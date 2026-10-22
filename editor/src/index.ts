@@ -1,5 +1,12 @@
 import '@rpg-platform/runtime-engine';
 export {
+  createAssetDefinition,
+  type AssetDefinitionInput,
+  type AssetDefinition,
+  type AssetMetadata,
+  type AssetMetadataValue,
+} from './asset-definition.js';
+export {
   createAssetIdentity,
   type AssetIdentityInput,
   type AssetIdentity,

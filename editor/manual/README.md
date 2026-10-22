@@ -48,3 +48,18 @@ case-sensitive IDs and rejected invalid inputs. Name/path fields are host-local
 example data, not a metadata descriptor. There are no assertions, test helpers or
 automatic test jobs; this is the task's requested manual Node/TypeScript consumer.
 No browser, renderer acquisition, filesystem asset access or file rename occurs.
+
+## Manual authored definition consumer — v0.2.2
+
+After the same real package build, run the separate public-root consumer:
+
+```sh
+node node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict --exactOptionalPropertyTypes --module NodeNext --target ES2022 --lib ES2022,DOM editor/manual/asset-definition.mts
+node editor/manual/asset-definition.mts
+```
+
+It prints image/text definitions, detached nested extension data after host edits,
+deep freeze observations, unchanged logical identity with new unknown metadata,
+and a TypeError for a Date supplied by an untyped host. This is a manual example,
+without assertions, a test suite or automatic CI runtime gate. It loads no assets
+and does not implement an exporter, extension parser or Render descriptor.

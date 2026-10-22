@@ -54,6 +54,13 @@ The factory validates explicit project-local IDs and preserves optional source t
 in a frozen detached value; label/path are not identity inputs. No registry,
 metadata descriptor, uniqueness check, IO or Render contract change is introduced.
 
+Phase 2 v0.2.2: [Asset Classification & Metadata](checkpoints/asset-contracts-v0.2.2.md)
+adds Editor-owned immutable authored definitions through `createAssetDefinition`
+and four readonly types. Open kind strings describe resources/data; metadata is
+deeply detached/frozen portable JSON data with unknown extension keys retained.
+Record schemaVersion is 1; identity semantics are unchanged. No Render descriptor,
+loaded resource, catalog, serializer or migration is introduced.
+
 1. **Workspace/project discovery**: five identifiable projects, build entrypoint, explicit dependency direction and public import surfaces. Keep package naming editable until real manifests exist.
 2. **Editor ↔ Render**: an authoring host can create/select/inspect/move a presentation object and save/reload scene/content without a duplicate renderer. The specific scene format/coordinate system belongs to the relevant MVP.
 3. **Editor ↔ Runtime**: Editor can discover or be supplied the active game's supported content/config contract and run its validation/preview through public Runtime APIs. No universal Skill/Player/Monster contract is imposed.
