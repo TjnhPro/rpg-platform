@@ -2,6 +2,33 @@
 
 This describes the *interactions to audit*, not finalized types or APIs. Do not create interfaces just to satisfy this document before a real MVP needs them.
 
+Phase 5 v0.5.11: [Unknown data/content integration DC17/DC18](checkpoints/document-v0.5.11.md)
+adds one Editor root function replaceSceneDocumentObject (133 -> 134 symbols).
+Document Scene strict validation now requires a complete canonical SceneMembership
+snapshot, with optional opaque portable metadata RECORDS only at content, scene,
+objects[i], and objects[i].definition. Metadata is preserved, not interpreted or
+reference-validated. Other unknown fields (including extra reference, identity,
+placement or relationship fields), primitive metadata, or default-normalized
+construction input produce UNSUPPORTED_CONTENT_PROFILE. Original decoded content
+and text remain inspectable; existing load/save/compatibility/migration reuse this
+strict gate. Current callers using canonical snapshots remain supported; old Scene
+construction inputs that required normalization become inspect-only. Asset snapshot
+metadata and Spatial exact-field policies are unchanged and reused directly.
+
+replaceSceneDocumentObject(document, objectId, replacement, sceneContext) takes a
+complete known-field SceneObjectMembership snapshot, delegates canonical same-ID
+replacement and retains original metadata at all supported source slots. It rejects
+extra replacement fields rather than stripping them. Explicit omission of optional
+known fields clears them per the existing owner operation; unknown metadata cannot
+be edited here. Exact current kind/version and strict source/candidate diagnostics
+are required; failure throws without returning/adopting a candidate. Trusted resolver
+errors and codec resource limits propagate. No schema bump, path patch engine,
+session/saved-state mutation, IO or automatic save/migrate. Low-level whole-content
+replacement remains caller-trusted: no API can restore data discarded before entry.
+Portable metadata must be authored content only; plain UI/runtime-shaped data cannot
+be distinguished by portability checks alone. Future semantics outside this profile
+remain read-only/rejected even if their raw bytes can be retained.
+
 Phase 5 v0.5.10: [Schema compatibility DC16](checkpoints/document-v0.5.10.md)
 adds inspectDocumentCompatibility, migrateDocument, DocumentMigration,
 DocumentCompatibilityResult and DocumentMigrationResult (Editor root 128 -> 133).

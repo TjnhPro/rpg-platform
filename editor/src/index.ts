@@ -1,4 +1,5 @@
 import '@rpg-platform/runtime-engine';
+export { replaceSceneDocumentObject } from './document-scene-edit.js';
 export {
   inspectDocumentCompatibility,
   migrateDocument,

@@ -22,6 +22,14 @@ This table is for routing an implementation **after inspecting current source**.
 
 ## Required reasoning for multi-project changes
 
+v0.5.11 DC17/DC18: Editor owns the Document Scene extension profile and explicit
+preserving replacement adapter. Canonical Scene/Object/Asset/Spatial owners retain
+all semantics, mutation and validation; no parallel schemas or math. Metadata slots
+are a Document-only opaque profile, not new Scene domain fields. Storage host owns
+publication and handles; Render/session/workspace preferences stay outside authored
+content. Existing trusted whole-content replacement does not infer lost data.
+See [checkpoint](checkpoints/document-v0.5.11.md). No other project changes.
+
 v0.5.10 DC16: Editor owns explicit compatibility policy and one-step migration
 orchestration. Existing content owners supply trusted pure transformations and
 canonical validation. Structural preservation is conservative and additive;

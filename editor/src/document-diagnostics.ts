@@ -9,11 +9,12 @@ import { AssetValidationError } from './asset-validation.js';
 import { createCoordinateSpaceDefinition, type CoordinateSpaceDefinition,
   type CoordinateSpaceReference } from './coordinate-space.js';
 import { describeSceneObjectSpatialPoint } from './scene-spatial-point.js';
+import { matchesSceneDocumentProfile } from './document-scene-profile.js';
 
 export type DocumentDiagnosticCode = DocumentDecodeDiagnostic['code'] | SceneDiagnosticCode | AssetDiagnosticCode
   | 'CONTENT_NOT_CHECKED' | 'CONTENT_CONTRACT_MISMATCH' | 'DOCUMENT_PROJECT_MISMATCH'
   | 'ASSET_REFERENCES_NOT_CHECKED' | 'SPATIAL_REFERENCES_NOT_CHECKED'
-  | 'SPACE_TARGET_NOT_FOUND' | 'INVALID_SPATIAL_SPACE' | 'INVALID_TEXT_CONTENT';
+  | 'SPACE_TARGET_NOT_FOUND' | 'INVALID_SPATIAL_SPACE' | 'INVALID_TEXT_CONTENT' | 'UNSUPPORTED_CONTENT_PROFILE';
 
 /** Safe portable context only; paths start at document, never a backend handle. */
 export interface DocumentDiagnostic {
@@ -83,6 +84,9 @@ function spaceHint(value: unknown): DocumentDiagnostic['reference'] {
  * their declaration order. Scene diagnostics precede its spatial pass. Missing
  * context produces warnings, never invented missing physical files. Diagnostic
  * reads retain every decoded source field, invalid reference and unknown extension.
+ * Scene strict admission requires a complete owner snapshot plus only the declared
+ * opaque metadata slots; unknown structural fields/default-normalized input remain
+ * inspect-only. Asset snapshot and coordinate-space owners retain their own policy.
  * Inspect allows any decoded portable envelope; strict requires status valid.
  * Neither policy establishes save preconditions, storage evidence or write safety.
  */
@@ -140,6 +144,9 @@ export function diagnoseDocument(text: string, context?: DocumentValidationConte
     content = 'CHECKED';
     if (result.membership !== null) {
       project(result.membership.scene.identity.projectId, 'document.content.scene.identity.projectId');
+      if (!matchesSceneDocumentProfile(source.content, result.membership)) {
+        diagnostics.push(diagnostic('schema', 'UNSUPPORTED_CONTENT_PROFILE', 'document.content'));
+      }
     }
     for (const item of result.diagnostics) {
       diagnostics.push(diagnostic(result.status === 'invalid' ? 'payload' : 'reference', item.code,
