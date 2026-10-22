@@ -2,6 +2,20 @@
 
 This describes the *interactions to audit*, not finalized types or APIs. Do not create interfaces just to satisfy this document before a real MVP needs them.
 
+Phase 5 v0.5.3: [Document lifecycle DC06/DC09](checkpoints/document-v0.5.3.md)
+adds an Editor-owned session capability. createDocumentSession(envelope,
+revertBaseline) captures both inputs; an explicit null disables revert, otherwise
+the caller-memory baseline must match identity, kind and schema versions. It is
+never saved/storage evidence. Observations carry state/envelope/revertBaseline
+outside authored data. open activates created data without IO; replaceContent
+delegates to v0.5.2; revert restores only the supplied baseline. Both require open.
+close('discard') requires explicit host admission from created/open; closed is
+terminal and repeat close fails. Snapshot observation remains available and retains
+final content. No dirty/equality/revision or saved inference, no implicit discard,
+UI tab removal or Render disposal. Same-ID factory calls are independent; share
+one session across views explicitly. No registry, codec, storage IO or v0.5.4.
+Earlier entries retain their checkpoint-specific scope.
+
 Phase 5 v0.5.2: [Document content isolation DC04/DC05](checkpoints/document-v0.5.2.md)
 adds replaceDocumentContent(envelope, content) at the Editor root. It validates the
 complete source envelope, then captures a fresh immutable whole-content replacement
