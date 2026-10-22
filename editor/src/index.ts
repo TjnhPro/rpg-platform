@@ -2,6 +2,8 @@ import '@rpg-platform/runtime-engine';
 import {
   createRenderSession,
   createRenderSessionLifecycle,
+  getRenderFailure,
+  type RenderFailure,
   type RenderSessionDescriptor,
   type RenderSessionDisposal,
   type RenderSessionLifecycle,
@@ -30,4 +32,9 @@ export function initializeEditorPreviewSession(target: object): RenderSessionLif
 /** Host calls before removing its target, then drops its own handles/snapshots. */
 export function disposeEditorPreviewSession(session: RenderSessionLifecycle): RenderSessionDisposal {
   return session.dispose();
+}
+
+/** Safe diagnostic forwarding only; the host decides how to present unknown errors. */
+export function getEditorPreviewFailure(error: unknown): RenderFailure | undefined {
+  return getRenderFailure(error);
 }

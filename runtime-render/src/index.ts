@@ -35,6 +35,52 @@ export interface RenderSessionDisposal {
   readonly state: 'disposed';
 }
 
+/** Safe diagnostics for current Render-authored misuse; no host data or raw cause. */
+export type RenderFailure =
+  | { readonly code: 'INVALID_HOST_TARGET'; readonly stage: 'initialize' }
+  | { readonly code: 'SESSION_DISPOSED'; readonly stage: 'initialize' | 'getSnapshot' };
+
+class InvalidHostTargetError extends TypeError {
+  readonly #failure: RenderFailure = Object.freeze({
+    code: 'INVALID_HOST_TARGET', stage: 'initialize',
+  });
+
+  constructor() {
+    super('Render host target must be an object reference');
+  }
+
+  static getFailure(error: unknown): RenderFailure | undefined {
+    if (typeof error === 'object' && error !== null && #failure in error) {
+      return error.#failure;
+    }
+    return undefined;
+  }
+}
+
+class SessionDisposedError extends Error {
+  readonly #failure: RenderFailure;
+
+  constructor(stage: 'initialize' | 'getSnapshot') {
+    super('Render session is disposed');
+    this.#failure = Object.freeze({ code: 'SESSION_DISPOSED', stage });
+  }
+
+  static getFailure(error: unknown): RenderFailure | undefined {
+    if (typeof error === 'object' && error !== null && #failure in error) {
+      return error.#failure;
+    }
+    return undefined;
+  }
+}
+
+/**
+ * Recognize errors created by this package instance. Undefined means unrecognized,
+ * never success. Does not parse messages or copy unknown exception/context data.
+ */
+export function getRenderFailure(error: unknown): RenderFailure | undefined {
+  return InvalidHostTargetError.getFailure(error) ?? SessionDisposedError.getFailure(error);
+}
+
 /** Host-controlled session boundary; no backend resources are acquired. */
 export interface RenderSessionLifecycle {
   /** Active observations only; throws after disposal. Previously returned snapshots survive. */
@@ -57,7 +103,7 @@ export function createRenderSessionLifecycle(host: RenderHostBinding): RenderSes
 
   const getSnapshot = (): RenderSessionSnapshot => {
     if (state === 'disposed' || descriptor === undefined) {
-      throw new Error('Render session is disposed');
+      throw new SessionDisposedError('getSnapshot');
     }
     return Object.freeze({ descriptor, state });
   };
@@ -66,12 +112,12 @@ export function createRenderSessionLifecycle(host: RenderHostBinding): RenderSes
     getSnapshot,
     initialize: (): RenderSessionSnapshot => {
       if (state === 'disposed' || descriptor === undefined) {
-        throw new Error('Render session is disposed');
+        throw new SessionDisposedError('initialize');
       }
       if (state === 'created') {
         const target = descriptor.host.target;
         if (target === null || (typeof target !== 'object' && typeof target !== 'function')) {
-          throw new TypeError('Render host target must be an object reference');
+          throw new InvalidHostTargetError();
         }
         state = 'bound';
       }
