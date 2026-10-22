@@ -95,6 +95,12 @@ physical file existence remain NOT_CHECKED. No automatic authored-data repair.
 to detached correlation/placement plus the existing Phase 2 visual description.
 Only its resource descriptor crosses Render's unchanged metadata preparation API;
 placement stays caller-retained until spatial/visual-instance contracts are approved.
+[v0.3.9](harness/checkpoints/scene-contracts-v0.3.9.md) consolidates the existing
+authoring surface in a public-root manual consumer and audits all 31 Scene exports.
+No production API is added. Scene capture retains known fields only; unknown host
+data is not a lossless round-trip contract. Document preservation, storage and
+migrations remain future decisions; never overwrite unknown documents with these
+construction projections.
 Runtime Engine
 has named imports of actual L1/L2 APIs to establish compile-time dependency linkage;
 consumer entrypoints import the appropriate workspace roots. No calculation or

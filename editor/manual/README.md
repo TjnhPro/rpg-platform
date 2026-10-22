@@ -1,3 +1,20 @@
+# Manual Scene authoring consumer — v0.3.9
+
+After the workspace build, optionally compile/run the finite package-root sequence:
+
+```powershell
+node node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict --exactOptionalPropertyTypes --module NodeNext --target ES2022 --lib ES2022,DOM editor/manual/scene-authoring.mts
+node editor/manual/scene-authoring.mts
+```
+
+Assemble, inspect, add, replace a label, update placement, reorder, clear a relation
+and remove via existing Editor exports. Observe stable Scene/Object/Asset keys,
+retained old snapshots and detached frozen known fields. Unknown example host note
+and active-tab data remain caller-owned, absent from captured records. This is not
+a lossless document reader or serializer; no save/load, resource loading or visuals.
+No assertions, runner or automatic runtime CI. Compatibility inventory and future
+design limits are in the [checkpoint](../../harness/checkpoints/scene-contracts-v0.3.9.md).
+
 # Manual Scene-to-Render metadata consumer — v0.3.8
 
 After the workspace build, optionally compile/run the finite package-root sequence:

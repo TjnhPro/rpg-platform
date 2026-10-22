@@ -218,6 +218,19 @@ correlation/placement remains with caller. No authored Scene store, instance/han
 layer/attachment interpretation, GPU allocation or resource loading is introduced.
 Render public surface remains independent of Editor; dependency graph unchanged.
 
+Phase 3 v0.3.9: [Scene Authoring & Compatibility Integration](checkpoints/scene-contracts-v0.3.9.md)
+inventories the 31 Scene exports and joins existing create/inspect/add/remove/
+replace/order/placement/relation operations in a finite root-only consumer. No
+production API, dependency or owner changes. Scene factories capture known fields
+only, unlike Phase 2 portable Asset metadata extensions. Unknown host fields remain
+with the caller and are absent from output; spreading a captured record preserves
+known fields only. This is not a document reader or preservation/save contract.
+Feature 05/19 must explicitly preserve or reject unknown document data before any
+future save; do not overwrite it with a construction projection. Current Scene
+records contain scalar/array/record data, independent of DOM, GPU, UI and gameplay
+instances. Future Map/visual metadata/clip/nesting shapes remain DESIGN_ONLY and
+DEFERRED; existing scoped identities need no demonstrated change for those cases.
+
 ## Unresolved until demonstrated
 
 - Scene identity is Editor-owned (v0.3.0 design decision); exact Scene schema/operations await scoped consumers. Coordinates/projection belong to Features 04/09; visual instance allocation/rendering to Feature 08. Text-only content does not require a visual scene.
