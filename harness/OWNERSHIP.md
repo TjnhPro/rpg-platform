@@ -22,6 +22,14 @@ This table is for routing an implementation **after inspecting current source**.
 
 ## Required reasoning for multi-project changes
 
+v0.5.10 DC16: Editor owns explicit compatibility policy and one-step migration
+orchestration. Existing content owners supply trusted pure transformations and
+canonical validation. Structural preservation is conservative and additive;
+semantic compatibility is not inferred from a version number. Storage host keeps
+IO/conditional-publication ownership; migration only creates immutable candidates.
+No Render, gameplay or other production owner changes. See
+[checkpoint](checkpoints/document-v0.5.10.md).
+
 v0.5.9 DC15: Editor owns portable persistence failure classification and bounded
 cleanup invocation around its existing write port. Storage host owns handles,
 per-request artifacts, actual IO guarantees and safe cleanup decisions. Primary

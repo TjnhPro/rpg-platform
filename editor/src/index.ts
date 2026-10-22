@@ -1,5 +1,12 @@
 import '@rpg-platform/runtime-engine';
 export {
+  inspectDocumentCompatibility,
+  migrateDocument,
+  type DocumentMigration,
+  type DocumentCompatibilityResult,
+  type DocumentMigrationResult,
+} from './document-compatibility.js';
+export {
   type DocumentPersistenceFailure,
   type DocumentCleanupReceipt,
   type DocumentCleanupResult,

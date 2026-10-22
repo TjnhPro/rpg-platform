@@ -2,6 +2,25 @@
 
 This describes the *interactions to audit*, not finalized types or APIs. Do not create interfaces just to satisfy this document before a real MVP needs them.
 
+Phase 5 v0.5.10: [Schema compatibility DC16](checkpoints/document-v0.5.10.md)
+adds inspectDocumentCompatibility, migrateDocument, DocumentMigration,
+DocumentCompatibilityResult and DocumentMigrationResult (Editor root 128 -> 133).
+Caller supplies current owner/kind/content-version binding. Only supported envelope
+schema 1 is decoded; malformed/future envelope, future content and mismatched kind
+are rejected. Strict-valid current content is writable-compatible with
+writeEligibility NOT_ESTABLISHED; older inspectable content stays read-only.
+Migration requires an explicitly selected named synchronous pure owner transform
+with exact numeric source/target versions and a forward step. It captures bounded
+portable output, preserves every old content key/value/array position, then applies
+canonical current owner/reference diagnostics. Projection loss blocks. Original
+text and immutable candidate are returned without IO, session or saved-state changes.
+Unknown fields are retained or blocked, never silently stripped. This conservative
+additive profile does not support destructive/renaming migrations. Trusted callback
+purity and semantic interpretation are host/content-owner duties, not sandboxed.
+No auto-open migration, chain, registry, downgrade or general envelope upgrade.
+Candidate Save is explicit through existing save policy and actual host guarantees.
+Sample document-content versions do not change published Asset/envelope schema 1.
+
 Phase 5 v0.5.9: [Persistence failure DC15](checkpoints/document-v0.5.9.md)
 adds three Editor root types: DocumentPersistenceFailure, DocumentCleanupReceipt
 and DocumentCleanupResult. Existing load/save status discriminants are retained;
