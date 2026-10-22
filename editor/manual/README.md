@@ -1,3 +1,21 @@
+# Manual Scene membership consumer — v0.3.3
+
+After the real package build from workspace root:
+
+```sh
+node node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict --exactOptionalPropertyTypes --module NodeNext --target ES2022 --lib ES2022,DOM editor/manual/scene-membership.mts
+node editor/manual/scene-membership.mts
+```
+
+Finite observations show a player visual placeholder and three monster placeholders,
+three references resolving the same existing Asset definition, detached frozen
+captures, original snapshots unchanged by candidate adds/host edits, duplicate
+rejection at create/add, foreign-project binding rejection, missing-target Phase 2
+diagnostics without object deletion or registration, empty and assetless membership,
+and reuse of a local ID in another Scene. Names are visual labels only, no gameplay.
+This optional public-root consumer has no assertions, runner, test helpers or runtime
+CI job. No Assets are loaded and no placement, renderer or file IO is exercised.
+
 # Manual visual object definition consumer — v0.3.2
 
 After the real package build from workspace root:

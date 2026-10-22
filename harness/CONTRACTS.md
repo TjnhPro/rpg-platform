@@ -156,6 +156,17 @@ labels are optional strings, captured verbatim or null. Frozen detached scalar d
 contains no placement, backend, gameplay fields or arbitrary extension state. Scene
 insertion and local uniqueness await v0.3.3. Existing contracts/graph are unchanged.
 
+Phase 3 v0.3.3: [Scene Membership & Asset Binding](checkpoints/scene-contracts-v0.3.3.md)
+adds Editor-owned SceneMembershipInput/SceneMembership,
+SceneObjectMembershipInput/SceneObjectMembership and createSceneMembership,
+addSceneObject, listSceneObjects, getSceneObject. Membership owns object definitions
+inline, not through an unimplemented object registry. It captures an existing Scene
+definition without changing that contract. Entries hold optional Phase 2 references
+only, never Asset definitions; repeated Asset targets are allowed. Local duplicate
+object IDs and foreign-project bindings reject. Missing targets remain authored
+intent; Phase 2 resolver/diagnostics are the only target/kind authority. Lists preserve
+declaration/append order, with no render-order or relationship semantics. No graph change.
+
 ## Unresolved until demonstrated
 
 - Scene identity is Editor-owned (v0.3.0 design decision); exact Scene schema/operations await scoped consumers. Coordinates/projection belong to Features 04/09; visual instance allocation/rendering to Feature 08. Text-only content does not require a visual scene.

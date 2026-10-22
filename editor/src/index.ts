@@ -1,5 +1,15 @@
 import '@rpg-platform/runtime-engine';
 export {
+  createSceneMembership,
+  addSceneObject,
+  listSceneObjects,
+  getSceneObject,
+  type SceneObjectMembershipInput,
+  type SceneObjectMembership,
+  type SceneMembershipInput,
+  type SceneMembership,
+} from './scene-membership.js';
+export {
   createSceneObjectDefinition,
   type SceneObjectDefinitionInput,
   type SceneObjectDefinition,

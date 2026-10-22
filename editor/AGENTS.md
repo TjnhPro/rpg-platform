@@ -4,6 +4,8 @@
 
 Read root agent guidance first.
 
+- [v0.3.3 Scene Membership & Asset Binding](../harness/checkpoints/scene-contracts-v0.3.3.md) adds createSceneMembership/addSceneObject/listSceneObjects/getSceneObject and four readonly types. Membership captures a Scene plus ordered owned object definitions and optional Phase 2 AssetReference values. It enforces scene-local IDs and project-local bindings, never target/kind resolution. Add returns a new candidate; old snapshots survive. No second object/Asset registry, Render instance, placement, relationship or draw-order semantics. Existing Scene/Object shapes remain unchanged.
+
 - [v0.3.2 Visual Object Identity & Definition](../harness/checkpoints/scene-contracts-v0.3.2.md) adds createSceneObjectDefinition and readonly input/result types. Caller objectId is exact and scene-local; standalone capture does not enforce uniqueness or join a Scene. Optional displayName/classification are opaque labels, defaulting to null. Frozen scalar-only snapshots need no Asset, placement, backend or gameplay entity. No extension state bag or gameplay type registry is introduced.
 
 - [v0.3.1 Scene Identity & Definition](../harness/checkpoints/scene-contracts-v0.3.1.md) adds Editor-owned createSceneIdentity/createSceneDefinition and four readonly input/result types. Empty definitions contain identity only; no object list, metadata, title/path, persistence or Render instance. Keys follow the existing project-local exact-string convention but Scenes are not Assets. Construction returns detached frozen records; caller owns identity stability/uniqueness. Manual public-root consumer is optional, without tests or automatic runtime CI.
