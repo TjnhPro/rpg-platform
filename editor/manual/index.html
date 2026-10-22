@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Editor–Render manual frame demo</title>
+<style>
+  body { font: 16px system-ui, sans-serif; max-width: 760px; margin: 40px auto; padding: 0 20px; }
+  canvas { display: block; max-width: 100%; border: 1px solid #777; margin: 20px 0; }
+  button { font: inherit; padding: 8px 16px; margin-right: 8px; }
+  output { display: block; margin-top: 16px; }
+</style>
+<h1>Editor–Render: one frame</h1>
+<p>Start submits one opaque blue frame through Runtime Render. Dispose releases its resources.
+  The canvas belongs to this Editor host. No animation loop runs.</p>
+<canvas width="640" height="360" aria-label="Manual Render output"></canvas>
+<button id="start" type="button">Start / new frame</button>
+<button id="dispose" type="button" disabled>Dispose</button>
+<output id="status" aria-live="polite">Not started. Graphics are acquired only on Start.</output>
+<script type="importmap">
+{
+  "imports": {
+    "@rpg-platform/runtime-render": "/runtime-render/dist/index.js",
+    "three": "/node_modules/three/build/three.module.js"
+  }
+}
+</script>
+<script type="module" src="../dist/manual-demo.js"></script>
+</html>

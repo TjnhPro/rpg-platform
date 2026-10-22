@@ -4,6 +4,17 @@
 
 Read root agent guidance first.
 
+- Follow the [Editor–Render boundary](../harness/checkpoints/editor-render-v0.1.0.md). v0.1.0 imports are bootstrap compilation only, not an operational preview consumer.
+- [v0.1.1](../harness/checkpoints/editor-render-v0.1.1.md) adds a package-root host adapter for session descriptors. It is not preview UI or renderer initialization; target creation/mounting/removal stays host-owned.
+- [v0.1.2](../harness/checkpoints/editor-render-v0.1.2.md) adds explicit host-binding initialization through the Render root. Editor calls the lifecycle; it does not own its state machine. Bound is not graphics-ready.
+- [v0.1.3](../harness/checkpoints/editor-render-v0.1.3.md): use public disposal before removing the host target, then drop caller-owned handles/snapshots. Render never destroys host-owned targets. No preview manager is implemented.
+- [v0.1.4](../harness/checkpoints/editor-render-v0.1.4.md): consume/forward safe Render failure diagnostics through the public root. Unknown exceptions remain unknown; presentation policy is host-owned. No UI, fallback or retry behavior is implemented.
+- Current [v0.1.5 ER04/ER10](../harness/checkpoints/editor-render-v0.1.5.md): the Editor preview-host adapter owns one session slot, disposes before replacement, and supports null as explicitly unavailable preview capability. Mounted means session initialized, not a rendered frame. No DOM host/UI is implemented.
+- [v0.1.6 ER11–ER13](../harness/checkpoints/editor-render-v0.1.6.md) records compatibility and portability limits. Keep null/unavailable distinct from unsupported graphical targets and failures; future Render features require public API consumer analysis, never Editor/private backend imports or a silent mounted-to-GPU-ready reinterpretation.
+- [v0.1.7 ER14](../harness/checkpoints/editor-render-v0.1.7.md) supplies a separate [manual browser entrypoint](manual/README.md). It awaits public Render graphics acquisition, submits one frame and disposes via the public lifecycle; it is not imported by the Editor root. Existing preview-host APIs stay binding-only. No Three import, loop, framework or automated browser verification is allowed in the demo.
+- Use Render's package root, never `three`, `@types/three`, Render source paths or private backend classes. Editor owns host UI and session-reference orchestration; Render owns its resources and their cleanup. The separate v0.1.7 graphics path owns backend cleanup; existing preview-host adapters remain binding-only.
+- [v0.1.8 ER15](../harness/checkpoints/editor-render-v0.1.8.md) records integration/closure evidence without a new API. The manual entrypoint is separate from the public preview-host adapter; do not imply mounting submits a frame. Keep manual visual review and phase acceptance open for Developer.
+
 - Editor + Runtime Render => reusable scene/asset/object authoring. Do not assume visual NPC/Monster implies a shared RPG mechanics schema.
 - Editor + Runtime Engine => configure what the **active game's Runtime** actually supports. Runtime is semantic owner; UI is the authoring surface.
 - Preview gameplay uses the actual Runtime rule implementation. Do not write independent movement/damage/loot algorithms into Inspector or preview.
