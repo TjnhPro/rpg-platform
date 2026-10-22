@@ -69,6 +69,14 @@ describe multiple sources under one identity without reads, parsing or loading.
 Repeated roles are permitted; exact duplicate pairs are rejected. Identity and
 metadata rules are unchanged; remote/archive location types remain deferred.
 
+Phase 2 v0.2.4: [Asset Reference & Dependency Contracts](checkpoints/asset-contracts-v0.2.4.md)
+adds Editor-owned `AssetReferenceInput`, `AssetReference`, `createAssetReference`
+and optional definition dependencies (frozen output list, empty by default).
+References contain project-local target keys, optional kind expectation and opaque
+subresource text, never an in-memory target. Direct dependencies preserve order
+and reject repeated target assets or cross-project edges; target existence is
+not checked. No catalog, resolver, Scene implementation or graph engine is added.
+
 1. **Workspace/project discovery**: five identifiable projects, build entrypoint, explicit dependency direction and public import surfaces. Keep package naming editable until real manifests exist.
 2. **Editor ↔ Render**: an authoring host can create/select/inspect/move a presentation object and save/reload scene/content without a duplicate renderer. The specific scene format/coordinate system belongs to the relevant MVP.
 3. **Editor ↔ Runtime**: Editor can discover or be supplied the active game's supported content/config contract and run its validation/preview through public Runtime APIs. No universal Skill/Player/Monster contract is imposed.

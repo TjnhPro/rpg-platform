@@ -78,3 +78,19 @@ source records, explicit relocation and multiple image pages retaining that iden
 and native rejections for traversal, unsupported remote type and duplicate source
 pairs. Names are illustrative; no bytes, filesystem or network are accessed.
 This is a manual example without assertions, test helpers or an automatic CI job.
+
+## Manual reference/dependency consumer — v0.2.4
+
+After the real package build, compile/run the public-root example:
+
+```sh
+node node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict --exactOptionalPropertyTypes --module NodeNext --target ES2022 --lib ES2022,DOM editor/manual/asset-reference.mts
+node editor/manual/asset-reference.mts
+```
+
+It prints two independent caller-local holders targeting one asset, optional kind
+expectation, unchanged reference data after explicit source relocation, an opaque
+forward subresource reference and detached frozen direct dependency declarations.
+It prints TypeErrors for a missing target key, duplicate direct target and
+cross-project dependency. No Scene API, catalog/target lookup, IO, loader or
+subresource parser is involved. No assertions, suite, test helpers or CI runtime job.

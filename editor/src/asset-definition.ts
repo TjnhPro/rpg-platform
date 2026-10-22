@@ -1,5 +1,6 @@
 import { createAssetIdentity, type AssetIdentity, type AssetIdentityInput } from './asset-identity.js';
 import { detachAssetSources, type AssetSourceReference } from './asset-sources.js';
+import { detachAssetDependencies, type AssetReference, type AssetReferenceInput } from './asset-reference.js';
 
 /** Portable authored data, never a loaded resource or an Editor UI object. */
 export type AssetMetadataValue =
@@ -19,6 +20,8 @@ export interface AssetDefinitionInput {
   readonly metadata: AssetMetadata;
   /** Omitted means no source references; order is preserved, duplicate role/locator pairs rejected. */
   readonly sources?: readonly AssetSourceReference[];
+  /** Ordered direct edges within this project; one edge per target asset. No target lookup. */
+  readonly dependencies?: readonly AssetReferenceInput[];
 }
 
 /** Version of this record shape, not the version of a source or metadata extension. */
@@ -28,6 +31,7 @@ export interface AssetDefinition {
   readonly kind: string;
   readonly metadata: AssetMetadata;
   readonly sources: readonly AssetSourceReference[];
+  readonly dependencies: readonly AssetReference[];
 }
 
 function invalidMetadata(path: string): never {
@@ -84,18 +88,20 @@ export function createAssetDefinition(input: AssetDefinitionInput): AssetDefinit
   if (typeof input !== 'object' || input === null || Array.isArray(input)) {
     throw new TypeError('Asset definition input must be an object');
   }
-  const { identity, kind, metadata, sources = [] } = input;
+  const { identity, kind, metadata, sources = [], dependencies = [] } = input;
   if (typeof kind !== 'string' || kind.length === 0 || /\s/u.test(kind)) {
     throw new TypeError('kind must be a non-empty resource/data classification without whitespace');
   }
   if (typeof metadata !== 'object' || metadata === null || Array.isArray(metadata)) {
     return invalidMetadata('metadata');
   }
+  const assetIdentity = createAssetIdentity(identity);
   return Object.freeze({
     schemaVersion: 1,
-    identity: createAssetIdentity(identity),
+    identity: assetIdentity,
     kind,
     metadata: detachMetadata(metadata, 'metadata', new Set()) as AssetMetadata,
     sources: detachAssetSources(sources),
+    dependencies: detachAssetDependencies(dependencies, assetIdentity.projectId),
   });
 }
