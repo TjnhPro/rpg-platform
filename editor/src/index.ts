@@ -1,4 +1,64 @@
 import '@rpg-platform/runtime-engine';
+export { replaceSceneDocumentObject } from './document-scene-edit.js';
+export {
+  inspectDocumentCompatibility,
+  migrateDocument,
+  type DocumentMigration,
+  type DocumentCompatibilityResult,
+  type DocumentMigrationResult,
+} from './document-compatibility.js';
+export {
+  type DocumentPersistenceFailure,
+  type DocumentCleanupReceipt,
+  type DocumentCleanupResult,
+} from './document-persistence.js';
+export {
+  saveDocument,
+  type DocumentWritePrecondition,
+  type DocumentWriteRequest,
+  type DocumentCommitReceipt,
+  type DocumentWritePort,
+  type DocumentSaveResult,
+} from './document-save.js';
+export {
+  loadDocument,
+  type DocumentStorageObservation,
+  type DocumentReadResult,
+  type DocumentReadPort,
+  type DocumentLoadResult,
+} from './document-load.js';
+export {
+  diagnoseDocument,
+  type DocumentDiagnosticCode,
+  type DocumentDiagnostic,
+  type DocumentValidationContext,
+  type DocumentValidationResult,
+} from './document-diagnostics.js';
+export {
+  serializeDocument,
+  deserializeDocument,
+  type DocumentDecodeDiagnostic,
+  type DocumentDecodeResult,
+} from './document-codec.js';
+export {
+  createDocumentSession,
+  type DocumentSession,
+  type DocumentSessionSnapshot,
+  type DocumentLoadedEvidence,
+  type DocumentCommitEvidence,
+  type DocumentSaveTicket,
+  type DocumentSaveOutcome,
+} from './document-session.js';
+export {
+  createDocumentIdentity,
+  createDocumentEnvelope,
+  replaceDocumentContent,
+  type DocumentIdentity,
+  type DocumentEnvelopeInput,
+  type DocumentEnvelope,
+  type DocumentContentValue,
+  type DocumentContentRecord,
+} from './document-envelope.js';
 export { describeSceneObjectSpatialPoint, type SceneObjectSpatialDescription } from './scene-spatial-point.js';
 export { updateSceneObjectSpatialPlacement } from './scene-spatial-placement.js';
 export { describeViewportMapping } from './viewport-mapping.js';

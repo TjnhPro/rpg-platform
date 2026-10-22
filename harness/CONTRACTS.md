@@ -2,6 +2,310 @@
 
 This describes the *interactions to audit*, not finalized types or APIs. Do not create interfaces just to satisfy this document before a real MVP needs them.
 
+Phase 5 v0.5.13: [Document integration/closure DC19](checkpoints/document-v0.5.13.md)
+is the current Phase 5 inventory and safety disposition: fourteen checkpoints,
+44 additive Editor symbols (134 total), Render52 unchanged, no closure API delta.
+Existing content owners remain canonical. Real local create-only Save/Load,
+conflict preservation, delayed acknowledgement and explicit migration candidate
+observations are finite evidence; no existing-file CAS, universal no-data-loss,
+recovery, durability, GUI or visual guarantee follows. Root README/architecture
+Phase 4 capability counts are historical; this report records current Phase 5
+source/declarations. READY_FOR_DEVELOPER_REVIEW; acceptance stays Developer-owned.
+No Feature 06, merge, tag, release or publication is authorized by closure.
+
+Phase 5 v0.5.12: [Minimal Document MVP DC19](checkpoints/document-v0.5.12.md)
+records a public-API-only [manual workflow](../editor/manual/document-mvp.md).
+No production/API/schema change: Editor134 / Render52 exports remain unchanged.
+Existing Document gates compose actual Scene/Asset/Spatial owners; local host owns
+real IO and create-only exclusive publication. Observations include saved/reloaded
+authored metadata, conflict bytes/state preservation, delayed revision2 receipt
+while revision3 stays dirty, saved-snapshot restore and migration candidate only.
+Direction is sample-owned opaque metadata, not a new Scene schema. No Renderer
+allocation, product CAS adapter, recovery, visual claim or automated suite.
+Stop before v0.5.13; build/manual evidence does not establish phase acceptance.
+
+Phase 5 v0.5.11: [Unknown data/content integration DC17/DC18](checkpoints/document-v0.5.11.md)
+adds one Editor root function replaceSceneDocumentObject (133 -> 134 symbols).
+Document Scene strict validation now requires a complete canonical SceneMembership
+snapshot, with optional opaque portable metadata RECORDS only at content, scene,
+objects[i], and objects[i].definition. Metadata is preserved, not interpreted or
+reference-validated. Other unknown fields (including extra reference, identity,
+placement or relationship fields), primitive metadata, or default-normalized
+construction input produce UNSUPPORTED_CONTENT_PROFILE. Original decoded content
+and text remain inspectable; existing load/save/compatibility/migration reuse this
+strict gate. Current callers using canonical snapshots remain supported; old Scene
+construction inputs that required normalization become inspect-only. Asset snapshot
+metadata and Spatial exact-field policies are unchanged and reused directly.
+
+replaceSceneDocumentObject(document, objectId, replacement, sceneContext) takes a
+complete known-field SceneObjectMembership snapshot, delegates canonical same-ID
+replacement and retains original metadata at all supported source slots. It rejects
+extra replacement fields rather than stripping them. Explicit omission of optional
+known fields clears them per the existing owner operation; unknown metadata cannot
+be edited here. Exact current kind/version and strict source/candidate diagnostics
+are required; failure throws without returning/adopting a candidate. Trusted resolver
+errors and codec resource limits propagate. No schema bump, path patch engine,
+session/saved-state mutation, IO or automatic save/migrate. Low-level whole-content
+replacement remains caller-trusted: no API can restore data discarded before entry.
+Portable metadata must be authored content only; plain UI/runtime-shaped data cannot
+be distinguished by portability checks alone. Future semantics outside this profile
+remain read-only/rejected even if their raw bytes can be retained.
+
+Phase 5 v0.5.10: [Schema compatibility DC16](checkpoints/document-v0.5.10.md)
+adds inspectDocumentCompatibility, migrateDocument, DocumentMigration,
+DocumentCompatibilityResult and DocumentMigrationResult (Editor root 128 -> 133).
+Caller supplies current owner/kind/content-version binding. Only supported envelope
+schema 1 is decoded; malformed/future envelope, future content and mismatched kind
+are rejected. Strict-valid current content is writable-compatible with
+writeEligibility NOT_ESTABLISHED; older inspectable content stays read-only.
+Migration requires an explicitly selected named synchronous pure owner transform
+with exact numeric source/target versions and a forward step. It captures bounded
+portable output, preserves every old content key/value/array position, then applies
+canonical current owner/reference diagnostics. Projection loss blocks. Original
+text and immutable candidate are returned without IO, session or saved-state changes.
+Unknown fields are retained or blocked, never silently stripped. This conservative
+additive profile does not support destructive/renaming migrations. Trusted callback
+purity and semantic interpretation are host/content-owner duties, not sandboxed.
+No auto-open migration, chain, registry, downgrade or general envelope upgrade.
+Candidate Save is explicit through existing save policy and actual host guarantees.
+Sample document-content versions do not change published Asset/envelope schema 1.
+
+Phase 5 v0.5.9: [Persistence failure DC15](checkpoints/document-v0.5.9.md)
+adds three Editor root types: DocumentPersistenceFailure, DocumentCleanupReceipt
+and DocumentCleanupResult. Existing load/save status discriminants are retained;
+rejected loads and save validation/write outcomes now include a frozen failure
+record (code, RECOVERY_NOT_AVAILABLE, advisory nextAction). Blocked save outcomes
+include failure for prior uncertainty or serialization rejection. No raw errors,
+host paths or handles enter diagnostic records. Unexpected read/pre-dispatch
+exceptions still propagate; any thrown/malformed write receipt is COMMIT_UNCERTAIN.
+Optional failed receipt reason refines known failures to IO_DENIED or
+WRITE_INTERRUPTED; absent/io-error is WRITE_FAILED. Failed still guarantees
+unchanged target and no pending write. No inferred rollback or durability.
+
+DocumentWritePort.cleanup?(request, outcome) is called at most once, only after
+commit settles, with the same frozen request and normalized primary status.
+Host must release handles before settling commit and own per-request artifact
+tracking. It must retain potentially sole valid copies; never delete destination,
+retry or republish here. Cleanup is not a recovery capability. No hook yields
+not-configured, not an assurance that artifacts are absent. Receipt cleaned or
+retained is captured separately; failed, thrown or malformed cleanup is
+CLEANUP_FAILED without replacing commit/conflict/uncertainty evidence. The active
+guard remains held until cleanup settles. Host must settle promptly; no timer,
+cancellation or forced handle disposal exists. Known commit still acknowledges
+its exact ticket if cleanup fails; newer edits stay dirty. Unknown commit never
+advances baseline or clears quarantine regardless of cleanup result. No recovery,
+reconciliation/unlock or automatic retry, including on external conflict or
+unsupported schema/target. Inspect storage and retained artifacts manually before
+an explicit host decision; there is no API to certify that decision here.
+
+Phase 5 v0.5.8: [Safe save DC14](checkpoints/document-v0.5.8.md) adds
+saveDocument(session, port, locator, expected, context?) and five readonly public
+write contracts. Preconditions are explicit absent, observed identity/revision, or
+unknown (always blocked). Port declares create-only/compare-and-swap/unavailable
+conflict protection and atomic-publish/unavailable publication. Missing guarantees
+return CONFLICT_UNDETECTABLE or ATOMIC_PUBLICATION_UNAVAILABLE before write IO.
+Revision tokens come from the host, never session/schema versions or guessed
+mtime. Host must atomically enforce preconditions against all writers while
+publishing the complete payload; a read-check-write sequence is insufficient.
+Atomic publication is not power-loss durability. No unconditional overwrite mode.
+
+Coordinator requires open session, captures an immutable session-bound ticket,
+serializes through canonical codec and requires strict existing owner diagnostics.
+Diagnostic writeEligibility remains advisory NOT_ESTABLISHED; actual admission
+also requires explicit host authority/guarantees/precondition. Missing references,
+unknown owner/version or unchecked context do not authorize writes. Serialize the
+original ticket, never a projected validation candidate; unknown supported fields
+survive. No automatic repair, schema bump or migration.
+
+Only committed host receipt acknowledges that ticket. Host observation is
+detached/frozen and remains separate from session generation. failed guarantees
+unchanged target and no pending IO; conflicted does not overwrite; uncertain,
+malformed/nonportable or thrown commit outcomes never advance saved baseline and
+block further coordinator writes on that session. Retiring a ticket with the old
+session failed seam only removes its capability, not a claim of known storage
+failure. Pre-dispatch unexpected resolver errors propagate after releasing the
+guard. Same-session overlap returns busy (no queue); separate sessions/hosts rely
+on actual atomic host protection. Low-level session APIs are trusted seams and
+must not bypass coordinator ordering; module-instance guards are not distributed
+locks. Closing while pending does not cancel host IO: committed/session-closed
+reports storage success without mutating/reopening the terminal session.
+
+This version adds no recovery/unlock policy, registry, watcher, autosave, UI,
+database or Render lifecycle integration. Local real host evidence is create-only
+staged-file hardlink publication. Existing-file CAS/replacement and crash safety
+are not established by this checkpoint; unsafe overwrite is refused.
+
+Phase 5 v0.5.7: [Storage read/load DC13](checkpoints/document-v0.5.7.md)
+adds loadDocument(port, locator, context?) and DocumentReadPort/DocumentReadResult/
+DocumentStorageObservation/DocumentLoadResult through Editor root only. Locator is
+an exact nonempty host string, independent of authored identity. Host read returns
+exact decoded text and explicit nullable identity/revision observations, not an
+implicit path policy or guaranteed concurrency token. Expected failures are
+not-found or read-failed (permission-denied/io-error/unavailable); unexpected port
+or resolver exceptions and invalid host contracts propagate, never empty fallback.
+Host owns authorization, byte limits, lossless decoding and actual IO guarantees.
+No portable module imports Node fs, browser storage or platform types.
+
+The existing diagnoseDocument pipeline owns all decode/content/reference checks.
+Decode rejection produces parse-failed (including invalid envelope/resource
+profile), except unsupported envelope schema produces unsupported-schema.
+Decoded but non-strict results produce validation-diagnostics, preserving unknown
+content and original text without a mutable session. An unsupported content-owner
+version remains its existing schema diagnostic; no new compatibility inference.
+Every successful read result retains exact text, detached frozen observations and
+canonical validation. Strict-valid creates one new open session with current and
+saved revision 1, saved envelope equal to loaded authored content, no caller-memory
+revert target and no connection to another current session. Clean means equal to
+the read snapshot; it establishes no write permission or conflict safety. Future
+schemas remain opaque text, never migrated, downgraded or overwritten. This
+checkpoint adds no save/write, registry, cache, UI or Render initialization.
+
+Phase 5 v0.5.6: [Document validation DC11/DC12](checkpoints/document-v0.5.6.md)
+adds diagnoseDocument(text, context?) -> DocumentValidationResult, plus
+DocumentDiagnosticCode/DocumentDiagnostic/DocumentValidationContext. JSON is decoded
+through v0.5.5 first, preserving its resource and schema profile; no second envelope
+or payload portability validator. Context explicitly binds exact documentKind and
+contentSchemaVersion to one existing owner adapter (scene, asset snapshot,
+coordinate-space, or string-only text). This is a per-call host assertion, not a
+universal kind registry, inferred schema compatibility or migration. Missing owner
+means not-checked; binding mismatch stops before domain validation. Catalogs are
+factory snapshots; an optional synchronous authored-space resolver is host-trusted,
+must use memory only and must not perform IO. Unknown resolver/host exceptions
+propagate without turning into authored diagnostics.
+
+Result always retains the ORIGINAL decoded/frozen envelope, including unknown
+fields and broken references; never the potentially projected owner candidate.
+Decode rejection returns document:null without fallback. Diagnostics are frozen
+portable records: group, code, severity, document-root path, reference string/null
+hints and primitive details. No raw exception message/backend handles. Existing
+owner code/path/constraint priority is retained; no message parsing. Spatial owner's
+plain TypeError yields coarse INVALID_SPATIAL_SPACE at the placement/content path.
+Order: decode/binding first; canonical owner first structural error stops its
+references; otherwise project correlation, Scene declaration order (attachment
+before Asset), missing-context warnings, spatial declaration pass. Asset direct
+dependencies use their declaration order. No transitive reference traversal.
+
+status is invalid for envelope/schema/payload/spatial errors, unresolved for logical
+reference errors alone, not-checked for warnings alone, valid otherwise. checks
+separately records content/Asset/spatial coverage; NOT_APPLICABLE means no declared
+reference of that supported owner, never unchecked unknown content. Missing catalog
+or resolver is NOT_CHECKED, not an invented missing target. Missing space requires
+explicit resolver returning undefined. Same Asset ID across Scene objects is valid;
+owner enforces duplicate OBJECT definitions, not duplicate Asset use. Attachment
+target is local/nonhierarchical; cross-Scene references keep the existing owner's
+unsupported diagnostic. No parent system or new Scene catalog.
+
+readEligibility.inspect permits decoded portable envelopes with diagnostics;
+strict requires status valid for the DECLARED checks only. Neither opens a session.
+writeEligibility is always NOT_ESTABLISHED; even valid authored references do not
+establish write preconditions, physical resources, unknown-field semantics or safe
+overwrite. fileExistence is always NOT_CHECKED. Host chooses admission policy;
+result never fixes/drops/rebinds data, increments revision, clears dirty state,
+saves, migrates, calls a loader or establishes storage guarantees. No v0.5.7.
+
+Phase 5 v0.5.5: [Serialization/deserialization DC10](checkpoints/document-v0.5.5.md)
+adds Editor-root serializeDocument(document): string and deserializeDocument(text):
+DocumentDecodeResult, plus DocumentDecodeDiagnostic. Pure compact schema-1 JSON;
+canonical envelope/portable capture is reused, not a second content schema system.
+Encode rejects unsupported graphs before stringify (TypeError/RangeError; unknown
+host exceptions propagate). Decode returns frozen decoded/document or rejected/
+diagnostic; safe codes INVALID_INPUT, INVALID_JSON, DUPLICATE_KEY, LIMIT_EXCEEDED,
+UNSUPPORTED_SCHEMA, INVALID_ENVELOPE. Fixed messages never echo untrusted text.
+Duplicate decoded keys reject, including escaped equivalents. Native JSON.parse
+remains grammar authority; a profile limit/duplicate can be detected before syntax.
+Exact root/identity fields stay enforced; unknown portable content keys including
+__proto__/constructor survive as own data without prototype merges. Explicit
+schemaVersion 1 only; no fallback, migration, write permission or read-only mode.
+contentSchemaVersion is preserved, not semantically interpreted. Fixed bounds:
+1,048,576 UTF-16 code units of input/output and aggregate graph string/key data,
+64 container levels (root=1), 100,000 value occurrences including root (keys are
+not values). Shared records are detached by value; cycles reject. Bounds guard the
+existing recursive detacher, not all possible host memory/Proxy behavior. Finite
+binary64 excluding -0 only: JSON text can already round large integers/decimals or
+underflow, so precision-sensitive values must be strings. Output follows native
+ECMAScript key order/number rendering, compact without newline/BOM; no sorting,
+semantic equality, hash or cryptographic canonicalization. Repeated captured input
+is stable; fresh records with different insertion order can differ in bytes.
+Codec never adopts a session, changes revision/dirty/saved evidence, interprets
+Scene/Asset/Spatial schema/references, performs IO or saves. Host selects authored
+payloads: portability cannot identify semantically misplaced plain UI records.
+No v0.5.6 diagnostics implementation, storage adapter or extra project dependency.
+
+Phase 5 v0.5.4: [Revision/dirty DC07/DC08](checkpoints/document-v0.5.4.md)
+extends DocumentSession with currentRevision (starts 1), savedRevision/savedEnvelope
+(null without explicit initial load evidence), and derived isDirty. Object.is on
+captured content defines no-op/clean; no deep equality/hash. Different records are
+edits; changed revert targets increment generation without fabricating savedRevision.
+Legacy revert targets caller memory only; new revertToSaved requires a confirmed
+loaded/committed snapshot. Optional loadedEvidence on the existing factory attests
+the initial envelope, not the old revertBaseline. prepareSave returns an immutable
+session-bound one-shot ticket with exact revision/envelope. completeSave accepts
+committed evidence or failed/cancelled; only a valid committed outcome at least as
+new as savedRevision updates the saved snapshot. Older acknowledgements are retired
+without rollback. Save(2), edit(3), ack(2) keeps current=3/saved=2/dirty=true when
+content differs. The trusted host must attest exact load/commit and order actual
+storage writes; confirmation text is not verified IO or a storage-token protocol.
+No writable dirty flag, schema bump, codec, IO, save loop or v0.5.5 operation.
+Earlier entries retain their checkpoint-specific scope.
+
+Phase 5 v0.5.3: [Document lifecycle DC06/DC09](checkpoints/document-v0.5.3.md)
+adds an Editor-owned session capability. createDocumentSession(envelope,
+revertBaseline) captures both inputs; an explicit null disables revert, otherwise
+the caller-memory baseline must match identity, kind and schema versions. It is
+never saved/storage evidence. Observations carry state/envelope/revertBaseline
+outside authored data. open activates created data without IO; replaceContent
+delegates to v0.5.2; revert restores only the supplied baseline. Both require open.
+close('discard') requires explicit host admission from created/open; closed is
+terminal and repeat close fails. Snapshot observation remains available and retains
+final content. No dirty/equality/revision or saved inference, no implicit discard,
+UI tab removal or Render disposal. Same-ID factory calls are independent; share
+one session across views explicitly. No registry, codec, storage IO or v0.5.4.
+Earlier entries retain their checkpoint-specific scope.
+
+Phase 5 v0.5.2: [Document content isolation DC04/DC05](checkpoints/document-v0.5.2.md)
+adds replaceDocumentContent(envelope, content) at the Editor root. It validates the
+complete source envelope, then captures a fresh immutable whole-content replacement
+through the existing portable-data detacher. Old snapshots stay unchanged; identity,
+kind and both schema-version values stay fixed. This is not patch/merge, semantic
+validation or write permission. Omitted old fields are intentionally not merged;
+callers retain intended authored extensions and use canonical owner operations.
+UI/session/Render/gameplay data stays outside authored payload by caller selection;
+plain portable records cannot reveal those semantics automatically. Even equal
+content yields a fresh envelope, so object identity is not a dirty/revision policy.
+No lifecycle, current/saved revision, codec, IO or v0.5.3 operation is implemented.
+Earlier entries describe their own checkpoint revisions.
+
+Phase 5 v0.5.1: [Document identity/envelope DC02/DC03](checkpoints/document-v0.5.1.md)
+adds createDocumentIdentity/createDocumentEnvelope at the Editor root. Identity is
+exact projectId+documentId, independent of payload identity, kind and location.
+Envelope schemaVersion is explicitly 1; contentSchemaVersion is explicitly a
+positive safe integer or null for an unversioned owner. No codec format version,
+editing revision, saved baseline or external storage token is introduced.
+Document content is detached/frozen portable data, captured with the existing
+Editor detacher; its kind/schema semantics remain the content owner's concern.
+Unknown portable content keys survive; unsupported envelope/identity fields and
+versions reject rather than being silently projected away. This is a construction
+factory, not a decoder, compatibility/write authorization or storage API. No
+session, registry, Save/Load/migration or v0.5.2 implementation. The v0.5.0 notes
+below describe their earlier architecture-only revision.
+
+Phase 5 v0.5.0: [Document architecture DC01](checkpoints/document-v0.5.0.md)
+assigns authored document identity/envelope/lifecycle, dirty/revision, codecs and
+load/save/migration orchestration to Editor. API_DESIGN_ONLY: no Document public
+symbol, state machine, serializer or storage adapter exists yet. Content validation
+remains with the existing Asset/Scene/Spatial owners; future game-specific config
+semantics belong to Runtime Engine. Document ID, content ID, filename and tab ID
+are separate; document/content/format versions, editing revisions and external
+storage tokens are separate domains. Encode/decode is pure conversion, not IO;
+saved baseline advances only with commit evidence for the exact captured revision.
+Save(2), edit(3), then acknowledge(2) remains dirty. Unknown compatibility requires
+preservation within an explicit supported profile or read-only/rejection before
+write; construction factories are not lossless readers. No automatic destructive
+migration or universal atomic-write promise. Authored payload excludes workspace,
+Render sessions/handles and gameplay state; text content requires no graphics.
+Concrete fields/signatures, payload profiles and storage guarantees remain future
+checkpoint decisions. Existing Feature 19 export scope is not implemented here.
+
 Phase 1 v0.1.0: [Editor–Render ER01/ER02/ER04 checkpoint](checkpoints/editor-render-v0.1.0.md)
 records the source audit, ownership and documented public boundary as API_DESIGN_ONLY.
 It introduces no runtime API symbols; future scene/preview interactions below remain unimplemented.

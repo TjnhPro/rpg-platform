@@ -1,3 +1,12 @@
+# Manual Document MVP — v0.5.12
+
+The [Document workflow guide](document-mvp.md) provides a finite PowerShell/Node
+public-Editor-API sequence using actual local files: create, authored edit,
+validation, conditional Save, Close, Load and saved-snapshot restore. It also
+observes real create-only conflict, delayed acknowledgement, missing references
+and explicit migration candidate preservation. No Renderer/GPU, production storage
+adapter, automatic suite or new public contract is introduced.
+
 # Manual Scene data-flow MVP — v0.3.10
 
 The [v0.3.10 checkpoint](../../harness/checkpoints/scene-contracts-v0.3.10.md)

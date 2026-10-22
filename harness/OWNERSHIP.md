@@ -8,6 +8,7 @@ This table is for routing an implementation **after inspecting current source**.
 | Skill/monster/player/item RULE definition | Runtime Engine | L1/L2 are external public capabilities, not places to move rules |
 | Animation, VFX, sprite alignment, camera | Runtime Render | Editor controls/inspects via public API |
 | Scene placement, selection, gizmo, authoring undo, workspace state | Editor | Runtime Render supplies shared visual scene operations |
+| Authored Document identity/envelope, session lifecycle, dirty/revision, codec and load/save/migration orchestration | **Editor** | [v0.5.0 architecture](checkpoints/document-v0.5.0.md); [v0.5.1 identity/envelope](checkpoints/document-v0.5.1.md); [v0.5.2 DC04/DC05](checkpoints/document-v0.5.2.md) immutable whole-content replacement; [v0.5.3 DC06/DC09](checkpoints/document-v0.5.3.md) session-local lifecycle, explicit caller-memory revert and discard admission. [v0.5.4 DC07/DC08](checkpoints/document-v0.5.4.md) adds session generation, derived dirty and exact-ticket host-confirmation seam; [v0.5.5 DC10](checkpoints/document-v0.5.5.md) adds the pure schema-1 JSON codec over canonical portable capture, with safe decode rejections and explicit resource/numeric/order policy. Codec does not save or mutate session state; [v0.5.6 DC11/DC12](checkpoints/document-v0.5.6.md) orchestrates existing owner validation/reference diagnostics via explicit kind/version/context bindings, preserving original decoded data for inspect and separating strict read from write eligibility. File existence remains NOT_CHECKED; IO/migration remain unavailable. Reuse Asset/Scene/Spatial owner validators; future game-config schema/semantic validation belongs to Runtime Engine. Storage host owns actual IO/commit guarantees; Render and L2 State Archive do not own Editor documents |
 | Authored asset identity, source identity, metadata/catalog, reference resolution and diagnostics | **Editor** | [Phase 2 integration review](checkpoints/asset-contracts-v0.2.10.md): immutable authored catalog/resolution/diagnostics are implemented. Render owns the neutral visual descriptor/preparation contract; loaded resources remain future work, never a second authored catalog |
 | Authored Scene Definition, Scene/Object IDs, membership, relationships and placement records | **Editor** | [Phase 3 closure audit](checkpoints/scene-contracts-v0.3.11.md): minimal immutable Scene data/operations/diagnostics/projection implemented; authored data is independent of UI, GPU and gameplay. Attachment is nonhierarchical; documents, parenting and spatial semantics remain deferred |
 | Authored coordinate-space/unit/grid declarations | **Editor** | [v0.4.1 SP02–SP04](checkpoints/spatial-contracts-v0.4.1.md): project-scoped spaces/points; [v0.4.4 SP08](checkpoints/spatial-contracts-v0.4.4.md): optional immutable orthogonal grid declarations. Existing Scene placement remains independent/optional; no second identity registry, map catalog or Scene schema change |
@@ -20,6 +21,56 @@ This table is for routing an implementation **after inspecting current source**.
 | Missing numerical/gameplay foundation API | **BLOCKED / Developer decision** | Do not modify L1/L2 or duplicate their ownership |
 
 ## Required reasoning for multi-project changes
+
+v0.5.13 DC19 closure: Editor is the single primary owner; Harness holds audit
+evidence only. No production API/source or ownership changes. Review all fourteen
+checkpoints and exact public declarations against accepted Phase 4; retain Scene,
+Asset and authored Spatial validators and Render-owned presentation math. Actual
+storage guarantees and safe artifact cleanup stay host-owned, not inferred from
+port types. See [closure report](checkpoints/document-v0.5.13.md). No other project
+change, phase acceptance, merge or next-phase authorization is implied.
+
+v0.5.12 DC19 is a documentation/manual-evidence checkpoint owned by Editor.
+The public Document workflow composes existing Scene/Object, Asset and Spatial
+contracts, with actual IO and exclusive publication owned by the local demo host.
+No public contract, production source, Render allocation or ownership change.
+See [manual guide](../editor/manual/document-mvp.md) and
+[checkpoint](checkpoints/document-v0.5.12.md); stop before v0.5.13.
+
+v0.5.11 DC17/DC18: Editor owns the Document Scene extension profile and explicit
+preserving replacement adapter. Canonical Scene/Object/Asset/Spatial owners retain
+all semantics, mutation and validation; no parallel schemas or math. Metadata slots
+are a Document-only opaque profile, not new Scene domain fields. Storage host owns
+publication and handles; Render/session/workspace preferences stay outside authored
+content. Existing trusted whole-content replacement does not infer lost data.
+See [checkpoint](checkpoints/document-v0.5.11.md). No other project changes.
+
+v0.5.10 DC16: Editor owns explicit compatibility policy and one-step migration
+orchestration. Existing content owners supply trusted pure transformations and
+canonical validation. Structural preservation is conservative and additive;
+semantic compatibility is not inferred from a version number. Storage host keeps
+IO/conditional-publication ownership; migration only creates immutable candidates.
+No Render, gameplay or other production owner changes. See
+[checkpoint](checkpoints/document-v0.5.10.md).
+
+v0.5.9 DC15: Editor owns portable persistence failure classification and bounded
+cleanup invocation around its existing write port. Storage host owns handles,
+per-request artifacts, actual IO guarantees and safe cleanup decisions. Primary
+commit evidence is independent of cleanup success/failure; recovery is unavailable.
+No other production owner changes. See [checkpoint](checkpoints/document-v0.5.9.md).
+
+v0.5.8 DC14: Editor owns save admission, exact-ticket orchestration and per-session
+in-flight/uncertain guards. Host owns actual atomic preconditions, full-payload
+publication, receipts and durability claims; no renderer or gameplay persistence
+ownership changes. Reuse codec/diagnostics/session public behavior. Only Editor
+and directly relevant Harness docs change. See [checkpoint](checkpoints/document-v0.5.8.md).
+
+v0.5.7 DC13: Editor owns the portable read port and load orchestration through
+its root public API. Actual IO, locator authorization/encoding/limits and storage
+observations are host-owned. Reuse existing document diagnostics/session capture;
+no Render/Engine/Client/Server or L1/L2 changes, no save/conflict guarantees.
+See [checkpoint](checkpoints/document-v0.5.7.md). Earlier table notes retain their
+checkpoint-specific capability descriptions.
 
 v0.4.10 SP16: Editor owns the authored Scene adapter and caller-held correlation.
 Render owns canonical conversion through existing PlaneProjectionPoint2D and root
