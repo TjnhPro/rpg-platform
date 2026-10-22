@@ -5,6 +5,7 @@
 Read root agent guidance first.
 
 - Follow the [Editor–Render boundary](../harness/checkpoints/editor-render-v0.1.0.md). v0.1.0 imports are bootstrap compilation only, not an operational preview consumer.
+- [v0.1.1](../harness/checkpoints/editor-render-v0.1.1.md) adds a package-root host adapter for session descriptors. It is not preview UI or renderer initialization; target creation/mounting/removal stays host-owned.
 - Use Render's package root, never `three`, `@types/three`, Render source paths or private backend classes. Editor owns host UI and session-reference orchestration; Render owns its resources and their cleanup. Concrete lifecycle signatures are deferred.
 
 - Editor + Runtime Render => reusable scene/asset/object authoring. Do not assume visual NPC/Monster implies a shared RPG mechanics schema.

@@ -6,6 +6,10 @@ Phase 1 v0.1.0: [Editor–Render ER01/ER02/ER04 checkpoint](checkpoints/editor-r
 records the source audit, ownership and documented public boundary as API_DESIGN_ONLY.
 It introduces no runtime API symbols; future scene/preview interactions below remain unimplemented.
 
+Phase 1 v0.1.1: [ER03/ER06 host/session checkpoint](checkpoints/editor-render-v0.1.1.md)
+adds immutable session descriptors and borrowed host bindings through the Render root.
+This metadata operation does not initialize a renderer or validate a graphics target.
+
 1. **Workspace/project discovery**: five identifiable projects, build entrypoint, explicit dependency direction and public import surfaces. Keep package naming editable until real manifests exist.
 2. **Editor ↔ Render**: an authoring host can create/select/inspect/move a presentation object and save/reload scene/content without a duplicate renderer. The specific scene format/coordinate system belongs to the relevant MVP.
 3. **Editor ↔ Runtime**: Editor can discover or be supplied the active game's supported content/config contract and run its validation/preview through public Runtime APIs. No universal Skill/Player/Monster contract is imposed.
