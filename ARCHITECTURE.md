@@ -87,3 +87,9 @@ Editor-owned orthogonal grid declarations with explicit referenced space, origin
 cell dimensions and index policies. Grid configuration does not alter Scene/Object
 identity or require gridded placement. Render has no grid catalog or new API;
 coordinate conversion remains deferred to its approved future scope.
+
+[v0.4.5 SP09](harness/checkpoints/spatial-contracts-v0.4.5.md) implements canonical
+orthogonal conversion in Render using its own portable requests/results, independent
+of Editor, GPU and gameplay. Editor adapts authored grid + matching space through
+the Render public root without formulas. Coordinate-space reference/unit survives
+both directions; Scene/Asset schema remains unchanged.

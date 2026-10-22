@@ -1,4 +1,13 @@
 export {
+  createOrthogonalGridConversion,
+  gridCellToScenePosition,
+  scenePositionToGridCell,
+  type GridConversionSpace,
+  type OrthogonalGridConversion,
+  type GridCell2D,
+  type GridScenePosition2D,
+} from './grid-conversion.js';
+export {
   toAffineTransform2D,
   applyPlanarPoint2D,
   composePlanarTransforms2D,

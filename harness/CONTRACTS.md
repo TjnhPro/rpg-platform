@@ -310,6 +310,20 @@ and unsupported orientation throw TypeError. No Scene/placement schema change,
 tile ID, map extent/catalog, conversion, clamp, registry or GPU acquisition.
 Stop before v0.4.5.
 
+Phase 4 v0.4.5: [Grid & Scene Coordinate Conversions](checkpoints/spatial-contracts-v0.4.5.md)
+adds Render root GridConversionSpace, OrthogonalGridConversion, GridCell2D,
+GridScenePosition2D, createOrthogonalGridConversion, gridCellToScenePosition and
+scenePositionToGridCell (26 -> 33), plus Editor describeGridConversion (83 -> 84).
+Adapter validates authored grid + matching space; Render captures portable exact
+records without Editor imports. Space includes projectId/coordinateSpaceId/unit,
+preserved in immutable results and matched exactly. Forward requires start-corner
+or center; inverse requires floor in directed index coordinates with [i,i+1) cells.
+Invalid/mismatched input throws TypeError, domain/numerical limits RangeError.
+No nearest/epsilon/clamp, implicit unit conversion, map bounds or grid catalog.
+Successful forward results floor-roundtrip to their input cell; this is not a
+general numerical accuracy guarantee. Scene/Asset schemas unchanged; no GPU.
+Stop before v0.4.6.
+
 ## Unresolved until demonstrated
 
 
