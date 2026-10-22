@@ -1,5 +1,16 @@
 import '@rpg-platform/runtime-engine';
 export {
+  createAssetCatalog,
+  getAssetDefinition,
+  registerAssetDefinition,
+  updateAssetDefinition,
+  removeAssetDefinition,
+  resolveAssetReference,
+  type AssetCatalogInput,
+  type AssetCatalog,
+  type AssetReferenceResolution,
+} from './asset-catalog.js';
+export {
   createAssetReference,
   type AssetReferenceInput,
   type AssetReference,

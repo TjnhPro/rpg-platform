@@ -94,3 +94,19 @@ forward subresource reference and detached frozen direct dependency declarations
 It prints TypeErrors for a missing target key, duplicate direct target and
 cross-project dependency. No Scene API, catalog/target lookup, IO, loader or
 subresource parser is involved. No assertions, suite, test helpers or CI runtime job.
+
+## Manual catalog/resolver consumer — v0.2.5
+
+After the real package build, compile/run this public-root example:
+
+```sh
+node node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict --exactOptionalPropertyTypes --module NodeNext --target ES2022 --lib ES2022,DOM editor/manual/asset-catalog.mts
+node editor/manual/asset-catalog.mts
+```
+
+It prints create/register/list/get, two references resolving to the exact frozen
+definition in one snapshot, candidate metadata update without changing prior data,
+duplicate rejection, removal and minimal unresolved outcomes. Catalog parameters
+are factory-created snapshots; raw host data enters through create/register/update.
+No assertions, test helpers/runner or automatic runtime job; no filesystem/network,
+resource loading, subresource discovery, graph traversal or persistent host commit.
