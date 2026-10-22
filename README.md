@@ -71,7 +71,7 @@ game-server    -> runtime-engine
 
 Workspace package names are `@rpg-platform/<project>`. Only the package root is
 exported, pointing at built ESM and declarations. All are private. Editor currently
-exports 72 symbols and Render 17; the Phase 2 integration review inventories the
+exports 74 symbols and Render 17; the Phase 2 integration review inventories the
 earlier 43/17, and [v0.3.1](harness/checkpoints/scene-contracts-v0.3.1.md) adds six
 Editor-owned Scene identity/definition symbols. [v0.3.2](harness/checkpoints/scene-contracts-v0.3.2.md)
 adds three Editor-owned Scene Object definition symbols without membership,
@@ -91,6 +91,10 @@ placement update. All return validated candidates without owning history or UI s
 over canonical capture and Phase 2 Asset diagnostics. Structural errors, missing
 local targets and unresolved Assets remain distinct; catalog-free lookup and all
 physical file existence remain NOT_CHECKED. No automatic authored-data repair.
+[v0.3.8](harness/checkpoints/scene-contracts-v0.3.8.md) projects one Scene object
+to detached correlation/placement plus the existing Phase 2 visual description.
+Only its resource descriptor crosses Render's unchanged metadata preparation API;
+placement stays caller-retained until spatial/visual-instance contracts are approved.
 Runtime Engine
 has named imports of actual L1/L2 APIs to establish compile-time dependency linkage;
 consumer entrypoints import the appropriate workspace roots. No calculation or

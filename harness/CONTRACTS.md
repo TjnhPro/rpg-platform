@@ -208,6 +208,16 @@ is frozen/detached; unknown host errors propagate. Asset checks without a catalo
 and all physical file existence are NOT_CHECKED. Attachment is not hierarchy:
 reciprocal links remain valid, with hierarchy cycle policy deferred. Graph unchanged.
 
+Phase 3 v0.3.8: [Scene-to-Render Presentation Contracts](checkpoints/scene-contracts-v0.3.8.md)
+adds Editor-owned describeSceneObjectVisual and SceneObjectVisualDescription.
+Canonical local lookup/capture and Phase 2 Asset resolution/projection produce a
+detached frozen result: external project/scene/object correlation, nullable opaque
+authored placement and a described resource or explicit unsupported reason. Only
+the existing resource descriptor crosses unchanged Render prepareVisualResource;
+correlation/placement remains with caller. No authored Scene store, instance/handle,
+layer/attachment interpretation, GPU allocation or resource loading is introduced.
+Render public surface remains independent of Editor; dependency graph unchanged.
+
 ## Unresolved until demonstrated
 
 - Scene identity is Editor-owned (v0.3.0 design decision); exact Scene schema/operations await scoped consumers. Coordinates/projection belong to Features 04/09; visual instance allocation/rendering to Feature 08. Text-only content does not require a visual scene.

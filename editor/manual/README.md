@@ -1,3 +1,20 @@
+# Manual Scene-to-Render metadata consumer — v0.3.8
+
+After the workspace build, optionally compile/run the finite package-root sequence:
+
+```powershell
+node node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict --exactOptionalPropertyTypes --module NodeNext --target ES2022 --lib ES2022,DOM editor/manual/scene-visual.mts
+node editor/manual/scene-visual.mts
+```
+
+Two Scene objects reference the same catalog definition and retain separate
+correlation/placement records. Each described resource passes to real Render
+prepareVisualResource; only resource metadata crosses that API. Observe frozen
+detached results, explicit/null media hints, unchanged source, unsupported cases
+and separate missing-reference diagnostics. Placement is not consumed by Render;
+no resource load, GPU/session/frame work, visual proof or file IO. Optional manual
+sequence only, with no assertions, runners or automatic runtime CI.
+
 # Manual Scene diagnostics consumer — v0.3.7
 
 After the workspace build, optionally compile/run this finite public-root sequence:

@@ -1,4 +1,5 @@
 import '@rpg-platform/runtime-engine';
+export { describeSceneObjectVisual, type SceneObjectVisualDescription } from './scene-visual.js';
 export {
   diagnoseSceneMembership,
   type SceneDiagnosticCode,

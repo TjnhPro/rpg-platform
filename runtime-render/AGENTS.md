@@ -4,6 +4,8 @@
 
 Read root agent guidance first.
 
+- [v0.3.8 Scene-to-Render handoff](../harness/checkpoints/scene-contracts-v0.3.8.md) reuses the existing VisualResourceDescriptor/prepareVisualResource unchanged. Editor retains Scene/Object correlation and uninterpreted placement outside the descriptor. Render receives resource identity/media hint/sources only, not authored Scene definitions, object lists, labels, layer/attachment or placement records. This metadata handoff introduces no Scene instance, store, session allocation or GPU work; no Editor import or new Scene API is needed.
+
 - [v0.2.10 integration/closure review](../harness/checkpoints/asset-contracts-v0.2.10.md) inventories three Phase 2 additions (17 total root symbols). Metadata preparation remains independent of graphics/session acquisition; no Editor/Engine import, loader, cache or image display is introduced. Earlier checkpoint notes describe their original revision; Developer acceptance remains pending.
 
 - [v0.2.8 AR14](../harness/checkpoints/asset-contracts-v0.2.8.md) introduces VisualResourceDescriptor and prepareVisualResource with the real Editor manual consumer. Render validates/detaches identity, image media hint and ordered source roles/locations, then returns metadata-prepared with resourceLoading NOT_PERFORMED. It accepts portable data independently of Editor; no catalog, IO, decoder, texture, cache or frame/session integration. Location checks are lexical description checks, not filesystem authorization. Phase 1 ownership/lifecycle is unchanged.
