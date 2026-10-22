@@ -22,3 +22,42 @@ export function createRenderSession(host: RenderHostBinding): RenderSessionDescr
     host: Object.freeze({ target: host.target }),
   });
 }
+
+/** Detached observation; bound means a reference was accepted, not graphics ready. */
+export interface RenderSessionSnapshot {
+  readonly descriptor: RenderSessionDescriptor;
+  readonly state: 'created' | 'bound';
+}
+
+/** Host-controlled session boundary; no backend resources are acquired. */
+export interface RenderSessionLifecycle {
+  readonly getSnapshot: () => RenderSessionSnapshot;
+  /** Idempotent once bound; invalid target reference throws before transition. */
+  readonly initialize: () => RenderSessionSnapshot;
+}
+
+/**
+ * Create independent lifecycle ownership with a new descriptor identity.
+ * Initialization checks reference shape only, never target liveness or GPU support.
+ * Existing metadata-only creation remains available without entering this lifecycle.
+ */
+export function createRenderSessionLifecycle(host: RenderHostBinding): RenderSessionLifecycle {
+  const descriptor = createRenderSession(host);
+  let state: RenderSessionSnapshot['state'] = 'created';
+
+  const getSnapshot = (): RenderSessionSnapshot => Object.freeze({ descriptor, state });
+
+  return Object.freeze({
+    getSnapshot,
+    initialize: (): RenderSessionSnapshot => {
+      if (state === 'created') {
+        const target = descriptor.host.target;
+        if (target === null || (typeof target !== 'object' && typeof target !== 'function')) {
+          throw new TypeError('Render host target must be an object reference');
+        }
+        state = 'bound';
+      }
+      return getSnapshot();
+    },
+  });
+}
