@@ -3,6 +3,8 @@ import { diagnoseDocument, type DocumentValidationContext, type DocumentValidati
 import type { DocumentSession, DocumentSessionSnapshot, DocumentSaveTicket } from './document-session.js';
 import type { DocumentStorageObservation } from './document-load.js';
 import { detachPortableAssetData } from './asset-definition.js';
+import { persistenceFailure, type DocumentPersistenceFailure,
+  type DocumentCleanupReceipt, type DocumentCleanupResult } from './document-persistence.js';
 
 export type DocumentWritePrecondition =
   | { readonly kind: 'absent' }
@@ -19,7 +21,9 @@ export interface DocumentWriteRequest {
 
 export type DocumentCommitReceipt =
   | { readonly status: 'committed'; readonly confirmation: string; readonly observation: DocumentStorageObservation }
-  | { readonly status: 'conflicted' | 'failed' | 'uncertain' };
+  | { readonly status: 'failed'; readonly reason?: 'permission-denied' | 'io-error' | 'interrupted-write' }
+  | { readonly status: 'conflicted' }
+  | { readonly status: 'uncertain' };
 
 /**
  * Trusted host capability. Preconditions MUST be enforced atomically with the
@@ -34,16 +38,29 @@ export interface DocumentWritePort {
   readonly conflictProtection: 'create-only' | 'compare-and-swap' | 'unavailable';
   readonly publication: 'atomic-publish' | 'unavailable';
   commit(request: DocumentWriteRequest): Promise<DocumentCommitReceipt>;
+  /**
+   * Optional host-owned cleanup, called ONCE after commit settles, with the same
+   * frozen request. Host must release handles before settling commit and retain
+   * per-request artifact ownership. Delete ONLY artifacts proven disposable;
+   * retain any potential sole valid copy, especially on uncertain/failed writes.
+   * Never rollback, republish, retry, or delete the destination here. No hook
+   * means cleanup is not configured, not that storage needs no cleanup.
+   * Must settle promptly; this coordinator has no cancellation/timeout authority.
+   */
+  cleanup?(request: DocumentWriteRequest, outcome: DocumentCommitReceipt['status']): Promise<DocumentCleanupReceipt>;
 }
 
 export type DocumentSaveResult =
   | { readonly status: 'blocked'; readonly reason: 'session-not-open' | 'busy'
-      | 'previous-write-uncertain' | 'CONFLICT_UNDETECTABLE' | 'ATOMIC_PUBLICATION_UNAVAILABLE' | 'serialization-rejected' }
-  | { readonly status: 'validation-diagnostics'; readonly validation: DocumentValidationResult }
-  | { readonly status: 'conflicted' | 'failed' | 'uncertain'; readonly revision: number }
+      | 'previous-write-uncertain' | 'CONFLICT_UNDETECTABLE' | 'ATOMIC_PUBLICATION_UNAVAILABLE' | 'serialization-rejected';
+      readonly failure?: DocumentPersistenceFailure }
+  | { readonly status: 'validation-diagnostics'; readonly validation: DocumentValidationResult;
+      readonly failure: DocumentPersistenceFailure }
+  | { readonly status: 'conflicted' | 'failed' | 'uncertain'; readonly revision: number;
+      readonly failure: DocumentPersistenceFailure; readonly cleanup: DocumentCleanupResult }
   | { readonly status: 'committed'; readonly revision: number;
       readonly observation: DocumentStorageObservation; readonly snapshot: DocumentSessionSnapshot;
-      readonly acknowledgement: 'applied' | 'session-closed' };
+      readonly acknowledgement: 'applied' | 'session-closed'; readonly cleanup: DocumentCleanupResult };
 
 // Shared across calls in this module instance; no queue/registry of documents.
 const active = new WeakSet<DocumentSession>();
@@ -73,7 +90,9 @@ export async function saveDocument(
   const precondition: DocumentWritePrecondition = Object.freeze(expected.kind === 'revision'
     ? { kind: 'revision', identity: expected.identity, revision: expected.revision } : { kind: expected.kind });
   const blocked = (reason: Extract<DocumentSaveResult, { status: 'blocked' }>['reason']): DocumentSaveResult =>
-    Object.freeze({ status: 'blocked', reason });
+    Object.freeze({ status: 'blocked', reason,
+      ...(reason === 'previous-write-uncertain' ? { failure: persistenceFailure('COMMIT_UNCERTAIN', 'inspect-storage') }
+        : reason === 'serialization-rejected' ? { failure: persistenceFailure('VALIDATION_REJECTED', 'correct-input') } : {}) });
   if (active.has(session)) return blocked('busy');
   if (uncertain.has(session)) return blocked('previous-write-uncertain');
   if (session.getSnapshot().state !== 'open') return blocked('session-not-open');
@@ -94,24 +113,35 @@ export async function saveDocument(
       return blocked('serialization-rejected');
     }
     const validation = diagnoseDocument(text, context);
-    if (!validation.readEligibility.strict) return Object.freeze({ status: 'validation-diagnostics', validation });
+    if (!validation.readEligibility.strict) return Object.freeze({ status: 'validation-diagnostics', validation,
+      failure: persistenceFailure('VALIDATION_REJECTED', 'correct-input') });
     // Trusted resolver callbacks must not silently close the session before IO.
     if (session.getSnapshot().state !== 'open') return blocked('session-not-open');
     const request = Object.freeze({ locator, text, revision: ticket.revision, expected: precondition });
-    let receipt: DocumentCommitReceipt;
+    let receipt: DocumentCommitReceipt = { status: 'uncertain' };
     try {
       receipt = detachPortableAssetData(await port.commit(request), 'Document commit receipt') as unknown as DocumentCommitReceipt;
     }
-    catch { uncertain.add(session); return Object.freeze({ status: 'uncertain', revision: ticket.revision }); }
+    catch { /* IO may already have committed; no raw exception or invented receipt. */ }
+    const validCommit = receipt?.status === 'committed' && typeof receipt.confirmation === 'string'
+      && receipt.confirmation.trim().length !== 0 && typeof receipt.observation === 'object'
+      && receipt.observation !== null && [receipt.observation.identity, receipt.observation.revision]
+        .every(value => value === null || (typeof value === 'string' && value.trim().length !== 0));
+    const validFailure = receipt?.status === 'failed' && (receipt.reason === undefined
+      || ['permission-denied', 'io-error', 'interrupted-write'].includes(receipt.reason));
+    if (!validCommit && !validFailure && receipt?.status !== 'conflicted') receipt = { status: 'uncertain' };
+    if (receipt.status === 'uncertain') uncertain.add(session);
+    // Cleanup is secondary evidence and cannot replace the primary commit result.
+    const cleanup = await cleanupWrite(port, request, receipt.status);
     if (receipt?.status === 'failed' || receipt?.status === 'conflicted') {
-      return Object.freeze({ status: receipt.status, revision: ticket.revision });
+      const failure = receipt.status === 'conflicted' ? persistenceFailure('EXTERNAL_CONFLICT', 'review-precondition')
+        : persistenceFailure(receipt.reason === 'permission-denied' ? 'IO_DENIED'
+          : receipt.reason === 'interrupted-write' ? 'WRITE_INTERRUPTED' : 'WRITE_FAILED', 'explicit-retry');
+      return Object.freeze({ status: receipt.status, revision: ticket.revision, failure, cleanup });
     }
-    if (receipt?.status !== 'committed' || typeof receipt.confirmation !== 'string'
-      || receipt.confirmation.trim().length === 0 || typeof receipt.observation !== 'object'
-      || receipt.observation === null || ![receipt.observation.identity, receipt.observation.revision]
-        .every(value => value === null || (typeof value === 'string' && value.trim().length !== 0))) {
-      uncertain.add(session);
-      return Object.freeze({ status: 'uncertain', revision: ticket.revision });
+    if (receipt.status !== 'committed') {
+      return Object.freeze({ status: 'uncertain', revision: ticket.revision,
+        failure: persistenceFailure('COMMIT_UNCERTAIN', 'inspect-storage'), cleanup });
     }
     const observation = Object.freeze({ identity: receipt.observation.identity, revision: receipt.observation.revision });
     const closed = session.getSnapshot().state === 'closed';
@@ -119,11 +149,22 @@ export async function saveDocument(
       { status: 'committed', evidence: { kind: 'storage-commit', confirmation: receipt.confirmation } });
     retired = !closed;
     return Object.freeze({ status: 'committed', revision: ticket.revision, observation, snapshot,
-      acknowledgement: closed ? 'session-closed' : 'applied' });
+      acknowledgement: closed ? 'session-closed' : 'applied', cleanup });
   } finally {
     if (ticket !== undefined && !retired && session.getSnapshot().state === 'open') {
       session.completeSave(ticket, { status: 'failed' });
     }
     active.delete(session);
   }
+}
+
+async function cleanupWrite(
+  port: DocumentWritePort, request: DocumentWriteRequest, outcome: DocumentCommitReceipt['status'],
+): Promise<DocumentCleanupResult> {
+  try {
+    if (port.cleanup === undefined) return Object.freeze({ status: 'not-configured' });
+    const receipt = detachPortableAssetData(await port.cleanup(request, outcome), 'Document cleanup receipt') as unknown as DocumentCleanupReceipt;
+    if (receipt?.status === 'cleaned' || receipt?.status === 'retained') return Object.freeze({ status: receipt.status });
+  } catch { /* Cleanup failure must not hide a known commit, conflict or uncertainty. */ }
+  return Object.freeze({ status: 'failed', failure: persistenceFailure('CLEANUP_FAILED', 'inspect-storage') });
 }

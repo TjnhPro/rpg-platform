@@ -22,6 +22,12 @@ This table is for routing an implementation **after inspecting current source**.
 
 ## Required reasoning for multi-project changes
 
+v0.5.9 DC15: Editor owns portable persistence failure classification and bounded
+cleanup invocation around its existing write port. Storage host owns handles,
+per-request artifacts, actual IO guarantees and safe cleanup decisions. Primary
+commit evidence is independent of cleanup success/failure; recovery is unavailable.
+No other production owner changes. See [checkpoint](checkpoints/document-v0.5.9.md).
+
 v0.5.8 DC14: Editor owns save admission, exact-ticket orchestration and per-session
 in-flight/uncertain guards. Host owns actual atomic preconditions, full-payload
 publication, receipts and durability claims; no renderer or gameplay persistence

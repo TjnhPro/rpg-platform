@@ -1,5 +1,6 @@
 import { diagnoseDocument, type DocumentValidationContext, type DocumentValidationResult } from './document-diagnostics.js';
 import { createDocumentSession, type DocumentSession } from './document-session.js';
+import { persistenceFailure, type DocumentPersistenceFailure } from './document-persistence.js';
 
 /** Host observations, independent of authored identity and session revisions. */
 export interface DocumentStorageObservation {
@@ -33,10 +34,11 @@ interface DocumentLoadCapture {
 }
 
 export type DocumentLoadResult =
-  | { readonly status: 'not-found'; readonly locator: string }
+  | { readonly status: 'not-found'; readonly locator: string; readonly failure: DocumentPersistenceFailure }
   | { readonly status: 'read-failed'; readonly locator: string;
-      readonly reason: 'permission-denied' | 'io-error' | 'unavailable' }
-  | (DocumentLoadCapture & { readonly status: 'parse-failed' | 'unsupported-schema' | 'validation-diagnostics' })
+      readonly reason: 'permission-denied' | 'io-error' | 'unavailable'; readonly failure: DocumentPersistenceFailure }
+  | (DocumentLoadCapture & { readonly status: 'parse-failed' | 'unsupported-schema' | 'validation-diagnostics';
+      readonly failure: DocumentPersistenceFailure })
   | (DocumentLoadCapture & { readonly status: 'loaded'; readonly session: DocumentSession });
 
 /**
@@ -52,12 +54,14 @@ export async function loadDocument(
     throw new TypeError('Document load requires an explicit non-empty host locator');
   }
   const read = await port.read(locator);
-  if (read.status === 'not-found') return Object.freeze({ status: 'not-found', locator });
+  if (read.status === 'not-found') return Object.freeze({ status: 'not-found', locator,
+    failure: persistenceFailure('NOT_FOUND', 'inspect-storage') });
   if (read.status === 'read-failed') {
     if (!['permission-denied', 'io-error', 'unavailable'].includes(read.reason)) {
       throw new TypeError('Invalid document read failure reason');
     }
-    return Object.freeze({ status: 'read-failed', locator, reason: read.reason });
+    return Object.freeze({ status: 'read-failed', locator, reason: read.reason,
+      failure: persistenceFailure(read.reason === 'permission-denied' ? 'IO_DENIED' : 'READ_FAILED', 'inspect-storage') });
   }
   if (read.status !== 'read' || typeof read.text !== 'string'
     || typeof read.observation !== 'object' || read.observation === null
@@ -70,11 +74,13 @@ export async function loadDocument(
   const validation = diagnoseDocument(text, context);
   const capture = { locator, text, observation, validation };
   if (validation.document === null) {
-    return Object.freeze({ ...capture, status: validation.diagnostics.some(item => item.code === 'UNSUPPORTED_SCHEMA')
-      ? 'unsupported-schema' : 'parse-failed' });
+    const unsupported = validation.diagnostics.some(item => item.code === 'UNSUPPORTED_SCHEMA');
+    return Object.freeze({ ...capture, status: unsupported ? 'unsupported-schema' : 'parse-failed',
+      failure: persistenceFailure(unsupported ? 'UNSUPPORTED_SCHEMA' : 'PARSE_FAILED', 'correct-input') });
   }
   if (!validation.readEligibility.strict) {
-    return Object.freeze({ ...capture, status: 'validation-diagnostics' });
+    return Object.freeze({ ...capture, status: 'validation-diagnostics',
+      failure: persistenceFailure('VALIDATION_REJECTED', 'correct-input') });
   }
   // Evidence attests only that the port returned this input, not a storage commit.
   const session = createDocumentSession(validation.document, null,

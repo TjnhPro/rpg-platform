@@ -1,5 +1,10 @@
 import '@rpg-platform/runtime-engine';
 export {
+  type DocumentPersistenceFailure,
+  type DocumentCleanupReceipt,
+  type DocumentCleanupResult,
+} from './document-persistence.js';
+export {
   saveDocument,
   type DocumentWritePrecondition,
   type DocumentWriteRequest,

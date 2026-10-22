@@ -2,6 +2,34 @@
 
 This describes the *interactions to audit*, not finalized types or APIs. Do not create interfaces just to satisfy this document before a real MVP needs them.
 
+Phase 5 v0.5.9: [Persistence failure DC15](checkpoints/document-v0.5.9.md)
+adds three Editor root types: DocumentPersistenceFailure, DocumentCleanupReceipt
+and DocumentCleanupResult. Existing load/save status discriminants are retained;
+rejected loads and save validation/write outcomes now include a frozen failure
+record (code, RECOVERY_NOT_AVAILABLE, advisory nextAction). Blocked save outcomes
+include failure for prior uncertainty or serialization rejection. No raw errors,
+host paths or handles enter diagnostic records. Unexpected read/pre-dispatch
+exceptions still propagate; any thrown/malformed write receipt is COMMIT_UNCERTAIN.
+Optional failed receipt reason refines known failures to IO_DENIED or
+WRITE_INTERRUPTED; absent/io-error is WRITE_FAILED. Failed still guarantees
+unchanged target and no pending write. No inferred rollback or durability.
+
+DocumentWritePort.cleanup?(request, outcome) is called at most once, only after
+commit settles, with the same frozen request and normalized primary status.
+Host must release handles before settling commit and own per-request artifact
+tracking. It must retain potentially sole valid copies; never delete destination,
+retry or republish here. Cleanup is not a recovery capability. No hook yields
+not-configured, not an assurance that artifacts are absent. Receipt cleaned or
+retained is captured separately; failed, thrown or malformed cleanup is
+CLEANUP_FAILED without replacing commit/conflict/uncertainty evidence. The active
+guard remains held until cleanup settles. Host must settle promptly; no timer,
+cancellation or forced handle disposal exists. Known commit still acknowledges
+its exact ticket if cleanup fails; newer edits stay dirty. Unknown commit never
+advances baseline or clears quarantine regardless of cleanup result. No recovery,
+reconciliation/unlock or automatic retry, including on external conflict or
+unsupported schema/target. Inspect storage and retained artifacts manually before
+an explicit host decision; there is no API to certify that decision here.
+
 Phase 5 v0.5.8: [Safe save DC14](checkpoints/document-v0.5.8.md) adds
 saveDocument(session, port, locator, expected, context?) and five readonly public
 write contracts. Preconditions are explicit absent, observed identity/revision, or
