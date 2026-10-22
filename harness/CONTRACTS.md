@@ -257,6 +257,21 @@ Render's public root with explicit space/unit/viewport/policy context; no duplic
 projection in Editor, reverse import or sixth package. Numeric illustrations are
 design examples, not observed math. Stop before v0.4.1.
 
+Phase 4 v0.4.1: [Coordinate Space Identity & Units](checkpoints/spatial-contracts-v0.4.1.md)
+adds seven Editor root symbols: createCoordinateSpaceReference,
+createCoordinateSpaceDefinition, createSpatialPoint2D, CoordinateSpaceReference,
+CoordinateSpaceDefinition, CoordinatePair2D and SpatialPoint2D. References use exact
+projectId + coordinateSpaceId, no lookup/registry; callers derive SC08 scope from
+the owning Scene project. Definitions explicitly require componentCount 2, increasing
+x right/left and y up/down, finite reference-origin coordinates in the declared
+space, and a nonblank verbatim unit label. Origin is not a parent offset; no
+conversion or implicit scale exists. Points carry scoped references and finite
+x/y, accepting zero/negative. All new records require exact own keys on plain/null-
+prototype records, rejecting extra dimensions/keys and arrays with TypeError;
+capture detaches/freezes every nested record. No Scene/Asset/session schema change,
+Render descriptor, transform or projection. This scoped task supersedes SP01's
+proposed SP04 allocation for authored values. Stop before v0.4.2.
+
 ## Unresolved until demonstrated
 
 - Scene identity, minimal authored records and immutable operations are Editor-owned and implemented through v0.3.8, with consumers/evidence in v0.3.9–v0.3.10. Versioned document schema, parenting/nesting and future extension compatibility remain open. Coordinates/projection belong to Features 04/09; visual instance allocation/rendering to Feature 08. Text-only content does not require a visual scene.

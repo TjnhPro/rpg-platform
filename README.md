@@ -71,7 +71,7 @@ game-server    -> runtime-engine
 
 Workspace package names are `@rpg-platform/<project>`. Only the package root is
 exported, pointing at built ESM and declarations. All are private. Editor currently
-exports 74 symbols and Render 17; the Phase 2 integration review inventories the
+exports 81 symbols and Render 17; the Phase 2 integration review inventories the
 earlier 43/17, and [v0.3.1](harness/checkpoints/scene-contracts-v0.3.1.md) adds six
 Editor-owned Scene identity/definition symbols. [v0.3.2](harness/checkpoints/scene-contracts-v0.3.2.md)
 adds three Editor-owned Scene Object definition symbols without membership,
@@ -110,6 +110,10 @@ no new API, permanent script, viewport or rendered Scene is introduced.
 Phase 3 commit chain, SC01–SC18 disposition, public contracts and future extension
 boundaries. No production API changes; builds/static checks and finite manual data
 observations remain separate from visual verification and Developer phase acceptance.
+[v0.4.1](harness/checkpoints/spatial-contracts-v0.4.1.md) adds seven Editor-owned
+symbols for explicit project-scoped coordinate definitions/references and finite
+2D points. Scene placement remains optional and unchanged; there is no spatial
+conversion, implicit unit scale or Render projection API.
 Runtime Engine
 has named imports of actual L1/L2 APIs to establish compile-time dependency linkage;
 consumer entrypoints import the appropriate workspace roots. No calculation or

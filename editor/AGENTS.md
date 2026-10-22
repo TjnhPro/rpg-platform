@@ -4,6 +4,8 @@
 
 Read root agent guidance first.
 
+- [v0.4.1 coordinate spaces](../harness/checkpoints/spatial-contracts-v0.4.1.md) adds seven Editor root symbols (81 total): projectId + coordinateSpaceId references, explicit two-component axes/origin/unit declarations and finite points. All new records require exact own keys and detach/freeze nested data; no registry, lookup, unit conversion or implicit Scene change. SC08 callers explicitly supply the owning Scene project as scope. This task supersedes SP01's proposed SP04 assignment for authored values. Stop before v0.4.2.
+
 - [v0.4.0 Spatial foundation](../harness/checkpoints/spatial-contracts-v0.4.0.md) is API_DESIGN_ONLY: Editor owns future authored space/unit/grid declarations and adapters, never Render projection math. Preserve Phase 3 opaque optional placement and existing identities. A future v0.4.10 adapter must supply explicit neutral context to Render public APIs without forwarding authored stores; no space registry, new schema or runtime API is implemented here. Stop before v0.4.1.
 
 - [v0.3.11 Scene closure](../harness/checkpoints/scene-contracts-v0.3.11.md) is the current Phase 3 audit and SC01–SC18 disposition. Editor owns 31 Scene additions (74 total root symbols); Render remains 17. Preserve known-field capture, explicit scoped IDs and canonical Phase 2 Asset resolution. Parenting/nesting, spatial semantics, documents and actual Scene rendering remain deferred. No API delta; STOP for Developer phase acceptance.

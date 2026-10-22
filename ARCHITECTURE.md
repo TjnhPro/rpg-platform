@@ -51,7 +51,7 @@ Phase 0 Foundation boundaries/contracts -> MVP 1 Editor + Render (Project, asset
 
 Do not lock the physical L3/L4 layer split, fixed package names, a universal RPG schema, or a mandatory realtime Server now. Rules with identical labels may have incompatible contracts across games.
 
-## Spatial boundary — Phase 4 design only
+## Spatial boundary — Phase 4
 
 [v0.4.0 SP01](harness/checkpoints/spatial-contracts-v0.4.0.md) records the source
 audit and proposed spatial contract map; no spatial API or math is implemented.
@@ -64,3 +64,9 @@ Coordinates stay optional for text content. Future portable requests must carry
 explicit space/unit/view/viewport/policy context without DOM, GPU or THREE types;
 pure math must not require graphics acquisition. No reverse Render-to-Editor import,
 shared spatial package, identity registry or global transform store is introduced.
+
+[v0.4.1 SP02–SP04](harness/checkpoints/spatial-contracts-v0.4.1.md) adds only
+Editor-owned project-scoped coordinate references, explicit 2D declarations and
+finite spatial point capture. This supersedes the proposed SP04 owner allocation
+in SP01 for authored values; Render still owns future presentation math. SC08
+remains unchanged and optional. No transform, grid conversion or projection exists.

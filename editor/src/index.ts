@@ -1,4 +1,13 @@
 import '@rpg-platform/runtime-engine';
+export {
+  createCoordinateSpaceReference,
+  createCoordinateSpaceDefinition,
+  createSpatialPoint2D,
+  type CoordinateSpaceReference,
+  type CoordinateSpaceDefinition,
+  type CoordinatePair2D,
+  type SpatialPoint2D,
+} from './coordinate-space.js';
 export { describeSceneObjectVisual, type SceneObjectVisualDescription } from './scene-visual.js';
 export {
   diagnoseSceneMembership,
