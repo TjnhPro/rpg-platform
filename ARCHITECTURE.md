@@ -99,3 +99,10 @@ local-unit anchor/pivot alignment and explicit angle-based visual facing. Editor
 adapts optional existing Scene placement and validates caller-supplied space/axes;
 no authored schema changes. Facing remains independent of geometry and animation.
 Alignment is unrotated pure translation, not a render instance or gameplay position.
+
+[v0.4.7 SP12](harness/checkpoints/spatial-contracts-v0.4.7.md) adds pure Render-owned
+forward orthographic-plane mapping with explicit scoped planes, units, axes,
+correspondence origins and ratios. Editor adapts authored coordinate definitions
+without projection formulas. Destination is a declared presentation plane, not
+viewport/screen coordinates or live camera state. No Scene/Asset schema change,
+inverse, perspective/isometric mapping or Phase 9 camera work is introduced.

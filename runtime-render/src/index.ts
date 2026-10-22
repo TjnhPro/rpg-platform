@@ -1,4 +1,11 @@
 export {
+  createOrthographicPlaneProjection,
+  projectPlanePoint2D,
+  type ProjectionPlane2D,
+  type PlaneProjectionPoint2D,
+  type OrthographicPlaneProjection,
+} from './plane-projection.js';
+export {
   createVisualAnchor2D,
   createVisualOrientation2D,
   resolveVisualAlignment2D,

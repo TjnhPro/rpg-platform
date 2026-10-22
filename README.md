@@ -141,6 +141,11 @@ perform no file IO, decoding, GPU loading or frame submission.
 
 ## Architecture and verification
 
+[v0.4.7 projection checkpoint](harness/checkpoints/spatial-contracts-v0.4.7.md)
+documents forward orthographic-plane conversion with explicit spaces/axes/units
+and mapping parameters. Editor uses Render's public root; no live camera or
+viewport/screen mapping is required or added.
+
 [v0.4.6 anchor/pivot/facing checkpoint](harness/checkpoints/spatial-contracts-v0.4.6.md)
 documents optional Render alignment and the Editor Scene-placement consumer.
 Local-unit anchors are explicit; facing does not select frames or rotate geometry.

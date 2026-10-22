@@ -21,6 +21,11 @@ This table is for routing an implementation **after inspecting current source**.
 
 ## Required reasoning for multi-project changes
 
+v0.4.7 SP12: Runtime Render owns pure forward orthographic-plane projection;
+Editor adapts explicit authored coordinate definitions and numeric mapping config
+through the Render root. No Editor math, Scene store, live camera/viewport state
+or reverse import. See [checkpoint](checkpoints/spatial-contracts-v0.4.7.md).
+
 v0.4.6 SP10/SP11: Runtime Render owns local-unit visual anchor/pivot alignment and
 angle facing conventions. Editor owns authored placement/config and adapts them
 through describeSceneObjectAlignment, with matching project/space/unit/axes.

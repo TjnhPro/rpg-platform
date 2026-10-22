@@ -336,7 +336,19 @@ RangeError, unknown host exceptions propagate. Scene/Asset/session schemas uncha
 No image decoding/metrics inference, normalization, discrete mapping or GPU work.
 Stop before v0.4.7.
 
+Phase 4 v0.4.7: [Projection Foundation](checkpoints/spatial-contracts-v0.4.7.md)
+adds five Render root symbols (39 -> 44) and Editor
+describeOrthographicPlaneProjection (85 -> 86). Pure orthographic-plane mapping
+uses declared source/destination scoped keys, units/axes, correspondence origins
+and positive per-axis destinationUnitsPerSourceUnit. Subtract source origin, apply
+axis signs/ratios, add destination origin through existing affine point operations.
+Mismatched source context, unsupported kind or invalid data throws TypeError;
+nonfinite intermediate/output math RangeError. Deeply detached frozen data;
+no inverse, depth reconstruction, camera, viewport/screen or global state.
+Scene/Asset/session and facing/anchor schemas unchanged. Stop before v0.4.8.
+
 ## Unresolved until demonstrated
+
 
 
 - Scene identity, minimal authored records and immutable operations are Editor-owned and implemented through v0.3.8, with consumers/evidence in v0.3.9–v0.3.10. Versioned document schema, parenting/nesting and future extension compatibility remain open. Coordinates/projection belong to Features 04/09; visual instance allocation/rendering to Feature 08. Text-only content does not require a visual scene.

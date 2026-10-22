@@ -4,6 +4,8 @@
 
 Read root agent guidance first.
 
+- [v0.4.7 SP12](../harness/checkpoints/spatial-contracts-v0.4.7.md) adds ProjectionPlane2D/PlaneProjectionPoint2D/OrthographicPlaneProjection, createOrthographicPlaneProjection/projectPlanePoint2D (44 exports). Explicit per-axis mapping: destinationOrigin + axisSign * positive ratio * (point-sourceOrigin), using existing affine point operations. Match scoped source/unit/axes; unsupported kinds reject. Pure forward mapping only; no perspective/isometric, inverse, clipping, camera or viewport integration. Scene/Asset/facing/anchor contracts unchanged. Stop before v0.4.8.
+
 - [v0.4.6 SP10/SP11](../harness/checkpoints/spatial-contracts-v0.4.6.md) adds immutable VisualAnchor2D/VisualOrientation2D/VisualAlignment2D and their factories/resolver (39 exports). Local-unit anchor/pivot and offset yield unrotated origin = placement + offset - anchor and plane pivot = origin + local pivot through existing planar translations. Facing is independent metadata: numeric +x zero, positive toward +y, [0,2*PI), no wrap/quantization/animation. No image dimensions, implicit scale, rotation application, Scene types or GPU. Stop before v0.4.7.
 
 - [v0.4.5 SP09](../harness/checkpoints/spatial-contracts-v0.4.5.md) adds seven exports (33 total) for portable orthogonal conversion capture and gridCellToScenePosition/scenePositionToGridCell. Match project/space/unit exactly; corner/center alignment and floor policy required. Directed normalized intervals [i,i+1), no epsilon/nearest/clamp. TypeError for invalid/mismatched input; RangeError for index domain, numerical overflow/underflow, unsafe result or failed forward roundtrip/collapsed center. No Editor import, map catalog, Scene traversal or GPU. Stop before v0.4.6.
