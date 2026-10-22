@@ -1,3 +1,4 @@
+export { createPlanarTransform2D, type PlanarTransform2D } from './planar-transform.js';
 export { prepareVisualResource, type VisualResourceDescriptor, type VisualResourcePreparation } from './visual-resource.js';
 export {
   createRenderFrameSession,

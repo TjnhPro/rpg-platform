@@ -69,4 +69,9 @@ shared spatial package, identity registry or global transform store is introduce
 Editor-owned project-scoped coordinate references, explicit 2D declarations and
 finite spatial point capture. This supersedes the proposed SP04 owner allocation
 in SP01 for authored values; Render still owns future presentation math. SC08
-remains unchanged and optional. No transform, grid conversion or projection exists.
+remains unchanged and optional. No grid conversion or projection exists.
+
+[v0.4.2 SP05](harness/checkpoints/spatial-contracts-v0.4.2.md) adds a Render-owned
+immutable planar TRS descriptor: scale about numeric zero, rotate in radians about
+zero, then translate. It captures finite data without applying it to points or
+changing Scene placement; composition, inverse and graphics integration are deferred.

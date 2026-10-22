@@ -4,6 +4,8 @@
 
 Read root agent guidance first.
 
+- [v0.4.2 planar transform](../harness/checkpoints/spatial-contracts-v0.4.2.md) adds two Render root symbols for immutable TRS descriptor capture (Render 19; Editor stays 81). Future adapters must supply coherent plane/unit context and use Render semantics: scale, radians rotation about numeric zero, then translation. No Editor math, Scene bridge/schema change, point application or graphics work is introduced. Stop before v0.4.3.
+
 - [v0.4.1 coordinate spaces](../harness/checkpoints/spatial-contracts-v0.4.1.md) adds seven Editor root symbols (81 total): projectId + coordinateSpaceId references, explicit two-component axes/origin/unit declarations and finite points. All new records require exact own keys and detach/freeze nested data; no registry, lookup, unit conversion or implicit Scene change. SC08 callers explicitly supply the owning Scene project as scope. This task supersedes SP01's proposed SP04 assignment for authored values. Stop before v0.4.2.
 
 - [v0.4.0 Spatial foundation](../harness/checkpoints/spatial-contracts-v0.4.0.md) is API_DESIGN_ONLY: Editor owns future authored space/unit/grid declarations and adapters, never Render projection math. Preserve Phase 3 opaque optional placement and existing identities. A future v0.4.10 adapter must supply explicit neutral context to Render public APIs without forwarding authored stores; no space registry, new schema or runtime API is implemented here. Stop before v0.4.1.

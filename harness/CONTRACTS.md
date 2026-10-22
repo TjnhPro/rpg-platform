@@ -272,6 +272,17 @@ capture detaches/freezes every nested record. No Scene/Asset/session schema chan
 Render descriptor, transform or projection. This scoped task supersedes SP01's
 proposed SP04 allocation for authored values. Stop before v0.4.2.
 
+Phase 4 v0.4.2: [Spatial Transform Foundation](checkpoints/spatial-contracts-v0.4.2.md)
+adds Render root PlanarTransform2D/createPlanarTransform2D. Explicit translation,
+rotationRadians and scale capture as detached deeply frozen finite data with exact
+own-key plain/null-prototype records. No defaults, coercion, angle normalization,
+unit/axis/space conversion or matrix exposure. Intended point semantics: component
+scale about numeric (0,0), radians rotation about zero, then translation; positive
+rotation maps +x toward +y. Zero scale collapses and negative scale reflects before
+rotation. This checkpoint supplies descriptor capture only; point application,
+composition/inverse, Scene bridge and projection remain deferred. Scene/Asset and
+prior Render APIs remain unchanged. Stop before v0.4.3.
+
 ## Unresolved until demonstrated
 
 - Scene identity, minimal authored records and immutable operations are Editor-owned and implemented through v0.3.8, with consumers/evidence in v0.3.9–v0.3.10. Versioned document schema, parenting/nesting and future extension compatibility remain open. Coordinates/projection belong to Features 04/09; visual instance allocation/rendering to Feature 08. Text-only content does not require a visual scene.
