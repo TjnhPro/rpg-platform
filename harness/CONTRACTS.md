@@ -124,6 +124,12 @@ support explicit selected rebinding, retain erroneous references with typed
 diagnostics, and pass relocated metadata to Render. No API/schema delta; asset
 contents are not loaded and visual correctness is not verified.
 
+Phase 2 v0.2.10: [Asset Foundation Integration & MVP Closure review](checkpoints/asset-contracts-v0.2.10.md)
+audits the complete commit chain, AR01–AR16, per-symbol ownership, current source/
+declaration exports, consumers and finite public-root manual proof. No API or
+production delta. READY_FOR_DEVELOPER_REVIEW is not Developer phase acceptance;
+loading, visual correctness and future feature contracts remain open.
+
 ## Unresolved until demonstrated
 
 - Scene identity/coordinates and whether text-only content needs a visual scene.

@@ -4,6 +4,8 @@
 
 Read root agent guidance first.
 
+- [v0.2.10 integration/closure review](../harness/checkpoints/asset-contracts-v0.2.10.md) is the current Phase 2 inventory and AR01–AR16 status matrix; older checkpoint descriptions record their original revision. Editor owns 35 Phase 2 additions (43 total root symbols). No new production capability in this checkpoint. Manual metadata evidence does not imply loaded assets, visual verification or Developer phase acceptance.
+
 - [v0.2.9 Minimal Working Asset Reference MVP](../harness/checkpoints/asset-contracts-v0.2.9.md) demonstrates registration, two independent reference holders, relocation, explicit rebinding, typed missing/kind diagnostics and Render metadata handoff in one optional public-root manual consumer. No new public API or production source change. Locators are illustrative; ASSET_CONTENT_NOT_LOADED and VISUAL_NOT_VERIFIED remain explicit. Do not turn holders into Scene/gameplay objects or the example into an automatic suite.
 
 - [v0.2.8 Editor–Render Asset Consumption](../harness/checkpoints/asset-contracts-v0.2.8.md) adds describeResolvedVisualAsset over factory-resolved records. Only authored kind image with an image source maps to Render's neutral descriptor; unresolved/nonvisual/missing-image-source return unsupported. Explicit nullable media hint is supplied by the caller, never guessed from metadata or suffixes. Consumer calls Render prepareVisualResource through its root; described and metadata-prepared never mean loaded/displayed. Source IDs, arbitrary metadata, dependencies and Editor objects do not cross this boundary.

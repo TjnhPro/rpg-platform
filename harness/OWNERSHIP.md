@@ -8,7 +8,7 @@ This table is for routing an implementation **after inspecting current source**.
 | Skill/monster/player/item RULE definition | Runtime Engine | L1/L2 are external public capabilities, not places to move rules |
 | Animation, VFX, sprite alignment, camera | Runtime Render | Editor controls/inspects via public API |
 | Scene placement, selection, gizmo, authoring undo, workspace state | Editor | Runtime Render supplies shared visual scene operations |
-| Authored asset identity, source identity, metadata/catalog, reference resolution and diagnostics | **Editor** | Phase 2 v0.2.0 assigns this specific authored-content boundary; no catalog/resolver implementation yet. Render owns its later presentation descriptor and loaded resources, never a second authored catalog |
+| Authored asset identity, source identity, metadata/catalog, reference resolution and diagnostics | **Editor** | [Phase 2 integration review](checkpoints/asset-contracts-v0.2.10.md): immutable authored catalog/resolution/diagnostics are implemented. Render owns the neutral visual descriptor/preparation contract; loaded resources remain future work, never a second authored catalog |
 | Scene object type's **visual** identity/presentation | Runtime Render + Editor authoring | Does **not** imply any HP/AI/Drop fields |
 | Monster HP/AI/drop parameters supported by current game | Editor authors Runtime Engine's config | Engine is source of semantics and validation |
 | User control or client input integration | Game Client | Runtime Engine owns effects of an accepted game command |
