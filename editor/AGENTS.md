@@ -4,6 +4,8 @@
 
 Read root agent guidance first.
 
+- [v0.3.5 Placement Data Foundation](../harness/checkpoints/scene-contracts-v0.3.5.md) adds SceneObjectPlacement and optional membership placement. Capture detaches/freezes caller coordinateSpaceId and finite point x/y; no default placement, unit/axis/origin interpretation, space lookup, screen pixels or transforms. Omitted placement remains absent; explicit null retained. Existing create/add/reorder preserve it. Feature 04 owns spatial semantics; general mutation operations remain v0.3.6.
+
 - [v0.3.4 Object Ordering & Relationships](../harness/checkpoints/scene-contracts-v0.3.4.md) adds reorderSceneObjects, SceneObjectReference and SceneObjectAttachment. Membership optionally captures layerKey/attachment; omitted fields stay absent for compatibility. Explicit order must be a full permutation, never z sorting. Attachment is one nonhierarchical authored intent within the same Scene/project; missing targets retained, self/cross-Scene rejected, no target lookup, traversal, parent/transform propagation or cycle enforcement. Existing create/add preserve these fields.
 
 - [v0.3.3 Scene Membership & Asset Binding](../harness/checkpoints/scene-contracts-v0.3.3.md) adds createSceneMembership/addSceneObject/listSceneObjects/getSceneObject and four readonly types. Membership captures a Scene plus ordered owned object definitions and optional Phase 2 AssetReference values. It enforces scene-local IDs and project-local bindings, never target/kind resolution. Add returns a new candidate; old snapshots survive. No second object/Asset registry, Render instance, placement, relationship or draw-order semantics. Existing Scene/Object shapes remain unchanged.

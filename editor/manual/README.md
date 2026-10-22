@@ -1,3 +1,20 @@
+# Manual authored placement consumer — v0.3.5
+
+After the real package build from workspace root:
+
+```sh
+node node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict --exactOptionalPropertyTypes --module NodeNext --target ES2022 --lib ES2022,DOM editor/manual/scene-placement.mts
+node editor/manual/scene-placement.mts
+```
+
+Finite public-root observations print separate coordinate-space IDs/numeric pairs,
+detached frozen captures after caller edits, a replacement candidate through the
+existing factory with original unchanged, placement retained by add/reorder, text
+without placement, empty/null cases and rejected invalid space/point fields.
+No coordinate-space resolution, unit/axis assumptions, conversion, gameplay movement
+or rendered placement is demonstrated. Optional manual sequence only: no assertions,
+runner, test helpers or automatic runtime CI job.
+
 # Manual authored ordering/attachment consumer — v0.3.4
 
 After the real package build from workspace root:

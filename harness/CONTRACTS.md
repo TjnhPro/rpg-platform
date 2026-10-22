@@ -177,6 +177,15 @@ retained, self/cross-Scene targets rejected. It is nonhierarchical authored inte
 no runtime following, parent/transform propagation, graph traversal or cycle policy.
 Omitted fields remain absent; old entry shape and all prior signatures remain valid.
 
+Phase 3 v0.3.5: [Placement Data Foundation](checkpoints/scene-contracts-v0.3.5.md)
+adds Editor-owned SceneObjectPlacement and optional membership placement. Records
+capture an exact caller coordinateSpaceId plus finite numeric point x/y, detached
+and frozen. Omission stays absent; explicit null stays null. Existing create/add/
+reorder capture/preserve placement without identity, Asset or order changes.
+Space lookup, units, axes, origin, projection and any conversion belong to Feature
+04, with camera behavior in 09; Phase 1 Render hosts provide no coordinate authority.
+No default placement, screen/GPU types, transforms, snapping or mutation API added.
+
 ## Unresolved until demonstrated
 
 - Scene identity is Editor-owned (v0.3.0 design decision); exact Scene schema/operations await scoped consumers. Coordinates/projection belong to Features 04/09; visual instance allocation/rendering to Feature 08. Text-only content does not require a visual scene.

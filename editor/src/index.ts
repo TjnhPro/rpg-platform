@@ -7,6 +7,7 @@ export {
   reorderSceneObjects,
   type SceneObjectReference,
   type SceneObjectAttachment,
+  type SceneObjectPlacement,
   type SceneObjectMembershipInput,
   type SceneObjectMembership,
   type SceneMembershipInput,

@@ -14,12 +14,23 @@ export interface SceneObjectAttachment {
   readonly target: SceneObjectReference;
 }
 
+/**
+ * Authored numeric pair in a caller-named space. x/y are data slots, not screen
+ * pixels or a world/local transform. Units, axes, origin and projection belong
+ * to Feature 04; this record does not define or resolve that space.
+ */
+export interface SceneObjectPlacement {
+  readonly coordinateSpaceId: string;
+  readonly point: { readonly x: number; readonly y: number };
+}
+
 export interface SceneObjectMembershipInput {
   readonly definition: SceneObjectDefinitionInput;
   readonly assetReference?: AssetReferenceInput | null;
   /** Opaque authoring key, not a numeric depth or renderer sorting instruction. */
   readonly layerKey?: string | null;
   readonly attachment?: SceneObjectAttachment | null;
+  readonly placement?: SceneObjectPlacement | null;
 }
 
 /** One owned authored definition and optional logical Asset target, never Asset data. */
@@ -28,6 +39,7 @@ export interface SceneObjectMembership {
   readonly assetReference: AssetReference | null;
   readonly layerKey?: string | null;
   readonly attachment?: SceneObjectAttachment | null;
+  readonly placement?: SceneObjectPlacement | null;
 }
 
 export interface SceneMembershipInput {
@@ -39,6 +51,24 @@ export interface SceneMembershipInput {
 export interface SceneMembership {
   readonly scene: SceneDefinition;
   readonly objects: readonly SceneObjectMembership[];
+}
+
+function capturePlacement(input: SceneObjectPlacement): SceneObjectPlacement {
+  if (typeof input !== 'object' || input === null || Array.isArray(input)) {
+    throw new TypeError('Placement must be an object');
+  }
+  const { coordinateSpaceId, point } = input;
+  if (typeof coordinateSpaceId !== 'string' || coordinateSpaceId.length === 0 || /\s/u.test(coordinateSpaceId)) {
+    throw new TypeError('coordinateSpaceId must be a non-empty string without whitespace');
+  }
+  if (typeof point !== 'object' || point === null || Array.isArray(point)) {
+    throw new TypeError('Placement point must be an object');
+  }
+  const { x, y } = point;
+  if (typeof x !== 'number' || !Number.isFinite(x) || typeof y !== 'number' || !Number.isFinite(y)) {
+    throw new TypeError('Placement point x/y must be finite numbers');
+  }
+  return Object.freeze({ coordinateSpaceId, point: Object.freeze({ x, y }) });
 }
 
 function captureAttachment(
@@ -77,7 +107,7 @@ export function createSceneMembership(input: SceneMembershipInput): SceneMembers
     if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) {
       throw new TypeError('Scene object membership must be an object');
     }
-    const { definition: definitionInput, assetReference: referenceInput = null, layerKey, attachment } = entry;
+    const { definition: definitionInput, assetReference: referenceInput = null, layerKey, attachment, placement } = entry;
     const definition = createSceneObjectDefinition(definitionInput);
     if (ids.has(definition.objectId)) throw new TypeError('Duplicate Scene objectId');
     const assetReference = referenceInput === null ? null : createAssetReference(referenceInput);
@@ -90,10 +120,13 @@ export function createSceneMembership(input: SceneMembershipInput): SceneMembers
     }
     const capturedAttachment = attachment === undefined || attachment === null
       ? attachment : captureAttachment(attachment, scene.identity, definition.objectId);
+    const capturedPlacement = placement === undefined || placement === null
+      ? placement : capturePlacement(placement);
     ids.add(definition.objectId);
     result.push(Object.freeze({ definition, assetReference,
       ...(layerKey === undefined ? {} : { layerKey }),
       ...(capturedAttachment === undefined ? {} : { attachment: capturedAttachment }),
+      ...(capturedPlacement === undefined ? {} : { placement: capturedPlacement }),
     }));
   }
   return Object.freeze({ scene, objects: Object.freeze(result) });
