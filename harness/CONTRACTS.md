@@ -148,6 +148,14 @@ catalog, browser or graphics acquisition. Frozen detached results are directly
 inspectable; no Scene Object, registry, persistence envelope or Render API is added.
 Construction projects known fields, not a versioned reader of arbitrary saved data.
 
+Phase 3 v0.3.2: [Visual Object Identity & Definition](checkpoints/scene-contracts-v0.3.2.md)
+adds Editor-owned createSceneObjectDefinition and two readonly input/result types.
+Explicit objectId is exact, case-sensitive and scene-local; standalone definitions
+do not carry Scene/Asset/entity/Render identity or membership. Display/classification
+labels are optional strings, captured verbatim or null. Frozen detached scalar data
+contains no placement, backend, gameplay fields or arbitrary extension state. Scene
+insertion and local uniqueness await v0.3.3. Existing contracts/graph are unchanged.
+
 ## Unresolved until demonstrated
 
 - Scene identity is Editor-owned (v0.3.0 design decision); exact Scene schema/operations await scoped consumers. Coordinates/projection belong to Features 04/09; visual instance allocation/rendering to Feature 08. Text-only content does not require a visual scene.

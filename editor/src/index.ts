@@ -1,5 +1,10 @@
 import '@rpg-platform/runtime-engine';
 export {
+  createSceneObjectDefinition,
+  type SceneObjectDefinitionInput,
+  type SceneObjectDefinition,
+} from './scene-object-definition.js';
+export {
   createSceneIdentity,
   createSceneDefinition,
   type SceneIdentityInput,

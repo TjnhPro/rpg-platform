@@ -1,3 +1,19 @@
+# Manual visual object definition consumer — v0.3.2
+
+After the real package build from workspace root:
+
+```sh
+node node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict --exactOptionalPropertyTypes --module NodeNext --target ES2022 --lib ES2022,DOM editor/manual/scene-object-definition.mts
+node editor/manual/scene-object-definition.mts
+```
+
+Prints distinct caller-provided IDs, independent frozen captures, unchanged mutable
+input, stable captured values after host edits, exact case, nullable labels, known
+output fields and invalid-input TypeErrors. Assetless/placementless data requires
+no Scene membership, browser or graphics. This finite public-root example has no
+assertions, runner, test helpers or automatic runtime CI. Uniqueness on Scene
+insertion is deferred to v0.3.3; visuals remain NOT_VERIFIED.
+
 # Manual Scene identity/definition consumer — v0.3.1
 
 After the real package build from workspace root:
