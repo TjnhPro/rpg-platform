@@ -240,9 +240,16 @@ snapshots. Missing Asset and Object targets remain distinct authored diagnostics
 never physical-file or gameplay claims. No production API, script/test file, Scene
 subsystem, Render instance, viewport or dependency change; frames remain deferred.
 
+Phase 3 v0.3.11: [Scene Foundation Integration & MVP Closure](checkpoints/scene-contracts-v0.3.11.md)
+audits the full checkpoint chain, SC01–SC18 dispositions, 31 Scene additions and
+unchanged Render surface. No production delta. Finite authored-data observations
+and build/static evidence do not establish rendering, serialization compatibility
+or Developer phase acceptance. Parenting/nesting and spatial/visual-instance
+semantics remain deferred to approved future scopes.
+
 ## Unresolved until demonstrated
 
-- Scene identity is Editor-owned (v0.3.0 design decision); exact Scene schema/operations await scoped consumers. Coordinates/projection belong to Features 04/09; visual instance allocation/rendering to Feature 08. Text-only content does not require a visual scene.
+- Scene identity, minimal authored records and immutable operations are Editor-owned and implemented through v0.3.8, with consumers/evidence in v0.3.9–v0.3.10. Versioned document schema, parenting/nesting and future extension compatibility remain open. Coordinates/projection belong to Features 04/09; visual instance allocation/rendering to Feature 08. Text-only content does not require a visual scene.
 - Authored Asset and Scene identity/reference semantics belong to Editor. Document lifecycle/envelopes (Feature 05), serialization/export (Feature 19) and other game content formats remain separate decisions. Ownership of authored data does not select a storage format or Client dependency on Editor.
 - Rule/config discovery shape (descriptors, type contracts, explicit editors, mixed approaches).
 - State/event update model, client/server data projections, authority/verifier, persistence.

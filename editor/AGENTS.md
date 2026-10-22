@@ -4,6 +4,8 @@
 
 Read root agent guidance first.
 
+- [v0.3.11 Scene closure](../harness/checkpoints/scene-contracts-v0.3.11.md) is the current Phase 3 audit and SC01–SC18 disposition. Editor owns 31 Scene additions (74 total root symbols); Render remains 17. Preserve known-field capture, explicit scoped IDs and canonical Phase 2 Asset resolution. Parenting/nesting, spatial semantics, documents and actual Scene rendering remain deferred. No API delta; STOP for Developer phase acceptance.
+
 - [v0.3.10 Minimal Working Scene MVP](../harness/checkpoints/scene-contracts-v0.3.10.md) records one reproducible ad hoc public-root sequence for scene-zone-01: Player/three Monster/VFX visual placeholders, shared Asset, placement update, VFX attachment, reference diagnostics and real Render metadata preparation. No production API or committed script/test file is added. This is authored-data flow evidence only; no rendering, gameplay, loader or Phase 3 closure claim.
 
 - [v0.3.9 Scene Authoring & Compatibility Integration](../harness/checkpoints/scene-contracts-v0.3.9.md) inventories all 31 Scene exports and demonstrates the existing root authoring surface without new API. Scene factories capture known fields only; unknown host fields are ignored, not losslessly retained as Asset metadata is. Keep caller data until a future explicit Document contract can preserve/reject unknown data safely; never save a factory projection over an unknown document. Full replacement requires spreading current known fields for a focused edit. No Scene metadata bag, serializer, migration or future nesting/animation API is implied.

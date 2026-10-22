@@ -106,6 +106,10 @@ manual Scene data flow: five visual placeholders, shared Asset references, an
 immutable placement edit, distinct missing-target diagnostics and real Render
 metadata preparation. The ad hoc consumer is documented in the checkpoint;
 no new API, permanent script, viewport or rendered Scene is introduced.
+[v0.3.11](harness/checkpoints/scene-contracts-v0.3.11.md) audits the complete
+Phase 3 commit chain, SC01–SC18 disposition, public contracts and future extension
+boundaries. No production API changes; builds/static checks and finite manual data
+observations remain separate from visual verification and Developer phase acceptance.
 Runtime Engine
 has named imports of actual L1/L2 APIs to establish compile-time dependency linkage;
 consumer entrypoints import the appropriate workspace roots. No calculation or
