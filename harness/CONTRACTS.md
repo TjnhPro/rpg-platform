@@ -36,6 +36,11 @@ adds explicit async graphics acquisition and a submitted-frame receipt through t
 Render root, plus an Editor manual demo. Existing binding-only APIs remain unchanged;
 build evidence and visual evidence are separate.
 
+Phase 1 v0.1.8: [ER15 integration and closure review](checkpoints/editor-render-v0.1.8.md)
+audits all nine checkpoints, current public symbols, ownership, dependency pins and
+consumer builds. No API delta; READY_FOR_DEVELOPER_REVIEW does not mean phase
+acceptance. Manual graphics/visual evidence remains unavailable.
+
 1. **Workspace/project discovery**: five identifiable projects, build entrypoint, explicit dependency direction and public import surfaces. Keep package naming editable until real manifests exist.
 2. **Editor ↔ Render**: an authoring host can create/select/inspect/move a presentation object and save/reload scene/content without a duplicate renderer. The specific scene format/coordinate system belongs to the relevant MVP.
 3. **Editor ↔ Runtime**: Editor can discover or be supplied the active game's supported content/config contract and run its validation/preview through public Runtime APIs. No universal Skill/Player/Monster contract is imposed.
