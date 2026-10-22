@@ -2,6 +2,43 @@
 
 This describes the *interactions to audit*, not finalized types or APIs. Do not create interfaces just to satisfy this document before a real MVP needs them.
 
+Phase 5 v0.5.8: [Safe save DC14](checkpoints/document-v0.5.8.md) adds
+saveDocument(session, port, locator, expected, context?) and five readonly public
+write contracts. Preconditions are explicit absent, observed identity/revision, or
+unknown (always blocked). Port declares create-only/compare-and-swap/unavailable
+conflict protection and atomic-publish/unavailable publication. Missing guarantees
+return CONFLICT_UNDETECTABLE or ATOMIC_PUBLICATION_UNAVAILABLE before write IO.
+Revision tokens come from the host, never session/schema versions or guessed
+mtime. Host must atomically enforce preconditions against all writers while
+publishing the complete payload; a read-check-write sequence is insufficient.
+Atomic publication is not power-loss durability. No unconditional overwrite mode.
+
+Coordinator requires open session, captures an immutable session-bound ticket,
+serializes through canonical codec and requires strict existing owner diagnostics.
+Diagnostic writeEligibility remains advisory NOT_ESTABLISHED; actual admission
+also requires explicit host authority/guarantees/precondition. Missing references,
+unknown owner/version or unchecked context do not authorize writes. Serialize the
+original ticket, never a projected validation candidate; unknown supported fields
+survive. No automatic repair, schema bump or migration.
+
+Only committed host receipt acknowledges that ticket. Host observation is
+detached/frozen and remains separate from session generation. failed guarantees
+unchanged target and no pending IO; conflicted does not overwrite; uncertain,
+malformed/nonportable or thrown commit outcomes never advance saved baseline and
+block further coordinator writes on that session. Retiring a ticket with the old
+session failed seam only removes its capability, not a claim of known storage
+failure. Pre-dispatch unexpected resolver errors propagate after releasing the
+guard. Same-session overlap returns busy (no queue); separate sessions/hosts rely
+on actual atomic host protection. Low-level session APIs are trusted seams and
+must not bypass coordinator ordering; module-instance guards are not distributed
+locks. Closing while pending does not cancel host IO: committed/session-closed
+reports storage success without mutating/reopening the terminal session.
+
+This version adds no recovery/unlock policy, registry, watcher, autosave, UI,
+database or Render lifecycle integration. Local real host evidence is create-only
+staged-file hardlink publication. Existing-file CAS/replacement and crash safety
+are not established by this checkpoint; unsafe overwrite is refused.
+
 Phase 5 v0.5.7: [Storage read/load DC13](checkpoints/document-v0.5.7.md)
 adds loadDocument(port, locator, context?) and DocumentReadPort/DocumentReadResult/
 DocumentStorageObservation/DocumentLoadResult through Editor root only. Locator is

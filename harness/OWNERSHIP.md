@@ -22,6 +22,12 @@ This table is for routing an implementation **after inspecting current source**.
 
 ## Required reasoning for multi-project changes
 
+v0.5.8 DC14: Editor owns save admission, exact-ticket orchestration and per-session
+in-flight/uncertain guards. Host owns actual atomic preconditions, full-payload
+publication, receipts and durability claims; no renderer or gameplay persistence
+ownership changes. Reuse codec/diagnostics/session public behavior. Only Editor
+and directly relevant Harness docs change. See [checkpoint](checkpoints/document-v0.5.8.md).
+
 v0.5.7 DC13: Editor owns the portable read port and load orchestration through
 its root public API. Actual IO, locator authorization/encoding/limits and storage
 observations are host-owned. Reuse existing document diagnostics/session capture;

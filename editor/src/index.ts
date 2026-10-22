@@ -1,5 +1,13 @@
 import '@rpg-platform/runtime-engine';
 export {
+  saveDocument,
+  type DocumentWritePrecondition,
+  type DocumentWriteRequest,
+  type DocumentCommitReceipt,
+  type DocumentWritePort,
+  type DocumentSaveResult,
+} from './document-save.js';
+export {
   loadDocument,
   type DocumentStorageObservation,
   type DocumentReadResult,
