@@ -4,6 +4,9 @@
 
 Read root agent guidance first.
 
+- Phase 1 checkpoint boundary: [ER01/ER02/ER04](../harness/checkpoints/editor-render-v0.1.0.md). v0.1.0 is API_DESIGN_ONLY; no session, host target or lifecycle API exists yet.
+- Only `@rpg-platform/runtime-render` is public. Keep backend objects and resource cleanup inside Render; never accept Editor UI/document stores or gameplay authority through future contracts.
+
 - Editor and Client MUST reuse the same presentation implementation; Editor-specific gizmos are tool extensions, not a second renderer.
 - Presentation identity/placement is not automatically gameplay identity/HP/AI/drop schema.
 - Do not import Combat/Skill/Reward Rules from Runtime Engine; receive presentation data via approved boundary.

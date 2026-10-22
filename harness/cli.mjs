@@ -132,6 +132,11 @@ function referenceTarget(specifier, fromFile, names) {
 
 function checkImport(owner, file, specifier, names, isManifestDependency = false) {
   const spec = specifier.replace(/[?#].*$/, '');
+  // ER01: Editor hosts Render's public API; native rendering stays in Render.
+  if (owner.id === 'editor' && /^(?:three|@types\/three)(?:\/|$)/.test(spec)) {
+    fail(`${rel(file)}: Editor cannot depend directly on ${spec}; use @rpg-platform/runtime-render public API`);
+    return;
+  }
   // Frozen foundation import checking: entrypoints are explicit.
   for (const foundation of config.foundationPackages) {
     if (spec === foundation.prefix || spec.startsWith(foundation.prefix + '/')) {
