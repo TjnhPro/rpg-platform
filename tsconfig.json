@@ -1,0 +1,10 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./runtime-engine" },
+    { "path": "./runtime-render" },
+    { "path": "./editor" },
+    { "path": "./game-client" },
+    { "path": "./game-server" }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "name": "rpg-platform",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "npm@12.2.0",
+  "engines": { "node": ">=22.13.0" },
+  "workspaces": ["runtime-engine", "runtime-render", "editor", "game-client", "game-server"],
+  "scripts": {
+    "foundations:prepare": "node harness/prepare-foundations.mjs",
+    "build": "tsc -b",
+    "harness:doctor": "node harness/cli.mjs doctor",
+    "harness:check": "node harness/cli.mjs check",
+    "harness:route": "node harness/cli.mjs route",
+    "harness:scope": "node harness/cli.mjs scope",
+    "harness:verify": "node harness/cli.mjs verify"
+  },
+  "devDependencies": { "typescript": "6.0.3" }
+}

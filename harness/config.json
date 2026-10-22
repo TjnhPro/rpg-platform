@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "notes": "Foundation: five private npm workspaces, root-only public exports, genuine TypeScript builds. Dependency permissions are unchanged.",
+  "projects": [
+    {
+      "id": "runtime-engine",
+      "path": "runtime-engine",
+      "packageName": "@rpg-platform/runtime-engine",
+      "build": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "canImportProjects": [],
+      "publicExports": []
+    },
+    {
+      "id": "runtime-render",
+      "path": "runtime-render",
+      "packageName": "@rpg-platform/runtime-render",
+      "build": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "canImportProjects": [],
+      "publicExports": []
+    },
+    {
+      "id": "editor",
+      "path": "editor",
+      "packageName": "@rpg-platform/editor",
+      "build": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "canImportProjects": [
+        "runtime-engine",
+        "runtime-render"
+      ],
+      "publicExports": []
+    },
+    {
+      "id": "game-client",
+      "path": "game-client",
+      "packageName": "@rpg-platform/game-client",
+      "build": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "canImportProjects": [
+        "runtime-engine",
+        "runtime-render"
+      ],
+      "publicExports": []
+    },
+    {
+      "id": "game-server",
+      "path": "game-server",
+      "packageName": "@rpg-platform/game-server",
+      "build": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "canImportProjects": [
+        "runtime-engine",
+        "runtime-render"
+      ],
+      "publicExports": []
+    }
+  ],
+  "foundationPackages": [
+    {
+      "prefix": "@rpg/core",
+      "allowedImports": [
+        "@rpg/core/kernel"
+      ],
+      "consumerProjects": [
+        "runtime-engine"
+      ]
+    },
+    {
+      "prefix": "@rpg/gameplay",
+      "allowedImports": [
+        "@rpg/gameplay"
+      ],
+      "consumerProjects": [
+        "runtime-engine"
+      ]
+    }
+  ],
+  "readOnlyDirectories": [
+    "rpg_core",
+    "rpg_gameplay"
+  ],
+  "sourceExtensions": [
+    ".js",
+    ".jsx",
+    ".mjs",
+    ".cjs",
+    ".ts",
+    ".tsx",
+    ".mts",
+    ".cts"
+  ],
+  "ignoredDirectories": [
+    "node_modules",
+    "dist",
+    "build",
+    "coverage",
+    ".git",
+    ".next",
+    ".turbo",
+    ".cache",
+    "out"
+  ]
+}

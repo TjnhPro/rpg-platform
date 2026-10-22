@@ -1,0 +1,24 @@
+{
+  "name": "@rpg-platform/runtime-engine",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -b --force"
+  },
+  "dependencies": {
+    "@rpg/core": "file:../.artifacts/rpg-core-2.0.0.tgz",
+    "@rpg/gameplay": "file:../.artifacts/rpg-gameplay-0.15.2.tgz"
+  }
+}

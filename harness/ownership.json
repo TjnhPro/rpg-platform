@@ -1,0 +1,30 @@
+{
+  "note": "Heuristic ROUTE HINTS only. Shared names DO NOT imply shared semantics or automatic permissions. Canonical owner requires source inspection.",
+  "domains": [
+    {
+      "owner": "runtime-engine",
+      "why": "Game-specific rules, actual gameplay behavior and lifecycle",
+      "signals": ["luật chơi", "quy tắc", "rule execution", "game rule", "combat rule", "luật skill", "va chạm gameplay", "xuyên thấu", "projectile", "monster ai", "quái ai", "gameplay state", "rule"]
+    },
+    {
+      "owner": "runtime-render",
+      "why": "Shared scene presentation, visuals, animation, VFX",
+      "signals": ["runtime render", "render engine", "three.js", "threejs", "animation", "sprite", "vfx", "shader", "camera", "hiển thị", "render", "texture"]
+    },
+    {
+      "owner": "editor",
+      "why": "Project/scene authoring, inspector/config, preview, export",
+      "signals": ["editor", "inspector", "authoring", "config ui", "cấu hình", "chỉnh sửa", "biên tập", "drag drop", "kéo thả", "preview", "asset browser", "export content"]
+    },
+    {
+      "owner": "game-client",
+      "why": "Player interaction and client game integration",
+      "signals": ["client", "điều khiển", "input", "bàn phím", "chuột", "player controls", "user interaction", "mobile controls"]
+    },
+    {
+      "owner": "game-server",
+      "why": "Per-game validation, session settlement, rewards and persistence",
+      "signals": ["server", "settlement", "phát thưởng", "xác minh", "đối soát", "lưu database", "reward", "backend", "lưu item", "anti cheat"]
+    }
+  ]
+}

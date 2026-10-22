@@ -1,0 +1,24 @@
+{
+  "name": "@rpg-platform/game-client",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -b --force"
+  },
+  "dependencies": {
+    "@rpg-platform/runtime-render": "0.0.0",
+    "@rpg-platform/runtime-engine": "0.0.0"
+  }
+}

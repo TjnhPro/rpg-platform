@@ -1,0 +1,20 @@
+name: Foundation build
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+      - run: npm install --global npm@12.2.0
+      - run: npm run foundations:prepare
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: node harness/cli.mjs check
+      - run: node harness/cli.mjs verify --projects runtime-engine,runtime-render,editor,game-client,game-server --with-consumers
+      - run: npm run build -- --force
