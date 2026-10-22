@@ -1,4 +1,6 @@
 import '@rpg-platform/runtime-engine';
+export { relocateAssetSource, rebindAssetReference } from './asset-transitions.js';
+export { readAssetDefinitionSnapshot } from './asset-snapshot.js';
 export {
   diagnoseAssetReference,
   diagnoseAssetDefinition,

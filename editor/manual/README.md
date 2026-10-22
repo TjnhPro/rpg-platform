@@ -125,3 +125,20 @@ structure, invalid locator, project mismatch and unsupported subresource outcome
 Physical files always remain NOT_CHECKED/NOT_VERIFIED. It also prints frozen result
 records, captured target detachment and unchanged input observations. This is a
 manual public-root example with no assertions, runner, test helpers or runtime CI job.
+
+## Manual relocation/rebinding/compatibility consumer — v0.2.7
+
+After the real package build:
+
+```sh
+node node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict --exactOptionalPropertyTypes --module NodeNext --target ES2022 --lib ES2022,DOM editor/manual/asset-relocation.mts
+node editor/manual/asset-relocation.mts
+```
+
+Prints one PNG locator candidate, two old references still resolving, explicit
+selected-reference rebinding and wrong-kind rejection. Round-trip uses host
+JSON.stringify/parse and the public snapshot reader, retaining ordered source roles,
+identity, dependencies and unknown metadata extensions. Unsupported version/structural
+fields reject, leaving original data with the caller. Input records/holders stay
+unchanged. No assertions, runners, test helpers or runtime CI job; no physical files
+or persistence are involved. JSON is a demonstration transport, not a project format.

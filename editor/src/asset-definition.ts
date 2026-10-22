@@ -81,6 +81,11 @@ function detachMetadata(value: unknown, path: string, ancestors: Set<object>): A
   }
 }
 
+/** Internal portable-data detacher shared by construction and snapshot reading. */
+export function detachPortableAssetData(value: unknown, path: string): AssetMetadataValue {
+  return detachMetadata(value, path, new Set());
+}
+
 /**
  * Validate, deeply detach and freeze authored data; throws TypeError on invalid
  * input. No kind registry, extension interpretation, IO, export or migration.
@@ -103,7 +108,7 @@ export function createAssetDefinition(input: AssetDefinitionInput): AssetDefinit
     schemaVersion: 1,
     identity: assetIdentity,
     kind,
-    metadata: detachMetadata(metadata, 'metadata', new Set()) as AssetMetadata,
+    metadata: detachPortableAssetData(metadata, 'metadata') as AssetMetadata,
     sources: detachAssetSources(sources),
     dependencies: detachAssetDependencies(dependencies, assetIdentity.projectId),
   });

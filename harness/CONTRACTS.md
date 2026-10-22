@@ -93,6 +93,14 @@ path and primitive details accompany the deterministic first failure. File exist
 is always NOT_CHECKED. Unknown host exceptions propagate; no raw Error/DOM payload,
 placeholder repair, graph traversal or Render resource failure handling is introduced.
 
+Phase 2 v0.2.7: [Asset Relocation, Rebinding & Compatibility](checkpoints/asset-contracts-v0.2.7.md)
+adds Editor-owned single-locator catalog candidates, explicit single-reference
+rebinding and a strict complete schemaVersion 1 snapshot reader. Existing identity,
+source roles/order and unknown metadata extensions are preserved. Unknown structural
+fields/versions reject without modifying the source; no silent downgrade/drop.
+Construction inputs remain distinct from portable snapshot reading. No IO, file
+replacement detection, permanent project file format, migration or save manager.
+
 1. **Workspace/project discovery**: five identifiable projects, build entrypoint, explicit dependency direction and public import surfaces. Keep package naming editable until real manifests exist.
 2. **Editor ↔ Render**: an authoring host can create/select/inspect/move a presentation object and save/reload scene/content without a duplicate renderer. The specific scene format/coordinate system belongs to the relevant MVP.
 3. **Editor ↔ Runtime**: Editor can discover or be supplied the active game's supported content/config contract and run its validation/preview through public Runtime APIs. No universal Skill/Player/Monster contract is imposed.
