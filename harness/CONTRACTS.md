@@ -2,6 +2,17 @@
 
 This describes the *interactions to audit*, not finalized types or APIs. Do not create interfaces just to satisfy this document before a real MVP needs them.
 
+Phase 5 v0.5.13: [Document integration/closure DC19](checkpoints/document-v0.5.13.md)
+is the current Phase 5 inventory and safety disposition: fourteen checkpoints,
+44 additive Editor symbols (134 total), Render52 unchanged, no closure API delta.
+Existing content owners remain canonical. Real local create-only Save/Load,
+conflict preservation, delayed acknowledgement and explicit migration candidate
+observations are finite evidence; no existing-file CAS, universal no-data-loss,
+recovery, durability, GUI or visual guarantee follows. Root README/architecture
+Phase 4 capability counts are historical; this report records current Phase 5
+source/declarations. READY_FOR_DEVELOPER_REVIEW; acceptance stays Developer-owned.
+No Feature 06, merge, tag, release or publication is authorized by closure.
+
 Phase 5 v0.5.12: [Minimal Document MVP DC19](checkpoints/document-v0.5.12.md)
 records a public-API-only [manual workflow](../editor/manual/document-mvp.md).
 No production/API/schema change: Editor134 / Render52 exports remain unchanged.

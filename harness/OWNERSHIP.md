@@ -22,6 +22,14 @@ This table is for routing an implementation **after inspecting current source**.
 
 ## Required reasoning for multi-project changes
 
+v0.5.13 DC19 closure: Editor is the single primary owner; Harness holds audit
+evidence only. No production API/source or ownership changes. Review all fourteen
+checkpoints and exact public declarations against accepted Phase 4; retain Scene,
+Asset and authored Spatial validators and Render-owned presentation math. Actual
+storage guarantees and safe artifact cleanup stay host-owned, not inferred from
+port types. See [closure report](checkpoints/document-v0.5.13.md). No other project
+change, phase acceptance, merge or next-phase authorization is implied.
+
 v0.5.12 DC19 is a documentation/manual-evidence checkpoint owned by Editor.
 The public Document workflow composes existing Scene/Object, Asset and Spatial
 contracts, with actual IO and exclusive publication owned by the local demo host.
