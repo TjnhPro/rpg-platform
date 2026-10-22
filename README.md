@@ -71,8 +71,9 @@ game-server    -> runtime-engine
 
 Workspace package names are `@rpg-platform/<project>`. Only the package root is
 exported, pointing at built ESM and declarations. All are private. Editor currently
-exports 43 symbols and Render 17; the integration review inventories their owners
-and Phase 2 additions. Runtime Engine
+exports 49 symbols and Render 17; the Phase 2 integration review inventories the
+earlier 43/17, and [v0.3.1](harness/checkpoints/scene-contracts-v0.3.1.md) adds six
+Editor-owned Scene identity/definition symbols. Runtime Engine
 has named imports of actual L1/L2 APIs to establish compile-time dependency linkage;
 consumer entrypoints import the appropriate workspace roots. No calculation or
 runtime lifecycle is invoked by those Engine/Client/Server bootstrap imports.

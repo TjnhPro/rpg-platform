@@ -1,3 +1,19 @@
+# Manual Scene identity/definition consumer — v0.3.1
+
+After the real package build from workspace root:
+
+```sh
+node node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict --exactOptionalPropertyTypes --module NodeNext --target ES2022 --lib ES2022,DOM editor/manual/scene-definition.mts
+node editor/manual/scene-definition.mts
+```
+
+Prints an identity-only empty Scene, independent captures, unchanged mutable caller
+input, frozen detached output, repeated reads, host-local title/path rename and ID
+edit, the same local ID in another project, and invalid-ID rejections. No Asset
+catalog, browser or graphics is required. Title/path are example host data, not
+Scene fields or persistence. Optional finite observations only: no assertions,
+runner, test helpers or automatic runtime CI. Rendering/visuals remain NOT_VERIFIED.
+
 # Manual frame demo — v0.1.7
 
 From workspace root, after README setup with pinned foundations:

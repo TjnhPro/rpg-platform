@@ -1,4 +1,12 @@
 import '@rpg-platform/runtime-engine';
+export {
+  createSceneIdentity,
+  createSceneDefinition,
+  type SceneIdentityInput,
+  type SceneIdentity,
+  type SceneDefinitionInput,
+  type SceneDefinition,
+} from './scene-definition.js';
 export { describeResolvedVisualAsset, type AssetVisualDescription } from './asset-visual.js';
 export { relocateAssetSource, rebindAssetReference } from './asset-transitions.js';
 export { readAssetDefinitionSnapshot } from './asset-snapshot.js';

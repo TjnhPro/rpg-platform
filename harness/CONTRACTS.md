@@ -140,6 +140,14 @@ Asset references/resolution reuse Phase 2; existing Render metadata preparation
 and frame submission do not provide a Scene consumer. Import graph is unchanged.
 Text-only scenes need no map, coordinates, root node, texture or graphics session.
 
+Phase 3 v0.3.1: [Scene Identity & Definition](checkpoints/scene-contracts-v0.3.1.md)
+adds Editor-owned createSceneIdentity/createSceneDefinition and four readonly
+input/result types. Exact projectId + sceneId identifies an authored Scene; caller
+supplies both. Identity-only definitions support empty text scenes with no Asset
+catalog, browser or graphics acquisition. Frozen detached results are directly
+inspectable; no Scene Object, registry, persistence envelope or Render API is added.
+Construction projects known fields, not a versioned reader of arbitrary saved data.
+
 ## Unresolved until demonstrated
 
 - Scene identity is Editor-owned (v0.3.0 design decision); exact Scene schema/operations await scoped consumers. Coordinates/projection belong to Features 04/09; visual instance allocation/rendering to Feature 08. Text-only content does not require a visual scene.

@@ -4,6 +4,8 @@
 
 Read root agent guidance first.
 
+- [v0.3.1 Scene Identity & Definition](../harness/checkpoints/scene-contracts-v0.3.1.md) adds Editor-owned createSceneIdentity/createSceneDefinition and four readonly input/result types. Empty definitions contain identity only; no object list, metadata, title/path, persistence or Render instance. Keys follow the existing project-local exact-string convention but Scenes are not Assets. Construction returns detached frozen records; caller owns identity stability/uniqueness. Manual public-root consumer is optional, without tests or automatic runtime CI.
+
 - [v0.2.10 integration/closure review](../harness/checkpoints/asset-contracts-v0.2.10.md) is the current Phase 2 inventory and AR01–AR16 status matrix; older checkpoint descriptions record their original revision. Editor owns 35 Phase 2 additions (43 total root symbols). No new production capability in this checkpoint. Manual metadata evidence does not imply loaded assets, visual verification or Developer phase acceptance.
 
 - [v0.2.9 Minimal Working Asset Reference MVP](../harness/checkpoints/asset-contracts-v0.2.9.md) demonstrates registration, two independent reference holders, relocation, explicit rebinding, typed missing/kind diagnostics and Render metadata handoff in one optional public-root manual consumer. No new public API or production source change. Locators are illustrative; ASSET_CONTENT_NOT_LOADED and VISUAL_NOT_VERIFIED remain explicit. Do not turn holders into Scene/gameplay objects or the example into an automatic suite.
