@@ -21,6 +21,12 @@ This table is for routing an implementation **after inspecting current source**.
 
 ## Required reasoning for multi-project changes
 
+v0.4.6 SP10/SP11: Runtime Render owns local-unit visual anchor/pivot alignment and
+angle facing conventions. Editor owns authored placement/config and adapts them
+through describeSceneObjectAlignment, with matching project/space/unit/axes.
+No Scene/Asset schema change or duplicate math; facing never chooses animation or
+changes gameplay aim. See [checkpoint](checkpoints/spatial-contracts-v0.4.6.md).
+
 v0.4.3 SP06/SP07: Runtime Render owns pure planar affine operations; Editor retains
 Scene/SC09/placement and may call only the Render root API with explicit numeric
 inputs. Caller-ordered composition is not a parent system or authored-data rewrite.

@@ -141,6 +141,11 @@ perform no file IO, decoding, GPU loading or frame submission.
 
 ## Architecture and verification
 
+[v0.4.6 anchor/pivot/facing checkpoint](harness/checkpoints/spatial-contracts-v0.4.6.md)
+documents optional Render alignment and the Editor Scene-placement consumer.
+Local-unit anchors are explicit; facing does not select frames or rotate geometry.
+Scene/Asset data and existing frame/session APIs remain unchanged.
+
 Read [AGENTS.md](AGENTS.md), [ARCHITECTURE.md](ARCHITECTURE.md),
 [harness/OWNERSHIP.md](harness/OWNERSHIP.md),
 [harness/CONTRACTS.md](harness/CONTRACTS.md) and each project's AGENTS.md before edits.

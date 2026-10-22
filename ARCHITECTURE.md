@@ -93,3 +93,9 @@ orthogonal conversion in Render using its own portable requests/results, indepen
 of Editor, GPU and gameplay. Editor adapts authored grid + matching space through
 the Render public root without formulas. Coordinate-space reference/unit survives
 both directions; Scene/Asset schema remains unchanged.
+
+[v0.4.6 SP10/SP11](harness/checkpoints/spatial-contracts-v0.4.6.md) adds Render-owned
+local-unit anchor/pivot alignment and explicit angle-based visual facing. Editor
+adapts optional existing Scene placement and validates caller-supplied space/axes;
+no authored schema changes. Facing remains independent of geometry and animation.
+Alignment is unrotated pure translation, not a render instance or gameplay position.

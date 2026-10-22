@@ -1,4 +1,12 @@
 export {
+  createVisualAnchor2D,
+  createVisualOrientation2D,
+  resolveVisualAlignment2D,
+  type VisualAnchor2D,
+  type VisualOrientation2D,
+  type VisualAlignment2D,
+} from './visual-alignment.js';
+export {
   createOrthogonalGridConversion,
   gridCellToScenePosition,
   scenePositionToGridCell,

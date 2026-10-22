@@ -4,6 +4,8 @@
 
 Read root agent guidance first.
 
+- [v0.4.6 SP10/SP11](../harness/checkpoints/spatial-contracts-v0.4.6.md) adds describeSceneObjectAlignment (85 Editor / 39 Render exports). Opt-in adapter validates Scene project/placement space and facing axes, then calls Render alignment with exact unit. Null/absent placement returns null. Anchor/facing config stays caller-retained; no Scene/Asset schema change or image-metadata inference. Facing does not rotate geometry or choose animation. Stop before v0.4.7. Developer explicitly waived prior review requests for this task.
+
 - [v0.4.5 SP09](../harness/checkpoints/spatial-contracts-v0.4.5.md) adds describeGridConversion (84 Editor / 33 Render exports). Capture authored grid + explicit matching CoordinateSpaceDefinition, then call Render's request factory through its root. Unit travels with scoped reference; space origin is a label, never an extra offset. No Editor conversion formula or Scene mutation. Use Render forward alignment and floor classification explicitly; no snapping UI. Stop before v0.4.6.
 
 - [v0.4.4 SP08](../harness/checkpoints/spatial-contracts-v0.4.4.md) adds OrthogonalGridDefinition/createOrthogonalGridDefinition (83 Editor exports; Render 26). Optional authored grid references an existing coordinate space; dimensions use its unit. Origin is cell (0,0)'s start corner; numeric row/column directions and allow/reject negative-index policy are explicit. Capture only, no index/conversion API or Scene schema change. No tile/map/occupancy catalog or clamp. Stop before v0.4.5; older notes describe their checkpoint revisions.

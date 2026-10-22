@@ -324,6 +324,18 @@ Successful forward results floor-roundtrip to their input cell; this is not a
 general numerical accuracy guarantee. Scene/Asset schemas unchanged; no GPU.
 Stop before v0.4.6.
 
+Phase 4 v0.4.6: [Anchor, Pivot & Direction](checkpoints/spatial-contracts-v0.4.6.md)
+adds six Render root symbols (33 -> 39) and Editor describeSceneObjectAlignment
+(84 -> 85), retaining all prior signatures/exports. Local-unit coordinates are
+not normalized fractions; explicit placement + offset - anchor gives unrotated
+origin, and origin + local pivot gives plane pivot. Facing has explicit axes,
+numeric +x zero and positive turn toward +y in [0,2*PI), independent of geometry
+or animation selection. Editor validates scoped placement/axes and calls Render
+math; no placement returns null. Invalid data/mismatch TypeError, nonfinite math
+RangeError, unknown host exceptions propagate. Scene/Asset/session schemas unchanged.
+No image decoding/metrics inference, normalization, discrete mapping or GPU work.
+Stop before v0.4.7.
+
 ## Unresolved until demonstrated
 
 
