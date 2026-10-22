@@ -2,6 +2,13 @@
 
 ## Fixed at this stage
 
+Current [v0.4.8 viewport checkpoint](harness/checkpoints/spatial-contracts-v0.4.8.md):
+Runtime Render owns pure explicit viewport/screen conversion and constrained
+selected-plane inverse. Editor forwards host-supplied metrics through the Render
+root. Pixel units, origins and scale are explicit; no global measurements, live
+camera, Scene schema change or gameplay spatial authority. Prior checkpoint
+descriptions retain their revision-specific scope. Stop before v0.4.9.
+
 Exactly one workspace and five independently owned projects:
 
 | Project | Canonical responsibility | Must not own |

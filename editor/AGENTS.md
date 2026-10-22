@@ -4,6 +4,8 @@
 
 Read root agent guidance first.
 
+- [v0.4.8 SP13/SP14](../harness/checkpoints/spatial-contracts-v0.4.8.md) adds describeViewportMapping (87 Editor / 52 Render exports). Host supplies explicit dimensions, pixel plane, optional screen origin/scale and the existing orthographic projection. Adapter calls Render capture only; caller uses Render root forward/constrained inverse. No DOM measurement, implicit DPR, Scene schema/adapter change or frame lifecycle integration. Earlier notes describe their checkpoint revisions. Stop before v0.4.9.
+
 - [v0.4.7 SP12](../harness/checkpoints/spatial-contracts-v0.4.7.md) adds describeOrthographicPlaneProjection (86 Editor / 44 Render exports). Adapt explicit source/destination coordinate definitions and caller correspondence origins/unit ratios to Render-owned capture; no formulas or Scene schema change. Definition origin labels are not extra offsets. Caller projects through Render root projectPlanePoint2D. Forward-only selected 2D plane; no camera/viewport state or inverse. Earlier checkpoint notes describe their own revisions. Stop before v0.4.8.
 
 - [v0.4.6 SP10/SP11](../harness/checkpoints/spatial-contracts-v0.4.6.md) adds describeSceneObjectAlignment (85 Editor / 39 Render exports). Opt-in adapter validates Scene project/placement space and facing axes, then calls Render alignment with exact unit. Null/absent placement returns null. Anchor/facing config stays caller-retained; no Scene/Asset schema change or image-metadata inference. Facing does not rotate geometry or choose animation. Stop before v0.4.7. Developer explicitly waived prior review requests for this task.

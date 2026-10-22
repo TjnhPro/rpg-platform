@@ -1,4 +1,14 @@
 export {
+  createViewportMapping2D,
+  projectPointToViewport2D,
+  viewportPointToPlane2D,
+  viewportPointToScreen2D,
+  screenPointToViewport2D,
+  type ScreenMapping2D,
+  type ViewportMetrics2D,
+  type ViewportMapping2D,
+} from './viewport-mapping.js';
+export {
   createOrthographicPlaneProjection,
   projectPlanePoint2D,
   type ProjectionPlane2D,

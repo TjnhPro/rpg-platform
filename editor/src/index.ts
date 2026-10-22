@@ -1,4 +1,5 @@
 import '@rpg-platform/runtime-engine';
+export { describeViewportMapping } from './viewport-mapping.js';
 export { describeOrthographicPlaneProjection } from './plane-projection.js';
 export { describeSceneObjectAlignment } from './scene-visual-alignment.js';
 export { describeGridConversion } from './grid-conversion.js';

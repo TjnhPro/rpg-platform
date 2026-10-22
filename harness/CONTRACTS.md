@@ -349,6 +349,23 @@ Scene/Asset/session and facing/anchor schemas unchanged. Stop before v0.4.8.
 
 ## Unresolved until demonstrated
 
+Phase 4 v0.4.8: [Viewport/Screen Mapping & Spatial Validation](checkpoints/spatial-contracts-v0.4.8.md)
+adds ScreenMapping2D, ViewportMetrics2D, ViewportMapping2D,
+createViewportMapping2D, projectPointToViewport2D, viewportPointToPlane2D,
+viewportPointToScreen2D and screenPointToViewport2D (Render 44 -> 52), plus
+Editor describeViewportMapping (86 -> 87). Existing signatures retained.
+Viewport dimensions are positive finite; local origin is top-left (0,0), axes
+right/down and units exactly css-px or device-px. Projection destination context
+matches metrics exactly; numeric correspondence origins/scale are explicit.
+Screen mapping is null or explicit plane/origin/per-axis scale; never implicit DPR.
+Exact plain/null-prototype records capture deeply frozen snapshots. Invalid data
+or mismatches throw TypeError; nonfinite arithmetic, normalized scale ratio
+<=1e-12, nonfinite/zero reciprocal or failed inverse destination residual throw
+RangeError. Residual bound is 1e-9*max(1,abs(input component)), not a universal
+source accuracy guarantee. Off-viewport points remain valid, no clipping or
+automatic aspect/fit. No camera, depth recovery, DOM/global reads, Scene schema
+or session lifecycle change. Stop before v0.4.9.
+
 
 
 - Scene identity, minimal authored records and immutable operations are Editor-owned and implemented through v0.3.8, with consumers/evidence in v0.3.9–v0.3.10. Versioned document schema, parenting/nesting and future extension compatibility remain open. Coordinates/projection belong to Features 04/09; visual instance allocation/rendering to Feature 08. Text-only content does not require a visual scene.

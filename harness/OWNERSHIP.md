@@ -21,6 +21,12 @@ This table is for routing an implementation **after inspecting current source**.
 
 ## Required reasoning for multi-project changes
 
+v0.4.8 SP13/SP14: Runtime Render owns explicit viewport/screen mapping and
+numerical validation, including constrained inverse to a declared plane. Editor
+forwards host measurements through describeViewportMapping; no formulas or global
+measurements. No dependency direction, Scene schema or frame lifecycle changes.
+See [checkpoint](checkpoints/spatial-contracts-v0.4.8.md).
+
 v0.4.7 SP12: Runtime Render owns pure forward orthographic-plane projection;
 Editor adapts explicit authored coordinate definitions and numeric mapping config
 through the Render root. No Editor math, Scene store, live camera/viewport state
