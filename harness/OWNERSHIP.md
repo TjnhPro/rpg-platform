@@ -21,6 +21,11 @@ This table is for routing an implementation **after inspecting current source**.
 
 ## Required reasoning for multi-project changes
 
+v0.4.10 SP16: Editor owns the authored Scene adapter and caller-held correlation.
+Render owns canonical conversion through existing PlaneProjectionPoint2D and root
+projection/viewport APIs; no Render source/API delta needed. No second Scene
+renderer or reverse import. See [checkpoint](checkpoints/spatial-contracts-v0.4.10.md).
+
 v0.4.9 SP15: Editor owns attaching/replacing authored Scene placement with an
 explicit matching coordinate definition/scoped point. Reuse existing coordinate
 factories and canonical Scene operation; no second registry, schema change or

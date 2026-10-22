@@ -349,6 +349,22 @@ Scene/Asset/session and facing/anchor schemas unchanged. Stop before v0.4.8.
 
 ## Unresolved until demonstrated
 
+Phase 4 v0.4.10: [Editor-Render Spatial Integration](checkpoints/spatial-contracts-v0.4.10.md)
+adds Editor describeSceneObjectSpatialPoint and SceneObjectSpatialDescription
+(88 -> 90 symbols; Render stays 52). Existing Scene membership/objectId plus one
+explicit CoordinateSpaceDefinition produces described/request or unavailable/
+NO_PLACEMENT. The request is Render's existing PlaneProjectionPoint2D, containing
+only plane and point; caller retains project/scene/object correlation separately.
+Canonical Scene/space capture detaches/freezes supported data and validates exact
+project/space matching. Origin labels are not offsets; placement absence does not
+inspect the supplied definition. Missing object/invalid placed data/mismatch throw
+TypeError; unknown host errors propagate. Caller sends request to Render root
+projectPointToViewport2D; unsupported mapping throws TypeError, numerical failures
+RangeError under existing contracts. No automatic fallback or Scene/Asset mutation.
+Authored IDs never become ephemeral session symbols; no allocation or session
+binding. Asset metadata preparation remains an independent existing path. No
+Scene/Asset schema, Render signature, UI/backend or dependency change. Stop before v0.4.11.
+
 Phase 4 v0.4.9: [Scene Spatial Integration](checkpoints/spatial-contracts-v0.4.9.md)
 adds Editor updateSceneObjectSpatialPlacement (87 -> 88), Render unchanged at 52.
 Input is an existing factory Scene snapshot, target objectId, explicit

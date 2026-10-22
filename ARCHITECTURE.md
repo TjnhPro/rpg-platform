@@ -2,7 +2,13 @@
 
 ## Fixed at this stage
 
-Current [v0.4.9 Scene spatial checkpoint](harness/checkpoints/spatial-contracts-v0.4.9.md):
+Current [v0.4.10 spatial handoff](harness/checkpoints/spatial-contracts-v0.4.10.md):
+Editor adapts one authored placement and explicit coordinate definition to the
+existing Render PlaneProjectionPoint2D. Caller retains authored correlation and
+passes only the request to Render's canonical projection/viewport API. No Render
+API/schema change, Scene instance, session binding or GPU work. Stop before v0.4.11.
+
+[v0.4.9 Scene spatial checkpoint](harness/checkpoints/spatial-contracts-v0.4.9.md):
 Editor validates a scoped spatial point against a caller-supplied coordinate
 definition and Scene project, then delegates to its existing focused immutable
 placement operation. No new Scene schema/registry or Render math is introduced;
