@@ -1,5 +1,11 @@
 import '@rpg-platform/runtime-engine';
 export {
+  serializeDocument,
+  deserializeDocument,
+  type DocumentDecodeDiagnostic,
+  type DocumentDecodeResult,
+} from './document-codec.js';
+export {
   createDocumentSession,
   type DocumentSession,
   type DocumentSessionSnapshot,

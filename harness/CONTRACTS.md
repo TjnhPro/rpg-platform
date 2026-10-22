@@ -2,6 +2,34 @@
 
 This describes the *interactions to audit*, not finalized types or APIs. Do not create interfaces just to satisfy this document before a real MVP needs them.
 
+Phase 5 v0.5.5: [Serialization/deserialization DC10](checkpoints/document-v0.5.5.md)
+adds Editor-root serializeDocument(document): string and deserializeDocument(text):
+DocumentDecodeResult, plus DocumentDecodeDiagnostic. Pure compact schema-1 JSON;
+canonical envelope/portable capture is reused, not a second content schema system.
+Encode rejects unsupported graphs before stringify (TypeError/RangeError; unknown
+host exceptions propagate). Decode returns frozen decoded/document or rejected/
+diagnostic; safe codes INVALID_INPUT, INVALID_JSON, DUPLICATE_KEY, LIMIT_EXCEEDED,
+UNSUPPORTED_SCHEMA, INVALID_ENVELOPE. Fixed messages never echo untrusted text.
+Duplicate decoded keys reject, including escaped equivalents. Native JSON.parse
+remains grammar authority; a profile limit/duplicate can be detected before syntax.
+Exact root/identity fields stay enforced; unknown portable content keys including
+__proto__/constructor survive as own data without prototype merges. Explicit
+schemaVersion 1 only; no fallback, migration, write permission or read-only mode.
+contentSchemaVersion is preserved, not semantically interpreted. Fixed bounds:
+1,048,576 UTF-16 code units of input/output and aggregate graph string/key data,
+64 container levels (root=1), 100,000 value occurrences including root (keys are
+not values). Shared records are detached by value; cycles reject. Bounds guard the
+existing recursive detacher, not all possible host memory/Proxy behavior. Finite
+binary64 excluding -0 only: JSON text can already round large integers/decimals or
+underflow, so precision-sensitive values must be strings. Output follows native
+ECMAScript key order/number rendering, compact without newline/BOM; no sorting,
+semantic equality, hash or cryptographic canonicalization. Repeated captured input
+is stable; fresh records with different insertion order can differ in bytes.
+Codec never adopts a session, changes revision/dirty/saved evidence, interprets
+Scene/Asset/Spatial schema/references, performs IO or saves. Host selects authored
+payloads: portability cannot identify semantically misplaced plain UI records.
+No v0.5.6 diagnostics implementation, storage adapter or extra project dependency.
+
 Phase 5 v0.5.4: [Revision/dirty DC07/DC08](checkpoints/document-v0.5.4.md)
 extends DocumentSession with currentRevision (starts 1), savedRevision/savedEnvelope
 (null without explicit initial load evidence), and derived isDirty. Object.is on
