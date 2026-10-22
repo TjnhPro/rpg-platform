@@ -167,6 +167,16 @@ object IDs and foreign-project bindings reject. Missing targets remain authored
 intent; Phase 2 resolver/diagnostics are the only target/kind authority. Lists preserve
 declaration/append order, with no render-order or relationship semantics. No graph change.
 
+Phase 3 v0.3.4: [Object Ordering & Relationship Contracts](checkpoints/scene-contracts-v0.3.4.md)
+adds reorderSceneObjects, SceneObjectReference, SceneObjectAttachment and optional
+membership layerKey/attachment fields. Reorder requires a full permutation of local
+IDs; it preserves definitions, Asset reference values and authored metadata in a
+new frozen candidate. Layers are opaque exact keys, not z sorting. An attachment
+records one local Scene/object target, independently of lookup; missing targets are
+retained, self/cross-Scene targets rejected. It is nonhierarchical authored intent:
+no runtime following, parent/transform propagation, graph traversal or cycle policy.
+Omitted fields remain absent; old entry shape and all prior signatures remain valid.
+
 ## Unresolved until demonstrated
 
 - Scene identity is Editor-owned (v0.3.0 design decision); exact Scene schema/operations await scoped consumers. Coordinates/projection belong to Features 04/09; visual instance allocation/rendering to Feature 08. Text-only content does not require a visual scene.

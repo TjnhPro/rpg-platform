@@ -1,16 +1,33 @@
-import { createSceneDefinition, type SceneDefinition, type SceneDefinitionInput } from './scene-definition.js';
+import { createSceneDefinition, createSceneIdentity, type SceneIdentity, type SceneDefinition, type SceneDefinitionInput } from './scene-definition.js';
 import { createSceneObjectDefinition, type SceneObjectDefinition, type SceneObjectDefinitionInput } from './scene-object-definition.js';
 import { createAssetReference, type AssetReference, type AssetReferenceInput } from './asset-reference.js';
+
+/** Target inside the owning project; only the owning Scene is supported today. */
+export interface SceneObjectReference {
+  readonly sceneId: string;
+  readonly objectId: string;
+}
+
+/** Authored presentation intent only: no parent, transform or runtime following. */
+export interface SceneObjectAttachment {
+  readonly kind: 'attachment';
+  readonly target: SceneObjectReference;
+}
 
 export interface SceneObjectMembershipInput {
   readonly definition: SceneObjectDefinitionInput;
   readonly assetReference?: AssetReferenceInput | null;
+  /** Opaque authoring key, not a numeric depth or renderer sorting instruction. */
+  readonly layerKey?: string | null;
+  readonly attachment?: SceneObjectAttachment | null;
 }
 
 /** One owned authored definition and optional logical Asset target, never Asset data. */
 export interface SceneObjectMembership {
   readonly definition: SceneObjectDefinition;
   readonly assetReference: AssetReference | null;
+  readonly layerKey?: string | null;
+  readonly attachment?: SceneObjectAttachment | null;
 }
 
 export interface SceneMembershipInput {
@@ -22,6 +39,23 @@ export interface SceneMembershipInput {
 export interface SceneMembership {
   readonly scene: SceneDefinition;
   readonly objects: readonly SceneObjectMembership[];
+}
+
+function captureAttachment(
+  input: SceneObjectAttachment, scene: SceneIdentity, sourceId: string,
+): SceneObjectAttachment {
+  if (typeof input !== 'object' || input === null || Array.isArray(input)
+    || input.kind !== 'attachment') throw new TypeError('Expected an attachment relationship');
+  const { target } = input;
+  if (typeof target !== 'object' || target === null || Array.isArray(target)) {
+    throw new TypeError('Attachment target must be a Scene object reference');
+  }
+  const sceneId = createSceneIdentity({ projectId: scene.projectId, sceneId: target.sceneId }).sceneId;
+  const objectId = createSceneObjectDefinition({ objectId: target.objectId }).objectId;
+  if (sceneId !== scene.sceneId) throw new TypeError('Cross-Scene attachments are not supported');
+  if (objectId === sourceId) throw new TypeError('An object cannot attach to itself');
+  // Preserve missing targets. This is not hierarchical: no traversal or cycle policy.
+  return Object.freeze({ kind: 'attachment', target: Object.freeze({ sceneId, objectId }) });
 }
 
 /**
@@ -43,15 +77,24 @@ export function createSceneMembership(input: SceneMembershipInput): SceneMembers
     if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) {
       throw new TypeError('Scene object membership must be an object');
     }
-    const { definition: definitionInput, assetReference: referenceInput = null } = entry;
+    const { definition: definitionInput, assetReference: referenceInput = null, layerKey, attachment } = entry;
     const definition = createSceneObjectDefinition(definitionInput);
     if (ids.has(definition.objectId)) throw new TypeError('Duplicate Scene objectId');
     const assetReference = referenceInput === null ? null : createAssetReference(referenceInput);
     if (assetReference !== null && assetReference.projectId !== scene.identity.projectId) {
       throw new TypeError('Scene Asset binding must target the Scene project');
     }
+    if (layerKey !== undefined && layerKey !== null
+      && (typeof layerKey !== 'string' || layerKey.length === 0 || /\s/u.test(layerKey))) {
+      throw new TypeError('layerKey must be a non-empty string without whitespace or null');
+    }
+    const capturedAttachment = attachment === undefined || attachment === null
+      ? attachment : captureAttachment(attachment, scene.identity, definition.objectId);
     ids.add(definition.objectId);
-    result.push(Object.freeze({ definition, assetReference }));
+    result.push(Object.freeze({ definition, assetReference,
+      ...(layerKey === undefined ? {} : { layerKey }),
+      ...(capturedAttachment === undefined ? {} : { attachment: capturedAttachment }),
+    }));
   }
   return Object.freeze({ scene, objects: Object.freeze(result) });
 }
@@ -74,4 +117,25 @@ export function getSceneObject(
 ): SceneObjectMembership | undefined {
   const key = createSceneObjectDefinition({ objectId }).objectId;
   return membership.objects.find((entry) => entry.definition.objectId === key);
+}
+
+/**
+ * Explicit full permutation of existing IDs; no insert/delete/identity or binding
+ * edits. Returns a fresh candidate, preserving metadata and the original snapshot.
+ * This changes authored list order only, never z sorting or attachment semantics.
+ */
+export function reorderSceneObjects(membership: SceneMembership, objectIds: readonly string[]): SceneMembership {
+  if (!Array.isArray(objectIds) || objectIds.length !== membership.objects.length) {
+    throw new TypeError('Object order must contain every existing objectId exactly once');
+  }
+  const byId = new Map(membership.objects.map(entry => [entry.definition.objectId, entry]));
+  const ordered: SceneObjectMembership[] = [];
+  for (const objectId of objectIds) {
+    const key = createSceneObjectDefinition({ objectId }).objectId;
+    const entry = byId.get(key);
+    if (entry === undefined) throw new TypeError('Object order contains an unknown or duplicate objectId');
+    ordered.push(entry);
+    byId.delete(key);
+  }
+  return createSceneMembership({ scene: membership.scene, objects: ordered });
 }

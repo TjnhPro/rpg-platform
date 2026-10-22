@@ -1,3 +1,20 @@
+# Manual authored ordering/attachment consumer — v0.3.4
+
+After the real package build from workspace root:
+
+```sh
+node node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict --exactOptionalPropertyTypes --module NodeNext --target ES2022 --lib ES2022,DOM editor/manual/scene-ordering.mts
+node editor/manual/scene-ordering.mts
+```
+
+Finite public-root observations show stable order through an unrelated label edit,
+explicit reorder preserving identity/Asset refs/layers/attachment, detached frozen
+reference/order after caller edits, missing target intent, old entry shape when
+optional fields are omitted, nullable optional values, and invalid permutations or
+self/cross-Scene attachments rejected. Layer names/attachment are authored intent
+only; no renderer, parent hierarchy, transform following or file IO is exercised.
+Optional manual sequence only: no assertions, runner, test helpers or runtime CI job.
+
 # Manual Scene membership consumer — v0.3.3
 
 After the real package build from workspace root:
