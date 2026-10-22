@@ -10,6 +10,12 @@ pending; asset contents are not loaded and image display is not verified.
 
 ## Setup and build
 
+Current [Phase 4 Spatial integration/closure report](harness/checkpoints/spatial-contracts-v0.4.12.md)
+records all checkpoint SHAs, the 90 Editor / 52 Render public symbols, dependency
+and artifact audit, build evidence and manual MVP limits. Status is
+READY_FOR_DEVELOPER_REVIEW, not phase acceptance or visual verification.
+Feature 05 is not authorized by this closure.
+
 Use Git, Node **24.18.0** (`.node-version`) and npm **12.2.0**.
 
 ```sh

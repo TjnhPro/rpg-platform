@@ -2,7 +2,13 @@
 
 ## Fixed at this stage
 
-Current [v0.4.11 spatial MVP](harness/checkpoints/spatial-contracts-v0.4.11.md)
+[v0.4.12 Spatial closure audit](harness/checkpoints/spatial-contracts-v0.4.12.md)
+inventories all 13 checkpoints, additive public contracts, unchanged dependency
+graph/pins and finite manual evidence. No production/API change at closure.
+READY_FOR_DEVELOPER_REVIEW; phase acceptance and visual review remain open.
+Stop here; Feature 05 requires a separate authorized phase/PR.
+
+[v0.4.11 spatial MVP](harness/checkpoints/spatial-contracts-v0.4.11.md)
 records a headless manual public-API scenario: four visual placeholders, immutable
 placement update, explicit grid, alignment/facing, transform and viewport/screen
 roundtrips. No production/API change or rendered Scene claim. Stop before v0.4.12.
