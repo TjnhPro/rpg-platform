@@ -4,6 +4,8 @@
 
 Read root agent guidance first.
 
+- [Phase 2 v0.2.0 AR01/AR02](../harness/checkpoints/asset-contracts-v0.2.0.md): Editor owns authored asset IDs, source metadata, future catalog/reference resolution and diagnostics. Asset ID is caller-provided and stable within project scope, never inferred from filename/path or a numeric external source ID. This is design-only: no asset API, catalog, resolver, importer or UI yet. Resolution must not perform IO or load Render resources; exported content must not require Client to import Editor.
+
 - Follow the [Editor–Render boundary](../harness/checkpoints/editor-render-v0.1.0.md). v0.1.0 imports are bootstrap compilation only, not an operational preview consumer.
 - [v0.1.1](../harness/checkpoints/editor-render-v0.1.1.md) adds a package-root host adapter for session descriptors. It is not preview UI or renderer initialization; target creation/mounting/removal stays host-owned.
 - [v0.1.2](../harness/checkpoints/editor-render-v0.1.2.md) adds explicit host-binding initialization through the Render root. Editor calls the lifecycle; it does not own its state machine. Bound is not graphics-ready.

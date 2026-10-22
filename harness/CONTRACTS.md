@@ -41,6 +41,13 @@ audits all nine checkpoints, current public symbols, ownership, dependency pins 
 consumer builds. No API delta; READY_FOR_DEVELOPER_REVIEW does not mean phase
 acceptance. Manual graphics/visual evidence remains unavailable.
 
+Phase 2 v0.2.0: [AR01/AR02 asset architecture and identity](checkpoints/asset-contracts-v0.2.0.md)
+assigns authored asset records/references to Editor and future presentation resource
+descriptors to Render. Asset IDs are caller-provided stable logical identities
+within a project, separate from source IDs, filenames and locators. Resolution
+uses explicit metadata inputs, with no IO/loading. This checkpoint is API_DESIGN_ONLY;
+no asset public type, factory, catalog, resolver or renderer API is implemented.
+
 1. **Workspace/project discovery**: five identifiable projects, build entrypoint, explicit dependency direction and public import surfaces. Keep package naming editable until real manifests exist.
 2. **Editor ↔ Render**: an authoring host can create/select/inspect/move a presentation object and save/reload scene/content without a duplicate renderer. The specific scene format/coordinate system belongs to the relevant MVP.
 3. **Editor ↔ Runtime**: Editor can discover or be supplied the active game's supported content/config contract and run its validation/preview through public Runtime APIs. No universal Skill/Player/Monster contract is imposed.
@@ -52,7 +59,7 @@ acceptance. Manual graphics/visual evidence remains unavailable.
 ## Unresolved until demonstrated
 
 - Scene identity/coordinates and whether text-only content needs a visual scene.
-- Which project owns the persisted content schema/serializer (may differ by content type); **assign one canonical owner when used**.
+- Persisted asset identity/reference semantics belong to Editor (v0.2.0); record serialization/export format and other content schema/serializer ownership remain unresolved. **Assign one canonical owner when used**.
 - Rule/config discovery shape (descriptors, type contracts, explicit editors, mixed approaches).
 - State/event update model, client/server data projections, authority/verifier, persistence.
 - Physical L3/L4 split and package/repository boundaries after working games.
