@@ -6,6 +6,7 @@ Read root agent guidance first.
 
 - Phase 1 boundary baseline: [ER01/ER02/ER04](../harness/checkpoints/editor-render-v0.1.0.md). [v0.1.1 ER03/ER06](../harness/checkpoints/editor-render-v0.1.1.md) adds immutable host/session metadata. Current [v0.1.2 ER07](../harness/checkpoints/editor-render-v0.1.2.md) adds created-to-bound lifecycle; bound never means graphics-ready.
 - Only `@rpg-platform/runtime-render` is public. Keep backend objects and resource cleanup inside Render; never accept Editor UI/document stores or gameplay authority through future contracts.
+- Current [v0.1.3 ER05/ER08](../harness/checkpoints/editor-render-v0.1.3.md): dispose clears the lifecycle's binding reference and terminates operations. Borrowed targets and caller-retained snapshots stay host-owned; no GPU cleanup exists yet.
 
 - Editor and Client MUST reuse the same presentation implementation; Editor-specific gizmos are tool extensions, not a second renderer.
 - Presentation identity/placement is not automatically gameplay identity/HP/AI/drop schema.

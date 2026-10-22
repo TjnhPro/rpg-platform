@@ -3,6 +3,7 @@ import {
   createRenderSession,
   createRenderSessionLifecycle,
   type RenderSessionDescriptor,
+  type RenderSessionDisposal,
   type RenderSessionLifecycle,
 } from '@rpg-platform/runtime-render';
 
@@ -17,6 +18,16 @@ export function createEditorPreviewSession(target: object): RenderSessionDescrip
 /** Accept the host binding explicitly; this does not initialize graphics or UI. */
 export function initializeEditorPreviewSession(target: object): RenderSessionLifecycle {
   const session = createRenderSessionLifecycle({ target });
-  session.initialize();
+  try {
+    session.initialize();
+  } catch (error) {
+    session.dispose();
+    throw error;
+  }
   return session;
+}
+
+/** Host calls before removing its target, then drops its own handles/snapshots. */
+export function disposeEditorPreviewSession(session: RenderSessionLifecycle): RenderSessionDisposal {
+  return session.dispose();
 }

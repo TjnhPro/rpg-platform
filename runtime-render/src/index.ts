@@ -29,11 +29,20 @@ export interface RenderSessionSnapshot {
   readonly state: 'created' | 'bound';
 }
 
+/** Terminal observation deliberately retains no host binding or target. */
+export interface RenderSessionDisposal {
+  readonly id: symbol;
+  readonly state: 'disposed';
+}
+
 /** Host-controlled session boundary; no backend resources are acquired. */
 export interface RenderSessionLifecycle {
+  /** Active observations only; throws after disposal. Previously returned snapshots survive. */
   readonly getSnapshot: () => RenderSessionSnapshot;
-  /** Idempotent once bound; invalid target reference throws before transition. */
+  /** Idempotent once bound; throws for invalid target or after disposal. */
   readonly initialize: () => RenderSessionSnapshot;
+  /** Terminal and idempotent; releases internal binding, never destroys host target. */
+  readonly dispose: () => RenderSessionDisposal;
 }
 
 /**
@@ -42,14 +51,23 @@ export interface RenderSessionLifecycle {
  * Existing metadata-only creation remains available without entering this lifecycle.
  */
 export function createRenderSessionLifecycle(host: RenderHostBinding): RenderSessionLifecycle {
-  const descriptor = createRenderSession(host);
-  let state: RenderSessionSnapshot['state'] = 'created';
+  let descriptor: RenderSessionDescriptor | undefined = createRenderSession(host);
+  let state: RenderSessionSnapshot['state'] | 'disposed' = 'created';
+  const disposal: RenderSessionDisposal = Object.freeze({ id: descriptor.id, state: 'disposed' });
 
-  const getSnapshot = (): RenderSessionSnapshot => Object.freeze({ descriptor, state });
+  const getSnapshot = (): RenderSessionSnapshot => {
+    if (state === 'disposed' || descriptor === undefined) {
+      throw new Error('Render session is disposed');
+    }
+    return Object.freeze({ descriptor, state });
+  };
 
   return Object.freeze({
     getSnapshot,
     initialize: (): RenderSessionSnapshot => {
+      if (state === 'disposed' || descriptor === undefined) {
+        throw new Error('Render session is disposed');
+      }
       if (state === 'created') {
         const target = descriptor.host.target;
         if (target === null || (typeof target !== 'object' && typeof target !== 'function')) {
@@ -58,6 +76,11 @@ export function createRenderSessionLifecycle(host: RenderHostBinding): RenderSes
         state = 'bound';
       }
       return getSnapshot();
+    },
+    dispose: (): RenderSessionDisposal => {
+      descriptor = undefined;
+      state = 'disposed';
+      return disposal;
     },
   });
 }
