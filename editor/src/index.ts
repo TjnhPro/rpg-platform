@@ -1,4 +1,13 @@
 import '@rpg-platform/runtime-engine';
+export {
+  createDocumentIdentity,
+  createDocumentEnvelope,
+  type DocumentIdentity,
+  type DocumentEnvelopeInput,
+  type DocumentEnvelope,
+  type DocumentContentValue,
+  type DocumentContentRecord,
+} from './document-envelope.js';
 export { describeSceneObjectSpatialPoint, type SceneObjectSpatialDescription } from './scene-spatial-point.js';
 export { updateSceneObjectSpatialPlacement } from './scene-spatial-placement.js';
 export { describeViewportMapping } from './viewport-mapping.js';

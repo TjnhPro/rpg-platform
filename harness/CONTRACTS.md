@@ -2,6 +2,20 @@
 
 This describes the *interactions to audit*, not finalized types or APIs. Do not create interfaces just to satisfy this document before a real MVP needs them.
 
+Phase 5 v0.5.1: [Document identity/envelope DC02/DC03](checkpoints/document-v0.5.1.md)
+adds createDocumentIdentity/createDocumentEnvelope at the Editor root. Identity is
+exact projectId+documentId, independent of payload identity, kind and location.
+Envelope schemaVersion is explicitly 1; contentSchemaVersion is explicitly a
+positive safe integer or null for an unversioned owner. No codec format version,
+editing revision, saved baseline or external storage token is introduced.
+Document content is detached/frozen portable data, captured with the existing
+Editor detacher; its kind/schema semantics remain the content owner's concern.
+Unknown portable content keys survive; unsupported envelope/identity fields and
+versions reject rather than being silently projected away. This is a construction
+factory, not a decoder, compatibility/write authorization or storage API. No
+session, registry, Save/Load/migration or v0.5.2 implementation. The v0.5.0 notes
+below describe their earlier architecture-only revision.
+
 Phase 5 v0.5.0: [Document architecture DC01](checkpoints/document-v0.5.0.md)
 assigns authored document identity/envelope/lifecycle, dirty/revision, codecs and
 load/save/migration orchestration to Editor. API_DESIGN_ONLY: no Document public
