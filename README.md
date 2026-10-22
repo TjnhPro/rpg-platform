@@ -1,8 +1,12 @@
 # RPG Platform — Foundation Workspace
 
-Exactly five private npm workspace projects. This is Project Initialization only.
-No gameplay, renderer implementation, Editor UI, Client/Server features or network
-architecture is provided. Developer product review and acceptance remain pending.
+Exactly five private npm workspace projects. Phase 1 supplies Render host/session
+contracts and an explicit one-frame graphics path. Phase 2 supplies authored asset
+identity, metadata, sources, references, catalog, diagnostics and a Render metadata
+handoff. Gameplay, Editor product UI and Client/Server features remain deferred.
+See the [Phase 2 integration review](harness/checkpoints/asset-contracts-v0.2.10.md)
+for current APIs, finite manual evidence and limits. Developer phase acceptance is
+pending; asset contents are not loaded and image display is not verified.
 
 ## Setup and build
 
@@ -59,18 +63,21 @@ Arrows mean "consumes public package API".
 ```text
 runtime-engine -> @rpg/core/kernel (L1), @rpg/gameplay (L2)
 @rpg/gameplay  -> @rpg/core/kernel (upstream implementation; Core peer 2.0.0)
-runtime-render -> (no runtime dependency yet; Three.js deferred)
+runtime-render -> three (private graphics backend; no workspace project dependency)
 editor         -> runtime-engine, runtime-render
 game-client    -> runtime-engine, runtime-render
 game-server    -> runtime-engine
 ```
 
 Workspace package names are `@rpg-platform/<project>`. Only the package root is
-exported, pointing at built ESM and declarations. All are private. The initial
-public surfaces intentionally export no domain types or functions. Runtime Engine
+exported, pointing at built ESM and declarations. All are private. Editor currently
+exports 43 symbols and Render 17; the integration review inventories their owners
+and Phase 2 additions. Runtime Engine
 has named imports of actual L1/L2 APIs to establish compile-time dependency linkage;
 consumer entrypoints import the appropriate workspace roots. No calculation or
-runtime lifecycle is invoked. These imports are Foundation wiring, not a game API.
+runtime lifecycle is invoked by those Engine/Client/Server bootstrap imports.
+Render graphics acquisition is a separate explicit API; asset metadata operations
+perform no file IO, decoding, GPU loading or frame submission.
 
 ## Architecture and verification
 

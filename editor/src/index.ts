@@ -1,4 +1,49 @@
 import '@rpg-platform/runtime-engine';
+export { describeResolvedVisualAsset, type AssetVisualDescription } from './asset-visual.js';
+export { relocateAssetSource, rebindAssetReference } from './asset-transitions.js';
+export { readAssetDefinitionSnapshot } from './asset-snapshot.js';
+export {
+  diagnoseAssetReference,
+  diagnoseAssetDefinition,
+  type AssetDiagnosticCode,
+  type AssetDiagnosticTarget,
+  type AssetDiagnostic,
+  type AssetReferenceDiagnosticResult,
+  type AssetDefinitionDiagnosticResult,
+} from './asset-diagnostics.js';
+export {
+  createAssetCatalog,
+  getAssetDefinition,
+  registerAssetDefinition,
+  updateAssetDefinition,
+  removeAssetDefinition,
+  resolveAssetReference,
+  type AssetCatalogInput,
+  type AssetCatalog,
+  type AssetReferenceResolution,
+} from './asset-catalog.js';
+export {
+  createAssetReference,
+  type AssetReferenceInput,
+  type AssetReference,
+} from './asset-reference.js';
+export {
+  createResourceLocator,
+  type ResourceLocator,
+  type AssetSourceReference,
+} from './asset-sources.js';
+export {
+  createAssetDefinition,
+  type AssetDefinitionInput,
+  type AssetDefinition,
+  type AssetMetadata,
+  type AssetMetadataValue,
+} from './asset-definition.js';
+export {
+  createAssetIdentity,
+  type AssetIdentityInput,
+  type AssetIdentity,
+} from './asset-identity.js';
 export {
   createEditorPreviewHost,
   openEditorPreviewHost,
