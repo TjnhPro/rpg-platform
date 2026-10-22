@@ -1,3 +1,5 @@
+import { AssetValidationError } from './asset-validation.js';
+
 /** Caller-supplied logical identity; never inferred from a filename or locator. */
 export interface AssetIdentityInput {
   readonly projectId: string;
@@ -15,7 +17,8 @@ export interface AssetIdentity {
 
 function identityPart(value: unknown, field: string): string {
   if (typeof value !== 'string' || value.length === 0 || /\s/u.test(value)) {
-    throw new TypeError(`${field} must be a non-empty string without whitespace`);
+    throw new AssetValidationError('INVALID_ID', field, 'NONEMPTY_WHITESPACE_FREE_STRING',
+      `${field} must be a non-empty string without whitespace`);
   }
   return value;
 }
@@ -27,13 +30,13 @@ function identityPart(value: unknown, field: string): string {
  */
 export function createAssetIdentity(input: AssetIdentityInput): AssetIdentity {
   if (typeof input !== 'object' || input === null || Array.isArray(input)) {
-    throw new TypeError('Asset identity input must be an object');
+    throw new AssetValidationError('INVALID_STRUCTURE', '', 'NONNULL_NONARRAY_OBJECT', 'Asset identity input must be an object');
   }
   const { projectId, assetId, sourceId = null } = input;
   const project = identityPart(projectId, 'projectId');
   const asset = identityPart(assetId, 'assetId');
   if (sourceId !== null && (typeof sourceId !== 'string' || sourceId.trim().length === 0)) {
-    throw new TypeError('sourceId must be a nonblank string or null');
+    throw new AssetValidationError('INVALID_ID', 'sourceId', 'NONBLANK_STRING_OR_NULL', 'sourceId must be a nonblank string or null');
   }
   return Object.freeze({ projectId: project, assetId: asset, sourceId });
 }

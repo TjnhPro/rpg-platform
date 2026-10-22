@@ -1,6 +1,7 @@
 import { createAssetIdentity, type AssetIdentity, type AssetIdentityInput } from './asset-identity.js';
 import { detachAssetSources, type AssetSourceReference } from './asset-sources.js';
 import { detachAssetDependencies, type AssetReference, type AssetReferenceInput } from './asset-reference.js';
+import { AssetValidationError, atAssetPath } from './asset-validation.js';
 
 /** Portable authored data, never a loaded resource or an Editor UI object. */
 export type AssetMetadataValue =
@@ -35,7 +36,8 @@ export interface AssetDefinition {
 }
 
 function invalidMetadata(path: string): never {
-  throw new TypeError(`${path} must contain only portable JSON data: plain enumerable data objects, dense arrays and finite primitives (no negative zero or cycles)`);
+  throw new AssetValidationError('INVALID_METADATA', path, 'PORTABLE_JSON_DATA',
+    `${path} must contain only portable JSON data: plain enumerable data objects, dense arrays and finite primitives (no negative zero or cycles)`);
 }
 
 function detachMetadata(value: unknown, path: string, ancestors: Set<object>): AssetMetadataValue {
@@ -86,16 +88,17 @@ function detachMetadata(value: unknown, path: string, ancestors: Set<object>): A
  */
 export function createAssetDefinition(input: AssetDefinitionInput): AssetDefinition {
   if (typeof input !== 'object' || input === null || Array.isArray(input)) {
-    throw new TypeError('Asset definition input must be an object');
+    throw new AssetValidationError('INVALID_STRUCTURE', '', 'NONNULL_NONARRAY_OBJECT', 'Asset definition input must be an object');
   }
   const { identity, kind, metadata, sources = [], dependencies = [] } = input;
   if (typeof kind !== 'string' || kind.length === 0 || /\s/u.test(kind)) {
-    throw new TypeError('kind must be a non-empty resource/data classification without whitespace');
+    throw new AssetValidationError('INVALID_KIND', 'kind', 'NONEMPTY_WHITESPACE_FREE_STRING',
+      'kind must be a non-empty resource/data classification without whitespace');
   }
   if (typeof metadata !== 'object' || metadata === null || Array.isArray(metadata)) {
     return invalidMetadata('metadata');
   }
-  const assetIdentity = createAssetIdentity(identity);
+  const assetIdentity = atAssetPath('identity', () => createAssetIdentity(identity));
   return Object.freeze({
     schemaVersion: 1,
     identity: assetIdentity,

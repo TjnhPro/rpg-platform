@@ -1,5 +1,14 @@
 import '@rpg-platform/runtime-engine';
 export {
+  diagnoseAssetReference,
+  diagnoseAssetDefinition,
+  type AssetDiagnosticCode,
+  type AssetDiagnosticTarget,
+  type AssetDiagnostic,
+  type AssetReferenceDiagnosticResult,
+  type AssetDefinitionDiagnosticResult,
+} from './asset-diagnostics.js';
+export {
   createAssetCatalog,
   getAssetDefinition,
   registerAssetDefinition,

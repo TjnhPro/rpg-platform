@@ -110,3 +110,18 @@ duplicate rejection, removal and minimal unresolved outcomes. Catalog parameters
 are factory-created snapshots; raw host data enters through create/register/update.
 No assertions, test helpers/runner or automatic runtime job; no filesystem/network,
 resource loading, subresource discovery, graph traversal or persistent host commit.
+
+## Manual validation diagnostics consumer — v0.2.6
+
+After the package build:
+
+```sh
+node node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict --exactOptionalPropertyTypes --module NodeNext --target ES2022 --lib ES2022,DOM editor/manual/asset-diagnostics.mts
+node editor/manual/asset-diagnostics.mts
+```
+
+Prints resolved target, absent authored target, kind mismatch, missing ID, invalid
+structure, invalid locator, project mismatch and unsupported subresource outcomes.
+Physical files always remain NOT_CHECKED/NOT_VERIFIED. It also prints frozen result
+records, captured target detachment and unchanged input observations. This is a
+manual public-root example with no assertions, runner, test helpers or runtime CI job.
