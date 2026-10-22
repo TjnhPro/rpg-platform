@@ -1,3 +1,5 @@
+import { SceneValidationError } from './scene-validation.js';
+
 /** Caller-supplied objectId is local to its eventual owning Scene. */
 export interface SceneObjectDefinitionInput {
   readonly objectId: string;
@@ -16,7 +18,7 @@ export interface SceneObjectDefinition {
 function optionalLabel(value: unknown, field: string): string | null {
   if (value === undefined || value === null) return null;
   if (typeof value !== 'string' || value.trim().length === 0) {
-    throw new TypeError(`${field} must be a non-blank string or null`);
+    throw new SceneValidationError('INVALID_LABEL', field, 'NONBLANK_STRING_OR_NULL', `${field} must be a non-blank string or null`);
   }
   return value;
 }
@@ -32,11 +34,11 @@ export function createSceneObjectDefinition(
   input: SceneObjectDefinitionInput,
 ): SceneObjectDefinition {
   if (typeof input !== 'object' || input === null || Array.isArray(input)) {
-    throw new TypeError('Scene object definition input must be an object');
+    throw new SceneValidationError('INVALID_STRUCTURE', '', 'OBJECT', 'Scene object definition input must be an object');
   }
   const { objectId, displayName, classification } = input;
   if (typeof objectId !== 'string' || objectId.length === 0 || /\s/u.test(objectId)) {
-    throw new TypeError('objectId must be a non-empty string without whitespace');
+    throw new SceneValidationError('INVALID_ID', 'objectId', 'EXACT_NONEMPTY_KEY', 'objectId must be a non-empty string without whitespace');
   }
   return Object.freeze({
     objectId,

@@ -1,3 +1,19 @@
+# Manual Scene diagnostics consumer — v0.3.7
+
+After the workspace build, optionally compile/run this finite public-root sequence:
+
+```powershell
+node node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict --exactOptionalPropertyTypes --module NodeNext --target ES2022 --lib ES2022,DOM editor/manual/scene-diagnostics.mts
+node editor/manual/scene-diagnostics.mts
+```
+
+Observe empty validity, present/deleted Assets, absent catalog, dangling objects,
+kind/project/subresource outcomes, structural failures with exact paths, reciprocal
+nonhierarchical attachments, stable diagnostic ordering and source/result isolation.
+Host TypeError is propagated unchanged. This optional sequence has no assertions,
+runner or automatic runtime CI. No files are probed, no data repaired and no visual
+behavior verified. Asset metadata presence does not establish physical existence.
+
 # Manual immutable Scene operations consumer — v0.3.6
 
 After the workspace build, optionally compile/run this finite public-root sequence:

@@ -1,6 +1,7 @@
 import { createSceneDefinition, createSceneIdentity, type SceneIdentity, type SceneDefinition, type SceneDefinitionInput } from './scene-definition.js';
 import { createSceneObjectDefinition, type SceneObjectDefinition, type SceneObjectDefinitionInput } from './scene-object-definition.js';
 import { createAssetReference, type AssetReference, type AssetReferenceInput } from './asset-reference.js';
+import { SceneValidationError, atScenePath } from './scene-validation.js';
 
 /** Target inside the owning project; only the owning Scene is supported today. */
 export interface SceneObjectReference {
@@ -55,18 +56,19 @@ export interface SceneMembership {
 
 function capturePlacement(input: SceneObjectPlacement): SceneObjectPlacement {
   if (typeof input !== 'object' || input === null || Array.isArray(input)) {
-    throw new TypeError('Placement must be an object');
+    throw new SceneValidationError('INVALID_PLACEMENT', '', 'OBJECT', 'Placement must be an object');
   }
   const { coordinateSpaceId, point } = input;
   if (typeof coordinateSpaceId !== 'string' || coordinateSpaceId.length === 0 || /\s/u.test(coordinateSpaceId)) {
-    throw new TypeError('coordinateSpaceId must be a non-empty string without whitespace');
+    throw new SceneValidationError('INVALID_PLACEMENT', 'coordinateSpaceId', 'EXACT_NONEMPTY_KEY', 'coordinateSpaceId must be a non-empty string without whitespace');
   }
   if (typeof point !== 'object' || point === null || Array.isArray(point)) {
-    throw new TypeError('Placement point must be an object');
+    throw new SceneValidationError('INVALID_PLACEMENT', 'point', 'OBJECT', 'Placement point must be an object');
   }
   const { x, y } = point;
   if (typeof x !== 'number' || !Number.isFinite(x) || typeof y !== 'number' || !Number.isFinite(y)) {
-    throw new TypeError('Placement point x/y must be finite numbers');
+    throw new SceneValidationError('INVALID_PLACEMENT', `point.${typeof x !== 'number' || !Number.isFinite(x) ? 'x' : 'y'}`,
+      'FINITE_NUMBER', 'Placement point x/y must be finite numbers');
   }
   return Object.freeze({ coordinateSpaceId, point: Object.freeze({ x, y }) });
 }
@@ -75,15 +77,15 @@ function captureAttachment(
   input: SceneObjectAttachment, scene: SceneIdentity, sourceId: string,
 ): SceneObjectAttachment {
   if (typeof input !== 'object' || input === null || Array.isArray(input)
-    || input.kind !== 'attachment') throw new TypeError('Expected an attachment relationship');
+    || input.kind !== 'attachment') throw new SceneValidationError('INVALID_ATTACHMENT', '', 'ATTACHMENT_OBJECT', 'Expected an attachment relationship');
   const { target } = input;
   if (typeof target !== 'object' || target === null || Array.isArray(target)) {
-    throw new TypeError('Attachment target must be a Scene object reference');
+    throw new SceneValidationError('INVALID_ATTACHMENT', 'target', 'OBJECT', 'Attachment target must be a Scene object reference');
   }
-  const sceneId = createSceneIdentity({ projectId: scene.projectId, sceneId: target.sceneId }).sceneId;
-  const objectId = createSceneObjectDefinition({ objectId: target.objectId }).objectId;
-  if (sceneId !== scene.sceneId) throw new TypeError('Cross-Scene attachments are not supported');
-  if (objectId === sourceId) throw new TypeError('An object cannot attach to itself');
+  const sceneId = atScenePath('target', () => createSceneIdentity({ projectId: scene.projectId, sceneId: target.sceneId })).sceneId;
+  const objectId = atScenePath('target', () => createSceneObjectDefinition({ objectId: target.objectId })).objectId;
+  if (sceneId !== scene.sceneId) throw new SceneValidationError('CROSS_SCENE_ATTACHMENT', 'target.sceneId', 'SAME_SCENE', 'Cross-Scene attachments are not supported');
+  if (objectId === sourceId) throw new SceneValidationError('SELF_ATTACHMENT', 'target.objectId', 'OTHER_OBJECT', 'An object cannot attach to itself');
   // Preserve missing targets. This is not hierarchical: no traversal or cycle policy.
   return Object.freeze({ kind: 'attachment', target: Object.freeze({ sceneId, objectId }) });
 }
@@ -96,32 +98,33 @@ function captureAttachment(
  */
 export function createSceneMembership(input: SceneMembershipInput): SceneMembership {
   if (typeof input !== 'object' || input === null || Array.isArray(input)) {
-    throw new TypeError('Scene membership input must be an object');
+    throw new SceneValidationError('INVALID_STRUCTURE', '', 'OBJECT', 'Scene membership input must be an object');
   }
   const { scene: sceneInput, objects = [] } = input;
-  const scene = createSceneDefinition(sceneInput);
-  if (!Array.isArray(objects)) throw new TypeError('Scene objects must be an array');
+  const scene = atScenePath('scene', () => createSceneDefinition(sceneInput));
+  if (!Array.isArray(objects)) throw new SceneValidationError('INVALID_STRUCTURE', 'objects', 'ARRAY', 'Scene objects must be an array');
   const result: SceneObjectMembership[] = [];
   const ids = new Set<string>();
   for (const entry of objects) {
+    const path = `objects[${result.length}]`;
     if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) {
-      throw new TypeError('Scene object membership must be an object');
+      throw new SceneValidationError('INVALID_STRUCTURE', path, 'OBJECT', 'Scene object membership must be an object');
     }
     const { definition: definitionInput, assetReference: referenceInput = null, layerKey, attachment, placement } = entry;
-    const definition = createSceneObjectDefinition(definitionInput);
-    if (ids.has(definition.objectId)) throw new TypeError('Duplicate Scene objectId');
-    const assetReference = referenceInput === null ? null : createAssetReference(referenceInput);
+    const definition = atScenePath(`${path}.definition`, () => createSceneObjectDefinition(definitionInput));
+    if (ids.has(definition.objectId)) throw new SceneValidationError('DUPLICATE_OBJECT_ID', `${path}.definition.objectId`, 'SCENE_LOCAL_UNIQUE', 'Duplicate Scene objectId');
+    const assetReference = referenceInput === null ? null : atScenePath(`${path}.assetReference`, () => createAssetReference(referenceInput));
     if (assetReference !== null && assetReference.projectId !== scene.identity.projectId) {
-      throw new TypeError('Scene Asset binding must target the Scene project');
+      throw new SceneValidationError('PROJECT_MISMATCH', `${path}.assetReference.projectId`, 'SCENE_PROJECT', 'Scene Asset binding must target the Scene project');
     }
     if (layerKey !== undefined && layerKey !== null
       && (typeof layerKey !== 'string' || layerKey.length === 0 || /\s/u.test(layerKey))) {
-      throw new TypeError('layerKey must be a non-empty string without whitespace or null');
+      throw new SceneValidationError('INVALID_LAYER', `${path}.layerKey`, 'EXACT_KEY_OR_NULL', 'layerKey must be a non-empty string without whitespace or null');
     }
     const capturedAttachment = attachment === undefined || attachment === null
-      ? attachment : captureAttachment(attachment, scene.identity, definition.objectId);
+      ? attachment : atScenePath(`${path}.attachment`, () => captureAttachment(attachment, scene.identity, definition.objectId));
     const capturedPlacement = placement === undefined || placement === null
-      ? placement : capturePlacement(placement);
+      ? placement : atScenePath(`${path}.placement`, () => capturePlacement(placement));
     ids.add(definition.objectId);
     result.push(Object.freeze({ definition, assetReference,
       ...(layerKey === undefined ? {} : { layerKey }),

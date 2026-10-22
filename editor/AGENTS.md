@@ -4,6 +4,8 @@
 
 Read root agent guidance first.
 
+- [v0.3.7 Scene Validation & Relationship Diagnostics](../harness/checkpoints/scene-contracts-v0.3.7.md) adds diagnoseSceneMembership and four readonly diagnostic types. Canonical factories retain their rules/messages and TypeError contract with an internal structured channel. First structural failure returns invalid/null membership; otherwise list all unresolved local attachments and caller-catalog Asset references in declaration order, attachment first. Missing catalog means Asset NOT_CHECKED; all file existence NOT_CHECKED. No message parsing, autofix or hierarchy/cycle enforcement; unknown host errors propagate.
+
 - [v0.3.6 Immutable Scene State Operations](../harness/checkpoints/scene-contracts-v0.3.6.md) adds removeSceneObject, replaceSceneObject and updateSceneObjectPlacement for factory snapshots. Missing operation targets and attempted rename throw TypeError. Full replacement retains position/ID but replaces all entry fields; use a spread to retain unrelated metadata. Focused placement update preserves other fields; null clears placement. Removal retains other authored references without cascade/repair. All candidates reuse canonical capture; no history, store or global registry.
 
 - [v0.3.5 Placement Data Foundation](../harness/checkpoints/scene-contracts-v0.3.5.md) adds SceneObjectPlacement and optional membership placement. Capture detaches/freezes caller coordinateSpaceId and finite point x/y; no default placement, unit/axis/origin interpretation, space lookup, screen pixels or transforms. Omitted placement remains absent; explicit null retained. Existing create/add/reorder preserve it. Feature 04 owns spatial semantics; general mutation operations remain v0.3.6.

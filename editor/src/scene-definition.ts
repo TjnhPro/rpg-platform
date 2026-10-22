@@ -1,3 +1,5 @@
+import { SceneValidationError, atScenePath } from './scene-validation.js';
+
 /** Caller-selected logical keys; sceneId is local to projectId. */
 export interface SceneIdentityInput {
   readonly projectId: string;
@@ -21,7 +23,7 @@ export interface SceneDefinition {
 
 function identityPart(value: unknown, field: string): string {
   if (typeof value !== 'string' || value.length === 0 || /\s/u.test(value)) {
-    throw new TypeError(`${field} must be a non-empty string without whitespace`);
+    throw new SceneValidationError('INVALID_ID', field, 'EXACT_NONEMPTY_KEY', `${field} must be a non-empty string without whitespace`);
   }
   return value;
 }
@@ -33,7 +35,7 @@ function identityPart(value: unknown, field: string): string {
  */
 export function createSceneIdentity(input: SceneIdentityInput): SceneIdentity {
   if (typeof input !== 'object' || input === null || Array.isArray(input)) {
-    throw new TypeError('Scene identity input must be an object');
+    throw new SceneValidationError('INVALID_STRUCTURE', '', 'OBJECT', 'Scene identity input must be an object');
   }
   const { projectId, sceneId } = input;
   return Object.freeze({
@@ -50,7 +52,7 @@ export function createSceneIdentity(input: SceneIdentityInput): SceneIdentity {
  */
 export function createSceneDefinition(input: SceneDefinitionInput): SceneDefinition {
   if (typeof input !== 'object' || input === null || Array.isArray(input)) {
-    throw new TypeError('Scene definition input must be an object');
+    throw new SceneValidationError('INVALID_STRUCTURE', '', 'OBJECT', 'Scene definition input must be an object');
   }
-  return Object.freeze({ identity: createSceneIdentity(input.identity) });
+  return Object.freeze({ identity: atScenePath('identity', () => createSceneIdentity(input.identity)) });
 }

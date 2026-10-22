@@ -196,6 +196,18 @@ placement. Removal retains other objects and authored references, without cascad
 relationship repair or diagnostics. Existing add/reorder and canonical factories
 remain unchanged. No history/store, graph change, runtime state or new Render API.
 
+Phase 3 v0.3.7: [Scene Validation & Relationship Diagnostics](checkpoints/scene-contracts-v0.3.7.md)
+adds Editor-owned diagnoseSceneMembership and four readonly diagnostic types.
+Canonical factories still reject with TypeError under unchanged structural rules;
+their internal structured errors supply precise code/path without duplicated
+validation or message parsing. Invalid input returns null membership and the first
+structural diagnostic. Structurally valid input is captured and assessed for local
+attachment targets and, with a supplied catalog, Phase 2 Asset reference diagnostics.
+Unresolved records retain authored intent; no repair, deletion or remapping. Output
+is frozen/detached; unknown host errors propagate. Asset checks without a catalog
+and all physical file existence are NOT_CHECKED. Attachment is not hierarchy:
+reciprocal links remain valid, with hierarchy cycle policy deferred. Graph unchanged.
+
 ## Unresolved until demonstrated
 
 - Scene identity is Editor-owned (v0.3.0 design decision); exact Scene schema/operations await scoped consumers. Coordinates/projection belong to Features 04/09; visual instance allocation/rendering to Feature 08. Text-only content does not require a visual scene.

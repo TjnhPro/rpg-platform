@@ -1,5 +1,12 @@
 import '@rpg-platform/runtime-engine';
 export {
+  diagnoseSceneMembership,
+  type SceneDiagnosticCode,
+  type SceneDiagnosticTarget,
+  type SceneDiagnostic,
+  type SceneMembershipDiagnosticResult,
+} from './scene-diagnostics.js';
+export {
   createSceneMembership,
   addSceneObject,
   removeSceneObject,
