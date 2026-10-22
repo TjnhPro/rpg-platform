@@ -2,6 +2,23 @@
 
 This describes the *interactions to audit*, not finalized types or APIs. Do not create interfaces just to satisfy this document before a real MVP needs them.
 
+Phase 5 v0.5.0: [Document architecture DC01](checkpoints/document-v0.5.0.md)
+assigns authored document identity/envelope/lifecycle, dirty/revision, codecs and
+load/save/migration orchestration to Editor. API_DESIGN_ONLY: no Document public
+symbol, state machine, serializer or storage adapter exists yet. Content validation
+remains with the existing Asset/Scene/Spatial owners; future game-specific config
+semantics belong to Runtime Engine. Document ID, content ID, filename and tab ID
+are separate; document/content/format versions, editing revisions and external
+storage tokens are separate domains. Encode/decode is pure conversion, not IO;
+saved baseline advances only with commit evidence for the exact captured revision.
+Save(2), edit(3), then acknowledge(2) remains dirty. Unknown compatibility requires
+preservation within an explicit supported profile or read-only/rejection before
+write; construction factories are not lossless readers. No automatic destructive
+migration or universal atomic-write promise. Authored payload excludes workspace,
+Render sessions/handles and gameplay state; text content requires no graphics.
+Concrete fields/signatures, payload profiles and storage guarantees remain future
+checkpoint decisions. Existing Feature 19 export scope is not implemented here.
+
 Phase 1 v0.1.0: [Editor–Render ER01/ER02/ER04 checkpoint](checkpoints/editor-render-v0.1.0.md)
 records the source audit, ownership and documented public boundary as API_DESIGN_ONLY.
 It introduces no runtime API symbols; future scene/preview interactions below remain unimplemented.
