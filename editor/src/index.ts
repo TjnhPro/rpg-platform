@@ -1,5 +1,13 @@
 import '@rpg-platform/runtime-engine';
-export { createDocumentSession, type DocumentSession, type DocumentSessionSnapshot } from './document-session.js';
+export {
+  createDocumentSession,
+  type DocumentSession,
+  type DocumentSessionSnapshot,
+  type DocumentLoadedEvidence,
+  type DocumentCommitEvidence,
+  type DocumentSaveTicket,
+  type DocumentSaveOutcome,
+} from './document-session.js';
 export {
   createDocumentIdentity,
   createDocumentEnvelope,

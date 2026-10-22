@@ -2,6 +2,23 @@
 
 This describes the *interactions to audit*, not finalized types or APIs. Do not create interfaces just to satisfy this document before a real MVP needs them.
 
+Phase 5 v0.5.4: [Revision/dirty DC07/DC08](checkpoints/document-v0.5.4.md)
+extends DocumentSession with currentRevision (starts 1), savedRevision/savedEnvelope
+(null without explicit initial load evidence), and derived isDirty. Object.is on
+captured content defines no-op/clean; no deep equality/hash. Different records are
+edits; changed revert targets increment generation without fabricating savedRevision.
+Legacy revert targets caller memory only; new revertToSaved requires a confirmed
+loaded/committed snapshot. Optional loadedEvidence on the existing factory attests
+the initial envelope, not the old revertBaseline. prepareSave returns an immutable
+session-bound one-shot ticket with exact revision/envelope. completeSave accepts
+committed evidence or failed/cancelled; only a valid committed outcome at least as
+new as savedRevision updates the saved snapshot. Older acknowledgements are retired
+without rollback. Save(2), edit(3), ack(2) keeps current=3/saved=2/dirty=true when
+content differs. The trusted host must attest exact load/commit and order actual
+storage writes; confirmation text is not verified IO or a storage-token protocol.
+No writable dirty flag, schema bump, codec, IO, save loop or v0.5.5 operation.
+Earlier entries retain their checkpoint-specific scope.
+
 Phase 5 v0.5.3: [Document lifecycle DC06/DC09](checkpoints/document-v0.5.3.md)
 adds an Editor-owned session capability. createDocumentSession(envelope,
 revertBaseline) captures both inputs; an explicit null disables revert, otherwise
