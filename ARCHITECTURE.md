@@ -2,6 +2,36 @@
 
 ## Fixed at this stage
 
+[v0.4.12 Spatial closure audit](harness/checkpoints/spatial-contracts-v0.4.12.md)
+inventories all 13 checkpoints, additive public contracts, unchanged dependency
+graph/pins and finite manual evidence. No production/API change at closure.
+READY_FOR_DEVELOPER_REVIEW; phase acceptance and visual review remain open.
+Stop here; Feature 05 requires a separate authorized phase/PR.
+
+[v0.4.11 spatial MVP](harness/checkpoints/spatial-contracts-v0.4.11.md)
+records a headless manual public-API scenario: four visual placeholders, immutable
+placement update, explicit grid, alignment/facing, transform and viewport/screen
+roundtrips. No production/API change or rendered Scene claim. Stop before v0.4.12.
+
+[v0.4.10 spatial handoff](harness/checkpoints/spatial-contracts-v0.4.10.md):
+Editor adapts one authored placement and explicit coordinate definition to the
+existing Render PlaneProjectionPoint2D. Caller retains authored correlation and
+passes only the request to Render's canonical projection/viewport API. No Render
+API/schema change, Scene instance, session binding or GPU work. Stop before v0.4.11.
+
+[v0.4.9 Scene spatial checkpoint](harness/checkpoints/spatial-contracts-v0.4.9.md):
+Editor validates a scoped spatial point against a caller-supplied coordinate
+definition and Scene project, then delegates to its existing focused immutable
+placement operation. No new Scene schema/registry or Render math is introduced;
+text content remains spatially optional. Stop before v0.4.10.
+
+[v0.4.8 viewport checkpoint](harness/checkpoints/spatial-contracts-v0.4.8.md):
+Runtime Render owns pure explicit viewport/screen conversion and constrained
+selected-plane inverse. Editor forwards host-supplied metrics through the Render
+root. Pixel units, origins and scale are explicit; no global measurements, live
+camera, Scene schema change or gameplay spatial authority. Prior checkpoint
+descriptions retain their revision-specific scope. Stop before v0.4.9.
+
 Exactly one workspace and five independently owned projects:
 
 | Project | Canonical responsibility | Must not own |
@@ -50,3 +80,59 @@ Runtime Render -X-> gameplay Rules, Editor, Client, Server
 Phase 0 Foundation boundaries/contracts -> MVP 1 Editor + Render (Project, assets, scene/map, visual object placement) -> MVP 2 Editor + Runtime (minimal player/monster/skill/item for the selected game) -> MVP 3 client/server vertical slice (this game's authority/settlement) -> review after evidence.
 
 Do not lock the physical L3/L4 layer split, fixed package names, a universal RPG schema, or a mandatory realtime Server now. Rules with identical labels may have incompatible contracts across games.
+
+## Spatial boundary — Phase 4
+
+[v0.4.0 SP01](harness/checkpoints/spatial-contracts-v0.4.0.md) records the source
+audit and proposed spatial contract map; no spatial API or math is implemented.
+Editor owns authored space/grid/placement declarations. Runtime Render owns
+presentation transforms, projection and viewport mapping; Editor calls its public
+API rather than duplicating math. Runtime Engine owns gameplay spatial policy/state.
+World/scene, grid and screen positions are distinct; authored placement is neither
+a Render instance nor gameplay truth. Existing Phase 3 placement remains opaque.
+Coordinates stay optional for text content. Future portable requests must carry
+explicit space/unit/view/viewport/policy context without DOM, GPU or THREE types;
+pure math must not require graphics acquisition. No reverse Render-to-Editor import,
+shared spatial package, identity registry or global transform store is introduced.
+
+[v0.4.1 SP02–SP04](harness/checkpoints/spatial-contracts-v0.4.1.md) adds only
+Editor-owned project-scoped coordinate references, explicit 2D declarations and
+finite spatial point capture. This supersedes the proposed SP04 owner allocation
+in SP01 for authored values; Render still owns future presentation math. SC08
+remains unchanged and optional. No grid conversion or projection exists.
+
+[v0.4.2 SP05](harness/checkpoints/spatial-contracts-v0.4.2.md) adds a Render-owned
+immutable planar TRS descriptor: scale about numeric zero, rotate in radians about
+zero, then translate. It captures finite data without applying it to points or
+changing Scene placement; composition, inverse and graphics integration are deferred.
+
+[v0.4.3 SP06/SP07](harness/checkpoints/spatial-contracts-v0.4.3.md) implements
+Render-owned point application, explicit ordered composition and conditional inverse
+using a portable immutable six-coefficient affine result that retains shear.
+SC09 attachments remain nonhierarchical authored references. No Scene traversal,
+Editor math duplication, unit/axis conversion or GPU dependency is introduced.
+
+[v0.4.4 SP08](harness/checkpoints/spatial-contracts-v0.4.4.md) implements optional
+Editor-owned orthogonal grid declarations with explicit referenced space, origin,
+cell dimensions and index policies. Grid configuration does not alter Scene/Object
+identity or require gridded placement. Render has no grid catalog or new API;
+coordinate conversion remains deferred to its approved future scope.
+
+[v0.4.5 SP09](harness/checkpoints/spatial-contracts-v0.4.5.md) implements canonical
+orthogonal conversion in Render using its own portable requests/results, independent
+of Editor, GPU and gameplay. Editor adapts authored grid + matching space through
+the Render public root without formulas. Coordinate-space reference/unit survives
+both directions; Scene/Asset schema remains unchanged.
+
+[v0.4.6 SP10/SP11](harness/checkpoints/spatial-contracts-v0.4.6.md) adds Render-owned
+local-unit anchor/pivot alignment and explicit angle-based visual facing. Editor
+adapts optional existing Scene placement and validates caller-supplied space/axes;
+no authored schema changes. Facing remains independent of geometry and animation.
+Alignment is unrotated pure translation, not a render instance or gameplay position.
+
+[v0.4.7 SP12](harness/checkpoints/spatial-contracts-v0.4.7.md) adds pure Render-owned
+forward orthographic-plane mapping with explicit scoped planes, units, axes,
+correspondence origins and ratios. Editor adapts authored coordinate definitions
+without projection formulas. Destination is a declared presentation plane, not
+viewport/screen coordinates or live camera state. No Scene/Asset schema change,
+inverse, perspective/isometric mapping or Phase 9 camera work is introduced.

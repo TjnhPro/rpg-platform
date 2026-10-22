@@ -247,7 +247,155 @@ and build/static evidence do not establish rendering, serialization compatibilit
 or Developer phase acceptance. Parenting/nesting and spatial/visual-instance
 semantics remain deferred to approved future scopes.
 
+Phase 4 v0.4.0: [Spatial Architecture & Contract Foundation](checkpoints/spatial-contracts-v0.4.0.md)
+records SP01 as API_DESIGN_ONLY and proposes future SP02–SP18 owner/contract seams.
+Editor owns authored space/grid declarations; Render owns presentation transforms,
+projection and viewport mapping; Engine owns game spatial policy/state. No public
+symbol or accepted Scene/Asset/session schema changes. Existing placement remains
+opaque, optional and caller-retained. Future Editor presentation requests must use
+Render's public root with explicit space/unit/viewport/policy context; no duplicate
+projection in Editor, reverse import or sixth package. Numeric illustrations are
+design examples, not observed math. Stop before v0.4.1.
+
+Phase 4 v0.4.1: [Coordinate Space Identity & Units](checkpoints/spatial-contracts-v0.4.1.md)
+adds seven Editor root symbols: createCoordinateSpaceReference,
+createCoordinateSpaceDefinition, createSpatialPoint2D, CoordinateSpaceReference,
+CoordinateSpaceDefinition, CoordinatePair2D and SpatialPoint2D. References use exact
+projectId + coordinateSpaceId, no lookup/registry; callers derive SC08 scope from
+the owning Scene project. Definitions explicitly require componentCount 2, increasing
+x right/left and y up/down, finite reference-origin coordinates in the declared
+space, and a nonblank verbatim unit label. Origin is not a parent offset; no
+conversion or implicit scale exists. Points carry scoped references and finite
+x/y, accepting zero/negative. All new records require exact own keys on plain/null-
+prototype records, rejecting extra dimensions/keys and arrays with TypeError;
+capture detaches/freezes every nested record. No Scene/Asset/session schema change,
+Render descriptor, transform or projection. This scoped task supersedes SP01's
+proposed SP04 allocation for authored values. Stop before v0.4.2.
+
+Phase 4 v0.4.2: [Spatial Transform Foundation](checkpoints/spatial-contracts-v0.4.2.md)
+adds Render root PlanarTransform2D/createPlanarTransform2D. Explicit translation,
+rotationRadians and scale capture as detached deeply frozen finite data with exact
+own-key plain/null-prototype records. No defaults, coercion, angle normalization,
+unit/axis/space conversion or matrix exposure. Intended point semantics: component
+scale about numeric (0,0), radians rotation about zero, then translation; positive
+rotation maps +x toward +y. Zero scale collapses and negative scale reflects before
+rotation. This checkpoint supplies descriptor capture only; point application,
+composition/inverse, Scene bridge and projection remain deferred. Scene/Asset and
+prior Render APIs remain unchanged. Stop before v0.4.3.
+
+Phase 4 v0.4.3: [Transform Composition & Inverse](checkpoints/spatial-contracts-v0.4.3.md)
+adds Render root PlanarPoint2D, AffineTransform2D, PlanarInverseResult,
+toAffineTransform2D, applyPlanarPoint2D, composePlanarTransforms2D and
+invertPlanarTransform2D (19 -> 26; Editor stays 81). Existing TRS API unchanged.
+Affine x'=a*x+c*y+tx, y'=b*x+d*y+ty preserves shear/reflection; [A,B] applies A
+then B (B*A), empty list gives identity. Only points include translation; no direction
+API. Exact finite plain/null-prototype inputs, detached frozen outputs; invalid
+inputs TypeError, nonfinite arithmetic RangeError. Inverse normalizes linear block
+by max coefficient magnitude, rejects zero block or abs(normalized determinant)
+<=1e-12 with non-invertible/SINGULAR_OR_ILL_CONDITIONED; otherwise inverted plus
+affine transform. Binary64 underflow/rounding remains possible; success gives no
+universal accuracy bound. No unit/axis/space inference, Scene traversal or GPU work.
+Stop before v0.4.4.
+
+Phase 4 v0.4.4: [Grid Coordinate Foundation](checkpoints/spatial-contracts-v0.4.4.md)
+adds Editor root OrthogonalGridDefinition/createOrthogonalGridDefinition (81 -> 83;
+Render stays 26). Explicit space reference, orthogonal orientation, origin corner,
+positive finite cellSize width/height and indexing directions/negativeIndices policy.
+Origin/dimensions use the referenced coordinate-space unit; no resolver or duplicate
+unit/axes declaration. Columns follow numeric x, rows numeric y, either sign;
+indices mean safe integers, zero-based, with negative values allowed/rejected by
+the declared policy. No index values are accepted or validated in this capture API.
+Exact finite plain/null-prototype input records detach/freeze deeply; invalid data
+and unsupported orientation throw TypeError. No Scene/placement schema change,
+tile ID, map extent/catalog, conversion, clamp, registry or GPU acquisition.
+Stop before v0.4.5.
+
+Phase 4 v0.4.5: [Grid & Scene Coordinate Conversions](checkpoints/spatial-contracts-v0.4.5.md)
+adds Render root GridConversionSpace, OrthogonalGridConversion, GridCell2D,
+GridScenePosition2D, createOrthogonalGridConversion, gridCellToScenePosition and
+scenePositionToGridCell (26 -> 33), plus Editor describeGridConversion (83 -> 84).
+Adapter validates authored grid + matching space; Render captures portable exact
+records without Editor imports. Space includes projectId/coordinateSpaceId/unit,
+preserved in immutable results and matched exactly. Forward requires start-corner
+or center; inverse requires floor in directed index coordinates with [i,i+1) cells.
+Invalid/mismatched input throws TypeError, domain/numerical limits RangeError.
+No nearest/epsilon/clamp, implicit unit conversion, map bounds or grid catalog.
+Successful forward results floor-roundtrip to their input cell; this is not a
+general numerical accuracy guarantee. Scene/Asset schemas unchanged; no GPU.
+Stop before v0.4.6.
+
+Phase 4 v0.4.6: [Anchor, Pivot & Direction](checkpoints/spatial-contracts-v0.4.6.md)
+adds six Render root symbols (33 -> 39) and Editor describeSceneObjectAlignment
+(84 -> 85), retaining all prior signatures/exports. Local-unit coordinates are
+not normalized fractions; explicit placement + offset - anchor gives unrotated
+origin, and origin + local pivot gives plane pivot. Facing has explicit axes,
+numeric +x zero and positive turn toward +y in [0,2*PI), independent of geometry
+or animation selection. Editor validates scoped placement/axes and calls Render
+math; no placement returns null. Invalid data/mismatch TypeError, nonfinite math
+RangeError, unknown host exceptions propagate. Scene/Asset/session schemas unchanged.
+No image decoding/metrics inference, normalization, discrete mapping or GPU work.
+Stop before v0.4.7.
+
+Phase 4 v0.4.7: [Projection Foundation](checkpoints/spatial-contracts-v0.4.7.md)
+adds five Render root symbols (39 -> 44) and Editor
+describeOrthographicPlaneProjection (85 -> 86). Pure orthographic-plane mapping
+uses declared source/destination scoped keys, units/axes, correspondence origins
+and positive per-axis destinationUnitsPerSourceUnit. Subtract source origin, apply
+axis signs/ratios, add destination origin through existing affine point operations.
+Mismatched source context, unsupported kind or invalid data throws TypeError;
+nonfinite intermediate/output math RangeError. Deeply detached frozen data;
+no inverse, depth reconstruction, camera, viewport/screen or global state.
+Scene/Asset/session and facing/anchor schemas unchanged. Stop before v0.4.8.
+
 ## Unresolved until demonstrated
+
+Phase 4 v0.4.10: [Editor-Render Spatial Integration](checkpoints/spatial-contracts-v0.4.10.md)
+adds Editor describeSceneObjectSpatialPoint and SceneObjectSpatialDescription
+(88 -> 90 symbols; Render stays 52). Existing Scene membership/objectId plus one
+explicit CoordinateSpaceDefinition produces described/request or unavailable/
+NO_PLACEMENT. The request is Render's existing PlaneProjectionPoint2D, containing
+only plane and point; caller retains project/scene/object correlation separately.
+Canonical Scene/space capture detaches/freezes supported data and validates exact
+project/space matching. Origin labels are not offsets; placement absence does not
+inspect the supplied definition. Missing object/invalid placed data/mismatch throw
+TypeError; unknown host errors propagate. Caller sends request to Render root
+projectPointToViewport2D; unsupported mapping throws TypeError, numerical failures
+RangeError under existing contracts. No automatic fallback or Scene/Asset mutation.
+Authored IDs never become ephemeral session symbols; no allocation or session
+binding. Asset metadata preparation remains an independent existing path. No
+Scene/Asset schema, Render signature, UI/backend or dependency change. Stop before v0.4.11.
+
+Phase 4 v0.4.9: [Scene Spatial Integration](checkpoints/spatial-contracts-v0.4.9.md)
+adds Editor updateSceneObjectSpatialPlacement (87 -> 88), Render unchanged at 52.
+Input is an existing factory Scene snapshot, target objectId, explicit
+CoordinateSpaceDefinition and SpatialPoint2D. Canonical factories validate both
+spatial values; point/definition project+space and Scene project must match exactly.
+One supplied definition is the operation's explicit scope, not a global catalog.
+Canonical updateSceneObjectPlacement returns the frozen candidate, preserving
+all supported fields except selected placement. Missing targets/mismatches/invalid
+data throw TypeError; host errors propagate. Definitions stay caller-retained,
+with no revision/consistency registry, implicit lookup or conversion. Null clearing
+uses the existing Scene API. Schema unchanged; anchor/direction remain caller-owned
+config, not new fields. Text/empty Scenes need no placement/grid. Stop before v0.4.10.
+
+Phase 4 v0.4.8: [Viewport/Screen Mapping & Spatial Validation](checkpoints/spatial-contracts-v0.4.8.md)
+adds ScreenMapping2D, ViewportMetrics2D, ViewportMapping2D,
+createViewportMapping2D, projectPointToViewport2D, viewportPointToPlane2D,
+viewportPointToScreen2D and screenPointToViewport2D (Render 44 -> 52), plus
+Editor describeViewportMapping (86 -> 87). Existing signatures retained.
+Viewport dimensions are positive finite; local origin is top-left (0,0), axes
+right/down and units exactly css-px or device-px. Projection destination context
+matches metrics exactly; numeric correspondence origins/scale are explicit.
+Screen mapping is null or explicit plane/origin/per-axis scale; never implicit DPR.
+Exact plain/null-prototype records capture deeply frozen snapshots. Invalid data
+or mismatches throw TypeError; nonfinite arithmetic, normalized scale ratio
+<=1e-12, nonfinite/zero reciprocal or failed inverse destination residual throw
+RangeError. Residual bound is 1e-9*max(1,abs(input component)), not a universal
+source accuracy guarantee. Off-viewport points remain valid, no clipping or
+automatic aspect/fit. No camera, depth recovery, DOM/global reads, Scene schema
+or session lifecycle change. Stop before v0.4.9.
+
+
 
 - Scene identity, minimal authored records and immutable operations are Editor-owned and implemented through v0.3.8, with consumers/evidence in v0.3.9–v0.3.10. Versioned document schema, parenting/nesting and future extension compatibility remain open. Coordinates/projection belong to Features 04/09; visual instance allocation/rendering to Feature 08. Text-only content does not require a visual scene.
 - Authored Asset and Scene identity/reference semantics belong to Editor. Document lifecycle/envelopes (Feature 05), serialization/export (Feature 19) and other game content formats remain separate decisions. Ownership of authored data does not select a storage format or Client dependency on Editor.

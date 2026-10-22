@@ -1,4 +1,20 @@
 import '@rpg-platform/runtime-engine';
+export { describeSceneObjectSpatialPoint, type SceneObjectSpatialDescription } from './scene-spatial-point.js';
+export { updateSceneObjectSpatialPlacement } from './scene-spatial-placement.js';
+export { describeViewportMapping } from './viewport-mapping.js';
+export { describeOrthographicPlaneProjection } from './plane-projection.js';
+export { describeSceneObjectAlignment } from './scene-visual-alignment.js';
+export { describeGridConversion } from './grid-conversion.js';
+export { createOrthogonalGridDefinition, type OrthogonalGridDefinition } from './orthogonal-grid.js';
+export {
+  createCoordinateSpaceReference,
+  createCoordinateSpaceDefinition,
+  createSpatialPoint2D,
+  type CoordinateSpaceReference,
+  type CoordinateSpaceDefinition,
+  type CoordinatePair2D,
+  type SpatialPoint2D,
+} from './coordinate-space.js';
 export { describeSceneObjectVisual, type SceneObjectVisualDescription } from './scene-visual.js';
 export {
   diagnoseSceneMembership,

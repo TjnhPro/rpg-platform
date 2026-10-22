@@ -10,6 +10,8 @@ This table is for routing an implementation **after inspecting current source**.
 | Scene placement, selection, gizmo, authoring undo, workspace state | Editor | Runtime Render supplies shared visual scene operations |
 | Authored asset identity, source identity, metadata/catalog, reference resolution and diagnostics | **Editor** | [Phase 2 integration review](checkpoints/asset-contracts-v0.2.10.md): immutable authored catalog/resolution/diagnostics are implemented. Render owns the neutral visual descriptor/preparation contract; loaded resources remain future work, never a second authored catalog |
 | Authored Scene Definition, Scene/Object IDs, membership, relationships and placement records | **Editor** | [Phase 3 closure audit](checkpoints/scene-contracts-v0.3.11.md): minimal immutable Scene data/operations/diagnostics/projection implemented; authored data is independent of UI, GPU and gameplay. Attachment is nonhierarchical; documents, parenting and spatial semantics remain deferred |
+| Authored coordinate-space/unit/grid declarations | **Editor** | [v0.4.1 SP02–SP04](checkpoints/spatial-contracts-v0.4.1.md): project-scoped spaces/points; [v0.4.4 SP08](checkpoints/spatial-contracts-v0.4.4.md): optional immutable orthogonal grid declarations. Existing Scene placement remains independent/optional; no second identity registry, map catalog or Scene schema change |
+| Presentation transforms, grid/plane conversion and viewport projection | **Runtime Render** | [v0.4.3](checkpoints/spatial-contracts-v0.4.3.md): affine operations; [v0.4.5 SP09](checkpoints/spatial-contracts-v0.4.5.md): canonical orthogonal grid/scene conversion; [v0.4.8 SP13/SP14](checkpoints/spatial-contracts-v0.4.8.md): explicit viewport/screen mapping and constrained selected-plane inverse. Editor adapts authored data/host metrics to Render-owned portable inputs, no duplicate formulas. No GPU/Editor imports in spatial math; gameplay grid/movement/collision stays Engine-owned |
 | Presentation descriptions, visual instances and session-local Render state | **Runtime Render** | Editor projects through Render public APIs; no reverse import or parallel authored Scene catalog. Scene instance allocation belongs to Feature 08; no HP/AI/Drop semantics |
 | Monster HP/AI/drop parameters supported by current game | Editor authors Runtime Engine's config | Engine is source of semantics and validation |
 | User control or client input integration | Game Client | Runtime Engine owns effects of an accepted game command |
@@ -18,6 +20,38 @@ This table is for routing an implementation **after inspecting current source**.
 | Missing numerical/gameplay foundation API | **BLOCKED / Developer decision** | Do not modify L1/L2 or duplicate their ownership |
 
 ## Required reasoning for multi-project changes
+
+v0.4.10 SP16: Editor owns the authored Scene adapter and caller-held correlation.
+Render owns canonical conversion through existing PlaneProjectionPoint2D and root
+projection/viewport APIs; no Render source/API delta needed. No second Scene
+renderer or reverse import. See [checkpoint](checkpoints/spatial-contracts-v0.4.10.md).
+
+v0.4.9 SP15: Editor owns attaching/replacing authored Scene placement with an
+explicit matching coordinate definition/scoped point. Reuse existing coordinate
+factories and canonical Scene operation; no second registry, schema change or
+Render math/API delta. See [checkpoint](checkpoints/spatial-contracts-v0.4.9.md).
+
+v0.4.8 SP13/SP14: Runtime Render owns explicit viewport/screen mapping and
+numerical validation, including constrained inverse to a declared plane. Editor
+forwards host measurements through describeViewportMapping; no formulas or global
+measurements. No dependency direction, Scene schema or frame lifecycle changes.
+See [checkpoint](checkpoints/spatial-contracts-v0.4.8.md).
+
+v0.4.7 SP12: Runtime Render owns pure forward orthographic-plane projection;
+Editor adapts explicit authored coordinate definitions and numeric mapping config
+through the Render root. No Editor math, Scene store, live camera/viewport state
+or reverse import. See [checkpoint](checkpoints/spatial-contracts-v0.4.7.md).
+
+v0.4.6 SP10/SP11: Runtime Render owns local-unit visual anchor/pivot alignment and
+angle facing conventions. Editor owns authored placement/config and adapts them
+through describeSceneObjectAlignment, with matching project/space/unit/axes.
+No Scene/Asset schema change or duplicate math; facing never chooses animation or
+changes gameplay aim. See [checkpoint](checkpoints/spatial-contracts-v0.4.6.md).
+
+v0.4.3 SP06/SP07: Runtime Render owns pure planar affine operations; Editor retains
+Scene/SC09/placement and may call only the Render root API with explicit numeric
+inputs. Caller-ordered composition is not a parent system or authored-data rewrite.
+See [checkpoint](checkpoints/spatial-contracts-v0.4.3.md) for numerical/failure policy.
 
 State **(1)** which observable behavior changes, **(2)** who owns that behavior, **(3)** what public contract crosses projects, **(4)** which consumers need adjustments and why, **(5)** what remains unchanged. If two possible owners both make sense, inspect actual implementation and request a decision before irreversible architecture changes.
 

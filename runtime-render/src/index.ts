@@ -1,3 +1,47 @@
+export {
+  createViewportMapping2D,
+  projectPointToViewport2D,
+  viewportPointToPlane2D,
+  viewportPointToScreen2D,
+  screenPointToViewport2D,
+  type ScreenMapping2D,
+  type ViewportMetrics2D,
+  type ViewportMapping2D,
+} from './viewport-mapping.js';
+export {
+  createOrthographicPlaneProjection,
+  projectPlanePoint2D,
+  type ProjectionPlane2D,
+  type PlaneProjectionPoint2D,
+  type OrthographicPlaneProjection,
+} from './plane-projection.js';
+export {
+  createVisualAnchor2D,
+  createVisualOrientation2D,
+  resolveVisualAlignment2D,
+  type VisualAnchor2D,
+  type VisualOrientation2D,
+  type VisualAlignment2D,
+} from './visual-alignment.js';
+export {
+  createOrthogonalGridConversion,
+  gridCellToScenePosition,
+  scenePositionToGridCell,
+  type GridConversionSpace,
+  type OrthogonalGridConversion,
+  type GridCell2D,
+  type GridScenePosition2D,
+} from './grid-conversion.js';
+export {
+  toAffineTransform2D,
+  applyPlanarPoint2D,
+  composePlanarTransforms2D,
+  invertPlanarTransform2D,
+  type PlanarPoint2D,
+  type AffineTransform2D,
+  type PlanarInverseResult,
+} from './planar-affine.js';
+export { createPlanarTransform2D, type PlanarTransform2D } from './planar-transform.js';
 export { prepareVisualResource, type VisualResourceDescriptor, type VisualResourcePreparation } from './visual-resource.js';
 export {
   createRenderFrameSession,
