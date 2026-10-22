@@ -4,6 +4,8 @@
 
 Read root agent guidance first.
 
+- [v0.4.4 SP08](../harness/checkpoints/spatial-contracts-v0.4.4.md) adds OrthogonalGridDefinition/createOrthogonalGridDefinition (83 Editor exports; Render 26). Optional authored grid references an existing coordinate space; dimensions use its unit. Origin is cell (0,0)'s start corner; numeric row/column directions and allow/reject negative-index policy are explicit. Capture only, no index/conversion API or Scene schema change. No tile/map/occupancy catalog or clamp. Stop before v0.4.5; older notes describe their checkpoint revisions.
+
 - [v0.4.3 composition/inverse](../harness/checkpoints/spatial-contracts-v0.4.3.md) adds Render-owned portable affine operations (Render 26; Editor unchanged at 81). Explicit caller application order [local,parent] is numerical composition only, never SC09 attachment traversal. Keep authored Scene/placement immutable and caller-retained; use Render root math, no duplicate Editor implementation. Scene-to-transform adapter, grid and projection remain deferred. Stop before v0.4.4. Older notes describe their checkpoint revisions.
 
 - [v0.4.2 planar transform](../harness/checkpoints/spatial-contracts-v0.4.2.md) adds two Render root symbols for immutable TRS descriptor capture (Render 19; Editor stays 81). Future adapters must supply coherent plane/unit context and use Render semantics: scale, radians rotation about numeric zero, then translation. No Editor math, Scene bridge/schema change, point application or graphics work is introduced. Stop before v0.4.3.

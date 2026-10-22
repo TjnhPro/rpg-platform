@@ -4,6 +4,8 @@
 
 Read root agent guidance first.
 
+- [v0.4.4 SP08](../harness/checkpoints/spatial-contracts-v0.4.4.md) adds authored orthogonal grid capture in Editor only (83/26 root symbols). Render receives no grid catalog, authored types or new API. Future conversion requires portable Render-owned input and explicit policies, never an Editor import or duplicate math in Editor. Stop before v0.4.5.
+
 - [v0.4.3 SP06/SP07](../harness/checkpoints/spatial-contracts-v0.4.3.md) adds seven root symbols (26 total): affine capture, point apply, ordered composition and conditional inverse. [A,B] means B*A; retain shear instead of decomposing TRS. Points include translation; no direction API. Inverse rejects normalized determinant magnitude <=1e-12; invalid input throws TypeError and nonfinite arithmetic RangeError. No hierarchy, space lookup or GPU requirement. Stop before v0.4.4. Older notes below describe their checkpoint revisions.
 
 - [v0.4.2 SP05](../harness/checkpoints/spatial-contracts-v0.4.2.md) adds PlanarTransform2D/createPlanarTransform2D (19 root exports). Capture finite explicit translation/rotationRadians/scale; detach/freeze exact nested records. Semantics are S then R then T about numeric zero; positive angle maps +x toward +y. Zero/negative scale is valid data, never proof of invertibility. No THREE matrix, space registry, point application, composition, inverse or acquisition. Stop before v0.4.3.

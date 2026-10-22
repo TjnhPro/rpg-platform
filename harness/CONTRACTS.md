@@ -297,7 +297,21 @@ affine transform. Binary64 underflow/rounding remains possible; success gives no
 universal accuracy bound. No unit/axis/space inference, Scene traversal or GPU work.
 Stop before v0.4.4.
 
+Phase 4 v0.4.4: [Grid Coordinate Foundation](checkpoints/spatial-contracts-v0.4.4.md)
+adds Editor root OrthogonalGridDefinition/createOrthogonalGridDefinition (81 -> 83;
+Render stays 26). Explicit space reference, orthogonal orientation, origin corner,
+positive finite cellSize width/height and indexing directions/negativeIndices policy.
+Origin/dimensions use the referenced coordinate-space unit; no resolver or duplicate
+unit/axes declaration. Columns follow numeric x, rows numeric y, either sign;
+indices mean safe integers, zero-based, with negative values allowed/rejected by
+the declared policy. No index values are accepted or validated in this capture API.
+Exact finite plain/null-prototype input records detach/freeze deeply; invalid data
+and unsupported orientation throw TypeError. No Scene/placement schema change,
+tile ID, map extent/catalog, conversion, clamp, registry or GPU acquisition.
+Stop before v0.4.5.
+
 ## Unresolved until demonstrated
+
 
 - Scene identity, minimal authored records and immutable operations are Editor-owned and implemented through v0.3.8, with consumers/evidence in v0.3.9–v0.3.10. Versioned document schema, parenting/nesting and future extension compatibility remain open. Coordinates/projection belong to Features 04/09; visual instance allocation/rendering to Feature 08. Text-only content does not require a visual scene.
 - Authored Asset and Scene identity/reference semantics belong to Editor. Document lifecycle/envelopes (Feature 05), serialization/export (Feature 19) and other game content formats remain separate decisions. Ownership of authored data does not select a storage format or Client dependency on Editor.

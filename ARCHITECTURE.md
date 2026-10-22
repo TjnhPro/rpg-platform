@@ -81,3 +81,9 @@ Render-owned point application, explicit ordered composition and conditional inv
 using a portable immutable six-coefficient affine result that retains shear.
 SC09 attachments remain nonhierarchical authored references. No Scene traversal,
 Editor math duplication, unit/axis conversion or GPU dependency is introduced.
+
+[v0.4.4 SP08](harness/checkpoints/spatial-contracts-v0.4.4.md) implements optional
+Editor-owned orthogonal grid declarations with explicit referenced space, origin,
+cell dimensions and index policies. Grid configuration does not alter Scene/Object
+identity or require gridded placement. Render has no grid catalog or new API;
+coordinate conversion remains deferred to its approved future scope.

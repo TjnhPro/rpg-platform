@@ -1,4 +1,5 @@
 import '@rpg-platform/runtime-engine';
+export { createOrthogonalGridDefinition, type OrthogonalGridDefinition } from './orthogonal-grid.js';
 export {
   createCoordinateSpaceReference,
   createCoordinateSpaceDefinition,
