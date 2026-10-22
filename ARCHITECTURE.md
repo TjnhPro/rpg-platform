@@ -2,7 +2,12 @@
 
 ## Fixed at this stage
 
-Current [v0.4.10 spatial handoff](harness/checkpoints/spatial-contracts-v0.4.10.md):
+Current [v0.4.11 spatial MVP](harness/checkpoints/spatial-contracts-v0.4.11.md)
+records a headless manual public-API scenario: four visual placeholders, immutable
+placement update, explicit grid, alignment/facing, transform and viewport/screen
+roundtrips. No production/API change or rendered Scene claim. Stop before v0.4.12.
+
+[v0.4.10 spatial handoff](harness/checkpoints/spatial-contracts-v0.4.10.md):
 Editor adapts one authored placement and explicit coordinate definition to the
 existing Render PlaneProjectionPoint2D. Caller retains authored correlation and
 passes only the request to Render's canonical projection/viewport API. No Render

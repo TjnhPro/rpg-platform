@@ -141,6 +141,13 @@ perform no file IO, decoding, GPU loading or frame submission.
 
 ## Architecture and verification
 
+[v0.4.11 spatial MVP](harness/checkpoints/spatial-contracts-v0.4.11.md)
+contains the executed, reproducible manual public-root scenario with one Player
+visual and three Monster placeholders. Explicit grid/space, immutable placement,
+anchor/facing, transforms and viewport/screen inverse are compared with hand-derived
+numbers. No production API, automated suite, GPU Scene renderer or gameplay entity
+is introduced. Finite observations do not establish general/visual correctness.
+
 [v0.4.10 spatial handoff](harness/checkpoints/spatial-contracts-v0.4.10.md)
 adds describeSceneObjectSpatialPoint and SceneObjectSpatialDescription. The pure
 Editor adapter returns an existing Render point DTO plus caller-held authored
