@@ -1,5 +1,10 @@
 import '@rpg-platform/runtime-engine';
 export {
+  createResourceLocator,
+  type ResourceLocator,
+  type AssetSourceReference,
+} from './asset-sources.js';
+export {
   createAssetDefinition,
   type AssetDefinitionInput,
   type AssetDefinition,

@@ -61,6 +61,14 @@ deeply detached/frozen portable JSON data with unknown extension keys retained.
 Record schemaVersion is 1; identity semantics are unchanged. No Render descriptor,
 loaded resource, catalog, serializer or migration is introduced.
 
+Phase 2 v0.2.3: [Resource Locator & Composite Sources](checkpoints/asset-contracts-v0.2.3.md)
+adds Editor-owned `ResourceLocator`, `AssetSourceReference`, `createResourceLocator`
+and optional `AssetDefinitionInput.sources` (frozen output list, empty by default).
+Only literal project-relative paths are implemented. Ordered role/locator pairs
+describe multiple sources under one identity without reads, parsing or loading.
+Repeated roles are permitted; exact duplicate pairs are rejected. Identity and
+metadata rules are unchanged; remote/archive location types remain deferred.
+
 1. **Workspace/project discovery**: five identifiable projects, build entrypoint, explicit dependency direction and public import surfaces. Keep package naming editable until real manifests exist.
 2. **Editor ↔ Render**: an authoring host can create/select/inspect/move a presentation object and save/reload scene/content without a duplicate renderer. The specific scene format/coordinate system belongs to the relevant MVP.
 3. **Editor ↔ Runtime**: Editor can discover or be supplied the active game's supported content/config contract and run its validation/preview through public Runtime APIs. No universal Skill/Player/Monster contract is imposed.

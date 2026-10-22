@@ -63,3 +63,18 @@ deep freeze observations, unchanged logical identity with new unknown metadata,
 and a TypeError for a Date supplied by an untyped host. This is a manual example,
 without assertions, a test suite or automatic CI runtime gate. It loads no assets
 and does not implement an exporter, extension parser or Render descriptor.
+
+## Manual composite source consumer — v0.2.3
+
+After the same real package build, compile/run the public-root example:
+
+```sh
+node node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict --exactOptionalPropertyTypes --module NodeNext --target ES2022 --lib ES2022,DOM editor/manual/asset-sources.mts
+node editor/manual/asset-sources.mts
+```
+
+It prints image + atlas-metadata sources under one logical identity, frozen/detached
+source records, explicit relocation and multiple image pages retaining that identity,
+and native rejections for traversal, unsupported remote type and duplicate source
+pairs. Names are illustrative; no bytes, filesystem or network are accessed.
+This is a manual example without assertions, test helpers or an automatic CI job.

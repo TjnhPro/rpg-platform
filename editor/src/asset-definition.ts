@@ -1,4 +1,5 @@
 import { createAssetIdentity, type AssetIdentity, type AssetIdentityInput } from './asset-identity.js';
+import { detachAssetSources, type AssetSourceReference } from './asset-sources.js';
 
 /** Portable authored data, never a loaded resource or an Editor UI object. */
 export type AssetMetadataValue =
@@ -16,6 +17,8 @@ export interface AssetDefinitionInput {
   /** Open resource/data classification (e.g. image, text, vendor:atlas-metadata). */
   readonly kind: string;
   readonly metadata: AssetMetadata;
+  /** Omitted means no source references; order is preserved, duplicate role/locator pairs rejected. */
+  readonly sources?: readonly AssetSourceReference[];
 }
 
 /** Version of this record shape, not the version of a source or metadata extension. */
@@ -24,6 +27,7 @@ export interface AssetDefinition {
   readonly identity: AssetIdentity;
   readonly kind: string;
   readonly metadata: AssetMetadata;
+  readonly sources: readonly AssetSourceReference[];
 }
 
 function invalidMetadata(path: string): never {
@@ -80,7 +84,7 @@ export function createAssetDefinition(input: AssetDefinitionInput): AssetDefinit
   if (typeof input !== 'object' || input === null || Array.isArray(input)) {
     throw new TypeError('Asset definition input must be an object');
   }
-  const { identity, kind, metadata } = input;
+  const { identity, kind, metadata, sources = [] } = input;
   if (typeof kind !== 'string' || kind.length === 0 || /\s/u.test(kind)) {
     throw new TypeError('kind must be a non-empty resource/data classification without whitespace');
   }
@@ -92,5 +96,6 @@ export function createAssetDefinition(input: AssetDefinitionInput): AssetDefinit
     identity: createAssetIdentity(identity),
     kind,
     metadata: detachMetadata(metadata, 'metadata', new Set()) as AssetMetadata,
+    sources: detachAssetSources(sources),
   });
 }
