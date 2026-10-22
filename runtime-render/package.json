@@ -17,5 +17,10 @@
   "scripts": {
     "build": "tsc -b --force"
   },
-  "dependencies": {}
+  "dependencies": {
+    "three": "0.186.1"
+  },
+  "devDependencies": {
+    "@types/three": "0.186.0"
+  }
 }

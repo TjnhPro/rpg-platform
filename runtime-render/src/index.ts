@@ -1,3 +1,11 @@
+export {
+  createRenderFrameSession,
+  getRenderFrameFailure,
+  type RenderFrameSession,
+  type RenderFrameReceipt,
+  type RenderFrameFailure,
+} from './frame-session.js';
+
 /** Host-owned opaque target reference; not a validated rendering capability. */
 export interface RenderHostBinding {
   /** Borrowed: the host creates, mounts and removes it. Render never freezes it. */
