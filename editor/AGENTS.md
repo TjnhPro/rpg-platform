@@ -4,6 +4,8 @@
 
 Read root agent guidance first.
 
+- [v0.4.0 Spatial foundation](../harness/checkpoints/spatial-contracts-v0.4.0.md) is API_DESIGN_ONLY: Editor owns future authored space/unit/grid declarations and adapters, never Render projection math. Preserve Phase 3 opaque optional placement and existing identities. A future v0.4.10 adapter must supply explicit neutral context to Render public APIs without forwarding authored stores; no space registry, new schema or runtime API is implemented here. Stop before v0.4.1.
+
 - [v0.3.11 Scene closure](../harness/checkpoints/scene-contracts-v0.3.11.md) is the current Phase 3 audit and SC01–SC18 disposition. Editor owns 31 Scene additions (74 total root symbols); Render remains 17. Preserve known-field capture, explicit scoped IDs and canonical Phase 2 Asset resolution. Parenting/nesting, spatial semantics, documents and actual Scene rendering remain deferred. No API delta; STOP for Developer phase acceptance.
 
 - [v0.3.10 Minimal Working Scene MVP](../harness/checkpoints/scene-contracts-v0.3.10.md) records one reproducible ad hoc public-root sequence for scene-zone-01: Player/three Monster/VFX visual placeholders, shared Asset, placement update, VFX attachment, reference diagnostics and real Render metadata preparation. No production API or committed script/test file is added. This is authored-data flow evidence only; no rendering, gameplay, loader or Phase 3 closure claim.

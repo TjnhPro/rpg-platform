@@ -50,3 +50,17 @@ Runtime Render -X-> gameplay Rules, Editor, Client, Server
 Phase 0 Foundation boundaries/contracts -> MVP 1 Editor + Render (Project, assets, scene/map, visual object placement) -> MVP 2 Editor + Runtime (minimal player/monster/skill/item for the selected game) -> MVP 3 client/server vertical slice (this game's authority/settlement) -> review after evidence.
 
 Do not lock the physical L3/L4 layer split, fixed package names, a universal RPG schema, or a mandatory realtime Server now. Rules with identical labels may have incompatible contracts across games.
+
+## Spatial boundary — Phase 4 design only
+
+[v0.4.0 SP01](harness/checkpoints/spatial-contracts-v0.4.0.md) records the source
+audit and proposed spatial contract map; no spatial API or math is implemented.
+Editor owns authored space/grid/placement declarations. Runtime Render owns
+presentation transforms, projection and viewport mapping; Editor calls its public
+API rather than duplicating math. Runtime Engine owns gameplay spatial policy/state.
+World/scene, grid and screen positions are distinct; authored placement is neither
+a Render instance nor gameplay truth. Existing Phase 3 placement remains opaque.
+Coordinates stay optional for text content. Future portable requests must carry
+explicit space/unit/view/viewport/policy context without DOM, GPU or THREE types;
+pure math must not require graphics acquisition. No reverse Render-to-Editor import,
+shared spatial package, identity registry or global transform store is introduced.

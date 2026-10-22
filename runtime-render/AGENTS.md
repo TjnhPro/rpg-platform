@@ -4,6 +4,8 @@
 
 Read root agent guidance first.
 
+- [v0.4.0 Spatial foundation](../harness/checkpoints/spatial-contracts-v0.4.0.md) assigns future presentation transform/projection/viewport math to Render, independently of Editor, gameplay and GPU acquisition. SP01 is API_DESIGN_ONLY; no public symbols added. Future portable operations require explicit spaces/units/context and coherent inverse/failure policy; never import Editor definitions or expose THREE/DOM/GPU types in spatial DTOs. Existing resource metadata/frame APIs do not consume placement. Stop before v0.4.1.
+
 - [v0.3.11 Scene closure](../harness/checkpoints/scene-contracts-v0.3.11.md) confirms the existing 17-symbol Render public surface is unchanged throughout Phase 3. Editor retains authored Scene correlation/placement; only neutral resource metadata crosses prepareVisualResource. Metadata preparation does not allocate Scene instances or display placement/attachments. Future Feature 08 requires its own approved contracts; Developer phase acceptance is pending.
 
 - [v0.3.8 Scene-to-Render handoff](../harness/checkpoints/scene-contracts-v0.3.8.md) reuses the existing VisualResourceDescriptor/prepareVisualResource unchanged. Editor retains Scene/Object correlation and uninterpreted placement outside the descriptor. Render receives resource identity/media hint/sources only, not authored Scene definitions, object lists, labels, layer/attachment or placement records. This metadata handoff introduces no Scene instance, store, session allocation or GPU work; no Editor import or new Scene API is needed.

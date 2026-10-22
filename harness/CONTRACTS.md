@@ -247,6 +247,16 @@ and build/static evidence do not establish rendering, serialization compatibilit
 or Developer phase acceptance. Parenting/nesting and spatial/visual-instance
 semantics remain deferred to approved future scopes.
 
+Phase 4 v0.4.0: [Spatial Architecture & Contract Foundation](checkpoints/spatial-contracts-v0.4.0.md)
+records SP01 as API_DESIGN_ONLY and proposes future SP02–SP18 owner/contract seams.
+Editor owns authored space/grid declarations; Render owns presentation transforms,
+projection and viewport mapping; Engine owns game spatial policy/state. No public
+symbol or accepted Scene/Asset/session schema changes. Existing placement remains
+opaque, optional and caller-retained. Future Editor presentation requests must use
+Render's public root with explicit space/unit/viewport/policy context; no duplicate
+projection in Editor, reverse import or sixth package. Numeric illustrations are
+design examples, not observed math. Stop before v0.4.1.
+
 ## Unresolved until demonstrated
 
 - Scene identity, minimal authored records and immutable operations are Editor-owned and implemented through v0.3.8, with consumers/evidence in v0.3.9–v0.3.10. Versioned document schema, parenting/nesting and future extension compatibility remain open. Coordinates/projection belong to Features 04/09; visual instance allocation/rendering to Feature 08. Text-only content does not require a visual scene.
