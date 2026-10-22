@@ -101,6 +101,11 @@ No production API is added. Scene capture retains known fields only; unknown hos
 data is not a lossless round-trip contract. Document preservation, storage and
 migrations remain future decisions; never overwrite unknown documents with these
 construction projections.
+[v0.3.10](harness/checkpoints/scene-contracts-v0.3.10.md) records a reproducible
+manual Scene data flow: five visual placeholders, shared Asset references, an
+immutable placement edit, distinct missing-target diagnostics and real Render
+metadata preparation. The ad hoc consumer is documented in the checkpoint;
+no new API, permanent script, viewport or rendered Scene is introduced.
 Runtime Engine
 has named imports of actual L1/L2 APIs to establish compile-time dependency linkage;
 consumer entrypoints import the appropriate workspace roots. No calculation or

@@ -1,3 +1,16 @@
+# Manual Scene data-flow MVP — v0.3.10
+
+The [v0.3.10 checkpoint](../../harness/checkpoints/scene-contracts-v0.3.10.md)
+contains a finite TypeScript sequence and PowerShell invocation using only Editor
+and Render package roots. After the workspace build, run the documented command
+from workspace root; it compiles/runs one temporary consumer and removes it.
+No permanent script/test file or automatic runtime job is added.
+
+Observe scene-zone-01 with one Player, three Monster and one VFX visual placeholder,
+shared Asset resolution, optional placements, immutable edit, VFX-to-Player intent,
+distinct missing Asset/Object diagnostics, independent scene isolation and real
+Render metadata preparation. No sprites, GPU frames, IO or gameplay are exercised.
+
 # Manual Scene authoring consumer — v0.3.9
 
 After the workspace build, optionally compile/run the finite package-root sequence:

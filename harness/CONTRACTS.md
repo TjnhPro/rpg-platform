@@ -231,6 +231,15 @@ records contain scalar/array/record data, independent of DOM, GPU, UI and gamepl
 instances. Future Map/visual metadata/clip/nesting shapes remain DESIGN_ONLY and
 DEFERRED; existing scoped identities need no demonstrated change for those cases.
 
+Phase 3 v0.3.10: [Minimal Working Scene MVP](checkpoints/scene-contracts-v0.3.10.md)
+records a finite root-only manual authored-data/reference/projection flow. Existing
+Scene operations and Phase 2 catalog/diagnostics feed Render's unchanged resource
+metadata API. Five visual placeholders include three Monster references to one
+Asset; candidate placement and missing-target edits retain original/independent
+snapshots. Missing Asset and Object targets remain distinct authored diagnostics,
+never physical-file or gameplay claims. No production API, script/test file, Scene
+subsystem, Render instance, viewport or dependency change; frames remain deferred.
+
 ## Unresolved until demonstrated
 
 - Scene identity is Editor-owned (v0.3.0 design decision); exact Scene schema/operations await scoped consumers. Coordinates/projection belong to Features 04/09; visual instance allocation/rendering to Feature 08. Text-only content does not require a visual scene.
