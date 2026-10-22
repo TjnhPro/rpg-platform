@@ -31,3 +31,20 @@ as a Render dependency (npm may hoist it to workspace node_modules).
 Build evidence is not visual evidence. No automated browser execution/assertions,
 screenshots, UI tests or frame probes are part of this checkpoint's gates. Record
 manual observation separately; absent observation means **VISUAL_NOT_VERIFIED**.
+
+## Manual identity consumer — v0.2.1
+
+After the normal package build, type-check this separate public consumer and run
+it manually with the workspace's Node 24.18.0 (native TypeScript stripping):
+
+```sh
+node node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict --exactOptionalPropertyTypes --module NodeNext --target ES2022 --lib ES2022,DOM editor/manual/asset-identity.mts
+node editor/manual/asset-identity.mts
+```
+
+It imports only `@rpg-platform/editor`, prints the frozen detached identity retaining
+`sourceId: '0012'` after its host input is changed, separate project/text identities,
+case-sensitive IDs and rejected invalid inputs. Name/path fields are host-local
+example data, not a metadata descriptor. There are no assertions, test helpers or
+automatic test jobs; this is the task's requested manual Node/TypeScript consumer.
+No browser, renderer acquisition, filesystem asset access or file rename occurs.

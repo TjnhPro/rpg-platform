@@ -1,5 +1,10 @@
 import '@rpg-platform/runtime-engine';
 export {
+  createAssetIdentity,
+  type AssetIdentityInput,
+  type AssetIdentity,
+} from './asset-identity.js';
+export {
   createEditorPreviewHost,
   openEditorPreviewHost,
   type EditorPreviewHost,
