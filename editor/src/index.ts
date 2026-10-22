@@ -1,4 +1,42 @@
 import '@rpg-platform/runtime-engine';
+export { describeSceneObjectVisual, type SceneObjectVisualDescription } from './scene-visual.js';
+export {
+  diagnoseSceneMembership,
+  type SceneDiagnosticCode,
+  type SceneDiagnosticTarget,
+  type SceneDiagnostic,
+  type SceneMembershipDiagnosticResult,
+} from './scene-diagnostics.js';
+export {
+  createSceneMembership,
+  addSceneObject,
+  removeSceneObject,
+  replaceSceneObject,
+  updateSceneObjectPlacement,
+  listSceneObjects,
+  getSceneObject,
+  reorderSceneObjects,
+  type SceneObjectReference,
+  type SceneObjectAttachment,
+  type SceneObjectPlacement,
+  type SceneObjectMembershipInput,
+  type SceneObjectMembership,
+  type SceneMembershipInput,
+  type SceneMembership,
+} from './scene-membership.js';
+export {
+  createSceneObjectDefinition,
+  type SceneObjectDefinitionInput,
+  type SceneObjectDefinition,
+} from './scene-object-definition.js';
+export {
+  createSceneIdentity,
+  createSceneDefinition,
+  type SceneIdentityInput,
+  type SceneIdentity,
+  type SceneDefinitionInput,
+  type SceneDefinition,
+} from './scene-definition.js';
 export { describeResolvedVisualAsset, type AssetVisualDescription } from './asset-visual.js';
 export { relocateAssetSource, rebindAssetReference } from './asset-transitions.js';
 export { readAssetDefinitionSnapshot } from './asset-snapshot.js';

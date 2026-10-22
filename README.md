@@ -71,8 +71,46 @@ game-server    -> runtime-engine
 
 Workspace package names are `@rpg-platform/<project>`. Only the package root is
 exported, pointing at built ESM and declarations. All are private. Editor currently
-exports 43 symbols and Render 17; the integration review inventories their owners
-and Phase 2 additions. Runtime Engine
+exports 74 symbols and Render 17; the Phase 2 integration review inventories the
+earlier 43/17, and [v0.3.1](harness/checkpoints/scene-contracts-v0.3.1.md) adds six
+Editor-owned Scene identity/definition symbols. [v0.3.2](harness/checkpoints/scene-contracts-v0.3.2.md)
+adds three Editor-owned Scene Object definition symbols without membership,
+asset binding or runtime state. [v0.3.3](harness/checkpoints/scene-contracts-v0.3.3.md)
+adds eight membership symbols: immutable Scene object lists with optional Phase 2
+Asset references, create/add/list/get and local duplicate rejection.
+[v0.3.4](harness/checkpoints/scene-contracts-v0.3.4.md) adds three symbols for
+explicit authored reordering and local attachment references, plus optional layer
+keys. These do not define renderer sorting, hierarchy or transforms.
+[v0.3.5](harness/checkpoints/scene-contracts-v0.3.5.md) adds optional authored
+placement with a caller-named coordinate space and finite numeric pair; space
+semantics and conversion remain deferred to Feature 04.
+[v0.3.6](harness/checkpoints/scene-contracts-v0.3.6.md) completes the minimal
+immutable operation set with remove, same-ID complete replacement and focused
+placement update. All return validated candidates without owning history or UI state.
+[v0.3.7](harness/checkpoints/scene-contracts-v0.3.7.md) adds typed Scene diagnostics
+over canonical capture and Phase 2 Asset diagnostics. Structural errors, missing
+local targets and unresolved Assets remain distinct; catalog-free lookup and all
+physical file existence remain NOT_CHECKED. No automatic authored-data repair.
+[v0.3.8](harness/checkpoints/scene-contracts-v0.3.8.md) projects one Scene object
+to detached correlation/placement plus the existing Phase 2 visual description.
+Only its resource descriptor crosses Render's unchanged metadata preparation API;
+placement stays caller-retained until spatial/visual-instance contracts are approved.
+[v0.3.9](harness/checkpoints/scene-contracts-v0.3.9.md) consolidates the existing
+authoring surface in a public-root manual consumer and audits all 31 Scene exports.
+No production API is added. Scene capture retains known fields only; unknown host
+data is not a lossless round-trip contract. Document preservation, storage and
+migrations remain future decisions; never overwrite unknown documents with these
+construction projections.
+[v0.3.10](harness/checkpoints/scene-contracts-v0.3.10.md) records a reproducible
+manual Scene data flow: five visual placeholders, shared Asset references, an
+immutable placement edit, distinct missing-target diagnostics and real Render
+metadata preparation. The ad hoc consumer is documented in the checkpoint;
+no new API, permanent script, viewport or rendered Scene is introduced.
+[v0.3.11](harness/checkpoints/scene-contracts-v0.3.11.md) audits the complete
+Phase 3 commit chain, SC01–SC18 disposition, public contracts and future extension
+boundaries. No production API changes; builds/static checks and finite manual data
+observations remain separate from visual verification and Developer phase acceptance.
+Runtime Engine
 has named imports of actual L1/L2 APIs to establish compile-time dependency linkage;
 consumer entrypoints import the appropriate workspace roots. No calculation or
 runtime lifecycle is invoked by those Engine/Client/Server bootstrap imports.

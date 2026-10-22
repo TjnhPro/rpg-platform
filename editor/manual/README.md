@@ -1,3 +1,166 @@
+# Manual Scene data-flow MVP — v0.3.10
+
+The [v0.3.10 checkpoint](../../harness/checkpoints/scene-contracts-v0.3.10.md)
+contains a finite TypeScript sequence and PowerShell invocation using only Editor
+and Render package roots. After the workspace build, run the documented command
+from workspace root; it compiles/runs one temporary consumer and removes it.
+No permanent script/test file or automatic runtime job is added.
+
+Observe scene-zone-01 with one Player, three Monster and one VFX visual placeholder,
+shared Asset resolution, optional placements, immutable edit, VFX-to-Player intent,
+distinct missing Asset/Object diagnostics, independent scene isolation and real
+Render metadata preparation. No sprites, GPU frames, IO or gameplay are exercised.
+
+# Manual Scene authoring consumer — v0.3.9
+
+After the workspace build, optionally compile/run the finite package-root sequence:
+
+```powershell
+node node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict --exactOptionalPropertyTypes --module NodeNext --target ES2022 --lib ES2022,DOM editor/manual/scene-authoring.mts
+node editor/manual/scene-authoring.mts
+```
+
+Assemble, inspect, add, replace a label, update placement, reorder, clear a relation
+and remove via existing Editor exports. Observe stable Scene/Object/Asset keys,
+retained old snapshots and detached frozen known fields. Unknown example host note
+and active-tab data remain caller-owned, absent from captured records. This is not
+a lossless document reader or serializer; no save/load, resource loading or visuals.
+No assertions, runner or automatic runtime CI. Compatibility inventory and future
+design limits are in the [checkpoint](../../harness/checkpoints/scene-contracts-v0.3.9.md).
+
+# Manual Scene-to-Render metadata consumer — v0.3.8
+
+After the workspace build, optionally compile/run the finite package-root sequence:
+
+```powershell
+node node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict --exactOptionalPropertyTypes --module NodeNext --target ES2022 --lib ES2022,DOM editor/manual/scene-visual.mts
+node editor/manual/scene-visual.mts
+```
+
+Two Scene objects reference the same catalog definition and retain separate
+correlation/placement records. Each described resource passes to real Render
+prepareVisualResource; only resource metadata crosses that API. Observe frozen
+detached results, explicit/null media hints, unchanged source, unsupported cases
+and separate missing-reference diagnostics. Placement is not consumed by Render;
+no resource load, GPU/session/frame work, visual proof or file IO. Optional manual
+sequence only, with no assertions, runners or automatic runtime CI.
+
+# Manual Scene diagnostics consumer — v0.3.7
+
+After the workspace build, optionally compile/run this finite public-root sequence:
+
+```powershell
+node node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict --exactOptionalPropertyTypes --module NodeNext --target ES2022 --lib ES2022,DOM editor/manual/scene-diagnostics.mts
+node editor/manual/scene-diagnostics.mts
+```
+
+Observe empty validity, present/deleted Assets, absent catalog, dangling objects,
+kind/project/subresource outcomes, structural failures with exact paths, reciprocal
+nonhierarchical attachments, stable diagnostic ordering and source/result isolation.
+Host TypeError is propagated unchanged. This optional sequence has no assertions,
+runner or automatic runtime CI. No files are probed, no data repaired and no visual
+behavior verified. Asset metadata presence does not establish physical existence.
+
+# Manual immutable Scene operations consumer — v0.3.6
+
+After the workspace build, optionally compile/run this finite public-root sequence:
+
+```powershell
+node node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict --exactOptionalPropertyTypes --module NodeNext --target ES2022 --lib ES2022,DOM editor/manual/scene-operations.mts
+node editor/manual/scene-operations.mts
+```
+
+Observe add, complete replacement, focused placement update, remove, retained old
+snapshots and dangling attachments; explicit null clearing, full replacement field
+reset and reorder; detached/frozen captures and independent Scene IDs. Missing
+operation targets, invalid identity, attempted rename, nonfinite placement and
+foreign Asset references print TypeError. No assertions, runner or automatic runtime
+CI; this is authored data evidence only, with no rendering, IO or history manager.
+
+# Manual authored placement consumer — v0.3.5
+
+After the real package build from workspace root:
+
+```sh
+node node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict --exactOptionalPropertyTypes --module NodeNext --target ES2022 --lib ES2022,DOM editor/manual/scene-placement.mts
+node editor/manual/scene-placement.mts
+```
+
+Finite public-root observations print separate coordinate-space IDs/numeric pairs,
+detached frozen captures after caller edits, a replacement candidate through the
+existing factory with original unchanged, placement retained by add/reorder, text
+without placement, empty/null cases and rejected invalid space/point fields.
+No coordinate-space resolution, unit/axis assumptions, conversion, gameplay movement
+or rendered placement is demonstrated. Optional manual sequence only: no assertions,
+runner, test helpers or automatic runtime CI job.
+
+# Manual authored ordering/attachment consumer — v0.3.4
+
+After the real package build from workspace root:
+
+```sh
+node node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict --exactOptionalPropertyTypes --module NodeNext --target ES2022 --lib ES2022,DOM editor/manual/scene-ordering.mts
+node editor/manual/scene-ordering.mts
+```
+
+Finite public-root observations show stable order through an unrelated label edit,
+explicit reorder preserving identity/Asset refs/layers/attachment, detached frozen
+reference/order after caller edits, missing target intent, old entry shape when
+optional fields are omitted, nullable optional values, and invalid permutations or
+self/cross-Scene attachments rejected. Layer names/attachment are authored intent
+only; no renderer, parent hierarchy, transform following or file IO is exercised.
+Optional manual sequence only: no assertions, runner, test helpers or runtime CI job.
+
+# Manual Scene membership consumer — v0.3.3
+
+After the real package build from workspace root:
+
+```sh
+node node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict --exactOptionalPropertyTypes --module NodeNext --target ES2022 --lib ES2022,DOM editor/manual/scene-membership.mts
+node editor/manual/scene-membership.mts
+```
+
+Finite observations show a player visual placeholder and three monster placeholders,
+three references resolving the same existing Asset definition, detached frozen
+captures, original snapshots unchanged by candidate adds/host edits, duplicate
+rejection at create/add, foreign-project binding rejection, missing-target Phase 2
+diagnostics without object deletion or registration, empty and assetless membership,
+and reuse of a local ID in another Scene. Names are visual labels only, no gameplay.
+This optional public-root consumer has no assertions, runner, test helpers or runtime
+CI job. No Assets are loaded and no placement, renderer or file IO is exercised.
+
+# Manual visual object definition consumer — v0.3.2
+
+After the real package build from workspace root:
+
+```sh
+node node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict --exactOptionalPropertyTypes --module NodeNext --target ES2022 --lib ES2022,DOM editor/manual/scene-object-definition.mts
+node editor/manual/scene-object-definition.mts
+```
+
+Prints distinct caller-provided IDs, independent frozen captures, unchanged mutable
+input, stable captured values after host edits, exact case, nullable labels, known
+output fields and invalid-input TypeErrors. Assetless/placementless data requires
+no Scene membership, browser or graphics. This finite public-root example has no
+assertions, runner, test helpers or automatic runtime CI. Uniqueness on Scene
+insertion is deferred to v0.3.3; visuals remain NOT_VERIFIED.
+
+# Manual Scene identity/definition consumer — v0.3.1
+
+After the real package build from workspace root:
+
+```sh
+node node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict --exactOptionalPropertyTypes --module NodeNext --target ES2022 --lib ES2022,DOM editor/manual/scene-definition.mts
+node editor/manual/scene-definition.mts
+```
+
+Prints an identity-only empty Scene, independent captures, unchanged mutable caller
+input, frozen detached output, repeated reads, host-local title/path rename and ID
+edit, the same local ID in another project, and invalid-ID rejections. No Asset
+catalog, browser or graphics is required. Title/path are example host data, not
+Scene fields or persistence. Optional finite observations only: no assertions,
+runner, test helpers or automatic runtime CI. Rendering/visuals remain NOT_VERIFIED.
+
 # Manual frame demo — v0.1.7
 
 From workspace root, after README setup with pinned foundations:

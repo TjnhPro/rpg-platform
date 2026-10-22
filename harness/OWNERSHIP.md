@@ -9,11 +9,12 @@ This table is for routing an implementation **after inspecting current source**.
 | Animation, VFX, sprite alignment, camera | Runtime Render | Editor controls/inspects via public API |
 | Scene placement, selection, gizmo, authoring undo, workspace state | Editor | Runtime Render supplies shared visual scene operations |
 | Authored asset identity, source identity, metadata/catalog, reference resolution and diagnostics | **Editor** | [Phase 2 integration review](checkpoints/asset-contracts-v0.2.10.md): immutable authored catalog/resolution/diagnostics are implemented. Render owns the neutral visual descriptor/preparation contract; loaded resources remain future work, never a second authored catalog |
-| Scene object type's **visual** identity/presentation | Runtime Render + Editor authoring | Does **not** imply any HP/AI/Drop fields |
+| Authored Scene Definition, Scene/Object IDs, membership, relationships and placement records | **Editor** | [Phase 3 closure audit](checkpoints/scene-contracts-v0.3.11.md): minimal immutable Scene data/operations/diagnostics/projection implemented; authored data is independent of UI, GPU and gameplay. Attachment is nonhierarchical; documents, parenting and spatial semantics remain deferred |
+| Presentation descriptions, visual instances and session-local Render state | **Runtime Render** | Editor projects through Render public APIs; no reverse import or parallel authored Scene catalog. Scene instance allocation belongs to Feature 08; no HP/AI/Drop semantics |
 | Monster HP/AI/drop parameters supported by current game | Editor authors Runtime Engine's config | Engine is source of semantics and validation |
 | User control or client input integration | Game Client | Runtime Engine owns effects of an accepted game command |
 | Session creation, validation policy, settlement, issuing rewards, persistence | Game Server | Uses game Runtime; do not assume tick server or a single validation algorithm |
-| Other saved content's resource/identity contract | **Unassigned until actual use case** | Asset identity is assigned above; other scene/game content formats still need their own decision. Do not create sixth `shared` package |
+| Other saved content's resource/identity contract | **Unassigned until actual use case** | Asset and authored Scene identities are assigned above. Document envelopes, serialization/export and game content formats remain separate decisions in Features 05/19. No sixth `shared` package |
 | Missing numerical/gameplay foundation API | **BLOCKED / Developer decision** | Do not modify L1/L2 or duplicate their ownership |
 
 ## Required reasoning for multi-project changes
