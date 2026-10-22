@@ -9,6 +9,7 @@ Read root agent guidance first.
 - [v0.1.2](../harness/checkpoints/editor-render-v0.1.2.md) adds explicit host-binding initialization through the Render root. Editor calls the lifecycle; it does not own its state machine. Bound is not graphics-ready.
 - [v0.1.3](../harness/checkpoints/editor-render-v0.1.3.md): use public disposal before removing the host target, then drop caller-owned handles/snapshots. Render never destroys host-owned targets. No preview manager is implemented.
 - [v0.1.4](../harness/checkpoints/editor-render-v0.1.4.md): consume/forward safe Render failure diagnostics through the public root. Unknown exceptions remain unknown; presentation policy is host-owned. No UI, fallback or retry behavior is implemented.
+- Current [v0.1.5 ER04/ER10](../harness/checkpoints/editor-render-v0.1.5.md): the Editor preview-host adapter owns one session slot, disposes before replacement, and supports null as explicitly unavailable preview capability. Mounted means session initialized, not a rendered frame. No DOM host/UI is implemented.
 - Use Render's package root, never `three`, `@types/three`, Render source paths or private backend classes. Editor owns host UI and session-reference orchestration; Render owns its resources and their cleanup. GPU resource lifecycle remains deferred.
 
 - Editor + Runtime Render => reusable scene/asset/object authoring. Do not assume visual NPC/Monster implies a shared RPG mechanics schema.

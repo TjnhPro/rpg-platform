@@ -1,4 +1,10 @@
 import '@rpg-platform/runtime-engine';
+export {
+  createEditorPreviewHost,
+  openEditorPreviewHost,
+  type EditorPreviewHost,
+  type EditorPreviewHostSnapshot,
+} from './preview-host.js';
 import {
   createRenderSession,
   createRenderSessionLifecycle,
