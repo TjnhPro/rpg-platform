@@ -4,6 +4,8 @@
 
 Read root agent guidance first.
 
+- [v0.2.8 AR14](../harness/checkpoints/asset-contracts-v0.2.8.md) introduces VisualResourceDescriptor and prepareVisualResource with the real Editor manual consumer. Render validates/detaches identity, image media hint and ordered source roles/locations, then returns metadata-prepared with resourceLoading NOT_PERFORMED. It accepts portable data independently of Editor; no catalog, IO, decoder, texture, cache or frame/session integration. Location checks are lexical description checks, not filesystem authorization. Phase 1 ownership/lifecycle is unchanged.
+
 - [Phase 2 v0.2.0 AR01/AR02](../harness/checkpoints/asset-contracts-v0.2.0.md): authored asset identity/catalog/reference resolution is Editor-owned. Render owns future presentation resource descriptors and actual loaded resources; never import Editor or create a duplicate catalog. No descriptor API before a real consumer (v0.2.8 task), no GPU loading/decoder/cache in Phase 2; Visual Resource Loading belongs to Phase 07.
 
 - Phase 1 boundary baseline: [ER01/ER02/ER04](../harness/checkpoints/editor-render-v0.1.0.md). [v0.1.1 ER03/ER06](../harness/checkpoints/editor-render-v0.1.1.md) adds immutable host/session metadata. Current [v0.1.2 ER07](../harness/checkpoints/editor-render-v0.1.2.md) adds created-to-bound lifecycle; bound never means graphics-ready.

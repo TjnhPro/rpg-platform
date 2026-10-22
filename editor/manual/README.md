@@ -142,3 +142,23 @@ identity, dependencies and unknown metadata extensions. Unsupported version/stru
 fields reject, leaving original data with the caller. Input records/holders stay
 unchanged. No assertions, runners, test helpers or runtime CI job; no physical files
 or persistence are involved. JSON is a demonstration transport, not a project format.
+
+## Manual Editor–Render asset consumption — v0.2.8
+
+After the real package build:
+
+```sh
+node node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict --exactOptionalPropertyTypes --module NodeNext --target ES2022 --lib ES2022,DOM editor/manual/asset-consumption.mts
+node editor/manual/asset-consumption.mts
+```
+
+Imports both public package roots. Resolves an authored image, projects its stable
+identity and ordered image/atlas-metadata sources, then invokes Render's real
+metadata validator. Prints metadata-prepared / resourceLoading NOT_PERFORMED;
+no image is displayed. Host JSON transport then feeds the same independent Render
+contract, demonstrating detached/frozen portable output. Prints unsupported text,
+unresolved reference and missing-image-source outcomes, plus Render rejections for
+nonimage media hint and missing image role. Authored metadata remains in the catalog.
+No assertions, test helpers, runner, browser or automatic runtime CI job. File
+existence, source contents, GPU/display correctness and Client integration are not
+verified. Atlas metadata is retained as a source description, never decoded.

@@ -1,3 +1,4 @@
+export { prepareVisualResource, type VisualResourceDescriptor, type VisualResourcePreparation } from './visual-resource.js';
 export {
   createRenderFrameSession,
   getRenderFrameFailure,

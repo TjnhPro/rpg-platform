@@ -109,6 +109,14 @@ replacement detection, permanent project file format, migration or save manager.
 6. **Client/Server**: each can consume applicable Runtime/config data according to the chosen game model. Do not enforce a realtime protocol, persistent monster simulation, identical active state or authoritative rendering.
 7. **External foundation usage**: `@rpg/core/kernel` and `@rpg/gameplay` are consumed only through approved public APIs; missing capabilities cause a recorded blocker.
 
+Phase 2 v0.2.8: [Editor–Render Asset Consumption](checkpoints/asset-contracts-v0.2.8.md)
+adds an Editor-owned resolved-image projection and Render-owned neutral descriptor/
+preparation API, exercised by a public-root manual consumer. Render validates and
+detaches portable metadata, reporting metadata-prepared and NOT_PERFORMED loading.
+Only image kind with image source maps today; unresolved/nonvisual targets are
+explicitly unsupported. No Editor types in Render, catalog duplication, decoder,
+IO, texture or Phase 1 session changes.
+
 ## Unresolved until demonstrated
 
 - Scene identity/coordinates and whether text-only content needs a visual scene.

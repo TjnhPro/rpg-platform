@@ -1,4 +1,5 @@
 import '@rpg-platform/runtime-engine';
+export { describeResolvedVisualAsset, type AssetVisualDescription } from './asset-visual.js';
 export { relocateAssetSource, rebindAssetReference } from './asset-transitions.js';
 export { readAssetDefinitionSnapshot } from './asset-snapshot.js';
 export {
