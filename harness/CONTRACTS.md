@@ -117,6 +117,13 @@ Only image kind with image source maps today; unresolved/nonvisual targets are
 explicitly unsupported. No Editor types in Render, catalog duplication, decoder,
 IO, texture or Phase 1 session changes.
 
+Phase 2 v0.2.9: [Minimal Working Asset Reference MVP](checkpoints/asset-contracts-v0.2.9.md)
+joins existing public APIs in a single optional manual data-flow consumer. Two
+independent holders resolve one composite-source definition, survive PNG relocation,
+support explicit selected rebinding, retain erroneous references with typed
+diagnostics, and pass relocated metadata to Render. No API/schema delta; asset
+contents are not loaded and visual correctness is not verified.
+
 ## Unresolved until demonstrated
 
 - Scene identity/coordinates and whether text-only content needs a visual scene.

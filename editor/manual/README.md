@@ -162,3 +162,30 @@ nonimage media hint and missing image role. Authored metadata remains in the cat
 No assertions, test helpers, runner, browser or automatic runtime CI job. File
 existence, source contents, GPU/display correctness and Client integration are not
 verified. Atlas metadata is retained as a source description, never decoded.
+
+## Minimal working asset reference MVP — v0.2.9
+
+After the normal package build, optionally compile/run the single public consumer:
+
+```sh
+node node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict --exactOptionalPropertyTypes --module NodeNext --target ES2022 --lib ES2022,DOM editor/manual/asset-reference-mvp.mts
+node editor/manual/asset-reference-mvp.mts
+```
+
+The example joins the existing APIs in one flow: register caller-provided
+sample-project/monster-0012 (sourceId string "0012", image + atlas-metadata
+locators), create two independent data holders, resolve both to one definition,
+relocate only the PNG, observe both references unchanged, diagnose an unknown ID
+and wrong expected kind, explicitly rebind one holder to a separately declared
+alternate target, then hand the relocated original image to Render's metadata API.
+Full input/output records are printed, including retained erroneous references and
+the old catalog. The alternate target is explicit example input, never automatic
+missing-reference repair. Holder names/IDs impose no Scene/Map/gameplay contract.
+
+No tracked PNG/TPSheet asset bytes are supplied. All example file locators are
+illustrative and never read or generated. Final output explicitly reports
+ASSET_CONTENT_NOT_LOADED, fileExistence NOT_CHECKED and VISUAL_NOT_VERIFIED.
+This is an optional manual example with no assertions, runner, test helpers or CI
+runtime job. It is not an image viewer, loader, asset importer or persisted format.
+Finite observed output and future compatibility limits are recorded in the
+[v0.2.9 checkpoint](../../harness/checkpoints/asset-contracts-v0.2.9.md).
