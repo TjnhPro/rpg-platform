@@ -186,6 +186,16 @@ Space lookup, units, axes, origin, projection and any conversion belong to Featu
 04, with camera behavior in 09; Phase 1 Render hosts provide no coordinate authority.
 No default placement, screen/GPU types, transforms, snapping or mutation API added.
 
+Phase 3 v0.3.6: [Immutable Scene State Operations](checkpoints/scene-contracts-v0.3.6.md)
+adds Editor-owned removeSceneObject, replaceSceneObject and updateSceneObjectPlacement.
+Factory snapshots produce fresh, validated, detached/frozen candidates; missing
+operation targets reject with TypeError rather than upsert/no-op. Full replacement
+retains exact object identity and list position; omitted optional fields clear their
+old values. Focused placement update preserves all unrelated fields, null clears
+placement. Removal retains other objects and authored references, without cascade,
+relationship repair or diagnostics. Existing add/reorder and canonical factories
+remain unchanged. No history/store, graph change, runtime state or new Render API.
+
 ## Unresolved until demonstrated
 
 - Scene identity is Editor-owned (v0.3.0 design decision); exact Scene schema/operations await scoped consumers. Coordinates/projection belong to Features 04/09; visual instance allocation/rendering to Feature 08. Text-only content does not require a visual scene.

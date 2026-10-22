@@ -2,6 +2,9 @@ import '@rpg-platform/runtime-engine';
 export {
   createSceneMembership,
   addSceneObject,
+  removeSceneObject,
+  replaceSceneObject,
+  updateSceneObjectPlacement,
   listSceneObjects,
   getSceneObject,
   reorderSceneObjects,

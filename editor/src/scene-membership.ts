@@ -152,6 +152,43 @@ export function getSceneObject(
   return membership.objects.find((entry) => entry.definition.objectId === key);
 }
 
+/** Remove exactly one existing object; retain other entries and authored references. */
+export function removeSceneObject(membership: SceneMembership, objectId: string): SceneMembership {
+  const current = getSceneObject(membership, objectId);
+  if (current === undefined) throw new TypeError('Cannot remove a missing Scene objectId');
+  return createSceneMembership({ scene: membership.scene,
+    objects: membership.objects.filter(entry => entry !== current) });
+}
+
+/**
+ * Replace a complete entry at its existing position, never rename or upsert.
+ * Omitted optional replacement fields clear their previous values. Use a spread
+ * of the existing entry when changing only selected metadata. Capture and validate
+ * the whole candidate before returning; failures leave the source untouched.
+ */
+export function replaceSceneObject(
+  membership: SceneMembership, objectId: string, replacement: SceneObjectMembershipInput,
+): SceneMembership {
+  const current = getSceneObject(membership, objectId);
+  if (current === undefined) throw new TypeError('Cannot replace a missing Scene objectId');
+  const candidate = createSceneMembership({ scene: membership.scene,
+    objects: membership.objects.map(entry => entry === current ? replacement : entry) });
+  const index = membership.objects.indexOf(current);
+  if (candidate.objects[index]!.definition.objectId !== current.definition.objectId) {
+    throw new TypeError('Replacement must retain the existing Scene objectId');
+  }
+  return candidate;
+}
+
+/** Replace only placement, preserving all other authored fields; null clears it. */
+export function updateSceneObjectPlacement(
+  membership: SceneMembership, objectId: string, placement: SceneObjectPlacement | null,
+): SceneMembership {
+  const current = getSceneObject(membership, objectId);
+  if (current === undefined) throw new TypeError('Cannot update a missing Scene objectId');
+  return replaceSceneObject(membership, objectId, { ...current, placement });
+}
+
 /**
  * Explicit full permutation of existing IDs; no insert/delete/identity or binding
  * edits. Returns a fresh candidate, preserving metadata and the original snapshot.

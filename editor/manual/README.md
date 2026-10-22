@@ -1,3 +1,19 @@
+# Manual immutable Scene operations consumer — v0.3.6
+
+After the workspace build, optionally compile/run this finite public-root sequence:
+
+```powershell
+node node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict --exactOptionalPropertyTypes --module NodeNext --target ES2022 --lib ES2022,DOM editor/manual/scene-operations.mts
+node editor/manual/scene-operations.mts
+```
+
+Observe add, complete replacement, focused placement update, remove, retained old
+snapshots and dangling attachments; explicit null clearing, full replacement field
+reset and reorder; detached/frozen captures and independent Scene IDs. Missing
+operation targets, invalid identity, attempted rename, nonfinite placement and
+foreign Asset references print TypeError. No assertions, runner or automatic runtime
+CI; this is authored data evidence only, with no rendering, IO or history manager.
+
 # Manual authored placement consumer — v0.3.5
 
 After the real package build from workspace root:

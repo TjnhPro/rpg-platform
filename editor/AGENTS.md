@@ -4,6 +4,8 @@
 
 Read root agent guidance first.
 
+- [v0.3.6 Immutable Scene State Operations](../harness/checkpoints/scene-contracts-v0.3.6.md) adds removeSceneObject, replaceSceneObject and updateSceneObjectPlacement for factory snapshots. Missing operation targets and attempted rename throw TypeError. Full replacement retains position/ID but replaces all entry fields; use a spread to retain unrelated metadata. Focused placement update preserves other fields; null clears placement. Removal retains other authored references without cascade/repair. All candidates reuse canonical capture; no history, store or global registry.
+
 - [v0.3.5 Placement Data Foundation](../harness/checkpoints/scene-contracts-v0.3.5.md) adds SceneObjectPlacement and optional membership placement. Capture detaches/freezes caller coordinateSpaceId and finite point x/y; no default placement, unit/axis/origin interpretation, space lookup, screen pixels or transforms. Omitted placement remains absent; explicit null retained. Existing create/add/reorder preserve it. Feature 04 owns spatial semantics; general mutation operations remain v0.3.6.
 
 - [v0.3.4 Object Ordering & Relationships](../harness/checkpoints/scene-contracts-v0.3.4.md) adds reorderSceneObjects, SceneObjectReference and SceneObjectAttachment. Membership optionally captures layerKey/attachment; omitted fields stay absent for compatibility. Explicit order must be a full permutation, never z sorting. Attachment is one nonhierarchical authored intent within the same Scene/project; missing targets retained, self/cross-Scene rejected, no target lookup, traversal, parent/transform propagation or cycle enforcement. Existing create/add preserve these fields.
