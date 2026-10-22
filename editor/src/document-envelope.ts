@@ -104,3 +104,27 @@ export function createDocumentEnvelope(input: DocumentEnvelopeInput): DocumentEn
     content: detachPortableAssetData(input.content, 'Document content'),
   });
 }
+
+/**
+ * Explicit whole-content replacement, not a patch/merge or session mutation.
+ * Validate the complete current envelope first, then detach/freeze the caller's
+ * replacement through the same portable-data boundary. Old snapshots and both
+ * inputs remain untouched; even equal content returns a fresh envelope.
+ * Identity, kind and both schema versions retain their values, not necessarily
+ * object references. No dirty flag, editing revision or schema bump is inferred.
+ *
+ * All portable fields in the supplied replacement survive. Omitted old fields
+ * are NOT merged back: callers must preserve intended authored extensions and
+ * use the canonical content owner for semantic edits/validation before calling.
+ * Workspace/Render/gameplay state must stay caller-side; physical portability
+ * cannot distinguish a plain UI/gameplay record from authored data.
+ * Invalid source/replacement throws TypeError without returning a candidate;
+ * native host exceptions propagate. No codec, IO, migration or write permission.
+ */
+export function replaceDocumentContent(envelope: DocumentEnvelope, content: unknown): DocumentEnvelope {
+  const captured = createDocumentEnvelope(envelope);
+  return Object.freeze({
+    ...captured,
+    content: detachPortableAssetData(content, 'Document content'),
+  });
+}

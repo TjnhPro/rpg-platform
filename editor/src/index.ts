@@ -2,6 +2,7 @@ import '@rpg-platform/runtime-engine';
 export {
   createDocumentIdentity,
   createDocumentEnvelope,
+  replaceDocumentContent,
   type DocumentIdentity,
   type DocumentEnvelopeInput,
   type DocumentEnvelope,

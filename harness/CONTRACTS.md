@@ -2,6 +2,19 @@
 
 This describes the *interactions to audit*, not finalized types or APIs. Do not create interfaces just to satisfy this document before a real MVP needs them.
 
+Phase 5 v0.5.2: [Document content isolation DC04/DC05](checkpoints/document-v0.5.2.md)
+adds replaceDocumentContent(envelope, content) at the Editor root. It validates the
+complete source envelope, then captures a fresh immutable whole-content replacement
+through the existing portable-data detacher. Old snapshots stay unchanged; identity,
+kind and both schema-version values stay fixed. This is not patch/merge, semantic
+validation or write permission. Omitted old fields are intentionally not merged;
+callers retain intended authored extensions and use canonical owner operations.
+UI/session/Render/gameplay data stays outside authored payload by caller selection;
+plain portable records cannot reveal those semantics automatically. Even equal
+content yields a fresh envelope, so object identity is not a dirty/revision policy.
+No lifecycle, current/saved revision, codec, IO or v0.5.3 operation is implemented.
+Earlier entries describe their own checkpoint revisions.
+
 Phase 5 v0.5.1: [Document identity/envelope DC02/DC03](checkpoints/document-v0.5.1.md)
 adds createDocumentIdentity/createDocumentEnvelope at the Editor root. Identity is
 exact projectId+documentId, independent of payload identity, kind and location.
