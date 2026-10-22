@@ -2,6 +2,49 @@
 
 This describes the *interactions to audit*, not finalized types or APIs. Do not create interfaces just to satisfy this document before a real MVP needs them.
 
+Phase 5 v0.5.6: [Document validation DC11/DC12](checkpoints/document-v0.5.6.md)
+adds diagnoseDocument(text, context?) -> DocumentValidationResult, plus
+DocumentDiagnosticCode/DocumentDiagnostic/DocumentValidationContext. JSON is decoded
+through v0.5.5 first, preserving its resource and schema profile; no second envelope
+or payload portability validator. Context explicitly binds exact documentKind and
+contentSchemaVersion to one existing owner adapter (scene, asset snapshot,
+coordinate-space, or string-only text). This is a per-call host assertion, not a
+universal kind registry, inferred schema compatibility or migration. Missing owner
+means not-checked; binding mismatch stops before domain validation. Catalogs are
+factory snapshots; an optional synchronous authored-space resolver is host-trusted,
+must use memory only and must not perform IO. Unknown resolver/host exceptions
+propagate without turning into authored diagnostics.
+
+Result always retains the ORIGINAL decoded/frozen envelope, including unknown
+fields and broken references; never the potentially projected owner candidate.
+Decode rejection returns document:null without fallback. Diagnostics are frozen
+portable records: group, code, severity, document-root path, reference string/null
+hints and primitive details. No raw exception message/backend handles. Existing
+owner code/path/constraint priority is retained; no message parsing. Spatial owner's
+plain TypeError yields coarse INVALID_SPATIAL_SPACE at the placement/content path.
+Order: decode/binding first; canonical owner first structural error stops its
+references; otherwise project correlation, Scene declaration order (attachment
+before Asset), missing-context warnings, spatial declaration pass. Asset direct
+dependencies use their declaration order. No transitive reference traversal.
+
+status is invalid for envelope/schema/payload/spatial errors, unresolved for logical
+reference errors alone, not-checked for warnings alone, valid otherwise. checks
+separately records content/Asset/spatial coverage; NOT_APPLICABLE means no declared
+reference of that supported owner, never unchecked unknown content. Missing catalog
+or resolver is NOT_CHECKED, not an invented missing target. Missing space requires
+explicit resolver returning undefined. Same Asset ID across Scene objects is valid;
+owner enforces duplicate OBJECT definitions, not duplicate Asset use. Attachment
+target is local/nonhierarchical; cross-Scene references keep the existing owner's
+unsupported diagnostic. No parent system or new Scene catalog.
+
+readEligibility.inspect permits decoded portable envelopes with diagnostics;
+strict requires status valid for the DECLARED checks only. Neither opens a session.
+writeEligibility is always NOT_ESTABLISHED; even valid authored references do not
+establish write preconditions, physical resources, unknown-field semantics or safe
+overwrite. fileExistence is always NOT_CHECKED. Host chooses admission policy;
+result never fixes/drops/rebinds data, increments revision, clears dirty state,
+saves, migrates, calls a loader or establishes storage guarantees. No v0.5.7.
+
 Phase 5 v0.5.5: [Serialization/deserialization DC10](checkpoints/document-v0.5.5.md)
 adds Editor-root serializeDocument(document): string and deserializeDocument(text):
 DocumentDecodeResult, plus DocumentDecodeDiagnostic. Pure compact schema-1 JSON;

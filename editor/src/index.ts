@@ -1,5 +1,12 @@
 import '@rpg-platform/runtime-engine';
 export {
+  diagnoseDocument,
+  type DocumentDiagnosticCode,
+  type DocumentDiagnostic,
+  type DocumentValidationContext,
+  type DocumentValidationResult,
+} from './document-diagnostics.js';
+export {
   serializeDocument,
   deserializeDocument,
   type DocumentDecodeDiagnostic,
