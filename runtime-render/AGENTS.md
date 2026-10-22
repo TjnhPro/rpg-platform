@@ -4,6 +4,8 @@
 
 Read root agent guidance first.
 
+- [v0.4.3 SP06/SP07](../harness/checkpoints/spatial-contracts-v0.4.3.md) adds seven root symbols (26 total): affine capture, point apply, ordered composition and conditional inverse. [A,B] means B*A; retain shear instead of decomposing TRS. Points include translation; no direction API. Inverse rejects normalized determinant magnitude <=1e-12; invalid input throws TypeError and nonfinite arithmetic RangeError. No hierarchy, space lookup or GPU requirement. Stop before v0.4.4. Older notes below describe their checkpoint revisions.
+
 - [v0.4.2 SP05](../harness/checkpoints/spatial-contracts-v0.4.2.md) adds PlanarTransform2D/createPlanarTransform2D (19 root exports). Capture finite explicit translation/rotationRadians/scale; detach/freeze exact nested records. Semantics are S then R then T about numeric zero; positive angle maps +x toward +y. Zero/negative scale is valid data, never proof of invertibility. No THREE matrix, space registry, point application, composition, inverse or acquisition. Stop before v0.4.3.
 
 - [v0.4.1 coordinate spaces](../harness/checkpoints/spatial-contracts-v0.4.1.md) implements authored declarations/points in Editor only. Render remains 17 exports; it does not consume those records yet. Future presentation descriptors must be Render-owned portable contracts supplied explicitly by the Editor adapter, never imports of Editor types. No projection/math or graphics dependency is added to authored capture. Stop before v0.4.2.

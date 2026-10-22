@@ -8,7 +8,8 @@
  * right/down axes. No axes, units or coordinate-space conversion is inferred.
  * Translation uses the caller's point unit; scale is dimensionless. The caller
  * must select one coherent numeric plane/unit before interpreting this descriptor.
- * This version captures data only; it does not apply/compose/invert transforms.
+ * This descriptor's factory captures data only; separate affine operations
+ * apply/compose/invert it without changing this TRS shape.
  */
 export interface PlanarTransform2D {
   readonly translation: { readonly x: number; readonly y: number };

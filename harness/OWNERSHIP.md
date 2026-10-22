@@ -21,6 +21,11 @@ This table is for routing an implementation **after inspecting current source**.
 
 ## Required reasoning for multi-project changes
 
+v0.4.3 SP06/SP07: Runtime Render owns pure planar affine operations; Editor retains
+Scene/SC09/placement and may call only the Render root API with explicit numeric
+inputs. Caller-ordered composition is not a parent system or authored-data rewrite.
+See [checkpoint](checkpoints/spatial-contracts-v0.4.3.md) for numerical/failure policy.
+
 State **(1)** which observable behavior changes, **(2)** who owns that behavior, **(3)** what public contract crosses projects, **(4)** which consumers need adjustments and why, **(5)** what remains unchanged. If two possible owners both make sense, inspect actual implementation and request a decision before irreversible architecture changes.
 
 Examples:

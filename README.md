@@ -71,7 +71,7 @@ game-server    -> runtime-engine
 
 Workspace package names are `@rpg-platform/<project>`. Only the package root is
 exported, pointing at built ESM and declarations. All are private. Editor currently
-exports 81 symbols and Render 19; the Phase 2 integration review inventories the
+exports 81 symbols and Render 26; the Phase 2 integration review inventories the
 earlier 43/17, and [v0.3.1](harness/checkpoints/scene-contracts-v0.3.1.md) adds six
 Editor-owned Scene identity/definition symbols. [v0.3.2](harness/checkpoints/scene-contracts-v0.3.2.md)
 adds three Editor-owned Scene Object definition symbols without membership,
@@ -118,6 +118,11 @@ conversion, implicit unit scale or Render projection API.
 PlanarTransform2D descriptor/factory with explicit scale-rotate-translate semantics,
 radians and zero pivot. Capture needs no graphics; application, composition,
 inverse and projection remain deferred.
+[v0.4.3](harness/checkpoints/spatial-contracts-v0.4.3.md) adds seven Render root
+symbols for affine capture, point application, ordered composition and conditional
+inverse. Composition preserves shear; [A,B] applies A then B. Pure math requires
+explicit coherent numeric inputs, no Scene traversal or graphics acquisition.
+The checkpoint documents numerical rejection/overflow policy and manual examples.
 Runtime Engine
 has named imports of actual L1/L2 APIs to establish compile-time dependency linkage;
 consumer entrypoints import the appropriate workspace roots. No calculation or

@@ -75,3 +75,9 @@ remains unchanged and optional. No grid conversion or projection exists.
 immutable planar TRS descriptor: scale about numeric zero, rotate in radians about
 zero, then translate. It captures finite data without applying it to points or
 changing Scene placement; composition, inverse and graphics integration are deferred.
+
+[v0.4.3 SP06/SP07](harness/checkpoints/spatial-contracts-v0.4.3.md) implements
+Render-owned point application, explicit ordered composition and conditional inverse
+using a portable immutable six-coefficient affine result that retains shear.
+SC09 attachments remain nonhierarchical authored references. No Scene traversal,
+Editor math duplication, unit/axis conversion or GPU dependency is introduced.

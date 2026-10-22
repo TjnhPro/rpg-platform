@@ -4,6 +4,8 @@
 
 Read root agent guidance first.
 
+- [v0.4.3 composition/inverse](../harness/checkpoints/spatial-contracts-v0.4.3.md) adds Render-owned portable affine operations (Render 26; Editor unchanged at 81). Explicit caller application order [local,parent] is numerical composition only, never SC09 attachment traversal. Keep authored Scene/placement immutable and caller-retained; use Render root math, no duplicate Editor implementation. Scene-to-transform adapter, grid and projection remain deferred. Stop before v0.4.4. Older notes describe their checkpoint revisions.
+
 - [v0.4.2 planar transform](../harness/checkpoints/spatial-contracts-v0.4.2.md) adds two Render root symbols for immutable TRS descriptor capture (Render 19; Editor stays 81). Future adapters must supply coherent plane/unit context and use Render semantics: scale, radians rotation about numeric zero, then translation. No Editor math, Scene bridge/schema change, point application or graphics work is introduced. Stop before v0.4.3.
 
 - [v0.4.1 coordinate spaces](../harness/checkpoints/spatial-contracts-v0.4.1.md) adds seven Editor root symbols (81 total): projectId + coordinateSpaceId references, explicit two-component axes/origin/unit declarations and finite points. All new records require exact own keys and detach/freeze nested data; no registry, lookup, unit conversion or implicit Scene change. SC08 callers explicitly supply the owning Scene project as scope. This task supersedes SP01's proposed SP04 assignment for authored values. Stop before v0.4.2.

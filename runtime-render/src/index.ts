@@ -1,3 +1,12 @@
+export {
+  toAffineTransform2D,
+  applyPlanarPoint2D,
+  composePlanarTransforms2D,
+  invertPlanarTransform2D,
+  type PlanarPoint2D,
+  type AffineTransform2D,
+  type PlanarInverseResult,
+} from './planar-affine.js';
 export { createPlanarTransform2D, type PlanarTransform2D } from './planar-transform.js';
 export { prepareVisualResource, type VisualResourceDescriptor, type VisualResourcePreparation } from './visual-resource.js';
 export {

@@ -283,6 +283,20 @@ rotation. This checkpoint supplies descriptor capture only; point application,
 composition/inverse, Scene bridge and projection remain deferred. Scene/Asset and
 prior Render APIs remain unchanged. Stop before v0.4.3.
 
+Phase 4 v0.4.3: [Transform Composition & Inverse](checkpoints/spatial-contracts-v0.4.3.md)
+adds Render root PlanarPoint2D, AffineTransform2D, PlanarInverseResult,
+toAffineTransform2D, applyPlanarPoint2D, composePlanarTransforms2D and
+invertPlanarTransform2D (19 -> 26; Editor stays 81). Existing TRS API unchanged.
+Affine x'=a*x+c*y+tx, y'=b*x+d*y+ty preserves shear/reflection; [A,B] applies A
+then B (B*A), empty list gives identity. Only points include translation; no direction
+API. Exact finite plain/null-prototype inputs, detached frozen outputs; invalid
+inputs TypeError, nonfinite arithmetic RangeError. Inverse normalizes linear block
+by max coefficient magnitude, rejects zero block or abs(normalized determinant)
+<=1e-12 with non-invertible/SINGULAR_OR_ILL_CONDITIONED; otherwise inverted plus
+affine transform. Binary64 underflow/rounding remains possible; success gives no
+universal accuracy bound. No unit/axis/space inference, Scene traversal or GPU work.
+Stop before v0.4.4.
+
 ## Unresolved until demonstrated
 
 - Scene identity, minimal authored records and immutable operations are Editor-owned and implemented through v0.3.8, with consumers/evidence in v0.3.9–v0.3.10. Versioned document schema, parenting/nesting and future extension compatibility remain open. Coordinates/projection belong to Features 04/09; visual instance allocation/rendering to Feature 08. Text-only content does not require a visual scene.
