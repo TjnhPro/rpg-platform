@@ -26,6 +26,11 @@ Phase 1 v0.1.5: [ER04/ER10 Editor host integration](checkpoints/editor-render-v0
 adds Editor-owned mount/unmount/replace/close orchestration through existing Render
 root APIs. A null target represents unavailable preview, without creating a session.
 
+Phase 1 v0.1.6: [ER11–ER13 extension and compatibility](checkpoints/editor-render-v0.1.6.md)
+inventories the current public surface, distinguishes existing binding operations
+from deferred visual subsystems, and records host portability, compatibility rules
+and Developer decision gates before GPU acquisition. No runtime API is added or changed.
+
 1. **Workspace/project discovery**: five identifiable projects, build entrypoint, explicit dependency direction and public import surfaces. Keep package naming editable until real manifests exist.
 2. **Editor ↔ Render**: an authoring host can create/select/inspect/move a presentation object and save/reload scene/content without a duplicate renderer. The specific scene format/coordinate system belongs to the relevant MVP.
 3. **Editor ↔ Runtime**: Editor can discover or be supplied the active game's supported content/config contract and run its validation/preview through public Runtime APIs. No universal Skill/Player/Monster contract is imposed.

@@ -8,6 +8,7 @@ Read root agent guidance first.
 - Only `@rpg-platform/runtime-render` is public. Keep backend objects and resource cleanup inside Render; never accept Editor UI/document stores or gameplay authority through future contracts.
 - Current [v0.1.3 ER05/ER08](../harness/checkpoints/editor-render-v0.1.3.md): dispose clears the lifecycle's binding reference and terminates operations. Borrowed targets and caller-retained snapshots stay host-owned; no GPU cleanup exists yet.
 - [v0.1.4 ER09](../harness/checkpoints/editor-render-v0.1.4.md) adds safe code/stage diagnostics for Render-created target/disposed errors. Preserve native exception behavior; unrecognized host exceptions are not backend failures or success. No raw context/cause in diagnostics.
+- [v0.1.6 ER11–ER13](../harness/checkpoints/editor-render-v0.1.6.md) inventories all current public symbols and extension seams. Preserve binding-only initialization and import portability; GPU readiness/acquisition, failure variants, cleanup and shared-target ownership require impact analysis and Developer decisions before a real backend. No plugin registry or new runtime API is introduced.
 
 - Editor and Client MUST reuse the same presentation implementation; Editor-specific gizmos are tool extensions, not a second renderer.
 - Presentation identity/placement is not automatically gameplay identity/HP/AI/drop schema.
