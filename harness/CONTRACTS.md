@@ -2,6 +2,31 @@
 
 This describes the *interactions to audit*, not finalized types or APIs. Do not create interfaces just to satisfy this document before a real MVP needs them.
 
+Phase 5 v0.5.7: [Storage read/load DC13](checkpoints/document-v0.5.7.md)
+adds loadDocument(port, locator, context?) and DocumentReadPort/DocumentReadResult/
+DocumentStorageObservation/DocumentLoadResult through Editor root only. Locator is
+an exact nonempty host string, independent of authored identity. Host read returns
+exact decoded text and explicit nullable identity/revision observations, not an
+implicit path policy or guaranteed concurrency token. Expected failures are
+not-found or read-failed (permission-denied/io-error/unavailable); unexpected port
+or resolver exceptions and invalid host contracts propagate, never empty fallback.
+Host owns authorization, byte limits, lossless decoding and actual IO guarantees.
+No portable module imports Node fs, browser storage or platform types.
+
+The existing diagnoseDocument pipeline owns all decode/content/reference checks.
+Decode rejection produces parse-failed (including invalid envelope/resource
+profile), except unsupported envelope schema produces unsupported-schema.
+Decoded but non-strict results produce validation-diagnostics, preserving unknown
+content and original text without a mutable session. An unsupported content-owner
+version remains its existing schema diagnostic; no new compatibility inference.
+Every successful read result retains exact text, detached frozen observations and
+canonical validation. Strict-valid creates one new open session with current and
+saved revision 1, saved envelope equal to loaded authored content, no caller-memory
+revert target and no connection to another current session. Clean means equal to
+the read snapshot; it establishes no write permission or conflict safety. Future
+schemas remain opaque text, never migrated, downgraded or overwritten. This
+checkpoint adds no save/write, registry, cache, UI or Render initialization.
+
 Phase 5 v0.5.6: [Document validation DC11/DC12](checkpoints/document-v0.5.6.md)
 adds diagnoseDocument(text, context?) -> DocumentValidationResult, plus
 DocumentDiagnosticCode/DocumentDiagnostic/DocumentValidationContext. JSON is decoded

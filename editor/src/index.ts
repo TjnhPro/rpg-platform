@@ -1,5 +1,12 @@
 import '@rpg-platform/runtime-engine';
 export {
+  loadDocument,
+  type DocumentStorageObservation,
+  type DocumentReadResult,
+  type DocumentReadPort,
+  type DocumentLoadResult,
+} from './document-load.js';
+export {
   diagnoseDocument,
   type DocumentDiagnosticCode,
   type DocumentDiagnostic,

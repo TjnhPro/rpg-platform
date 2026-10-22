@@ -22,6 +22,13 @@ This table is for routing an implementation **after inspecting current source**.
 
 ## Required reasoning for multi-project changes
 
+v0.5.7 DC13: Editor owns the portable read port and load orchestration through
+its root public API. Actual IO, locator authorization/encoding/limits and storage
+observations are host-owned. Reuse existing document diagnostics/session capture;
+no Render/Engine/Client/Server or L1/L2 changes, no save/conflict guarantees.
+See [checkpoint](checkpoints/document-v0.5.7.md). Earlier table notes retain their
+checkpoint-specific capability descriptions.
+
 v0.4.10 SP16: Editor owns the authored Scene adapter and caller-held correlation.
 Render owns canonical conversion through existing PlaneProjectionPoint2D and root
 projection/viewport APIs; no Render source/API delta needed. No second Scene
