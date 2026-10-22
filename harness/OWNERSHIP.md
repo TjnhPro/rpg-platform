@@ -21,6 +21,11 @@ This table is for routing an implementation **after inspecting current source**.
 
 ## Required reasoning for multi-project changes
 
+v0.4.9 SP15: Editor owns attaching/replacing authored Scene placement with an
+explicit matching coordinate definition/scoped point. Reuse existing coordinate
+factories and canonical Scene operation; no second registry, schema change or
+Render math/API delta. See [checkpoint](checkpoints/spatial-contracts-v0.4.9.md).
+
 v0.4.8 SP13/SP14: Runtime Render owns explicit viewport/screen mapping and
 numerical validation, including constrained inverse to a declared plane. Editor
 forwards host measurements through describeViewportMapping; no formulas or global

@@ -1,4 +1,5 @@
 import '@rpg-platform/runtime-engine';
+export { updateSceneObjectSpatialPlacement } from './scene-spatial-placement.js';
 export { describeViewportMapping } from './viewport-mapping.js';
 export { describeOrthographicPlaneProjection } from './plane-projection.js';
 export { describeSceneObjectAlignment } from './scene-visual-alignment.js';

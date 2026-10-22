@@ -2,7 +2,13 @@
 
 ## Fixed at this stage
 
-Current [v0.4.8 viewport checkpoint](harness/checkpoints/spatial-contracts-v0.4.8.md):
+Current [v0.4.9 Scene spatial checkpoint](harness/checkpoints/spatial-contracts-v0.4.9.md):
+Editor validates a scoped spatial point against a caller-supplied coordinate
+definition and Scene project, then delegates to its existing focused immutable
+placement operation. No new Scene schema/registry or Render math is introduced;
+text content remains spatially optional. Stop before v0.4.10.
+
+[v0.4.8 viewport checkpoint](harness/checkpoints/spatial-contracts-v0.4.8.md):
 Runtime Render owns pure explicit viewport/screen conversion and constrained
 selected-plane inverse. Editor forwards host-supplied metrics through the Render
 root. Pixel units, origins and scale are explicit; no global measurements, live

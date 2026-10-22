@@ -349,6 +349,19 @@ Scene/Asset/session and facing/anchor schemas unchanged. Stop before v0.4.8.
 
 ## Unresolved until demonstrated
 
+Phase 4 v0.4.9: [Scene Spatial Integration](checkpoints/spatial-contracts-v0.4.9.md)
+adds Editor updateSceneObjectSpatialPlacement (87 -> 88), Render unchanged at 52.
+Input is an existing factory Scene snapshot, target objectId, explicit
+CoordinateSpaceDefinition and SpatialPoint2D. Canonical factories validate both
+spatial values; point/definition project+space and Scene project must match exactly.
+One supplied definition is the operation's explicit scope, not a global catalog.
+Canonical updateSceneObjectPlacement returns the frozen candidate, preserving
+all supported fields except selected placement. Missing targets/mismatches/invalid
+data throw TypeError; host errors propagate. Definitions stay caller-retained,
+with no revision/consistency registry, implicit lookup or conversion. Null clearing
+uses the existing Scene API. Schema unchanged; anchor/direction remain caller-owned
+config, not new fields. Text/empty Scenes need no placement/grid. Stop before v0.4.10.
+
 Phase 4 v0.4.8: [Viewport/Screen Mapping & Spatial Validation](checkpoints/spatial-contracts-v0.4.8.md)
 adds ScreenMapping2D, ViewportMetrics2D, ViewportMapping2D,
 createViewportMapping2D, projectPointToViewport2D, viewportPointToPlane2D,

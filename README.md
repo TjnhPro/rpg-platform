@@ -71,7 +71,7 @@ game-server    -> runtime-engine
 
 Workspace package names are `@rpg-platform/<project>`. Only the package root is
 exported, pointing at built ESM and declarations. All are private. Editor currently
-exports 87 symbols and Render 52; the Phase 2 integration review inventories the
+exports 88 symbols and Render 52; the Phase 2 integration review inventories the
 earlier 43/17, and [v0.3.1](harness/checkpoints/scene-contracts-v0.3.1.md) adds six
 Editor-owned Scene identity/definition symbols. [v0.3.2](harness/checkpoints/scene-contracts-v0.3.2.md)
 adds three Editor-owned Scene Object definition symbols without membership,
@@ -140,6 +140,12 @@ Render graphics acquisition is a separate explicit API; asset metadata operation
 perform no file IO, decoding, GPU loading or frame submission.
 
 ## Architecture and verification
+
+[v0.4.9 Scene spatial checkpoint](harness/checkpoints/spatial-contracts-v0.4.9.md)
+adds Editor's updateSceneObjectSpatialPlacement: explicit coordinate definition
+and scoped point validation before the existing focused Scene placement update.
+No Scene schema, registry, conversion math or Render API change. Old snapshots,
+supported identities/bindings/relationships and spatially optional text are retained.
 
 [v0.4.8 viewport/screen checkpoint](harness/checkpoints/spatial-contracts-v0.4.8.md)
 adds pure explicit pixel metrics, optional screen origin/scale, and constrained

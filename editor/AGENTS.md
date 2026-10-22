@@ -4,6 +4,8 @@
 
 Read root agent guidance first.
 
+- [v0.4.9 SP15](../harness/checkpoints/spatial-contracts-v0.4.9.md) adds updateSceneObjectSpatialPlacement (88 Editor / unchanged 52 Render exports). Supply one explicit CoordinateSpaceDefinition and SpatialPoint2D with matching scoped keys and Scene project. Adapter validates through existing factories then calls canonical updateSceneObjectPlacement; no registry or math. Preserves supported factory data/identities/relationships, not unknown documents or reference equality. Definition remains caller-owned; no new Scene schema, stored anchor/direction, Render instance or forced placement/grid. Clear via existing null operation. Stop before v0.4.10.
+
 - [v0.4.8 SP13/SP14](../harness/checkpoints/spatial-contracts-v0.4.8.md) adds describeViewportMapping (87 Editor / 52 Render exports). Host supplies explicit dimensions, pixel plane, optional screen origin/scale and the existing orthographic projection. Adapter calls Render capture only; caller uses Render root forward/constrained inverse. No DOM measurement, implicit DPR, Scene schema/adapter change or frame lifecycle integration. Earlier notes describe their checkpoint revisions. Stop before v0.4.9.
 
 - [v0.4.7 SP12](../harness/checkpoints/spatial-contracts-v0.4.7.md) adds describeOrthographicPlaneProjection (86 Editor / 44 Render exports). Adapt explicit source/destination coordinate definitions and caller correspondence origins/unit ratios to Render-owned capture; no formulas or Scene schema change. Definition origin labels are not extra offsets. Caller projects through Render root projectPlanePoint2D. Forward-only selected 2D plane; no camera/viewport state or inverse. Earlier checkpoint notes describe their own revisions. Stop before v0.4.8.
