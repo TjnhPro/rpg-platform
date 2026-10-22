@@ -22,6 +22,13 @@ This table is for routing an implementation **after inspecting current source**.
 
 ## Required reasoning for multi-project changes
 
+v0.5.12 DC19 is a documentation/manual-evidence checkpoint owned by Editor.
+The public Document workflow composes existing Scene/Object, Asset and Spatial
+contracts, with actual IO and exclusive publication owned by the local demo host.
+No public contract, production source, Render allocation or ownership change.
+See [manual guide](../editor/manual/document-mvp.md) and
+[checkpoint](checkpoints/document-v0.5.12.md); stop before v0.5.13.
+
 v0.5.11 DC17/DC18: Editor owns the Document Scene extension profile and explicit
 preserving replacement adapter. Canonical Scene/Object/Asset/Spatial owners retain
 all semantics, mutation and validation; no parallel schemas or math. Metadata slots

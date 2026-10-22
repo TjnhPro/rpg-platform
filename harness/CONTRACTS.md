@@ -2,6 +2,17 @@
 
 This describes the *interactions to audit*, not finalized types or APIs. Do not create interfaces just to satisfy this document before a real MVP needs them.
 
+Phase 5 v0.5.12: [Minimal Document MVP DC19](checkpoints/document-v0.5.12.md)
+records a public-API-only [manual workflow](../editor/manual/document-mvp.md).
+No production/API/schema change: Editor134 / Render52 exports remain unchanged.
+Existing Document gates compose actual Scene/Asset/Spatial owners; local host owns
+real IO and create-only exclusive publication. Observations include saved/reloaded
+authored metadata, conflict bytes/state preservation, delayed revision2 receipt
+while revision3 stays dirty, saved-snapshot restore and migration candidate only.
+Direction is sample-owned opaque metadata, not a new Scene schema. No Renderer
+allocation, product CAS adapter, recovery, visual claim or automated suite.
+Stop before v0.5.13; build/manual evidence does not establish phase acceptance.
+
 Phase 5 v0.5.11: [Unknown data/content integration DC17/DC18](checkpoints/document-v0.5.11.md)
 adds one Editor root function replaceSceneDocumentObject (133 -> 134 symbols).
 Document Scene strict validation now requires a complete canonical SceneMembership
