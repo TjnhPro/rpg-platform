@@ -130,10 +130,20 @@ declaration exports, consumers and finite public-root manual proof. No API or
 production delta. READY_FOR_DEVELOPER_REVIEW is not Developer phase acceptance;
 loading, visual correctness and future feature contracts remain open.
 
+Phase 3 v0.3.0: [Scene Architecture & Contract Foundation](checkpoints/scene-contracts-v0.3.0.md)
+assigns authored Scene Definition/Object identity, membership, relationships and
+placement records to Editor. Render owns presentation runtime instances, never an
+authored Scene catalog. Scene Definition != Render Scene Instance != Gameplay World;
+Scene Object ID != Asset ID != Gameplay Entity ID != Render Session/Instance ID.
+This is DESIGN_ONLY: no Scene public API, schema or runtime instance operation.
+Asset references/resolution reuse Phase 2; existing Render metadata preparation
+and frame submission do not provide a Scene consumer. Import graph is unchanged.
+Text-only scenes need no map, coordinates, root node, texture or graphics session.
+
 ## Unresolved until demonstrated
 
-- Scene identity/coordinates and whether text-only content needs a visual scene.
-- Persisted asset identity/reference semantics belong to Editor (v0.2.0); record serialization/export format and other content schema/serializer ownership remain unresolved. **Assign one canonical owner when used**.
+- Scene identity is Editor-owned (v0.3.0 design decision); exact Scene schema/operations await scoped consumers. Coordinates/projection belong to Features 04/09; visual instance allocation/rendering to Feature 08. Text-only content does not require a visual scene.
+- Authored Asset and Scene identity/reference semantics belong to Editor. Document lifecycle/envelopes (Feature 05), serialization/export (Feature 19) and other game content formats remain separate decisions. Ownership of authored data does not select a storage format or Client dependency on Editor.
 - Rule/config discovery shape (descriptors, type contracts, explicit editors, mixed approaches).
 - State/event update model, client/server data projections, authority/verifier, persistence.
 - Physical L3/L4 split and package/repository boundaries after working games.
