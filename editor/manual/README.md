@@ -487,3 +487,6 @@ frame lookup performs no extra source reads and no image/GPU operation.
 
 - [v0.7.8 in-flight PNG scope](inflight-png.md): finite provider counters, waiter
   release/failure/retry trace and optional browser-native decode entry.
+
+- [v0.7.9 resource cache](resource-cache.md): optional finite 100-lease/multi-session
+  public-root consumer. Compiled only; native reuse/cleanup requires manual observation.

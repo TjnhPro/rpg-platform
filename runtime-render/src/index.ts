@@ -247,3 +247,8 @@ export {
 export {
   createPngLoadScope, type PngLoadScope, type SharedPngLoad, type SharedPngLoadSnapshot,
 } from './png-load-scope.js';
+
+export {
+  createVisualResourceCache, type ResourceCacheLimits, type VisualResourceCache,
+  type VisualResourceCacheSnapshot, type VisualResourceLease, type VisualResourceLeaseSnapshot,
+} from './visual-resource-cache.js';

@@ -10,7 +10,7 @@ import type { ThreeFrameBackend } from './three-frame.js';
 import { readBrowserCanvas } from './canvas-target.js';
 import { planRenderViewportSize, type RenderViewportMetrics, type RenderViewportSizeLimits } from './viewport-size.js';
 import { readDecodedPng } from './png-bitmap.js';
-import { registerTextureSession, TextureError, getRenderTextureFailure } from './render-texture.js';
+import { registerTextureSession, endTextureSession, TextureError, getRenderTextureFailure } from './render-texture.js';
 
 export { getRenderFrameFailure, type RenderFrameFailure } from './frame-failure.js';
 
@@ -320,7 +320,7 @@ async function acquireRenderFrameSession(
     viewportControl.suspended = false;
     const owned = backend;
     backend = undefined;
-    let cleanupFailed = false;
+    let cleanupFailed = endTextureSession(session);
     try {
       owned?.dispose();
     } catch {

@@ -50,7 +50,8 @@ export function getRenderTextureFailure(error: unknown): RenderTextureFailure | 
 
 // Weak dispatch/identity guards like the viewport APIs, not active-resource stores or caches.
 const sessions = new WeakMap<RenderFrameSession, { readonly id: symbol;
-  readonly upload: (image: PngImageDecode, options: RenderTextureOptions) => RenderTexture }>();
+  readonly upload: (image: PngImageDecode, options: RenderTextureOptions) => RenderTexture;
+  terminal: boolean; readonly listeners: Set<() => void> }>();
 const textures = new WeakMap<RenderTexture, { readonly sessionId: symbol;
   readonly read: () => RenderTextureSnapshot }>();
 
@@ -58,7 +59,7 @@ const textures = new WeakMap<RenderTexture, { readonly sessionId: symbol;
 export function registerTextureSession(
   session: RenderFrameSession, id: symbol,
   upload: (image: PngImageDecode, options: RenderTextureOptions) => RenderTexture,
-): void { sessions.set(session, { id, upload }); }
+): void { sessions.set(session, { id, upload, terminal: false, listeners: new Set() }); }
 
 /** Internal capability branding, retained only while the caller holds the handle. */
 export function registerRenderTexture(handle: RenderTexture, sessionId: symbol, read: () => RenderTextureSnapshot): void {
@@ -85,4 +86,32 @@ export function getRenderTextureSnapshot(session: RenderFrameSession, texture: R
   if (owner === undefined || binding === undefined) throw new TypeError('Expected canonical graphics and texture handles');
   if (owner.id !== binding.sessionId) throw new TextureError('CONTEXT_MISMATCH');
   return binding.read();
+}
+
+/** Internal canonical admission, before source IO or cache reuse. */
+export function requireTextureSession(session: RenderFrameSession): symbol {
+  const control = sessions.get(session);
+  if (control === undefined) throw new TypeError('Expected a canonical graphics session');
+  if (control.terminal) throw new TextureError('SESSION_UNAVAILABLE');
+  return control.id;
+}
+
+/** Internal owned cleanup subscription; removed when the cache has no session entries. */
+export function onTextureSessionEnd(session: RenderFrameSession, listener: () => void): () => void {
+  requireTextureSession(session);
+  const control = sessions.get(session)!;
+  control.listeners.add(listener);
+  return () => { control.listeners.delete(listener); };
+}
+
+/** Called by canonical terminal cleanup before backend disposal. Always drains listeners. */
+export function endTextureSession(session: RenderFrameSession): boolean {
+  const control = sessions.get(session);
+  if (control === undefined || control.terminal) return false;
+  control.terminal = true;
+  const listeners = [...control.listeners];
+  control.listeners.clear();
+  let failed = false;
+  for (const listener of listeners) try { listener(); } catch { failed = true; }
+  return failed;
 }

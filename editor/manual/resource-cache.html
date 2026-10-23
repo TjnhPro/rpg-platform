@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Resource cache acquire/release â€” finite manual consumer</title>
+<script type="importmap">
+{"imports":{"@rpg-platform/runtime-render":"/runtime-render/dist/index.js","three":"/node_modules/three/build/three.module.js"}}
+</script>
+<h1>Resource cache acquire/release</h1>
+<p>Finite 100-lease trace over one fixed real PNG and three real GPU sessions. No sprite display.</p>
+<button id="run">Run finite resource cache trace</button>
+<canvas width="64" height="64"></canvas><canvas width="64" height="64"></canvas><canvas width="64" height="64"></canvas>
+<pre id="output"></pre>
+<script type="module">
+import { inspectResourceCache } from '/.artifacts/cache-manual/resource-cache.mjs';
+const button = document.querySelector('#run'), output = document.querySelector('#output');
+const log = (label, value) => {
+  output.textContent += label + '\n' + JSON.stringify(value, (_key, item) =>
+    typeof item === 'symbol' ? String(item) : item instanceof Error ? { name: item.name, message: item.message } : item, 2) + '\n';
+};
+async function readSource() {
+  // Host authorizes one fixed local URL. No locator is interpreted as a network permission.
+  const response = await fetch('./png-sample/rgba-2x2.png', { cache: 'no-store' });
+  if (!response.ok || !response.body) throw new Error('Selected sample unavailable');
+  const reader = response.body.getReader(), storage = new Uint8Array(4096);
+  let length = 0;
+  try {
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      if (length + value.length > storage.length) throw new Error('Fixed host read budget exceeded');
+      storage.set(value, length); length += value.length;
+    }
+  } finally { try { await reader.cancel(); } finally { reader.releaseLock(); } }
+  const bytes = storage.slice(0, length);
+  const revision = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)),
+    byte => byte.toString(16).padStart(2, '0')).join('');
+  return { bytes, revision };
+}
+button.onclick = async () => {
+  button.disabled = true; output.textContent = '';
+  try {
+    const initial = await readSource();
+    log('provenance (one separate bootstrap fetch)', { bytes: initial.bytes.length, sha256: initial.revision });
+    await inspectResourceCache([...document.querySelectorAll('canvas')], readSource, initial.revision, log);
+  } catch (error) { log('unexpected error', error); }
+  finally { button.disabled = false; }
+};
+</script>
+</html>
