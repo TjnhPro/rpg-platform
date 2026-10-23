@@ -5,6 +5,10 @@ import { resolveAtlasFrameGeometry, createAtlasTextureView, type AtlasPagePixels
   type AtlasFrameGeometry, type AtlasFrameGeometryResult } from './atlas-geometry.js';
 import type { VisualFrameReference } from './atlas-frame.js';
 import type { AtlasMetadata } from './atlas-metadata.js';
+import { captureVisualInstanceTransform, type RenderVisualInstanceTransformInput,
+  type RenderVisualInstanceTransformSnapshot } from './visual-instance-transform.js';
+import { writeVisualTransform } from './visual-transform-backend.js';
+import type { AffineTransform2D } from './planar-affine.js';
 
 export interface RenderVisualFrameBinding {
   readonly reference: VisualFrameReference;
@@ -215,6 +219,8 @@ interface MembershipControl {
   readonly update: (instance: RenderVisualInstance, properties: RenderVisualInstanceProperties) => RenderVisualInstanceSnapshot;
   readonly bind: (instance: RenderVisualInstance, input: RenderVisualResourceBindingInput | null) => RenderVisualResourceBindingSnapshot | null;
   readonly binding: (instance: RenderVisualInstance) => RenderVisualResourceBindingSnapshot | null;
+  readonly transform: (instance: RenderVisualInstance, input: RenderVisualInstanceTransformInput | null) => RenderVisualInstanceTransformSnapshot | null;
+  readonly readTransform: (instance: RenderVisualInstance) => RenderVisualInstanceTransformSnapshot | null;
 }
 
 // Weak canonical capability dispatch only: no enumerable/global scene registry.
@@ -321,6 +327,18 @@ export function getRenderVisualInstanceResource(scene: RenderVisualScene,
   return membership(scene).binding(instance);
 }
 
+/** Explicit planar update through Phase 4. null removes only the presentation transform/node. */
+export function setRenderVisualInstanceTransform(scene: RenderVisualScene, instance: RenderVisualInstance,
+  input: RenderVisualInstanceTransformInput | null): RenderVisualInstanceTransformSnapshot | null {
+  return membership(scene).transform(instance, input);
+}
+
+/** Detached last accepted transform, not a GPU/visual-health observation. */
+export function getRenderVisualInstanceTransform(scene: RenderVisualScene,
+  instance: RenderVisualInstance): RenderVisualInstanceTransformSnapshot | null {
+  return membership(scene).readTransform(instance);
+}
+
 // Separate environment: retained terminal handles cannot keep the factory's session
 // parameter alive after the detach callback has been dropped.
 function createScope(sessionId: symbol) {
@@ -328,8 +346,9 @@ function createScope(sessionId: symbol) {
   let snapshot: RenderVisualSceneSnapshot = Object.freeze({ id, sessionId, state: 'active' });
   let detach: (() => void) | undefined;
   let prepare: ((input: RenderVisualResourceBindingInput) => OwnedBinding) | undefined;
+  let writeTransform: ((instance: object, matrix: AffineTransform2D | null) => void) | undefined;
   const instances = new Map<string, { readonly handle: RenderVisualInstance; snapshot: RenderVisualInstanceSnapshot;
-    binding: OwnedBinding | undefined }>();
+    binding: OwnedBinding | undefined; transform: RenderVisualInstanceTransformSnapshot | null }>();
   const issued = new WeakSet<RenderVisualInstance>();
   let nextOrdinal = 0;
   const requireActive = (): void => {
@@ -345,14 +364,20 @@ function createScope(sessionId: symbol) {
     return entry;
   };
 
+  const releaseEntry = (entry: { readonly handle: RenderVisualInstance; binding: OwnedBinding | undefined;
+    transform: RenderVisualInstanceTransformSnapshot | null }): void => {
+    const binding = entry.binding, transformed = entry.transform !== null;
+    entry.binding = undefined; entry.transform = null;
+    // Attempt resource cleanup even if native node removal fails.
+    try { if (transformed) writeTransform?.(entry.handle, null); }
+    finally { binding?.release(); }
+  };
   const drain = (): void => {
     const previous = [...instances.values()];
     instances.clear();
     let failure: { error: unknown } | undefined;
     for (const entry of previous) {
-      const binding = entry.binding;
-      entry.binding = undefined;
-      try { binding?.release(); } catch (error) { failure ??= { error }; }
+      try { releaseEntry(entry); } catch (error) { failure ??= { error }; }
     }
     if (failure !== undefined) throw failure.error;
   };
@@ -362,7 +387,7 @@ function createScope(sessionId: symbol) {
     prepare = undefined;
     const release = detach;
     detach = undefined; // Terminal before unlinking; no retained session/subscription.
-    try { drain(); } finally { release?.(); }
+    try { drain(); } finally { writeTransform = undefined; release?.(); }
     return snapshot;
   };
   const handle: RenderVisualScene = Object.freeze({
@@ -385,7 +410,7 @@ function createScope(sessionId: symbol) {
       const observation: RenderVisualInstanceSnapshot = Object.freeze({ ...captured, sceneId: id, sessionId,
         insertionOrdinal: nextOrdinal });
       const instance = Object.freeze({ ...observation }) as RenderVisualInstance;
-      instances.set(instance.visualInstanceId, { handle: instance, snapshot: observation, binding: undefined });
+      instances.set(instance.visualInstanceId, { handle: instance, snapshot: observation, binding: undefined, transform: null });
       issued.add(instance);
       nextOrdinal += 1;
       return instance;
@@ -404,12 +429,24 @@ function createScope(sessionId: symbol) {
       const entry = instances.get(instance.visualInstanceId);
       if (entry?.handle !== instance) return false;
       instances.delete(instance.visualInstanceId);
-      const binding = entry.binding;
-      entry.binding = undefined;
-      binding?.release();
+      releaseEntry(entry);
       return true;
     },
     read: (instance): RenderVisualInstanceSnapshot => requireEntry(instance).snapshot,
+    readTransform: (instance) => requireEntry(instance).transform,
+    transform: (instance, input) => {
+      const entry = requireEntry(instance), before = entry.transform, beforeState = entry.snapshot,
+        beforeBinding = entry.binding;
+      const candidate = input === null ? null : captureVisualInstanceTransform(input);
+      const current = requireEntry(instance);
+      if (current !== entry || current.transform !== before || current.snapshot !== beforeState
+        || current.binding !== beforeBinding) throw new InstanceError('INSTANCE_CHANGED');
+      if (candidate === null && before === null) return null;
+      writeTransform!(instance, candidate?.localToClip ?? null);
+      requireEntry(instance); // Native loss/failure must not publish a successful transform.
+      entry.transform = candidate;
+      return candidate;
+    },
     binding: (instance) => {
       const binding = requireEntry(instance).binding;
       const observation = binding?.read() ?? null;
@@ -447,8 +484,9 @@ function createScope(sessionId: symbol) {
       return candidate;
     },
   });
-  return { handle, end, attach: (callback: () => void, factory: (input: RenderVisualResourceBindingInput) => OwnedBinding): void => {
-    detach = callback; prepare = factory;
+  return { handle, end, attach: (callback: () => void, factory: (input: RenderVisualResourceBindingInput) => OwnedBinding,
+    transformWriter: (instance: object, matrix: AffineTransform2D | null) => void): void => {
+    detach = callback; prepare = factory; writeTransform = transformWriter;
   } };
 }
 
@@ -473,7 +511,7 @@ export function createRenderVisualScene(session: RenderFrameSession): RenderVisu
   scope.attach(() => {
     occupiedSessions.delete(session);
     unsubscribe();
-  }, input => prepareBinding(session, input));
+  }, input => prepareBinding(session, input), (instance, matrix) => writeVisualTransform(session, instance, matrix));
   occupiedSessions.add(session);
   return scope.handle;
 }

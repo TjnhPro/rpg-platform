@@ -1,5 +1,14 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase 8 v0.8.5: [SR07 transform](checkpoints/scene-rendering-v0.8.5.md) adds
+set/get instance transform and two neutral input/snapshot types. Reuse Phase 4
+TRS/affine/alignment/projection in exact source units/axes; explicit same-project
+render-clip-2d mapping feeds private existing Three nodes. Invalid admission
+preserves last transform; native failure uses canonical terminal cleanup. null
+unsets presentation only; membership/resource rights remain. No drawable/camera
+controller, native public type, authored schema or required signature change.
+See [contract](../runtime-render/docs/scene-rendering-v0.8.5.md).
+
 Phase 8 v0.8.4: [SR06 binding](checkpoints/scene-rendering-v0.8.4.md) adds bind,
 read, safe binding classifier and four neutral input/snapshot/frame/failure types.
 Success retains independent Phase 7 cache usage; input lease remains host-owned.

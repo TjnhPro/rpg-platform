@@ -23,7 +23,10 @@ export {
   type RenderVisualResourceBindingSnapshot,
   type RenderVisualFrameBinding,
   type RenderVisualBindingFailure,
+  setRenderVisualInstanceTransform,
+  getRenderVisualInstanceTransform,
 } from './visual-scene.js';
+export { type RenderVisualInstanceTransformInput, type RenderVisualInstanceTransformSnapshot } from './visual-instance-transform.js';
 export { renderVisualResourceDemo } from './visual-resource-demo.js';
 export {
   planRenderViewportSize,

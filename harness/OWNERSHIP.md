@@ -1,5 +1,11 @@
 # Ownership decisions — do not classify by similar names
 
+v0.8.5 SR07: Runtime Render owns live instance transforms and private nodes in
+its existing Three backend. Phase 4 remains the canonical math/alignment owner;
+Phase 6 owns graphics lifetime/frame demand; Phase 7 keeps resource rights.
+Editor/Client are compatibility builds only. No Engine/Server/L1/L2 edit or
+dependency reversal. See [checkpoint](checkpoints/scene-rendering-v0.8.5.md).
+
 v0.8.4 SR06: Runtime Render owns per-instance resource binding and independent
 usage. Its existing Phase 7 cache retains another ready waiter; source loading,
 GPU allocation, shared retirement and atlas interpretation keep their canonical

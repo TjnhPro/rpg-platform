@@ -1,4 +1,5 @@
-import { Camera, REVISION, Scene, WebGLRenderer } from 'three';
+import { Camera, Object3D, REVISION, Scene, WebGLRenderer } from 'three';
+import type { AffineTransform2D } from './planar-affine.js';
 import { FrameError, getRenderFrameFailure } from './frame-failure.js';
 import { readBrowserCanvas } from './canvas-target.js';
 import type { RenderViewportSizePlan } from './viewport-size.js';
@@ -17,6 +18,7 @@ export interface ThreeFrameBackend {
   };
   readonly renderFrame: (demo?: DemoTextureRequest) => void;
   readonly uploadTexture: (sessionId: symbol, bitmap: ImageBitmap, options: RenderTextureOptions) => RenderTexture;
+  readonly setVisualTransform: (instance: object, matrix: AffineTransform2D | null) => void;
   readonly dispose: () => void;
 }
 
@@ -46,6 +48,7 @@ export function createThreeFrameBackend(
   const nativeTextures = new Map<RenderTexture, WebGLTexture>();
   let demoQuad: ReturnType<typeof createDemoQuad> | undefined;
   let textureCleanupFailed = false;
+  const visualNodes = new Map<object, Object3D>();
   const handleContextLost = (): void => {
     // Synthetic browser events alone are not evidence of actual context loss.
     if (released || contextLost || !context.isContextLost()) return;
@@ -60,6 +63,7 @@ export function createThreeFrameBackend(
     renderer = undefined;
     scene = undefined;
     camera = undefined;
+    visualNodes.clear(); // Nodes own no materials/geometry/GPU resources.
     let failed = textureCleanupFailed;
     // Invalidate every resource before releasing the renderer; never close CPU images.
     for (const texture of [...textures]) {
@@ -113,6 +117,25 @@ export function createThreeFrameBackend(
 
   return Object.freeze({
     get viewportSize() { return viewportSize; },
+    setVisualTransform: (instance: object, matrix: AffineTransform2D | null): void => {
+      if (contextLost || context.isContextLost()) throw new FrameError('CONTEXT_LOST', 'renderFrame');
+      if (released || scene === undefined) throw new FrameError('FRAME_FAILED', 'renderFrame');
+      const previous = visualNodes.get(instance);
+      if (matrix === null) {
+        visualNodes.delete(instance);
+        if (previous !== undefined) scene.remove(previous);
+        return;
+      }
+      const node = previous ?? new Object3D();
+      node.matrixAutoUpdate = false;
+      // Explicit local-plane -> clip mapping; fixed existing identity Camera, z=0.
+      // No TRS decomposition: preserve nonuniform scale/reflection/affine shear.
+      node.matrix.set(matrix.a, matrix.c, 0, matrix.tx,
+        matrix.b, matrix.d, 0, matrix.ty, 0, 0, 1, 0, 0, 0, 0, 1);
+      node.matrixWorldNeedsUpdate = true;
+      if (previous === undefined) { visualNodes.set(instance, node); scene.add(node); }
+      node.updateMatrixWorld(true);
+    },
     uploadTexture: (sessionId: symbol, bitmap: ImageBitmap, options: RenderTextureOptions): RenderTexture => {
       if (contextLost || context.isContextLost()) throw new TextureError('CONTEXT_LOST');
       if (released || renderer === undefined) throw new TextureError('SESSION_UNAVAILABLE');
@@ -254,7 +277,7 @@ export function createThreeFrameBackend(
           || context.drawingBufferHeight !== viewportSize.height) {
         throw new FrameError('FRAME_FAILED', 'renderFrame');
       }
-      // Empty scene deliberately submits a visible, opaque blue clear frame.
+      // Presentation nodes have no drawables yet; the opaque blue clear remains.
       const previousFrame = renderer.info.render.frame;
       try {
         renderer.render(scene, camera);

@@ -4,6 +4,14 @@
 
 Read root agent guidance first.
 
+- [v0.8.5 SR07](../harness/checkpoints/scene-rendering-v0.8.5.md): current instance
+  transforms reuse Phase 4 TRS/affine/alignment/projection with explicit units and
+  axes. Fixed same-project render-clip-2d mapping feeds non-drawable private nodes
+  in the existing backend. Ground pivot=anchor keeps contact under rotate/scale;
+  no texture-center inference. Validate before native write/state commit, retain
+  identity/resource rights, unlink nodes on cleanup. No native public types,
+  camera/hierarchy/draw or behavior/visual PASS inferred from build.
+
 - [v0.8.4 SR06](../harness/checkpoints/scene-rendering-v0.8.4.md): bind through
   the Phase 7 public lease, retain an independent waiter in the existing cache.
   Host lease release cannot revoke instance usage; cache/session revocation can.
