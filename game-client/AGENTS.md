@@ -4,6 +4,12 @@
 
 Read root agent guidance first.
 
+- [v0.6.12 RV17](../harness/checkpoints/render-viewport-v0.6.12.md): the same
+  private continuous browser consumer measures CSS/current DPR and calls Render
+  resize/resume before frames. Client owns observers/listeners and explicit
+  start/stop/unmount; Render alone owns backend sizing/cleanup. Root remains
+  headless-safe; no Editor imports, public API additions or gameplay tick.
+
 - [v0.6.9 RV13/RV14](../harness/checkpoints/render-viewport-v0.6.9.md): optional
   manual-frame-continuous browser entry owns explicit start/stop/rAF cancellation
   and host visibility. It calls only Render public APIs, even when demand is clean.

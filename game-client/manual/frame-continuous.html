@@ -1,17 +1,25 @@
 <!doctype html>
 <html lang="en">
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Client continuous frames — manual</title>
 <h1>Client: host-driven continuous requests</h1>
 <p>Acquire does not schedule. Start resumes with fresh host metrics and schedules
 one browser callback at a time. Stop/hidden cancels and suspends; returning visible
 requires explicit Start. Errors/native loss stop scheduling. Dispose releases the
 session, including an unwanted late acquisition. Counts are submissions, not FPS
-or displayed-frame measurements. The scene remains the same opaque blue clear.</p>
+or displayed-frame measurements. CSS resize and browser DPR changes are forwarded
+to Render; hidden/zero size requires explicit Start after restoration. Unmount
+removes host observers/listeners and releases graphics; reload to mount again.
+The scene remains the same opaque blue clear, not Scene rendering.</p>
 <canvas width="320" height="180" style="width:320px;height:180px" aria-label="Continuous target"></canvas>
 <p><button id="acquire">Acquire</button> <button id="start">Start / resume</button>
 <button id="stop">Stop / suspend</button> <button id="dispose">Dispose</button>
 <button id="observe">Observe</button></p>
+<p><button id="resize">Toggle CSS width 320 / 480</button>
+<button id="zero">Zero CSS height / suspend</button>
+<button id="restore">Restore CSS height</button>
+<button id="unmount">Unmount host / release</button></p>
 <pre id="output" aria-live="polite">Not acquired. No callbacks scheduled.</pre>
 <script type="importmap">
 {"imports":{"@rpg-platform/runtime-render":"/runtime-render/dist/index.js","three":"/node_modules/three/build/three.module.js"}}

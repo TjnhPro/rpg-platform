@@ -1,5 +1,10 @@
 # Ownership decisions — do not classify by similar names
 
+v0.6.12 RV17: Client owns its independent browser viewport host, CSS/DPR metrics,
+continuous callbacks, explicit start/stop and observer/listener teardown. Existing
+Render root APIs suffice; no Editor dependency or Render/source ownership change.
+See [checkpoint](checkpoints/render-viewport-v0.6.12.md).
+
 v0.6.11 RV16: Editor owns its browser viewport host, canvas/CSS/DPR measurement,
 on-demand callback, observers/listeners and pending-acquisition unmount policy.
 Render owns actual backend/viewport/cleanup; existing root APIs suffice. No Render

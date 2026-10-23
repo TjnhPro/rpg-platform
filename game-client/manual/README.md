@@ -1,36 +1,57 @@
-# Manual Client browser host
+# Manual Client viewport host — v0.6.12 RV17
 
-After `npm run build -- --force`, serve the workspace root, for example with
-`python -m http.server 8080 --bind 127.0.0.1`, then open
+Build with `npm run build -- --force`, serve the workspace root, e.g.
+`python -m http.server 8080 --bind 127.0.0.1`, and open
 http://127.0.0.1:8080/game-client/manual/frame-continuous.html.
-The page uses the real compiled Client browser entry and Render public root,
-with local Three from the locked install. It is excluded from package-root
-evaluation. No runner, assertions, mocks or automatic startup.
+This independent page imports the compiled Client browser entry and Render public
+root, with local locked Three. Client imports neither Editor nor Three. The Client
+package root never imports this browser entry. No assertions, runner or mocks.
 
-Acquire, then Start. Acquire alone submits/schedules nothing. Start applies fresh
-positive host metrics and resumes, then requests one Render frame per host browser
-callback. Repeated Start keeps at most one pending callback. The counter records
-returned submission receipts, not FPS, GPU completion or displayed frames. The
-scene is still an opaque blue clear: no animation/gameplay update is implied.
+Manual review procedure (not executed at this checkpoint):
 
-Stop cancels the callback and suspends without disposing. Start explicitly resumes
-the same session. Hidden document stops/suspends; returning visible does not restart.
-Dispose/page exit cancels and releases, including an unwanted late acquisition.
-Stop/hidden while acquiring marks the late result unwanted. Acquire explicitly
-again to replace a terminal session; never auto-recover loss or retry failures.
+1. Acquire, then Observe: actual graphics acquisition and measured CSS/current
+   browser DPR configuration, initially suspended, no scheduled/submitted frame.
+   Start applies fresh metrics/resumes the same session and requests continuously.
+   Repeated Start must retain at most one pending browser callback. Receipts count
+   submissions, not FPS, GPU completion or displayed frames. Expected visual is
+   the existing opaque blue clear, not Scene rendering or animation.
+2. Toggle CSS width while running. Compare requested CSS metrics/DPR with Render's
+   configured drawing-buffer extent and later receipt viewport. Change browser
+   zoom or move between monitors with different DPR; media query re-arms and
+   ResizeObserver/window resize deliver host measurements. Each callback also
+   remeasures before submission. The canvas is untransformed, borderless and
+   padding-free; its bounds represent logical content size for this demo only.
+   Render performs all pixel rounding and limit checks. Host limits are 4096 per
+   axis / 4,000,000 pixels, with rejection instead of clamping.
+3. Stop suspends and cancels; resize while stopped must not schedule or resume.
+   Start explicitly resumes. Zero CSS height cancels/suspends without setting a
+   zero native buffer. Restore height alone must not resume; press Start. Hidden
+   tab also stops/suspends and requires explicit Start when visible again.
+4. Dispose releases the held session while keeping page host controls/observers
+   available for explicit Acquire. Unmount/pagehide closes the host permanently,
+   disconnects observers/media/window/document/canvas listeners and releases it.
+   Reload to mount again, including after BFCache return; no automatic recreation.
+   The canvas/CSS remain host-owned. Cleanup failure remains visible through the
+   retained acquisition's terminal snapshot/cleanupFailed; no quarantine reset.
+5. Cold-cache network throttling permits Stop/Dispose/Unmount while acquisition
+   is pending. There is no abort API: the original handler disposes unwanted late
+   results and never adopts/configures/schedules them. Acquire is blocked until
+   the prior operation settles. No fake delays or success instrumentation.
+6. Native loss review uses the actual DevTools procedure in the
+   [Render guide](../../runtime-render/manual/README.md), when available. The host
+   cancels callbacks; Render alone detects/cleans up real loss. Observe after event
+   dispatch because the host listener can run before Render's. No synthetic event
+   or automatic retry/recovery. Explicit Acquire may still reject on a lost or
+   quarantined target. Reload/new target is a host decision, not promised recovery.
 
-Use the native DevTools loss procedure in [Render guide](../../runtime-render/manual/README.md)
-on this page's canvas if the extension exists. Host loss listener cancels scheduling;
-Render alone validates native loss/cleans up. Listener ordering can print a snapshot
-before Render handles the same event; use Observe afterwards. No synthetic event
-is loss evidence. Terminal/suspended checks stop callbacks; unexpected exceptions
-cancel instead of scheduling retries. Existing direct renderFrame rejection remains.
+Browser requirements: modern same-realm HTMLCanvasElement/WebGL2, ResizeObserver,
+matchMedia change events and requestAnimationFrame. References:
+[ResizeObserver](https://drafts.csswg.org/resize-observer/),
+[CSSOM View](https://drafts.csswg.org/cssom-view/),
+[HTML animation frames](https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#animation-frames).
+No polyfill/fallback backend, gameplay tick, timing contract or Render-owned loop.
 
-Browser callback/cancellation policy follows the
-[HTML animation frames specification](https://html.spec.whatwg.org/multipage/imagebitmap-and-animations.html#animation-frames).
-This host deliberately ignores callback timestamps; Render needs no new timing API.
-
-**Compiled only at v0.6.9. FEATURE_NOT_VERIFIED / VISUAL_NOT_VERIFIED.**
-Actual start/stop/restart, hidden-tab cancellation, native loss/cleanup, real frame
-submission and visual blue pixels have not been observed. No measured performance
-claim, fixed timestep, worker, game-loop kernel or Render-owned singleton.
+**BUILD_PASS is compilation only. FEATURE_NOT_VERIFIED / VISUAL_NOT_VERIFIED.**
+No browser frame, resize/DPR/visibility delivery, pending-close race, native loss,
+cleanup, GPU memory reclamation or visual blue pixels have been observed here.
+Manual functional/visual acceptance remains Developer-owned. Phase6 remains open.

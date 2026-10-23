@@ -1,5 +1,11 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase6 v0.6.12 RV17: [Client viewport integration](checkpoints/render-viewport-v0.6.12.md)
+uses the same existing Render root as Editor, with Client-owned continuous browser
+requests and measured CSS/DPR resize/resume. Public exports/signatures, package
+dependencies and authored Scene/Document contracts are unchanged. Browser entry
+is separate from the import-safe Client root; no Editor runtime dependency.
+
 Phase6 v0.6.11 RV16: [Editor viewport host](checkpoints/render-viewport-v0.6.11.md)
 integrates existing Render public graphics/viewport/demand APIs in an internal
 browser module, consumed by Editor's manual host. Root contracts remain
