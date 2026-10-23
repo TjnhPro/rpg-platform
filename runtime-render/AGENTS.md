@@ -4,6 +4,13 @@
 
 Read root agent guidance first.
 
+- [v0.8.3 SR05](../harness/checkpoints/scene-rendering-v0.8.3.md): add remains
+  creation; replace only current correlation through exact live handle. Read current
+  state via getRenderVisualInstanceSnapshot; handle fields remain registration
+  history. Update preserves handle/ID/ordinal/order; equal props reuse snapshot.
+  Validate before commit, recheck provenance/terminal and nested changes. Known
+  admission errors classify safely; no transforms/resources/native state yet.
+
 - [v0.8.2 SR03/SR04](../harness/checkpoints/scene-rendering-v0.8.2.md): Render
   root owns immutable scene-local membership. Caller string live keys differ from
   runtime scene/session symbols and optional neutral authored correlation. Remove

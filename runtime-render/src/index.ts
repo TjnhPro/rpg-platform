@@ -10,6 +10,12 @@ export {
   type RenderVisualInstance,
   type RenderVisualInstanceInput,
   type RenderVisualCorrelation,
+  getRenderVisualInstanceSnapshot,
+  updateRenderVisualInstance,
+  getRenderVisualInstanceFailure,
+  type RenderVisualInstanceProperties,
+  type RenderVisualInstanceSnapshot,
+  type RenderVisualInstanceFailure,
 } from './visual-scene.js';
 export { renderVisualResourceDemo } from './visual-resource-demo.js';
 export {

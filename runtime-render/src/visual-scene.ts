@@ -57,11 +57,48 @@ export interface RenderVisualInstance {
   readonly correlation: RenderVisualCorrelation | null;
 }
 
+/** Complete replace payload for SR05; no identity, transforms or resource rights. */
+export interface RenderVisualInstanceProperties {
+  readonly correlation: RenderVisualCorrelation | null;
+}
+
+/** Detached current-state observation, not a capability or GPU-readiness claim. */
+export interface RenderVisualInstanceSnapshot extends RenderVisualInstanceProperties {
+  readonly visualInstanceId: string;
+  readonly sceneId: symbol;
+  readonly sessionId: symbol;
+  readonly insertionOrdinal: number;
+}
+
+export interface RenderVisualInstanceFailure {
+  readonly code: 'INVALID_DESCRIPTOR' | 'INVALID_ID' | 'DUPLICATE_ID'
+    | 'FOREIGN_SCENE' | 'FOREIGN_INSTANCE' | 'MISSING_INSTANCE' | 'INSTANCE_CHANGED'
+    | 'SCENE_DISPOSED' | 'SESSION_UNAVAILABLE';
+}
+
+class InstanceError extends TypeError {
+  readonly #failure: RenderVisualInstanceFailure;
+  constructor(code: RenderVisualInstanceFailure['code']) {
+    super(`Visual instance operation rejected: ${code}`);
+    this.#failure = Object.freeze({ code });
+  }
+  static classify(error: unknown): RenderVisualInstanceFailure | undefined {
+    return typeof error === 'object' && error !== null && #failure in error ? error.#failure : undefined;
+  }
+}
+
+/** Safe package-branded admission reason; unknown host exceptions remain unknown. */
+export function getRenderVisualInstanceFailure(error: unknown): RenderVisualInstanceFailure | undefined {
+  return InstanceError.classify(error);
+}
+
 interface MembershipControl {
   readonly add: (input: RenderVisualInstanceInput) => RenderVisualInstance;
   readonly get: (id: string) => RenderVisualInstance | undefined;
   readonly list: () => readonly RenderVisualInstance[];
   readonly remove: (instance: RenderVisualInstance) => boolean;
+  readonly read: (instance: RenderVisualInstance) => RenderVisualInstanceSnapshot;
+  readonly update: (instance: RenderVisualInstance, properties: RenderVisualInstanceProperties) => RenderVisualInstanceSnapshot;
 }
 
 // Weak canonical capability dispatch only: no enumerable/global scene registry.
@@ -69,35 +106,42 @@ const memberships = new WeakMap<RenderVisualScene, MembershipControl>();
 
 function membership(scene: RenderVisualScene): MembershipControl {
   const control = memberships.get(scene);
-  if (control === undefined) throw new TypeError('Expected a canonical visual scene');
+  if (control === undefined) throw new InstanceError('FOREIGN_SCENE');
   return control;
 }
 
 function dataRecord(value: unknown, required: readonly string[], optional: readonly string[] = []): Record<string, unknown> {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-    throw new TypeError('Visual instance input must be a plain data record');
+    throw new InstanceError('INVALID_DESCRIPTOR');
   }
   const prototype = Object.getPrototypeOf(value);
-  if (prototype !== Object.prototype && prototype !== null) throw new TypeError('Expected a plain data record');
+  if (prototype !== Object.prototype && prototype !== null) throw new InstanceError('INVALID_DESCRIPTOR');
   const keys = Reflect.ownKeys(value);
   if (required.some(key => !keys.includes(key))
     || keys.some(key => typeof key !== 'string' || (!required.includes(key) && !optional.includes(key)))) {
-    throw new TypeError('Unexpected or missing visual instance fields');
+    throw new InstanceError('INVALID_DESCRIPTOR');
   }
   const captured: Record<string, unknown> = Object.create(null) as Record<string, unknown>;
   for (const key of keys) {
     const field = Object.getOwnPropertyDescriptor(value, key);
-    if (!field?.enumerable || !('value' in field)) throw new TypeError('Expected enumerable data fields');
+    if (!field?.enumerable || !('value' in field)) throw new InstanceError('INVALID_DESCRIPTOR');
     captured[key as string] = field.value;
   }
   return captured;
 }
 
-function instanceToken(value: unknown): string {
+function instanceToken(value: unknown, code: 'INVALID_DESCRIPTOR' | 'INVALID_ID' = 'INVALID_DESCRIPTOR'): string {
   if (typeof value !== 'string' || value.length === 0 || /\s/u.test(value)) {
-    throw new TypeError('Visual identity fields must be nonempty whitespace-free strings');
+    throw new InstanceError(code);
   }
   return value;
+}
+
+function captureCorrelation(value: unknown): RenderVisualCorrelation | null {
+  if (value === null) return null;
+  const fields = dataRecord(value, ['projectId', 'sceneId', 'objectId']);
+  return Object.freeze({ projectId: instanceToken(fields.projectId),
+    sceneId: instanceToken(fields.sceneId), objectId: instanceToken(fields.objectId) });
 }
 
 function captureInstance(input: RenderVisualInstanceInput): {
@@ -105,12 +149,7 @@ function captureInstance(input: RenderVisualInstanceInput): {
 } {
   const data = dataRecord(input, ['visualInstanceId'], ['correlation']);
   const visualInstanceId = instanceToken(data.visualInstanceId);
-  let correlation: RenderVisualCorrelation | null = null;
-  if (Object.hasOwn(data, 'correlation') && data.correlation !== null) {
-    const fields = dataRecord(data.correlation, ['projectId', 'sceneId', 'objectId']);
-    correlation = Object.freeze({ projectId: instanceToken(fields.projectId),
-      sceneId: instanceToken(fields.sceneId), objectId: instanceToken(fields.objectId) });
-  }
+  const correlation = Object.hasOwn(data, 'correlation') ? captureCorrelation(data.correlation) : null;
   return { visualInstanceId, correlation };
 }
 
@@ -137,17 +176,43 @@ export function removeRenderVisualInstance(scene: RenderVisualScene, instance: R
   return membership(scene).remove(instance);
 }
 
+/** Read current props through an exact live capability. Historical snapshots stay unchanged. */
+export function getRenderVisualInstanceSnapshot(
+  scene: RenderVisualScene, instance: RenderVisualInstance,
+): RenderVisualInstanceSnapshot {
+  return membership(scene).read(instance);
+}
+
+/**
+ * Replace the complete SR05 props after validation. Keeps handle/ID/ordinal and
+ * insertion order. Equal props return the existing snapshot; no recreation/draw.
+ */
+export function updateRenderVisualInstance(
+  scene: RenderVisualScene, instance: RenderVisualInstance, properties: RenderVisualInstanceProperties,
+): RenderVisualInstanceSnapshot {
+  return membership(scene).update(instance, properties);
+}
+
 // Separate environment: retained terminal handles cannot keep the factory's session
 // parameter alive after the detach callback has been dropped.
 function createScope(sessionId: symbol) {
   const id = Symbol('visual-scene');
   let snapshot: RenderVisualSceneSnapshot = Object.freeze({ id, sessionId, state: 'active' });
   let detach: (() => void) | undefined;
-  const instances = new Map<string, RenderVisualInstance>();
+  const instances = new Map<string, { readonly handle: RenderVisualInstance; snapshot: RenderVisualInstanceSnapshot }>();
   const issued = new WeakSet<RenderVisualInstance>();
   let nextOrdinal = 0;
   const requireActive = (): void => {
-    if (snapshot.state === 'disposed') throw new TypeError('Visual scene is disposed');
+    if (snapshot.state === 'disposed') {
+      throw new InstanceError(snapshot.reason === 'session-ended' ? 'SESSION_UNAVAILABLE' : 'SCENE_DISPOSED');
+    }
+  };
+  const requireEntry = (instance: RenderVisualInstance) => {
+    requireActive();
+    if (!issued.has(instance)) throw new InstanceError('FOREIGN_INSTANCE');
+    const entry = instances.get(instance.visualInstanceId);
+    if (entry?.handle !== instance) throw new InstanceError('MISSING_INSTANCE');
+    return entry;
   };
 
   const end = (reason: RenderVisualSceneDisposal['reason']): RenderVisualSceneDisposal => {
@@ -174,28 +239,45 @@ function createScope(sessionId: symbol) {
       const captured = captureInstance(input);
       // Reflection on untrusted input may reenter/dispose; recheck before mutation.
       requireActive();
-      if (instances.has(captured.visualInstanceId)) throw new TypeError('Duplicate live visualInstanceId');
+      if (instances.has(captured.visualInstanceId)) throw new InstanceError('DUPLICATE_ID');
       if (!Number.isSafeInteger(nextOrdinal)) throw new RangeError('Visual instance insertion ordinal exhausted');
-      const instance = Object.freeze({ ...captured, sceneId: id, sessionId,
-        insertionOrdinal: nextOrdinal }) as RenderVisualInstance;
-      instances.set(instance.visualInstanceId, instance);
+      const observation: RenderVisualInstanceSnapshot = Object.freeze({ ...captured, sceneId: id, sessionId,
+        insertionOrdinal: nextOrdinal });
+      const instance = Object.freeze({ ...observation }) as RenderVisualInstance;
+      instances.set(instance.visualInstanceId, { handle: instance, snapshot: observation });
       issued.add(instance);
       nextOrdinal += 1;
       return instance;
     },
     get: (key): RenderVisualInstance | undefined => {
       requireActive();
-      return instances.get(instanceToken(key));
+      return instances.get(instanceToken(key, 'INVALID_ID'))?.handle;
     },
     list: (): readonly RenderVisualInstance[] => {
       requireActive();
-      return Object.freeze([...instances.values()]);
+      return Object.freeze([...instances.values()].map(entry => entry.handle));
     },
     remove: (instance): boolean => {
       requireActive();
-      if (!issued.has(instance)) throw new TypeError('Expected an instance issued by this visual scene');
-      if (instances.get(instance.visualInstanceId) !== instance) return false;
+      if (!issued.has(instance)) throw new InstanceError('FOREIGN_INSTANCE');
+      if (instances.get(instance.visualInstanceId)?.handle !== instance) return false;
       return instances.delete(instance.visualInstanceId);
+    },
+    read: (instance): RenderVisualInstanceSnapshot => requireEntry(instance).snapshot,
+    update: (instance, properties): RenderVisualInstanceSnapshot => {
+      const before = requireEntry(instance).snapshot;
+      const data = dataRecord(properties, ['correlation']);
+      const correlation = captureCorrelation(data.correlation);
+      // Input reflection may mutate/remove/terminate via host Proxy traps.
+      const entry = requireEntry(instance);
+      if (entry.snapshot !== before) throw new InstanceError('INSTANCE_CHANGED');
+      const previous = before.correlation;
+      if (previous === correlation || (previous !== null && correlation !== null
+        && previous.projectId === correlation.projectId && previous.sceneId === correlation.sceneId
+        && previous.objectId === correlation.objectId)) return before;
+      const candidate: RenderVisualInstanceSnapshot = Object.freeze({ ...before, correlation });
+      entry.snapshot = candidate; // Single commit; no ID map mutation/reorder/ordinal increment.
+      return candidate;
     },
   });
   return { handle, end, attach: (callback: () => void): void => { detach = callback; } };

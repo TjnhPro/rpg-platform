@@ -1,5 +1,14 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase 8 v0.8.3: [SR05 operations](checkpoints/scene-rendering-v0.8.3.md) adds
+getRenderVisualInstanceSnapshot/updateRenderVisualInstance and typed props/snapshot/
+failure plus getRenderVisualInstanceFailure. Current correlation uses full replace;
+issued handles retain registration history. Update preserves identity/order/ordinal,
+validates candidate before one commit and rejects stale/foreign/terminal targets.
+No-op returns current snapshot; remove remains exact-handle/idempotent. Existing
+TypeError compatibility is preserved with branded safe codes; no native objects,
+resource rights or extra state schema. See [contract](../runtime-render/docs/scene-rendering-v0.8.3.md).
+
 Phase 8 v0.8.2: [SR03/SR04 membership](checkpoints/scene-rendering-v0.8.2.md)
 adds seven Render-root names for add/get/list/remove and immutable instance/input/
 correlation types. Exact issued handle required for removal; caller keys are live

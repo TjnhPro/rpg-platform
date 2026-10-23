@@ -1,5 +1,10 @@
 # Ownership decisions — do not classify by similar names
 
+v0.8.3 SR05: Runtime Render owns current correlation state, exact-handle read/
+replacement and admission classification in its existing visual scope. Host input
+is detached metadata; no authored/Engine/native ownership transfer. Editor/Client
+are compatibility builds only. See [checkpoint](checkpoints/scene-rendering-v0.8.3.md).
+
 v0.8.2 SR03/SR04: Runtime Render owns live visual registration identity/membership
 inside the canonical visual scope. Neutral correlation is detached metadata, not
 an Editor dependency or unique live key. Editor/Client are build-only consumers;
