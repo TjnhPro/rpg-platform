@@ -1,0 +1,95 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Independent Editor and Client visual scenes — v0.8.12</title>
+<style>body{font:16px system-ui;max-width:1000px;margin:2rem auto}section{display:inline-block;vertical-align:top;margin:1rem}canvas{display:block;border:1px solid #888}button{margin:4px}pre{white-space:pre-wrap;overflow-wrap:anywhere}</style>
+<h1>Editor and Client visual scene hosts</h1>
+<p>Optional manual observation only. Select an authorized PNG (up to 1 MiB).
+Both hosts use the same Render module and separate providers, caches, canvases and sessions.
+No cross-context GPU texture sharing is claimed. Reload before replacing the selection.</p>
+<input id="png" type="file" accept="image/png"><button id="open">Open both</button>
+<button id="inspect">Observe identities</button>
+<section><h2>Editor authored preview</h2><canvas id="editor" width="320" height="240"></canvas>
+<button id="editor-move">Move first</button><button id="editor-remove">Remove second</button>
+<button id="editor-close">Close Editor</button></section>
+<section><h2>Client neutral presentation</h2><canvas id="client" width="320" height="240"></canvas>
+<button id="client-add">Add</button><button id="client-move">Move first</button>
+<button id="client-hide">Hide first</button><button id="client-show">Show first</button>
+<button id="client-order">Order first</button><button id="client-remove">Remove second</button>
+<button id="client-draw">Draw</button><button id="client-close">Close Client</button></section>
+<p>Frame receipts and different session IDs are observations, not visual/GPU-health proof.</p>
+<pre id="output"></pre>
+<script type="importmap">
+{"imports":{"@rpg-platform/runtime-render":"/runtime-render/dist/index.js","@rpg-platform/editor":"/editor/dist/index.js","three":"/node_modules/three/build/three.module.js"}}
+</script>
+<script type="module">
+// Comparison composition only: neither project imports the other.
+import { mountClientSceneDemo } from '/game-client/dist/manual-scene-host.js';
+import { openEditorScenePreview } from '/.artifacts/scene-preview/scene-preview.mjs';
+import { createAssetCatalog } from '@rpg-platform/editor';
+const output = document.querySelector('#output');
+const log = (event, data) => { output.textContent += `${event}: ${JSON.stringify(data,
+  (_, value) => typeof value === 'symbol' ? String(value) : value)}\n`; };
+let editor, client, opened = false, alive = true, editorWanted = true;
+const projectId = 'independent-scene-hosts', assetId = 'selected-image';
+const descriptor = { identity: { projectId, resourceId: assetId }, mediaType: 'image/png',
+  sources: [{ role: 'image', locator: { type: 'project-relative', path: 'selected/image.png' } }] };
+const providerFor = (file, revision) => {
+  const scope = Object.freeze({ projectId, providerId: Symbol('file-provider'), authorizationGeneration: revision });
+  return { scope, async read(request) {
+    if (request.scope.providerId !== scope.providerId || request.scope.authorizationGeneration !== revision
+      || request.scope.projectId !== projectId || request.identity.projectId !== projectId
+      || request.identity.resourceId !== assetId || request.sourceIndex !== 0 || request.source.role !== 'image'
+      || request.source.locator.type !== 'project-relative' || request.source.locator.path !== 'selected/image.png') {
+      return { status: 'failed', code: 'SOURCE_DENIED' };
+    }
+    if (file.size > Math.min(request.maxBytes, 1048576)) return { status: 'failed', code: 'CONTENT_TOO_LARGE' };
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    return { status: 'provided', bytes, contentLength: bytes.length, mediaType: 'image/png', revision };
+  } };
+};
+const observe = () => {
+  const e = editor?.inspect(), c = client?.inspect();
+  const editorId = e?.instances[0]?.sessionId;
+  log('Same Render implementation; independently issued session IDs', {
+    editor: e, client: c, differentSessionIds: editorId && c?.sessionId ? editorId !== c.sessionId : null,
+  });
+};
+const actions = {
+  async open() {
+    if (opened) throw new TypeError('Reload to mount new hosts');
+    const file = document.querySelector('#png').files[0];
+    if (!file || file.size > 1048576) throw new TypeError('Select an authorized PNG up to 1 MiB');
+    opened = true;
+    const bytes = await file.arrayBuffer();
+    const revision = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)), b => b.toString(16).padStart(2, '0')).join('');
+    if (!alive) return;
+    const catalog = createAssetCatalog({ projectId, definitions: [{ identity: { projectId, assetId },
+      kind: 'image', metadata: {}, sources: descriptor.sources }] });
+    client = mountClientSceneDemo(document.querySelector('#client'), log);
+    const results = await Promise.allSettled([
+      client.open(providerFor(file, revision), { descriptor, sourceIndex: 0, sourceRevision: revision, frame: null }),
+      openEditorScenePreview({ target: document.querySelector('#editor') }, providerFor(file, revision),
+        catalog, assetId, 'intentionally-missing', revision, log).then(controller => {
+          if (!alive || !editorWanted) controller.close(); else editor = controller;
+        }),
+    ]);
+    log('Host open outcomes; inspect failures separately', results.map(result => result.status)); observe();
+  },
+  inspect: observe,
+  'editor-move': () => editor.moveFirst(190), 'editor-remove': () => editor.removeSecond(),
+  'editor-close': () => { editorWanted = false; const old = editor; editor = undefined; old?.close(); },
+  'client-add': () => client.add(), 'client-move': () => client.move('client-visual-1', 120, 195),
+  'client-hide': () => client.visible('client-visual-1', false), 'client-show': () => client.visible('client-visual-1', true),
+  'client-order': () => client.order('client-visual-1', 10), 'client-remove': () => client.remove('client-visual-2'),
+  'client-draw': () => client.draw(), 'client-close': () => client?.close(),
+};
+for (const [id, action] of Object.entries(actions)) document.getElementById(id).onclick = async () => {
+  try { await action(); } catch (error) { log('Manual host action failed', { name: error?.name, message: error?.message }); }
+};
+window.addEventListener('pagehide', () => {
+  alive = false;
+  for (const close of [() => client?.close(), () => editor?.close()]) {
+    try { close(); } catch (error) { log('Page cleanup uncertain', { name: error?.name }); }
+  }
+}, { once: true });
+</script>

@@ -930,3 +930,8 @@ Scene synchronization, policy and per-object partial outcomes. Render roots and
 persisted schemas unchanged; reuse Phase2/3/4/7 and canonical visual instances.
 See [contract](../editor/docs/scene-rendering-v0.8.11.md) and
 [checkpoint](checkpoints/scene-rendering-v0.8.11.md). Browser NOT_EXECUTED.
+Phase8 v0.8.12 SR19 adds an optional Client browser Scene consumer through existing
+Render roots; zero public symbol/signature changes (Render186/Editor138/Client0).
+Separate host/provider/session/context, same Render implementation; no GPU sharing
+promise. [Contract](../game-client/docs/scene-rendering-v0.8.12.md),
+[checkpoint](checkpoints/scene-rendering-v0.8.12.md). Browser NOT_EXECUTED.

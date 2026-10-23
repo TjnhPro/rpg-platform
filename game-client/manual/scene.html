@@ -1,0 +1,53 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Client-only Scene consumer — v0.8.12</title>
+<h1>Client-only neutral visual scene</h1>
+<p>Select an authorized PNG up to 1 MiB. This page imports no Editor module.
+Reload before opening another mount. Frame submission is not display proof.</p>
+<input id="file" type="file" accept="image/png"><button id="open">Open</button>
+<canvas id="canvas" width="320" height="240" style="display:block;border:1px solid"></canvas>
+<button id="add">Add</button><button id="move">Move first</button><button id="hide">Hide first</button>
+<button id="show">Show first</button><button id="order">Order first</button>
+<button id="remove">Remove second</button><button id="draw">Draw</button>
+<button id="inspect">Observe</button><button id="close">Close</button><pre id="output"></pre>
+<script type="importmap">
+{"imports":{"@rpg-platform/runtime-render":"/runtime-render/dist/index.js","three":"/node_modules/three/build/three.module.js"}}
+</script>
+<script type="module">
+import { mountClientSceneDemo } from '/game-client/dist/manual-scene-host.js';
+const output = document.querySelector('#output');
+const log = (label, value) => { output.textContent += `${label}: ${JSON.stringify(value,
+  (_, item) => typeof item === 'symbol' ? String(item) : item)}\n`; };
+const host = mountClientSceneDemo(document.querySelector('#canvas'), log);
+const projectId = 'client-scene-only', resourceId = 'selected-png';
+const descriptor = { identity: { projectId, resourceId }, mediaType: 'image/png',
+  sources: [{ role: 'image', locator: { type: 'project-relative', path: 'selected/image.png' } }] };
+const actions = {
+  async open() {
+    const file = document.querySelector('#file').files[0];
+    if (!file || file.size > 1048576) throw new TypeError('Select an authorized PNG up to 1 MiB');
+    const revision = 'immutable-file-selection-1';
+    const scope = { projectId, providerId: Symbol('client-file'), authorizationGeneration: revision };
+    const provider = { scope, async read(request) {
+      if (request.scope.providerId !== scope.providerId || request.scope.authorizationGeneration !== revision
+        || request.scope.projectId !== projectId || request.identity.projectId !== projectId
+        || request.identity.resourceId !== resourceId || request.sourceIndex !== 0 || request.source.role !== 'image'
+        || request.source.locator.type !== 'project-relative' || request.source.locator.path !== 'selected/image.png') {
+        return { status: 'failed', code: 'SOURCE_DENIED' };
+      }
+      if (file.size > Math.min(request.maxBytes, 1048576)) return { status: 'failed', code: 'CONTENT_TOO_LARGE' };
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      return { status: 'provided', bytes, contentLength: bytes.length, mediaType: 'image/png', revision };
+    } };
+    await host.open(provider, { descriptor, sourceIndex: 0, sourceRevision: revision, frame: null });
+  },
+  add: () => host.add(), move: () => host.move('client-visual-1', 120, 195),
+  hide: () => host.visible('client-visual-1', false), show: () => host.visible('client-visual-1', true),
+  order: () => host.order('client-visual-1', 10), remove: () => host.remove('client-visual-2'),
+  draw: () => host.draw(), inspect: () => log('Client observations', host.inspect()), close: () => host.close(),
+};
+for (const [id, action] of Object.entries(actions)) document.getElementById(id).onclick = async () => {
+  try { await action(); } catch (error) { log('Client action failed', { name: error?.name, message: error?.message }); }
+};
+window.addEventListener('pagehide', () => host.close(), { once: true });
+</script>

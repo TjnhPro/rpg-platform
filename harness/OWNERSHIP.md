@@ -241,3 +241,7 @@ runtime-only map. Runtime Render exclusively owns live instances, transforms,
 ordering, retained resource rights and drawing. No Engine/Client/Server change;
 no authored schema, public Render dependency direction or GPU ownership transfer.
 See [checkpoint](checkpoints/scene-rendering-v0.8.11.md).
+v0.8.12 SR19: **game-client** owns neutral sample presentation and browser host
+orchestration. Runtime Render remains canonical scene/resource/draw implementation;
+Harness manual composition alone wires Editor and Client, without a production
+dependency. No Engine/Server change or gameplay/network authority inferred.

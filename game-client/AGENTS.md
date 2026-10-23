@@ -22,3 +22,7 @@ Read root agent guidance first.
 - Editor is not a runtime dependency. Use exported content independently of Editor process/state.
 - A Client may simulate local waves/battles if the game's chosen authority model allows it, but cannot dictate Server policy just by reporting rewards.
 - Build-only automated verification, no UI tests or synthetic PASS.
+- [v0.8.12 SR19](docs/scene-rendering-v0.8.12.md): optional manual-scene-host owns
+  neutral sample inputs/canvas/provider/rAF only, outside the public root. Render
+  owns visual instances/resource/cache/backend. No Editor imports/authored formats,
+  gameplay tick, protocol or cross-context GPU sharing claim. Build-only evidence.

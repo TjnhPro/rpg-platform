@@ -70,3 +70,6 @@ Manual functional/visual acceptance remains Developer-owned. Phase6 remains open
 selection, Render loading/cache/frame-view consumption, missing source and disposal.
 The Harness-only two-host page supports same-realm Editor isolation inspection.
 No Editor dependency, tests or sprite renderer. Browser NOT_EXECUTED.
+- [v0.8.12 neutral Scene host](scene.md): Client-only PNG/visual-instance page and
+  Harness two-host comparison with the existing Editor preview. Compiled only;
+  browser NOT_EXECUTED. No Editor runtime dependency or new root API.
