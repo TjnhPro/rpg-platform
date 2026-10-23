@@ -8,6 +8,8 @@ import { getVisualResourceCacheFailure as cacheFailure, type VisualResourceCache
 import { VisualPresentationError } from './visual-presentation-error.js';
 export { getRenderCameraViewportSnapshot, type RenderCameraViewportSnapshot } from './camera-viewport.js';
 export { projectRenderCameraPoint, type RenderCameraProjectionResult } from './camera-projection.js';
+export { viewportToRenderCameraSelectedPlane, screenToRenderCameraSelectedPlane,
+  type RenderCameraSelectedPlaneInput, type RenderCameraSelectedPlaneResult } from './camera-inverse.js';
 export { getRenderVisualSceneDiagnostics, type RenderVisualSceneDiagnostics } from './visual-scene.js';
 
 /** Safe error data only. null cleanup means unknown/not reported by that domain. */

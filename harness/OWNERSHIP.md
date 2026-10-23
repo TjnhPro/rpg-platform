@@ -294,3 +294,5 @@ See [review packet](../runtime-render/docs/scene-rendering-v0.8.14.md). Develope
 alone accepts the phase and authorizes merge/release; no next phase is implemented.
 
 v0.9.6 CM11/CM12: runtime-render owns canonical camera-to-viewport/screen projection through Phase4, including explicit logical or accepted Phase6 context. Editor/Client compatibility consumers only; Harness evidence, no owner/dependency move, Engine/Server/L1/L2 unchanged. [Checkpoint](checkpoints/camera-v0.9.6.md).
+
+v0.9.7 CM13: runtime-render owns constrained selected-plane camera inverse through Phase4. Host owns logical/screen measurements; Phase6 owns accepted receipt freshness. Editor/Client are compatibility consumers, Harness records evidence. No owner/dependency transfer or Engine/Server/L1/L2 change. [Checkpoint](checkpoints/camera-v0.9.7.md).

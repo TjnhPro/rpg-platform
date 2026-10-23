@@ -31,6 +31,17 @@ export function projectRenderCameraPoint(camera: RenderCamera, logical: Viewport
     readonly session: RenderFrameSession;
     readonly receipt: RenderViewportResizeReceipt;
   } | null): RenderCameraProjectionResult {
+  const context = captureRenderCameraProjectionContext(camera, logical, accepted);
+  const { view, mapping, acceptedViewport } = context;
+  const viewportPoint = projectPointToViewport2D(mapping, point);
+  const screenPoint = mapping.metrics.screen === null ? null : viewportPointToScreen2D(mapping, viewportPoint);
+  context.requireCurrent();
+  return Object.freeze({ camera: view, mapping, viewportPoint, screenPoint, acceptedViewport });
+}
+
+/** Owner-local forward/inverse admission, not a new root contract or native binder. */
+export function captureRenderCameraProjectionContext(camera: RenderCamera, logical: ViewportMetrics2D,
+  accepted: { readonly session: RenderFrameSession; readonly receipt: RenderViewportResizeReceipt } | null) {
   const context = accepted === null ? null : captureCameraFields(accepted, ['session', 'receipt']);
   const session = context?.session as RenderFrameSession;
   const receipt = context?.receipt as RenderViewportResizeReceipt;
@@ -38,14 +49,14 @@ export function projectRenderCameraPoint(camera: RenderCamera, logical: Viewport
   const view = acceptedViewport?.camera ?? getRenderCameraViewSnapshot(camera);
   if (view.camera.state !== 'active') throw new TypeError('Camera is disposed');
   const mapping = acceptedViewport?.mapping ?? captureCameraViewportMapping(view, logical);
-  const viewportPoint = projectPointToViewport2D(mapping, point);
-  const screenPoint = mapping.metrics.screen === null ? null : viewportPointToScreen2D(mapping, viewportPoint);
   // Point/plane proxies may change camera, resize or end a session during capture.
   // Recheck exact accepted evidence; never silently switch to pure math or return
   // the old solution as current. Re-read only already captured logical metrics.
-  if (context !== null) getRenderCameraViewportSnapshot(camera, session, receipt, mapping.metrics);
-  if (getRenderCameraViewSnapshot(camera) !== view) {
-    throw new TypeError('Camera changed while capturing projection context');
-  }
-  return Object.freeze({ camera: view, mapping, viewportPoint, screenPoint, acceptedViewport });
+  const requireCurrent = (): void => {
+    if (context !== null) getRenderCameraViewportSnapshot(camera, session, receipt, mapping.metrics);
+    if (getRenderCameraViewSnapshot(camera) !== view) {
+      throw new TypeError('Camera changed while capturing projection context');
+    }
+  };
+  return { view, mapping, acceptedViewport, requireCurrent };
 }

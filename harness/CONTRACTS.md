@@ -989,3 +989,5 @@ now draws the attached visual source. [Public inventory](../runtime-render/docs/
 READY_FOR_DEVELOPER_REVIEW; browser/visual MVP acceptance remains open.
 
 Phase9 v0.9.6 CM11/CM12 adds projectRenderCameraPoint and RenderCameraProjectionResult. Render208/Editor138/Client0; existing declarations unchanged. Reuse Phase4 mapping; explicit logical-only null or real current session/receipt. No implicit screen origin/DPR, no GPU application. [Contract](../runtime-render/docs/camera-v0.9.6.md), [evidence](checkpoints/camera-v0.9.6.md).
+
+Phase9 v0.9.7 CM13 adds viewportToRenderCameraSelectedPlane, screenToRenderCameraSelectedPlane, RenderCameraSelectedPlaneInput/Result. Exact issued camera-view identity, selected plane and Phase6 receipt freshness; unchanged Phase4 cutoff/residual policy. Four additions, no legacy declaration changes. [Contract](../runtime-render/docs/camera-v0.9.7.md), [checkpoint](checkpoints/camera-v0.9.7.md).
