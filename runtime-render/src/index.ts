@@ -50,6 +50,15 @@ export {
 export { createPlanarTransform2D, type PlanarTransform2D } from './planar-transform.js';
 export { prepareVisualResource, type VisualResourceDescriptor, type VisualResourcePreparation } from './visual-resource.js';
 export {
+  acquireVisualSource,
+  type VisualSourceScope,
+  type VisualSourceRequest,
+  type VisualSourceResponse,
+  type VisualSourceProvider,
+  type VisualSourceFailureCode,
+  type VisualSourceAcquisition,
+} from './visual-source.js';
+export {
   createRenderFrameSession,
   beginRenderFrameSession,
   type RenderFrameAcquisition,

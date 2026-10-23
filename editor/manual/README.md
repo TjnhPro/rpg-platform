@@ -1,3 +1,9 @@
+# Manual Resource Provider — v0.7.1
+
+[Source-access guide](visual-source.md) demonstrates the Render public provider
+port with a host-authorized snapshot of the real Editor manifest. It records bytes,
+provenance, denied/missing sources and limits; no image decode or graphics proof.
+
 # Manual Document MVP — v0.5.12
 
 The [Document workflow guide](document-mvp.md) provides a finite PowerShell/Node
