@@ -1,3 +1,21 @@
+# Editor Visual Resource Integration — v0.7.11
+
+[Editor-owned host guide](editor-visual-resource.md): authored catalog/reference to
+Render resource lease, explicit provider permissions and preview replacement/close/
+unmount. Optional package-root consumer; no authored state mutation or public API
+extension. Browser NOT_EXECUTED; FEATURE_NOT_VERIFIED / VISUAL_NOT_VERIFIED.
+
+# Manual Source Loading Lifecycle — v0.7.2
+
+[Async source guide](visual-source-load.md) traces independent requests, source-only
+acquisition, failure, release and late delivery through the Render public root.
+
+# Manual Resource Provider — v0.7.1
+
+[Source-access guide](visual-source.md) demonstrates the Render public provider
+port with a host-authorized snapshot of the real Editor manifest. It records bytes,
+provenance, denied/missing sources and limits; no image decode or graphics proof.
+
 # Manual Document MVP — v0.5.12
 
 The [Document workflow guide](document-mvp.md) provides a finite PowerShell/Node
@@ -443,3 +461,45 @@ A starts at 800×450 and toggles to 600×400; each host offers explicit ratio1/2
 browser DPR. Last accepted resize receipt remains visible beside current metrics.
 See the [manual procedure/evidence matrix](../../harness/checkpoints/render-viewport-v0.6.13.md).
 Browser execution unavailable here; FEATURE_NOT_VERIFIED / VISUAL_NOT_VERIFIED.
+
+## PNG decoding — v0.7.3
+
+See [optional PNG consumer](png-image.md) for an original 2x2 PNG, browser
+decode/cleanup procedure and finite headless admission-only trace. No GPU display,
+automated tests or headless decoder is provided.
+
+## Texture upload — v0.7.4
+
+See [optional texture consumer](texture-upload.md) for bounded PNG acquisition,
+two real graphics sessions, opaque upload handles, independent CPU release,
+cross-session rejection, terminal cleanup and explicit reacquisition. This
+consumer submits no frames and has not been run in a browser here.
+
+## Atlas metadata — v0.7.5
+
+See [finite atlas consumer](atlas-metadata.md) for read-only original TPSheet40300
+metadata parsing, explicit multi-page source bindings and malformed-copy
+diagnostics. Local original metadata was observed; no authored catalog change,
+PNG decode, frame geometry or visual acceptance is implied.
+
+## Frame identity/resolution — v0.7.6
+
+See [finite frame consumer](frame-resolution.md) for two logical holders, exact key
+lookup, typed missing/unsupported/revision diagnostics and unchanged Phase2 catalog
+semantics. The optional `--frames` mode reuses the bounded original-file atlas host;
+frame lookup performs no extra source reads and no image/GPU operation.
+
+- [v0.7.7 atlas geometry](atlas-geometry.md): finite rect/UV inspection over original
+  metadata and an optional borrowed-texture hook. Numeric observation is not GPU display.
+
+- [v0.7.8 in-flight PNG scope](inflight-png.md): finite provider counters, waiter
+  release/failure/retry trace and optional browser-native decode entry.
+
+- [v0.7.9 resource cache](resource-cache.md): optional finite 100-lease/multi-session
+  public-root consumer. Compiled only; native reuse/cleanup requires manual observation.
+
+- [v0.7.10 explicit cache revision/limits](cache-invalidation.md): optional finite A/B consumer, compiled only; browser/GPU observations remain open.
+
+- [v0.7.13 visual resource MVP](../../runtime-render/manual/visual-resource-mvp.md):
+  Editor Catalog/reference and independent Client host adapters, shared Render
+  demonstration path, concurrent holders/release/revision controls. Browser NOT_EXECUTED.

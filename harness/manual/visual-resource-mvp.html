@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><title>Visual resource MVP — manual review</title>
+<script type="importmap">{"imports":{"@rpg-platform/editor":"/editor/dist/index.js","@rpg-platform/runtime-render":"/runtime-render/dist/index.js","@rpg-platform/runtime-engine":"/runtime-engine/dist/index.js","@rpg/core/kernel":"/node_modules/@rpg/core/dist/kernel/index.js","@rpg/gameplay":"/node_modules/@rpg/gameplay/dist/index.js","three":"/node_modules/three/build/three.module.js"}}</script>
+<h1>Visual resource MVP — manual review</h1>
+<p>Select an authorized matching original PNG / Unity TPSheet pair. Choose Editor or independent Client source adapter.
+Read the <a href="/runtime-render/manual/visual-resource-mvp.md">runbook</a> first. Submission is not display evidence.</p>
+<label>Host <select id="host"><option>Editor</option><option>Client</option></select></label>
+<label>PNG <input id="png" type="file" accept=".png"></label>
+<label>Original TPSheet <input id="sheet" type="file" accept=".tpsheet"></label>
+<label>Exact texture label <input id="label" value="Wound_7.png"></label>
+<label>Frame key <input id="key" value="0050"></label>
+<label><input id="missing" type="checkbox">Withdraw PNG availability</label>
+<p><button id="open">Open three concurrent holders</button><button id="partial">Release A1</button>
+<button id="draw-a">Draw A2</button><button id="final-a">Release A2</button>
+<button id="dispose-a">Dispose session A only</button><button id="draw-b">Draw B1</button>
+<button id="whole">Draw B1 whole page explicitly</button><button id="release-b">Release B1</button></p>
+<label>Replacement PNG (same atlas dimensions/layout) <input id="replacement" type="file" accept=".png"></label>
+<button id="replace">Invalidate to replacement SHA256 / acquire B new holder</button>
+<button id="observe">Observe</button><button id="close">Close all</button>
+<p>A <canvas id="a" width="256" height="256"></canvas> B <canvas id="b" width="256" height="256"></canvas></p>
+<pre aria-live="polite"></pre>
+<script type="module">
+import { createEditorAtlasInput } from '/.artifacts/editor-resource-manual/atlas-mvp.mjs';
+import { createClientAtlasInput } from '/.artifacts/client-resource-manual/atlas-mvp.mjs';
+import { openVisualResourceMvp } from '/.artifacts/render-resource-mvp/visual-resource-mvp.mjs';
+const byId = id => document.getElementById(id), symbols = new Map();
+const log = (event, data) => {
+  byId('observe').dataset.lastEvent = event;
+  const serialized = JSON.stringify(data, (_key, value) => {
+    if (typeof value !== 'symbol') return value;
+    if (!symbols.has(value)) symbols.set(value, `${String(value)}#${symbols.size + 1}`);
+    return symbols.get(value);
+  }, 2);
+  // Bounded inspection output; no disk writes or telemetry.
+  byId('observe').title = event;
+  const output = document.querySelector('pre');
+  output.textContent = (output.textContent + event + '\n' + serialized + '\n').slice(-120000);
+};
+let demo, busy = false, terminal = false;
+const run = async action => {
+  if (busy || terminal) return;
+  busy = true;
+  try { await action(); } catch { log('host-exception', { details: 'WITHHELD', display: 'NOT_VERIFIED' }); }
+  finally { busy = false; }
+};
+byId('open').onclick = () => run(async () => {
+  if (demo) { log('reload-required', 'Close then reload for a new mount; cleanup uncertainty must not reuse this canvas.'); return; }
+  const png = byId('png').files[0], sheet = byId('sheet').files[0];
+  if (!png || !sheet) { log('selection-required', null); return; }
+  const factory = byId('host').value === 'Editor' ? createEditorAtlasInput : createClientAtlasInput;
+  const input = await factory(png, sheet, byId('missing').checked);
+  if (terminal) return;
+  log('host-authorized', { host: byId('host').value, descriptor: input.descriptor, authored: input.authored ?? null });
+  demo = await openVisualResourceMvp([byId('a'), byId('b')], input, byId('label').value, byId('key').value, log);
+  if (terminal) demo.close(); // Eventual release of a late result after page exit.
+});
+byId('partial').onclick = () => run(() => demo?.release(0));
+byId('draw-a').onclick = () => run(() => demo?.draw(1));
+byId('final-a').onclick = () => run(() => demo?.release(1));
+byId('dispose-a').onclick = () => run(() => demo?.disposeA());
+byId('draw-b').onclick = () => run(() => demo?.draw(2));
+byId('whole').onclick = () => run(() => demo?.draw(2, true));
+byId('release-b').onclick = () => run(() => demo?.release(2));
+byId('replace').onclick = () => run(() => {
+  const file = byId('replacement').files[0];
+  return file ? demo?.replace(file) : log('replacement-required', null);
+});
+byId('observe').onclick = () => run(() => log('observation', demo?.observe()));
+const close = () => { terminal = true; demo?.close(); window.removeEventListener('pagehide', close); };
+byId('close').onclick = close;
+window.addEventListener('pagehide', close);
+</script></html>

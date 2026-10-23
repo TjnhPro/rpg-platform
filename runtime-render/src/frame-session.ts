@@ -6,9 +6,12 @@ import {
   type RenderSessionLifecycle,
 } from './index.js';
 import { FrameError, getRenderFrameFailure, type RenderFrameFailure } from './frame-failure.js';
+import { registerVisualResourceDemo, type DemoTextureRequest } from './visual-resource-demo.js';
 import type { ThreeFrameBackend } from './three-frame.js';
 import { readBrowserCanvas } from './canvas-target.js';
 import { planRenderViewportSize, type RenderViewportMetrics, type RenderViewportSizeLimits } from './viewport-size.js';
+import { readDecodedPng } from './png-bitmap.js';
+import { registerTextureSession, endTextureSession, TextureError, getRenderTextureFailure } from './render-texture.js';
 
 export { getRenderFrameFailure, type RenderFrameFailure } from './frame-failure.js';
 
@@ -302,7 +305,7 @@ async function acquireRenderFrameSession(
       // Native loss is asynchronous: publish its diagnostic, never throw from
       // the browser event. Cleanup failure is retained in the same observation.
       failGraphics(new FrameError('CONTEXT_LOST', 'renderFrame'));
-    });
+    }, (error) => { failGraphics(error); });
     captureViewport(sessionId, backend.viewportSize);
   } catch (error) {
     lifecycle.dispose();
@@ -318,7 +321,7 @@ async function acquireRenderFrameSession(
     viewportControl.suspended = false;
     const owned = backend;
     backend = undefined;
-    let cleanupFailed = false;
+    let cleanupFailed = endTextureSession(session);
     try {
       owned?.dispose();
     } catch {
@@ -353,6 +356,32 @@ async function acquireRenderFrameSession(
   let submittedToken: object | undefined;
   const readInvalidation = (): RenderFrameInvalidationSnapshot =>
     Object.freeze({ sessionId, invalidated: redrawToken !== submittedToken });
+  const submit = (demo?: DemoTextureRequest): RenderFrameReceipt => {
+    lifecycle.getSnapshot(); // Disposed sessions use existing error semantics.
+    // Rejection is not a backend failure: no frame, cleanup or state transition.
+    if (viewportControl.suspended) throw new FrameError('VIEWPORT_SUSPENDED', 'renderFrame');
+    if (frameInProgress) throw new FrameError('FRAME_IN_PROGRESS', 'renderFrame');
+    const viewport = getRenderViewportSnapshot(session);
+    if (viewport.state !== 'active' || viewport.graphics.state !== 'ready') {
+      throw failGraphics(new FrameError('FRAME_NOT_SUBMITTED', 'renderFrame'));
+    }
+    frameInProgress = true;
+    const requestedToken = redrawToken;
+    try {
+      const owned = backend;
+      if (owned === undefined) throw new FrameError('FRAME_FAILED', 'renderFrame');
+      owned.renderFrame(demo);
+      // Do not receipt a frame whose session was released during backend work.
+      if (backend !== owned) throw new FrameError('FRAME_FAILED', 'renderFrame');
+      submittedToken = requestedToken;
+      return Object.freeze({ sessionId: viewport.sessionId, status: 'submitted',
+        viewport: Object.freeze({ ...viewport, state: 'active' as const }) });
+    } catch (error) {
+      throw failGraphics(error);
+    } finally {
+      frameInProgress = false;
+    }
+  };
   const session: RenderFrameSession = Object.freeze({
     getSnapshot: lifecycle.getSnapshot,
     initialize: lifecycle.initialize,
@@ -370,32 +399,33 @@ async function acquireRenderFrameSession(
         throw error;
       }
     },
-    renderFrame: (): RenderFrameReceipt => {
-      lifecycle.getSnapshot(); // Disposed sessions use existing error semantics.
-      // Rejection is not a backend failure: no frame, cleanup or state transition.
-      if (viewportControl.suspended) throw new FrameError('VIEWPORT_SUSPENDED', 'renderFrame');
-      if (frameInProgress) throw new FrameError('FRAME_IN_PROGRESS', 'renderFrame');
-      const viewport = getRenderViewportSnapshot(session);
-      if (viewport.state !== 'active' || viewport.graphics.state !== 'ready') {
-        throw failGraphics(new FrameError('FRAME_NOT_SUBMITTED', 'renderFrame'));
+    renderFrame: () => submit(),
+  });
+  registerVisualResourceDemo(session, submit);
+  registerTextureSession(session, sessionId, (image, options) => {
+    const owned = backend;
+    if (owned === undefined) throw new TextureError('SESSION_UNAVAILABLE');
+    // Admission errors do not destroy another resource or a valid graphics session.
+    const bitmap = readDecodedPng(image);
+    if (bitmap === undefined) throw new TextureError('IMAGE_NOT_DECODED');
+    if (frameInProgress) throw new FrameError('FRAME_IN_PROGRESS', 'renderFrame');
+    try {
+      const resource = owned.uploadTexture(sessionId, bitmap, options);
+      if (backend !== owned) {
+        resource.release();
+        throw new TextureError('SESSION_UNAVAILABLE');
       }
-      frameInProgress = true;
-      const requestedToken = redrawToken;
-      try {
-        const owned = backend;
-        if (owned === undefined) throw new FrameError('FRAME_FAILED', 'renderFrame');
-        owned.renderFrame();
-        // Do not receipt a frame whose session was released during backend work.
-        if (backend !== owned) throw new FrameError('FRAME_FAILED', 'renderFrame');
-        submittedToken = requestedToken;
-        return Object.freeze({ sessionId: viewport.sessionId, status: 'submitted',
-          viewport: Object.freeze({ ...viewport, state: 'active' as const }) });
-      } catch (error) {
-        throw failGraphics(error);
-      } finally {
-        frameInProgress = false;
+      return resource;
+    } catch (error) {
+      // A dimension admission rejection is before allocation/mutation.
+      if (getRenderTextureFailure(error)?.code === 'TEXTURE_LIMIT_EXCEEDED') throw error;
+      if (backend === owned) {
+        // Keep Phase6's recognized native-loss diagnostic without expanding its union.
+        failGraphics(getRenderTextureFailure(error)?.code === 'CONTEXT_LOST'
+          ? new FrameError('CONTEXT_LOST', 'renderFrame') : error);
       }
-    },
+      throw error;
+    }
   });
   frameInvalidations.set(session, {
     read: readInvalidation,

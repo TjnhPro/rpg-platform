@@ -1,3 +1,4 @@
+export { renderVisualResourceDemo } from './visual-resource-demo.js';
 export {
   planRenderViewportSize,
   type RenderViewportMetrics,
@@ -49,6 +50,43 @@ export {
 } from './planar-affine.js';
 export { createPlanarTransform2D, type PlanarTransform2D } from './planar-transform.js';
 export { prepareVisualResource, type VisualResourceDescriptor, type VisualResourcePreparation } from './visual-resource.js';
+export { parseUnityAtlasMetadata } from './unity-atlas.js';
+export { createVisualFrameReference, resolveAtlasFrame, type VisualFrameReference, type AtlasFrameResolution } from './atlas-frame.js';
+export { getAtlasMetadataRevision, type AtlasMetadataRevision } from './atlas-metadata.js';
+export {
+  type AtlasSourceBinding, type UnityAtlasSheet, type AtlasMetadataPage,
+  type AtlasMetadataFrame, type AtlasMetadata, type AtlasMetadataResult,
+} from './atlas-metadata.js';
+export {
+  uploadPngTexture,
+  getRenderTextureSnapshot,
+  getRenderTextureFailure,
+  type RenderTexture,
+  type RenderTextureSnapshot,
+  type RenderTextureOptions,
+  type RenderTextureFailure,
+} from './render-texture.js';
+export {
+  createPngImageDecode,
+  type PngDecodeLimits,
+  type PngDecodeFailure,
+  type PngImageObservation,
+  type PngImageDecode,
+} from './png-image.js';
+export {
+  createVisualSourceLoad,
+  type VisualSourceLoad,
+  type VisualSourceLoadObservation,
+} from './visual-source-load.js';
+export {
+  acquireVisualSource,
+  type VisualSourceScope,
+  type VisualSourceRequest,
+  type VisualSourceResponse,
+  type VisualSourceProvider,
+  type VisualSourceFailureCode,
+  type VisualSourceAcquisition,
+} from './visual-source.js';
 export {
   createRenderFrameSession,
   beginRenderFrameSession,
@@ -203,3 +241,18 @@ export function createRenderSessionLifecycle(host: RenderHostBinding): RenderSes
     },
   });
 }
+export {
+  resolveAtlasFrameGeometry, createAtlasTextureView,
+  type AtlasPagePixels, type AtlasFrameGeometry, type AtlasFrameGeometryResult, type AtlasTextureView,
+} from './atlas-geometry.js';
+export {
+  createPngLoadScope, type PngLoadScope, type SharedPngLoad, type SharedPngLoadSnapshot,
+} from './png-load-scope.js';
+
+export {
+  createVisualResourceCache, type ResourceCacheLimits, type VisualResourceCache,
+  type VisualResourceCacheSnapshot, type VisualResourceLease, type VisualResourceLeaseSnapshot,
+} from './visual-resource-cache.js';
+
+export { invalidateVisualResourceCache, getVisualResourceCacheFailure, type VisualResourceCacheFailure } from './visual-resource-cache.js';
+export type { AtlasMetadataLimits } from './unity-atlas.js';

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><title>Editor authored PNG resource preview</title>
+<script type="importmap">{"imports":{"@rpg-platform/editor":"/editor/dist/index.js","@rpg-platform/runtime-render":"/runtime-render/dist/index.js","@rpg-platform/runtime-engine":"/runtime-engine/dist/index.js","@rpg/core/kernel":"/node_modules/@rpg/core/dist/kernel/index.js","@rpg/gameplay":"/node_modules/@rpg/gameplay/dist/index.js","three":"/node_modules/three/build/three.module.js"}}</script>
+<h1>Editor authored PNG resource preview</h1>
+<p>Catalog/reference resolution, actual native PNG loading and explicit release. No sprite is drawn.</p>
+<button data-mode="allow">Open / replace PNG</button><button data-mode="missing">Missing source</button>
+<button data-mode="deny">Permission denied</button><button data-mode="asset">Missing asset</button>
+<label><input id="hold" type="checkbox">Hold source read for late-response inspection</label>
+<button id="deliver">Deliver held reads</button><button id="close">Close preview</button><button id="unmount">Unmount</button>
+<canvas width="64" height="64"></canvas><pre></pre>
+<script type="module">
+import { createAssetReference } from '@rpg-platform/editor';
+import { createPreviewAuthoredSample, mountEditorVisualResource } from '/.artifacts/editor-resource-manual/editor-visual-resource.mjs';
+const log = (event, observation) => { document.querySelector('pre').textContent += event + '\n' + JSON.stringify(observation, null, 2) + '\n'; };
+const authored = createPreviewAuthoredSample();
+const host = mountEditorVisualResource(document.querySelector('canvas'), authored, log);
+const revision = 'e9aa41812d69aa8ebbee3fb351fede258f2a159c4a547b3187ee54184dea0b79';
+const held = new Set();
+function deliver() { for (const release of held) release(); held.clear(); }
+function provider(mode, hold) {
+  const scope = { projectId: authored.catalog.projectId, providerId: Symbol(), authorizationGeneration: 'fixed-local-sample' };
+  return { scope, async read(request) {
+    // Fixed explicit allowlist: no request locator becomes arbitrary network permission.
+    if (mode === 'deny' || request.scope.providerId !== scope.providerId
+      || request.scope.authorizationGeneration !== scope.authorizationGeneration
+      || request.identity.projectId !== scope.projectId || request.identity.resourceId !== 'sample-png'
+      || request.sourceIndex !== 0 || request.source.role !== 'image'
+      || request.source.locator.type !== 'project-relative' || request.source.locator.path !== 'png-sample/rgba-2x2.png') {
+      return { status: 'failed', code: 'SOURCE_DENIED' };
+    }
+    log('authorized-source-read-entered', { held: hold });
+    if (hold) await new Promise(yes => { held.add(yes); });
+    const url = mode === 'missing' ? './png-sample/unavailable.png' : './png-sample/rgba-2x2.png';
+    const response = await fetch(url, { cache: 'no-store' });
+    if (response.status === 404) return { status: 'failed', code: 'SOURCE_NOT_FOUND' };
+    if (response.status === 401 || response.status === 403) return { status: 'failed', code: 'SOURCE_DENIED' };
+    if (!response.ok || !response.body) throw new Error('HOST_READ_FAILED');
+    const storage = new Uint8Array(Math.min(request.maxBytes, 4096)), reader = response.body.getReader();
+    let length = 0;
+    try {
+      while (true) {
+        const { done, value } = await reader.read(); if (done) break;
+        if (length + value.length > storage.length) return { status: 'failed', code: 'CONTENT_TOO_LARGE' };
+        storage.set(value, length); length += value.length;
+      }
+    } finally { try { await reader.cancel(); } finally { reader.releaseLock(); } }
+    const bytes = storage.slice(0, length);
+    const observedRevision = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)), byte => byte.toString(16).padStart(2, '0')).join('');
+    log('host-bytes-read', { bytes: length, matchesCommittedSample: observedRevision === revision });
+    return { status: 'provided', bytes, contentLength: length, mediaType: 'image/png', revision: observedRevision };
+  } };
+}
+for (const button of document.querySelectorAll('[data-mode]')) button.onclick = () => {
+  const mode = button.dataset.mode;
+  const reference = mode === 'asset' ? createAssetReference({ projectId: authored.catalog.projectId, assetId: 'absent', expectedKind: 'image' }) : authored.reference;
+  void host.open(reference, provider(mode, document.querySelector('#hold').checked), revision)
+    .catch(() => log('unknown-host-error', { details: 'WITHHELD', authored: host.inspect() }));
+};
+document.querySelector('#deliver').onclick = deliver;
+document.querySelector('#close').onclick = () => host.close();
+const unmount = () => {
+  host.unmount();
+  for (const button of document.querySelectorAll('[data-mode], #close, #unmount')) button.disabled = true;
+  window.removeEventListener('pagehide', pagehide);
+};
+const pagehide = () => { unmount(); deliver(); };
+document.querySelector('#unmount').onclick = unmount;
+window.addEventListener('pagehide', pagehide);
+log('initial-authored-state (unsaved document)', host.inspect());
+</script></html>
