@@ -4,6 +4,14 @@
 
 Read root agent guidance first.
 
+- [v0.8.8 SR11/SR12/SR13](../harness/checkpoints/scene-rendering-v0.8.8.md): opt-in
+  layer depth-key/ground-y policies retain explicit-order default. Ground uses
+  Phase4 source-plane attachment, exact unit/axes and declared front; missing
+  context rejects. Layer group precedes depth, then explicit order/ordinal ties.
+  Scene-local revision cache, proposed-transform sort before native commit.
+  Alpha profile selected for future draw; DRAW_NOT_IMPLEMENTED remains. See
+  [contract](docs/scene-rendering-v0.8.8.md).
+
 - [v0.8.7 SR09/SR10](../harness/checkpoints/scene-rendering-v0.8.7.md): scene-local
   presentation layers and explicit instance order use priority, layer creation
   ordinal, order, instance ordinal. Default layer preserves existing consumers;

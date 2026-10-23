@@ -1,5 +1,12 @@
 # Ownership decisions — do not classify by similar names
 
+v0.8.8 SR11/SR12/SR13: Runtime Render owns opt-in live depth policies, finite
+keys, source-plane presentation attachment depth and stable comparator/cache.
+Phase4 math/plane validation, Phase6 lifetime/frame demand and Phase7 resource
+ownership remain canonical. Editor/Client build-only collaborators; no authored
+depth schema, gameplay spatial authority, Engine/Server/L1/L2 or dependency edit.
+See [checkpoint](checkpoints/scene-rendering-v0.8.8.md).
+
 v0.8.7 SR09/SR10: Runtime Render owns live scene-local presentation layer
 definitions, instance assignments, comparator and native participation/ranks.
 Editor authored layer refs/classification stay Editor-owned; no mapping policy

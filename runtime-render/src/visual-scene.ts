@@ -10,6 +10,8 @@ import { captureVisualInstanceTransform, type RenderVisualInstanceTransformInput
 import { writeVisualTransform, writeVisualVisibility, writeVisualOrdering, readVisualViewportSuspension,
   type VisualPresentationWrite } from './visual-transform-backend.js';
 import type { AffineTransform2D } from './planar-affine.js';
+import { captureDepthKey, captureOrderingPolicy, explicitOrdering, sameOrderingPolicy, visualDepth,
+  type RenderVisualDepthKey, type RenderVisualLayerOrderingPolicy } from './visual-depth.js';
 
 export interface RenderVisualFrameBinding {
   readonly reference: VisualFrameReference;
@@ -279,6 +281,23 @@ export function listRenderVisualDrawCandidates(scene: RenderVisualScene): readon
   return membership(scene).candidates();
 }
 
+/** Opt in independently of layer definition updates. All members must admit the policy. */
+export function setRenderVisualLayerOrderingPolicy(scene: RenderVisualScene, key: string,
+  policy: RenderVisualLayerOrderingPolicy): RenderVisualLayerOrderingPolicy {
+  return membership(scene).policy(key, policy);
+}
+export function getRenderVisualLayerOrderingPolicy(scene: RenderVisualScene, key: string): RenderVisualLayerOrderingPolicy {
+  return membership(scene).readPolicy(key);
+}
+/** null clears the stored key only if the active policy does not require it. */
+export function setRenderVisualInstanceDepthKey(scene: RenderVisualScene, instance: RenderVisualInstance,
+  input: RenderVisualDepthKey | null): RenderVisualDepthKey | null {
+  return membership(scene).depthKey(instance, input);
+}
+export function getRenderVisualInstanceDepthKey(scene: RenderVisualScene, instance: RenderVisualInstance): RenderVisualDepthKey | null {
+  return membership(scene).readDepthKey(instance);
+}
+
 declare const visualInstanceBrand: unique symbol;
 
 /**
@@ -331,6 +350,10 @@ export function getRenderVisualInstanceFailure(error: unknown): RenderVisualInst
 }
 
 interface MembershipControl {
+  readonly policy: (key: string, policy: RenderVisualLayerOrderingPolicy) => RenderVisualLayerOrderingPolicy;
+  readonly readPolicy: (key: string) => RenderVisualLayerOrderingPolicy;
+  readonly depthKey: (instance: RenderVisualInstance, input: RenderVisualDepthKey | null) => RenderVisualDepthKey | null;
+  readonly readDepthKey: (instance: RenderVisualInstance) => RenderVisualDepthKey | null;
   readonly addLayer: (input: RenderVisualLayerInput) => RenderVisualLayerSnapshot;
   readonly updateLayer: (input: RenderVisualLayerInput) => RenderVisualLayerSnapshot;
   readonly getLayer: (key: string) => RenderVisualLayerSnapshot | undefined;
@@ -498,7 +521,7 @@ function createScope(sessionId: symbol) {
   interface Entry {
     readonly handle: RenderVisualInstance; snapshot: RenderVisualInstanceSnapshot;
     binding: OwnedBinding | undefined; transform: RenderVisualInstanceTransformSnapshot | null;
-    visible: boolean; ordering: RenderVisualInstanceOrder;
+    visible: boolean; ordering: RenderVisualInstanceOrder; depthKey: RenderVisualDepthKey | null;
   }
   const instances = new Map<string, Entry>();
   let layers = new Map<string, RenderVisualLayerSnapshot>([['default', Object.freeze({
@@ -506,6 +529,9 @@ function createScope(sessionId: symbol) {
   })]]);
   let nextLayerOrdinal = 1;
   let revision = {};
+  const policies = new Map<string, RenderVisualLayerOrderingPolicy>();
+  let orderCache: { readonly revision: object; readonly entries: readonly Entry[] } | undefined;
+  const invalidateOrdering = (): void => { revision = {}; orderCache = undefined; };
   const issued = new WeakSet<RenderVisualInstance>();
   let nextOrdinal = 0;
   const requireActive = (): void => {
@@ -524,11 +550,28 @@ function createScope(sessionId: symbol) {
   const compare = (a: number, b: number): number => a === b ? 0 : a < b ? -1 : 1;
   const compareLayers = (a: RenderVisualLayerSnapshot, b: RenderVisualLayerSnapshot): number =>
     compare(a.priority, b.priority) || compare(a.insertionOrdinal, b.insertionOrdinal);
-  const ordered = (entries: readonly Entry[] = [...instances.values()], definitions = layers): Entry[] =>
-    [...entries].sort((a, b) => compareLayers(definitions.get(a.ordering.layerKey)!, definitions.get(b.ordering.layerKey)!)
-      || compare(a.ordering.order, b.ordering.order) || compare(a.handle.insertionOrdinal, b.handle.insertionOrdinal));
-  const syncOrdering = (entries: readonly Entry[] = [...instances.values()], definitions = layers): Entry[] => {
-    const sorted = ordered(entries, definitions);
+  const policyFor = (key: string, selected = policies): RenderVisualLayerOrderingPolicy => selected.get(key) ?? explicitOrdering;
+  const requireLayer = (key: string): string => {
+    requireActive(); const captured = layerKey(key);
+    if (!layers.has(captured)) throw new LayerError('MISSING_LAYER');
+    return captured;
+  };
+  const ordered = (entries?: readonly Entry[], definitions = layers, selected = policies): readonly Entry[] => {
+    const cacheable = entries === undefined && definitions === layers && selected === policies;
+    if (cacheable && orderCache?.revision === revision) return orderCache.entries;
+    // Decorate once: no context validation/traversal inside the comparator.
+    const decorated = (entries ?? [...instances.values()]).map(entry => ({ entry,
+      layer: definitions.get(entry.ordering.layerKey)!,
+      depth: visualDepth(policyFor(entry.ordering.layerKey, selected), entry.transform, entry.depthKey) }));
+    decorated.sort((a, b) => compareLayers(a.layer, b.layer) || compare(a.depth, b.depth)
+      || compare(a.entry.ordering.order, b.entry.ordering.order)
+      || compare(a.entry.handle.insertionOrdinal, b.entry.handle.insertionOrdinal));
+    const sorted = decorated.map(value => value.entry);
+    if (cacheable) orderCache = { revision, entries: sorted };
+    return sorted;
+  };
+  const syncOrdering = (entries?: readonly Entry[], definitions = layers, selected = policies): readonly Entry[] => {
+    const sorted = ordered(entries, definitions, selected);
     writeOrdering!(sorted.map((entry, renderOrder) => ({ instance: entry.handle, renderOrder,
       visible: entry.visible && definitions.get(entry.ordering.layerKey)!.visible })));
     requireActive(); // Native failure/loss is terminal, never an accepted logical edit.
@@ -557,7 +600,7 @@ function createScope(sessionId: symbol) {
   const drain = (): void => {
     const previous = [...instances.values()];
     instances.clear();
-    revision = {};
+    invalidateOrdering();
     let failure: { error: unknown } | undefined;
     for (const entry of previous) {
       try { releaseEntry(entry); } catch (error) { failure ??= { error }; }
@@ -572,6 +615,7 @@ function createScope(sessionId: symbol) {
     detach = undefined; // Terminal before unlinking; no retained session/subscription.
     try { drain(); } finally {
       layers.clear();
+      policies.clear();
       writeTransform = undefined; writeVisibility = undefined; writeOrdering = undefined;
       readSuspended = undefined; release?.();
     }
@@ -587,6 +631,35 @@ function createScope(sessionId: symbol) {
     dispose: (): RenderVisualSceneDisposal => end('scene-disposed'),
   });
   memberships.set(handle, {
+    readPolicy: (key) => policyFor(requireLayer(key)),
+    policy: (key, input) => {
+      const capturedKey = requireLayer(key), before = revision;
+      const candidate = captureOrderingPolicy(input);
+      unchanged(before);
+      const previous = policyFor(capturedKey);
+      if (sameOrderingPolicy(previous, candidate)) return previous;
+      const selected = new Map(policies); selected.set(capturedKey, candidate);
+      syncOrdering(undefined, layers, selected); // Validates all members, including hidden ones.
+      unchanged(before);
+      policies.set(capturedKey, candidate); invalidateOrdering();
+      return candidate;
+    },
+    readDepthKey: (instance) => requireEntry(instance).depthKey,
+    depthKey: (instance, input) => {
+      const entry = requireEntry(instance), before = revision;
+      const candidate = captureDepthKey(input);
+      requireEntry(instance); unchanged(before);
+      const previous = entry.depthKey, policy = policyFor(entry.ordering.layerKey);
+      visualDepth(policy, entry.transform, candidate);
+      if (previous === candidate || (previous !== null && candidate !== null
+        && previous.value === candidate.value && previous.unit === candidate.unit)) return previous;
+      if (policy.kind === 'depth-key') {
+        syncOrdering([...instances.values()].map(current => current === entry ? { ...entry, depthKey: candidate } : current));
+        requireEntry(instance); unchanged(before);
+      }
+      entry.depthKey = candidate; invalidateOrdering();
+      return candidate;
+    },
     addLayer: (input) => {
       requireActive();
       const before = revision, captured = captureLayer(input);
@@ -594,7 +667,7 @@ function createScope(sessionId: symbol) {
       if (layers.has(captured.layerKey)) throw new LayerError('DUPLICATE_LAYER');
       if (!Number.isSafeInteger(nextLayerOrdinal)) throw new RangeError('Visual layer insertion ordinal exhausted');
       const result = Object.freeze({ ...captured, insertionOrdinal: nextLayerOrdinal++ });
-      layers.set(result.layerKey, result); revision = {};
+      layers.set(result.layerKey, result); invalidateOrdering();
       return result;
     },
     updateLayer: (input) => {
@@ -608,7 +681,7 @@ function createScope(sessionId: symbol) {
       const candidate = new Map(layers); candidate.set(result.layerKey, result);
       syncOrdering([...instances.values()], candidate);
       unchanged(before);
-      layers = candidate; revision = {};
+      layers = candidate; invalidateOrdering();
       return result;
     },
     getLayer: (key) => { requireActive(); return layers.get(layerKey(key)); },
@@ -619,7 +692,7 @@ function createScope(sessionId: symbol) {
       if (!layers.has(captured)) throw new LayerError('MISSING_LAYER');
       if (captured === 'default') throw new LayerError('RESERVED_LAYER');
       if ([...instances.values()].some(entry => entry.ordering.layerKey === captured)) throw new LayerError('LAYER_IN_USE');
-      layers.delete(captured); revision = {};
+      layers.delete(captured); policies.delete(captured); invalidateOrdering();
     },
     readOrder: (instance) => requireEntry(instance).ordering,
     order: (instance, input) => {
@@ -630,7 +703,7 @@ function createScope(sessionId: symbol) {
       if (entry.ordering.layerKey === candidate.layerKey && entry.ordering.order === candidate.order) return entry.ordering;
       syncOrdering([...instances.values()].map(current => current === entry ? { ...entry, ordering: candidate } : current));
       requireEntry(instance); unchanged(before);
-      entry.ordering = candidate; revision = {};
+      entry.ordering = candidate; invalidateOrdering();
       return candidate;
     },
     candidates: () => {
@@ -651,14 +724,15 @@ function createScope(sessionId: symbol) {
       unchanged(before);
       if (instances.has(captured.visualInstanceId)) throw new InstanceError('DUPLICATE_ID');
       if (!layers.has(captured.ordering.layerKey)) throw new LayerError('MISSING_LAYER');
+      visualDepth(policyFor(captured.ordering.layerKey), null, null);
       if (!Number.isSafeInteger(nextOrdinal)) throw new RangeError('Visual instance insertion ordinal exhausted');
       const observation: RenderVisualInstanceSnapshot = Object.freeze({ visualInstanceId: captured.visualInstanceId,
         correlation: captured.correlation, sceneId: id, sessionId,
         insertionOrdinal: nextOrdinal });
       const instance = Object.freeze({ ...observation }) as RenderVisualInstance;
       instances.set(instance.visualInstanceId, { handle: instance, snapshot: observation,
-        binding: undefined, transform: null, visible: true, ordering: captured.ordering });
-      revision = {};
+        binding: undefined, transform: null, visible: true, ordering: captured.ordering, depthKey: null });
+      invalidateOrdering();
       issued.add(instance);
       nextOrdinal += 1;
       return instance;
@@ -677,7 +751,7 @@ function createScope(sessionId: symbol) {
       const entry = instances.get(instance.visualInstanceId);
       if (entry?.handle !== instance) return false;
       instances.delete(instance.visualInstanceId);
-      revision = {};
+      invalidateOrdering();
       releaseEntry(entry);
       return true;
     },
@@ -690,7 +764,7 @@ function createScope(sessionId: symbol) {
       writeVisibility!(instance, visible && layers.get(entry.ordering.layerKey)!.visible);
       requireEntry(instance); // Native loss/failure must not publish a successful flag.
       entry.visible = visible;
-      revision = {};
+      invalidateOrdering();
       return readVisibility(instance);
     },
     readTransform: (instance) => requireEntry(instance).transform,
@@ -703,13 +777,17 @@ function createScope(sessionId: symbol) {
       if (current !== entry || current.transform !== before || current.snapshot !== beforeState
         || current.binding !== beforeBinding || current.visible !== beforeVisible) throw new InstanceError('INSTANCE_CHANGED');
       if (candidate === null && before === null) return null;
+      visualDepth(policyFor(entry.ordering.layerKey), candidate, entry.depthKey);
       // Recompute all native ranks before placement: intervening metadata-only
       // adds/removals need no node writes, and cannot make ranks collide here.
-      const rank = candidate === null ? 0 : syncOrdering().findIndex(value => value === entry);
+      const proposed = [...instances.values()].map(value => value === entry ? { ...entry, transform: candidate } : value);
+      const sorted = candidate === null ? undefined : syncOrdering(proposed);
+      const rank = sorted?.findIndex(value => value.handle === instance) ?? 0;
       writeTransform!(instance, candidate?.localToClip ?? null,
         entry.visible && layers.get(entry.ordering.layerKey)!.visible, rank);
       requireEntry(instance); // Native loss/failure must not publish a successful transform.
       entry.transform = candidate;
+      invalidateOrdering();
       return candidate;
     },
     binding: (instance) => {

@@ -42,7 +42,13 @@ export {
   type RenderVisualInstanceOrder,
   type RenderVisualDrawCandidate,
   type RenderVisualLayerFailure,
+  setRenderVisualLayerOrderingPolicy,
+  getRenderVisualLayerOrderingPolicy,
+  setRenderVisualInstanceDepthKey,
+  getRenderVisualInstanceDepthKey,
 } from './visual-scene.js';
+export { getRenderVisualDepthFailure, type RenderVisualDepthFailure,
+  type RenderVisualDepthKey, type RenderVisualLayerOrderingPolicy } from './visual-depth.js';
 export { type RenderVisualInstanceTransformInput, type RenderVisualInstanceTransformSnapshot } from './visual-instance-transform.js';
 export { renderVisualResourceDemo } from './visual-resource-demo.js';
 export {

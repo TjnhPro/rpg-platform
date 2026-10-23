@@ -1,5 +1,14 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase8 v0.8.8: [depth/stability](checkpoints/scene-rendering-v0.8.8.md) adds eight
+root names for per-layer policy set/get, per-instance finite key set/get and
+branded depth failure/types. Existing shapes/unions unchanged. Policies are
+separate from layer definition updates; default explicit-order preserves SR09/10.
+Ground uses Phase4 source-plane attachment, explicit axes/unit/front, strict
+missing/mismatch rejection. Comparator keeps layer priority/group before depth,
+then explicit order/ordinal. Same native rank path, no new draw/material APIs.
+See [contract](../runtime-render/docs/scene-rendering-v0.8.8.md).
+
 Phase 8 v0.8.7: [SR09/SR10 layers/order](checkpoints/scene-rendering-v0.8.7.md)
 adds scene-local layer CRUD, exact-handle order replacement/read and ordered
 participation candidates. Fourteen additive root names, two optional creation
