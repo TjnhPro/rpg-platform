@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Viewport identity — manual consumer</title>
+<h1>Independent full-canvas viewports</h1>
+<p>Each explicit acquisition owns one viewport. No automatic frame, resize,
+suspend/resume or restoration. Snapshots are observations, not displayed pixels.</p>
+<section><h2>Session A</h2>
+<canvas id="canvas-A" width="320" height="180" aria-label="Host target A"></canvas>
+<p><button id="acquire-A">Acquire A</button> <button id="dispose-A">Dispose A</button></p></section>
+<section><h2>Session B</h2>
+<canvas id="canvas-B" width="240" height="160" aria-label="Host target B"></canvas>
+<p><button id="acquire-B">Acquire B</button> <button id="dispose-B">Dispose B</button></p></section>
+<button id="observe">Observe A and B / identities</button>
+<pre id="output" aria-live="polite"></pre>
+<script type="importmap">
+{"imports": {
+  "@rpg-platform/runtime-render": "/runtime-render/dist/index.js",
+  "three": "/node_modules/three/build/three.module.js"
+}}
+</script>
+<script type="module" src="/runtime-render/dist/manual-viewport-identity.js"></script>
+</html>

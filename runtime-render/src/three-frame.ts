@@ -4,6 +4,7 @@ import { readBrowserCanvas } from './canvas-target.js';
 
 /** Private browser backend; never exposed through public declarations. */
 export interface ThreeFrameBackend {
+  readonly viewportSize: { readonly width: number; readonly height: number };
   readonly renderFrame: () => void;
   readonly dispose: () => void;
 }
@@ -25,6 +26,7 @@ export function createThreeFrameBackend(input: object, onContextLost: () => void
   let renderer: WebGLRenderer | undefined;
   let scene: Scene | undefined;
   let camera: Camera | undefined;
+  let viewportSize: ThreeFrameBackend['viewportSize'];
   let contextLost = false;
   let released = false;
   const handleContextLost = (): void => {
@@ -60,6 +62,12 @@ export function createThreeFrameBackend(input: object, onContextLost: () => void
   try {
     renderer = new WebGLRenderer({ canvas: target, context, preserveDrawingBuffer: true });
     renderer.setClearColor(0x147da8, 1);
+    // Full native drawing buffer; no CSS/layout measurement, DPR policy or resize.
+    viewportSize = Object.freeze({ width: context.drawingBufferWidth, height: context.drawingBufferHeight });
+    if (viewportSize.width <= 0 || viewportSize.height <= 0 || context.isContextLost()) {
+      throw new FrameError('GRAPHICS_UNAVAILABLE', 'acquire');
+    }
+    renderer.setViewport(0, 0, viewportSize.width, viewportSize.height);
     scene = new Scene();
     camera = new Camera();
     // Three's earlier listener permits browser restoration. Our terminal cleanup
@@ -75,6 +83,7 @@ export function createThreeFrameBackend(input: object, onContextLost: () => void
   }
 
   return Object.freeze({
+    viewportSize,
     renderFrame: (): void => {
       if (contextLost || context.isContextLost()) {
         contextLost = true;

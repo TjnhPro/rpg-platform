@@ -38,6 +38,47 @@ export interface RenderFrameAcquisition {
   readonly result: Promise<RenderFrameSession>;
 }
 
+/** Detached, last-configured extent; not CSS size, world placement or screen mapping. */
+export type RenderViewportSnapshot = {
+  readonly scope: 'full-canvas';
+  readonly graphics: RenderGraphicsSnapshot;
+} & (
+  | {
+    /** Null only if binding descriptor creation itself failed. */
+    readonly sessionId: symbol | null;
+    readonly state: 'uninitialized' | 'unavailable' | 'terminal';
+    readonly size: null;
+  }
+  | {
+    /** One full-canvas viewport per session; existing symbol is its identity. */
+    readonly sessionId: symbol;
+    /** Suspended is reserved for a future explicit operation; not produced yet. */
+    readonly state: 'active' | 'suspended';
+    readonly size: {
+      readonly width: number;
+      readonly height: number;
+      readonly unit: 'drawing-buffer-px';
+    };
+  }
+);
+
+// Identity lookup only: non-enumerable weak keys, no global selection or manager.
+// Readers retain only scalar state/immutable diagnostics, never targets/backends.
+const viewportReaders = new WeakMap<object, () => RenderViewportSnapshot>();
+
+/**
+ * Observe the viewport of a handle created by this package instance. Accepts
+ * pending/failed acquisitions and disposed sessions; never acquires graphics.
+ * Throws TypeError for binding-only/custom/foreign handles, without invoking them.
+ */
+export function getRenderViewportSnapshot(
+  handle: RenderFrameAcquisition | RenderFrameSession,
+): RenderViewportSnapshot {
+  const read = viewportReaders.get(handle);
+  if (read === undefined) throw new TypeError('Expected a graphics handle from this Render package instance');
+  return read();
+}
+
 /**
  * Start the canonical async acquisition with pull-based lifecycle observations.
  * No callbacks, cancellation, extra backend or implicit frame. Snapshot remains
@@ -45,12 +86,36 @@ export interface RenderFrameAcquisition {
  */
 export function beginRenderFrameSession(host: RenderHostBinding): RenderFrameAcquisition {
   let snapshot: RenderGraphicsSnapshot = Object.freeze({ state: 'pending', failure: null });
-  const update = (next: RenderGraphicsSnapshot): void => { snapshot = Object.freeze(next); };
-  const result = acquireRenderFrameSession(host, update).catch((error: unknown) => {
+  let sessionId: symbol | null = null;
+  let size: { readonly width: number; readonly height: number; readonly unit: 'drawing-buffer-px' } | null = null;
+  let acquired = false;
+  const update = (next: RenderGraphicsSnapshot): void => {
+    snapshot = Object.freeze(next);
+    if (next.state === 'ready') acquired = true;
+    if (next.state === 'failed' || next.state === 'disposed') size = null;
+  };
+  const readViewport = (): RenderViewportSnapshot => {
+    const common = { scope: 'full-canvas' as const, graphics: snapshot };
+    if (snapshot.state === 'ready' && size !== null && sessionId !== null) {
+      return Object.freeze({ ...common, sessionId, state: 'active', size });
+    }
+    const state = snapshot.state === 'pending' ? 'uninitialized'
+      : acquired ? 'terminal' : 'unavailable';
+    return Object.freeze({ ...common, sessionId, state, size: null });
+  };
+  const result = acquireRenderFrameSession(host, update, (id, extent) => {
+    sessionId = id;
+    size = extent === null ? null : Object.freeze({ ...extent, unit: 'drawing-buffer-px' });
+  }).then((session) => {
+    viewportReaders.set(session, readViewport);
+    return session;
+  }).catch((error: unknown) => {
     update({ state: 'failed', failure: getRenderFailure(error) ?? getRenderFrameFailure(error) ?? null });
     throw error;
   });
-  return Object.freeze({ getSnapshot: () => snapshot, result });
+  const operation = Object.freeze({ getSnapshot: () => snapshot, result });
+  viewportReaders.set(operation, readViewport);
+  return operation;
 }
 
 // Resource ownership guard, not a cache. Scoped to this package instance.
@@ -105,8 +170,11 @@ export async function createRenderFrameSession(host: RenderHostBinding): Promise
 /** One canonical implementation for both the existing factory and observation handle. */
 async function acquireRenderFrameSession(
   host: RenderHostBinding, update: (snapshot: RenderGraphicsSnapshot) => void,
+  captureViewport: (id: symbol, size: { readonly width: number; readonly height: number } | null) => void,
 ): Promise<RenderFrameSession> {
   const lifecycle = createRenderSessionLifecycle(host);
+  const sessionId = lifecycle.getSnapshot().descriptor.id;
+  captureViewport(sessionId, null);
   let target: object | undefined;
   let backend: ThreeFrameBackend | undefined;
   try {
@@ -123,6 +191,7 @@ async function acquireRenderFrameSession(
       // the browser event. Cleanup failure is retained in the same observation.
       failGraphics(new FrameError('CONTEXT_LOST', 'renderFrame'));
     });
+    captureViewport(sessionId, backend.viewportSize);
   } catch (error) {
     lifecycle.dispose();
     if (target !== undefined && !getRenderFrameFailure(error)?.cleanupFailed) {

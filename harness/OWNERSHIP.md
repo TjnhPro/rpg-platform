@@ -4,6 +4,7 @@ This table is for routing an implementation **after inspecting current source**.
 
 | Change | Primary owner | Allowed collaborator / note |
 | --- | --- | --- |
+| Session-bound full-canvas viewport identity and immutable observation | **Runtime Render** | [v0.6.4 RV06](checkpoints/render-viewport-v0.6.4.md): one viewport per canonical graphics session, same symbol; host reads through root API, owns canvas layout/visibility, no authored Scene/Document mutation. Suspended contract slot does not implement suspension |
 | Context loss detection, terminal cleanup and recreation admission | **Runtime Render** | [v0.6.3 RV05](checkpoints/render-viewport-v0.6.3.md): native event plus render-operation checks; no backend auto-restoration. Host decides explicit new target/session, owns its own browser listeners and Promise handling; cleanup failure retains quarantine |
 | Observable graphics acquisition/release lifecycle | **Runtime Render** | [v0.6.2 RV03/RV04](checkpoints/render-viewport-v0.6.2.md): one canonical session/backend; immutable observations via acquisition handle. Host handles Promise/late-result release; binding-only EditorPreviewHost remains unchanged |
 | Browser canvas capability/brand validation and reservation observations | **Runtime Render** | [v0.6.1 RV02](checkpoints/render-viewport-v0.6.1.md): native same-realm target inspection; no GPU-readiness claim. Host retains canvas/CSS/listeners; acquisition and exclusive reservation remain existing session responsibilities |

@@ -2,6 +2,15 @@
 
 This describes the *interactions to audit*, not finalized types or APIs. Do not create interfaces just to satisfy this document before a real MVP needs them.
 
+Phase 6 v0.6.4 RV06: [Viewport identity/state](checkpoints/render-viewport-v0.6.4.md)
+adds RenderViewportSnapshot/getRenderViewportSnapshot (Render59). Real canonical
+acquisition/session handles observe one full-canvas viewport with the existing
+session symbol and frozen scalar extent/graphics diagnostics. State derives from
+graphics, not a second lifecycle; no global active viewport. Suspended is a distinct
+contract-only slot, with no suspend/resume operation yet. Drawing-buffer-px is not
+CSS layout or authored placement; pure Phase 4 mapping and Scene/Document state
+remain untouched. Existing interfaces/factory signatures stay unchanged.
+
 Phase 6 v0.6.3 RV05: [Context loss policy](checkpoints/render-viewport-v0.6.3.md)
 adds CONTEXT_LOST to RenderFrameFailure.code (57 root symbols unchanged). Native
 loss events and pre/post-frame checks terminate the same acquired session and

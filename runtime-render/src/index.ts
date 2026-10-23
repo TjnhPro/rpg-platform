@@ -48,6 +48,8 @@ export {
   beginRenderFrameSession,
   type RenderFrameAcquisition,
   type RenderGraphicsSnapshot,
+  getRenderViewportSnapshot,
+  type RenderViewportSnapshot,
   inspectRenderTarget,
   type RenderTargetCapabilities,
   getRenderFrameFailure,

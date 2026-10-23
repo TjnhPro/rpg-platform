@@ -1,5 +1,42 @@
 # Manual Render consumers
 
+## Viewport identity / independent sessions — v0.6.4
+
+After building and serving the workspace as below, open
+http://127.0.0.1:8080/runtime-render/manual/viewport-identity.html.
+The genuine Render build compiles this typed public-root consumer. No assertions,
+test runner, mock engine or automatic frame. **Not browser-executed at v0.6.4.**
+
+Acquire A and B explicitly on their separate host-owned canvases. Observe both:
+each acquisition starts uninitialized, then active if acquisition succeeds, or
+unavailable if it fails. Active size describes the last configured native drawing
+buffer in drawing-buffer-px, not CSS pixels, a world coordinate or live DOM query.
+Actual browser allocation may differ from requested canvas attributes. Active does
+not assert visibility, continuous GPU health, frame submission or displayed pixels.
+
+Observe reports independentSessionIds and sameIdentity for acquisition/session
+views. Symbol string descriptions alone are not identity; the logged boolean uses
+actual symbol equality. Retained previous snapshots are historical immutable data.
+Dispose A, then Observe: A should become terminal with size:null, while B retains
+its own active state/size/identity. Reacquire A explicitly: its new identity should
+differ from its preceding observation; B's remains unchanged. These are expected
+review steps, not recorded outcomes or behavioral PASS. If graphics fails, record
+the real diagnostic; do not claim two active viewports from compilation alone.
+
+Terminal snapshots remain readable after clean/failed disposal or native context
+loss via the same graphics lifecycle. `getRenderViewportSnapshot` accepts only
+real acquisitions/sessions created by this package instance; metadata-only,
+fabricated and foreign handles are rejected with TypeError without invoking them.
+It does not acquire, resize, suspend, dispose or select a global viewport.
+
+Suspended is a distinct reserved contract state; **no suspend/resume operation or
+suspended producer is implemented in this checkpoint**. Hiding a canvas or pausing
+host frame requests does not silently change its Render state. Resize/DPR/layout
+synchronization is also absent: do not mutate canvas buffer attributes while held
+and expect automatic synchronization. Release before replacing/removing a target.
+There is no Scene/Document binding, serialization or dirty-state side effect.
+Page exit requests release, including late acquisitions.
+
 ## Context loss / explicit recreation — v0.6.3
 
 Use the graphics lifecycle page below. This is an optional manual procedure, with
