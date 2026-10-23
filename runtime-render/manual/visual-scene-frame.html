@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Visual Scene frame — optional manual consumer</title>
+<h1>Two real PNG resources in one Visual Scene frame</h1>
+<p>Select PNGs you have permission to use (up to 1 MiB each). The second selection
+is optional: leaving it empty shares the first real resource. Images are stretched
+to explicit 96×96 scene-unit quads. No files are uploaded or stored by this page.</p>
+<p><label>First PNG <input id="first" type="file" accept="image/png"></label>
+<label>Second PNG <input id="second" type="file" accept="image/png"></label></p>
+<canvas id="canvas" width="640" height="480" style="width:640px;height:480px" aria-label="Manual scene frame"></canvas>
+<p><button id="open">Load and submit</button> <button id="draw">Draw</button>
+<button id="hide">Hide first</button> <button id="show">Show first</button>
+<button id="move">Move first ground Y</button> <button id="order">First last (explicit)</button>
+<button id="ground">Ground sort</button> <button id="clear">Clear scene</button>
+<button id="close">Dispose</button></p>
+<p>Changes request Render demand; use Draw to submit the next frame. Receipts are
+not display proof. This page has no animation loop or automated assertions.</p>
+<pre id="output" aria-live="polite"></pre>
+<script type="importmap">
+{"imports": {
+  "@rpg-platform/runtime-render": "/runtime-render/dist/index.js",
+  "three": "/node_modules/three/build/three.module.js"
+}}
+</script>
+<script type="module">
+import { openVisualSceneFrames } from '/.artifacts/visual-scene-frame/visual-scene-frame.mjs';
+const output = document.querySelector('#output');
+const report = (label, value) => {
+  output.textContent += `${label}: ${JSON.stringify(value, (_, item) =>
+    typeof item === 'symbol' ? String(item) : item instanceof Error ? { name: item.name, message: item.message } : item)}\n`;
+};
+let active, busy = false, alive = true, moved = false;
+const actions = {
+  async open() {
+    if (active) throw new TypeError('Dispose the current session before loading again');
+    const first = document.querySelector('#first').files[0];
+    const second = document.querySelector('#second').files[0] ?? first;
+    if (!first) throw new TypeError('Select an authorized PNG first');
+    const projectId = 'scene-frame-manual';
+    const same = first === second;
+    const entries = new Map([['chosen/first.png', { file: first, id: 'first' }],
+      ['chosen/second.png', { file: second, id: 'second' }]]);
+    const provider = { scope: Object.freeze({ projectId, providerId: Symbol('local-file-selection'), authorizationGeneration: '1' }),
+      async read(request) {
+        const entry = entries.get(request.source.locator.path);
+        if (request.scope.providerId !== provider.scope.providerId
+          || request.scope.authorizationGeneration !== provider.scope.authorizationGeneration
+          || request.scope.projectId !== projectId || request.identity.projectId !== projectId || !entry
+          || request.identity.resourceId !== entry.id || request.sourceIndex !== 0 || request.source.role !== 'image') {
+          return { status: 'failed', code: 'SOURCE_DENIED' };
+        }
+        if (entry.file.size > request.maxBytes) return { status: 'failed', code: 'CONTENT_TOO_LARGE' };
+        const bytes = new Uint8Array(await entry.file.arrayBuffer());
+        return { status: 'provided', bytes, contentLength: bytes.length, mediaType: 'image/png', revision: 'selected-file-v1' };
+      } };
+    const input = id => ({ descriptor: { identity: { projectId, resourceId: id }, mediaType: 'image/png',
+      sources: [{ role: 'image', locator: { type: 'project-relative', path: `chosen/${id}.png` } }] },
+      sourceIndex: 0, sourceRevision: 'selected-file-v1', frame: null });
+    const controller = await openVisualSceneFrames({ target: document.querySelector('#canvas') }, provider,
+      [input('first'), input(same ? 'first' : 'second')], report);
+    if (!alive) controller.close(); else active = controller;
+    moved = false;
+  },
+  draw() { active.draw(); }, hide() { active.hideFirst(false); }, show() { active.hideFirst(true); },
+  move() { moved = !moved; active.moveFirst(moved ? 208 : 144); },
+  order() { active.orderFirst(10); }, ground() { active.groundSort(); }, clear() { active.clear(); },
+  close() { const previous = active; active = undefined; previous?.close(); },
+};
+for (const [id, action] of Object.entries(actions)) document.querySelector(`#${id}`).onclick = async () => {
+  if (busy) return;
+  busy = true;
+  try { await action(); } catch (error) { report('Operation rejected/failed; inspect session', error); }
+  finally { busy = false; }
+};
+addEventListener('pagehide', () => { alive = false; actions.close(); }, { once: true });
+</script>
+</html>

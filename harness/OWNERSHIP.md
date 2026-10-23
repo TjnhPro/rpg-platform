@@ -1,5 +1,11 @@
 # Ownership decisions — do not classify by similar names
 
+v0.8.9 SR14: Runtime Render owns live sprite layout, frozen frame snapshot and
+owned Three geometry/material/mesh integration. Phase4 math, Phase6 submission/
+terminal/frame demand, Phase7 usable resource/atlas/cache allocation lifetime stay
+canonical. Editor/Client are compatibility builds only; no authoring/gameplay/
+Engine/Server/L1/L2 changes. See [checkpoint](checkpoints/scene-rendering-v0.8.9.md).
+
 v0.8.8 SR11/SR12/SR13: Runtime Render owns opt-in live depth policies, finite
 keys, source-plane presentation attachment depth and stable comparator/cache.
 Phase4 math/plane validation, Phase6 lifetime/frame demand and Phase7 resource

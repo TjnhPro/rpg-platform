@@ -1,5 +1,14 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase8 v0.8.9 SR14 adds exactly three root symbols: explicit local sprite layout
+type and set/get. Required old shapes and renderFrame submitted receipt unchanged.
+Existing metadata-only instances require explicit layout+transform+usable binding
+to draw. Private snapshot bridge feeds the same Three frame backend; Phase7 owns
+native allocations, Three ExternalTexture only borrows. No authored schema, GPU
+public type, second upload/cache/renderer or scheduling contract. See
+[checkpoint](checkpoints/scene-rendering-v0.8.9.md) and
+[contract](../runtime-render/docs/scene-rendering-v0.8.9.md).
+
 Phase8 v0.8.8: [depth/stability](checkpoints/scene-rendering-v0.8.8.md) adds eight
 root names for per-layer policy set/get, per-instance finite key set/get and
 branded depth failure/types. Existing shapes/unions unchanged. Policies are

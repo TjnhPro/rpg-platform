@@ -7,7 +7,8 @@ import { createTextureLifetime } from './texture-lifetime.js';
 import { TextureError, textureBacking, type RenderTexture, type RenderTextureOptions } from './render-texture.js';
 import { createDemoQuad } from './demo-quad.js';
 import type { DemoTextureRequest } from './visual-resource-demo.js';
-import type { VisualPresentationWrite } from './visual-transform-backend.js';
+import { createVisualDrawScope } from './three-visual-draw.js';
+import type { VisualFrameItem, VisualPresentationWrite } from './visual-transform-backend.js';
 
 /** Private browser backend; never exposed through public declarations. */
 export interface ThreeFrameBackend {
@@ -17,7 +18,8 @@ export interface ThreeFrameBackend {
     readonly size: { readonly width: number; readonly height: number };
     readonly changed: boolean;
   };
-  readonly renderFrame: (demo?: DemoTextureRequest) => void;
+  readonly renderFrame: (demo?: DemoTextureRequest, items?: readonly VisualFrameItem[]) => void;
+  readonly clearVisualDrawable: (instance: object) => void;
   readonly uploadTexture: (sessionId: symbol, bitmap: ImageBitmap, options: RenderTextureOptions) => RenderTexture;
   readonly setVisualTransform: (instance: object, matrix: AffineTransform2D | null, visible: boolean, renderOrder: number) => void;
   readonly setVisualVisibility: (instance: object, visible: boolean) => void;
@@ -52,6 +54,14 @@ export function createThreeFrameBackend(
   let demoQuad: ReturnType<typeof createDemoQuad> | undefined;
   let textureCleanupFailed = false;
   const visualNodes = new Map<object, Object3D>();
+  const visualDraw = createVisualDrawScope(visualNodes, texture => {
+    const snapshot = texture.getSnapshot();
+    const backing = textureBacking(texture), native = backing === undefined ? undefined : nativeTextures.get(backing);
+    if (snapshot.state !== 'usable' || native === undefined || !context.isTexture(native)) {
+      throw new FrameError('FRAME_FAILED', 'renderFrame');
+    }
+    return { native, snapshot };
+  });
   const handleContextLost = (): void => {
     // Synthetic browser events alone are not evidence of actual context loss.
     if (released || contextLost || !context.isContextLost()) return;
@@ -66,8 +76,10 @@ export function createThreeFrameBackend(
     renderer = undefined;
     scene = undefined;
     camera = undefined;
-    visualNodes.clear(); // Nodes own no materials/geometry/GPU resources.
-    let failed = textureCleanupFailed;
+    let visualCleanupFailed = false;
+    try { visualDraw.dispose(); } catch { visualCleanupFailed = true; }
+    visualNodes.clear();
+    let failed = textureCleanupFailed || visualCleanupFailed;
     // Invalidate every resource before releasing the renderer; never close CPU images.
     for (const texture of [...textures]) {
       try { texture.invalidate(); } catch { failed = true; }
@@ -120,6 +132,7 @@ export function createThreeFrameBackend(
 
   return Object.freeze({
     get viewportSize() { return viewportSize; },
+    clearVisualDrawable: visualDraw.remove,
     setVisualVisibility: (instance: object, visible: boolean): void => {
       if (contextLost || context.isContextLost()) throw new FrameError('CONTEXT_LOST', 'renderFrame');
       if (released || scene === undefined) throw new FrameError('FRAME_FAILED', 'renderFrame');
@@ -139,6 +152,7 @@ export function createThreeFrameBackend(
       if (released || scene === undefined) throw new FrameError('FRAME_FAILED', 'renderFrame');
       const previous = visualNodes.get(instance);
       if (matrix === null) {
+        visualDraw.remove(instance);
         visualNodes.delete(instance);
         if (previous !== undefined) scene.remove(previous);
         return;
@@ -282,7 +296,7 @@ export function createThreeFrameBackend(
         throw error; // Unknown exceptions remain unknown; session handles cleanup.
       }
     },
-    renderFrame: (demo?: DemoTextureRequest): void => {
+    renderFrame: (demo?: DemoTextureRequest, items: readonly VisualFrameItem[] = []): void => {
       if (contextLost || context.isContextLost()) {
         contextLost = true;
         throw new FrameError('CONTEXT_LOST', 'renderFrame');
@@ -296,9 +310,10 @@ export function createThreeFrameBackend(
           || context.drawingBufferHeight !== viewportSize.height) {
         throw new FrameError('FRAME_FAILED', 'renderFrame');
       }
-      // Presentation nodes have no drawables yet; the opaque blue clear remains.
+      // Reconcile one frozen logical submission; empty items preserve the legacy clear.
       const previousFrame = renderer.info.render.frame;
       try {
+        visualDraw.synchronize(items);
         renderer.render(scene, camera);
         if (demo !== undefined) {
           const backing = textureBacking(demo.texture);

@@ -9,6 +9,9 @@ import { captureVisualInstanceTransform, type RenderVisualInstanceTransformInput
   type RenderVisualInstanceTransformSnapshot } from './visual-instance-transform.js';
 import { writeVisualTransform, writeVisualVisibility, writeVisualOrdering, readVisualViewportSuspension,
   type VisualPresentationWrite } from './visual-transform-backend.js';
+import { captureSpriteLayout, type RenderVisualSpriteLayout } from './visual-sprite-layout.js';
+import { FrameError } from './frame-failure.js';
+import { checkVisualEdit, attachVisualFrameSource, type VisualFrameItem } from './visual-transform-backend.js';
 import type { AffineTransform2D } from './planar-affine.js';
 import { captureDepthKey, captureOrderingPolicy, explicitOrdering, sameOrderingPolicy, visualDepth,
   type RenderVisualDepthKey, type RenderVisualLayerOrderingPolicy } from './visual-depth.js';
@@ -70,6 +73,7 @@ export function getRenderVisualBindingFailure(error: unknown): RenderVisualBindi
 
 interface OwnedBinding {
   readonly read: () => RenderVisualResourceBindingSnapshot;
+  readonly draw: () => { readonly texture: import('./render-texture.js').RenderTexture; readonly frame: AtlasFrameGeometry | null };
   readonly release: () => void;
 }
 
@@ -82,6 +86,11 @@ function ownBinding(input: VisualResourceLease, frame: AtlasFrameGeometry | null
     resourceId: initial.resourceId, sessionId: initial.sessionId, sourceRevision: initial.sourceRevision,
     frame, cleanupFailed: initial.cleanupFailed });
   return {
+    draw: () => {
+      const current = lease?.getSnapshot();
+      if (current?.state !== 'usable') throw new FrameError('FRAME_FAILED', 'renderFrame');
+      return Object.freeze({ texture: current.texture, frame });
+    },
     read: () => {
       const current = lease?.getSnapshot();
       snapshot = Object.freeze({ ...snapshot, state: current?.state === 'usable' ? 'usable' : 'unavailable',
@@ -298,6 +307,16 @@ export function getRenderVisualInstanceDepthKey(scene: RenderVisualScene, instan
   return membership(scene).readDepthKey(instance);
 }
 
+/** Opt-in sprite geometry; null returns to metadata-only participation. */
+export function setRenderVisualInstanceSpriteLayout(scene: RenderVisualScene, instance: RenderVisualInstance,
+  layout: RenderVisualSpriteLayout | null): RenderVisualSpriteLayout | null {
+  return membership(scene).layout(instance, layout);
+}
+export function getRenderVisualInstanceSpriteLayout(scene: RenderVisualScene,
+  instance: RenderVisualInstance): RenderVisualSpriteLayout | null {
+  return membership(scene).readLayout(instance);
+}
+
 declare const visualInstanceBrand: unique symbol;
 
 /**
@@ -350,6 +369,8 @@ export function getRenderVisualInstanceFailure(error: unknown): RenderVisualInst
 }
 
 interface MembershipControl {
+  readonly layout: (instance: RenderVisualInstance, input: RenderVisualSpriteLayout | null) => RenderVisualSpriteLayout | null;
+  readonly readLayout: (instance: RenderVisualInstance) => RenderVisualSpriteLayout | null;
   readonly policy: (key: string, policy: RenderVisualLayerOrderingPolicy) => RenderVisualLayerOrderingPolicy;
   readonly readPolicy: (key: string) => RenderVisualLayerOrderingPolicy;
   readonly depthKey: (instance: RenderVisualInstance, input: RenderVisualDepthKey | null) => RenderVisualDepthKey | null;
@@ -513,6 +534,7 @@ function createScope(sessionId: symbol) {
   const id = Symbol('visual-scene');
   let snapshot: RenderVisualSceneSnapshot = Object.freeze({ id, sessionId, state: 'active' });
   let detach: (() => void) | undefined;
+  let edit: ((invalidate: boolean, dropDrawable?: object) => void) | undefined;
   let prepare: ((input: RenderVisualResourceBindingInput) => OwnedBinding) | undefined;
   let writeTransform: ((instance: object, matrix: AffineTransform2D | null, visible: boolean, renderOrder: number) => void) | undefined;
   let writeVisibility: ((instance: object, visible: boolean) => void) | undefined;
@@ -522,6 +544,7 @@ function createScope(sessionId: symbol) {
     readonly handle: RenderVisualInstance; snapshot: RenderVisualInstanceSnapshot;
     binding: OwnedBinding | undefined; transform: RenderVisualInstanceTransformSnapshot | null;
     visible: boolean; ordering: RenderVisualInstanceOrder; depthKey: RenderVisualDepthKey | null;
+    layout: RenderVisualSpriteLayout | null;
   }
   const instances = new Map<string, Entry>();
   let layers = new Map<string, RenderVisualLayerSnapshot>([['default', Object.freeze({
@@ -531,7 +554,7 @@ function createScope(sessionId: symbol) {
   let revision = {};
   const policies = new Map<string, RenderVisualLayerOrderingPolicy>();
   let orderCache: { readonly revision: object; readonly entries: readonly Entry[] } | undefined;
-  const invalidateOrdering = (): void => { revision = {}; orderCache = undefined; };
+  const invalidateOrdering = (): void => { revision = {}; orderCache = undefined; edit?.(true); };
   const issued = new WeakSet<RenderVisualInstance>();
   let nextOrdinal = 0;
   const requireActive = (): void => {
@@ -539,6 +562,7 @@ function createScope(sessionId: symbol) {
       throw new InstanceError(snapshot.reason === 'session-ended' ? 'SESSION_UNAVAILABLE' : 'SCENE_DISPOSED');
     }
   };
+  const requireEdit = (): void => { requireActive(); edit!(false); };
   const requireEntry = (instance: RenderVisualInstance) => {
     requireActive();
     if (!issued.has(instance)) throw new InstanceError('FOREIGN_INSTANCE');
@@ -617,22 +641,40 @@ function createScope(sessionId: symbol) {
       layers.clear();
       policies.clear();
       writeTransform = undefined; writeVisibility = undefined; writeOrdering = undefined;
-      readSuspended = undefined; release?.();
+      readSuspended = undefined; edit = undefined; release?.();
     }
     return snapshot;
   };
   const handle: RenderVisualScene = Object.freeze({
     getSnapshot: (): RenderVisualSceneSnapshot => snapshot,
     clear: (): RenderVisualSceneSnapshot => {
-      requireActive();
+      requireEdit();
       drain(); // Keep ordinal/provenance: old handles cannot target re-adds.
       return snapshot;
     },
-    dispose: (): RenderVisualSceneDisposal => end('scene-disposed'),
+    dispose: (): RenderVisualSceneDisposal => { if (snapshot.state === 'active') requireEdit(); return end('scene-disposed'); },
   });
   memberships.set(handle, {
+    readLayout: (instance) => requireEntry(instance).layout,
+    layout: (instance, input) => {
+      requireEdit();
+      const entry = requireEntry(instance), before = revision;
+      const candidate = captureSpriteLayout(input);
+      requireEntry(instance); unchanged(before);
+      if (candidate !== null && entry.transform !== null && candidate.unit !== entry.transform.placement.plane.unit) {
+        throw new TypeError('Sprite layout and transform local unit mismatch');
+      }
+      const previous = entry.layout;
+      if (previous === candidate || (previous !== null && candidate !== null
+        && previous.unit === candidate.unit && previous.x === candidate.x && previous.y === candidate.y
+        && previous.width === candidate.width && previous.height === candidate.height)) return previous;
+      edit!(true, instance);
+      entry.layout = candidate; invalidateOrdering();
+      return candidate;
+    },
     readPolicy: (key) => policyFor(requireLayer(key)),
     policy: (key, input) => {
+      requireEdit();
       const capturedKey = requireLayer(key), before = revision;
       const candidate = captureOrderingPolicy(input);
       unchanged(before);
@@ -646,6 +688,7 @@ function createScope(sessionId: symbol) {
     },
     readDepthKey: (instance) => requireEntry(instance).depthKey,
     depthKey: (instance, input) => {
+      requireEdit();
       const entry = requireEntry(instance), before = revision;
       const candidate = captureDepthKey(input);
       requireEntry(instance); unchanged(before);
@@ -661,6 +704,7 @@ function createScope(sessionId: symbol) {
       return candidate;
     },
     addLayer: (input) => {
+      requireEdit();
       requireActive();
       const before = revision, captured = captureLayer(input);
       unchanged(before);
@@ -671,6 +715,7 @@ function createScope(sessionId: symbol) {
       return result;
     },
     updateLayer: (input) => {
+      requireEdit();
       requireActive();
       const before = revision, captured = captureLayer(input);
       unchanged(before);
@@ -687,6 +732,7 @@ function createScope(sessionId: symbol) {
     getLayer: (key) => { requireActive(); return layers.get(layerKey(key)); },
     listLayers: () => { requireActive(); return Object.freeze([...layers.values()].sort(compareLayers)); },
     removeLayer: (key) => {
+      requireEdit();
       requireActive();
       const captured = layerKey(key);
       if (!layers.has(captured)) throw new LayerError('MISSING_LAYER');
@@ -696,6 +742,7 @@ function createScope(sessionId: symbol) {
     },
     readOrder: (instance) => requireEntry(instance).ordering,
     order: (instance, input) => {
+      requireEdit();
       const entry = requireEntry(instance), before = revision;
       const candidate = captureOrder(input);
       requireEntry(instance); unchanged(before);
@@ -717,6 +764,7 @@ function createScope(sessionId: symbol) {
         }));
     },
     add: (input): RenderVisualInstance => {
+      requireEdit();
       requireActive();
       const before = revision;
       const captured = captureInstance(input);
@@ -731,7 +779,7 @@ function createScope(sessionId: symbol) {
         insertionOrdinal: nextOrdinal });
       const instance = Object.freeze({ ...observation }) as RenderVisualInstance;
       instances.set(instance.visualInstanceId, { handle: instance, snapshot: observation,
-        binding: undefined, transform: null, visible: true, ordering: captured.ordering, depthKey: null });
+        binding: undefined, transform: null, visible: true, ordering: captured.ordering, depthKey: null, layout: null });
       invalidateOrdering();
       issued.add(instance);
       nextOrdinal += 1;
@@ -746,6 +794,7 @@ function createScope(sessionId: symbol) {
       return Object.freeze([...instances.values()].map(entry => entry.handle));
     },
     remove: (instance): boolean => {
+      requireEdit();
       requireActive();
       if (!issued.has(instance)) throw new InstanceError('FOREIGN_INSTANCE');
       const entry = instances.get(instance.visualInstanceId);
@@ -758,6 +807,7 @@ function createScope(sessionId: symbol) {
     read: (instance): RenderVisualInstanceSnapshot => requireEntry(instance).snapshot,
     readVisibility,
     visibility: (instance, visible) => {
+      requireEdit();
       const entry = requireEntry(instance);
       if (typeof visible !== 'boolean') throw new InstanceError('INVALID_DESCRIPTOR');
       if (entry.visible === visible) return readVisibility(instance);
@@ -769,6 +819,7 @@ function createScope(sessionId: symbol) {
     },
     readTransform: (instance) => requireEntry(instance).transform,
     transform: (instance, input) => {
+      requireEdit();
       const entry = requireEntry(instance), beforeRevision = revision, before = entry.transform, beforeState = entry.snapshot,
         beforeBinding = entry.binding, beforeVisible = entry.visible;
       const candidate = input === null ? null : captureVisualInstanceTransform(input);
@@ -778,6 +829,9 @@ function createScope(sessionId: symbol) {
         || current.binding !== beforeBinding || current.visible !== beforeVisible) throw new InstanceError('INSTANCE_CHANGED');
       if (candidate === null && before === null) return null;
       visualDepth(policyFor(entry.ordering.layerKey), candidate, entry.depthKey);
+      if (candidate !== null && entry.layout !== null && entry.layout.unit !== candidate.placement.plane.unit) {
+        throw new TypeError('Sprite layout and transform local unit mismatch');
+      }
       // Recompute all native ranks before placement: intervening metadata-only
       // adds/removals need no node writes, and cannot make ranks collide here.
       const proposed = [...instances.values()].map(value => value === entry ? { ...entry, transform: candidate } : value);
@@ -797,6 +851,7 @@ function createScope(sessionId: symbol) {
       return observation;
     },
     bind: (instance, input) => {
+      requireEdit();
       const entry = requireEntry(instance), before = entry.binding, beforeState = entry.snapshot;
       const candidate = input === null ? undefined : prepare!(input);
       try {
@@ -805,6 +860,7 @@ function createScope(sessionId: symbol) {
           throw new InstanceError('INSTANCE_CHANGED');
         }
       } catch (error) { candidate?.release(); throw error; }
+      try { edit!(true, instance); } catch (error) { candidate?.release(); throw error; }
       entry.binding = candidate; // Commit before old cleanup; cleanup failure does not roll back.
       before?.release();
       const observation = candidate?.read() ?? null;
@@ -812,6 +868,7 @@ function createScope(sessionId: symbol) {
       return observation;
     },
     update: (instance, properties): RenderVisualInstanceSnapshot => {
+      requireEdit();
       const before = requireEntry(instance).snapshot;
       const data = dataRecord(properties, ['correlation']);
       const correlation = captureCorrelation(data.correlation);
@@ -823,16 +880,33 @@ function createScope(sessionId: symbol) {
         && previous.projectId === correlation.projectId && previous.sceneId === correlation.sceneId
         && previous.objectId === correlation.objectId)) return before;
       const candidate: RenderVisualInstanceSnapshot = Object.freeze({ ...before, correlation });
+      edit!(true);
       entry.snapshot = candidate; // Single commit; no ID map mutation/reorder/ordinal increment.
       return candidate;
     },
   });
-  return { handle, end, attach: (callback: () => void, factory: (input: RenderVisualResourceBindingInput) => OwnedBinding,
+  const captureFrame = (): readonly VisualFrameItem[] => {
+    requireActive();
+    const before = revision;
+    const items: VisualFrameItem[] = [];
+    for (const [renderOrder, entry] of ordered().entries()) {
+      if (!entry.visible || !layers.get(entry.ordering.layerKey)!.visible || entry.transform === null
+        || entry.layout === null || entry.binding === undefined) continue;
+      const resource = entry.binding.draw();
+      unchanged(before);
+      items.push(Object.freeze({ instance: entry.handle, renderOrder, transform: entry.transform,
+        layout: entry.layout, ...resource }));
+    }
+    unchanged(before);
+    return Object.freeze(items);
+  };
+  return { handle, end, captureFrame, attach: (callback: () => void, factory: (input: RenderVisualResourceBindingInput) => OwnedBinding,
     transformWriter: (instance: object, matrix: AffineTransform2D | null, visible: boolean, renderOrder: number) => void,
     visibilityWriter: (instance: object, visible: boolean) => void,
-    orderingWriter: (writes: readonly VisualPresentationWrite[]) => void, suspensionReader: () => boolean): void => {
+    orderingWriter: (writes: readonly VisualPresentationWrite[]) => void, suspensionReader: () => boolean,
+    editWriter: (invalidate: boolean, dropDrawable?: object) => void): void => {
     detach = callback; prepare = factory; writeTransform = transformWriter;
-    writeVisibility = visibilityWriter; writeOrdering = orderingWriter; readSuspended = suspensionReader;
+    writeVisibility = visibilityWriter; writeOrdering = orderingWriter; readSuspended = suspensionReader; edit = editWriter;
   } };
 }
 
@@ -851,17 +925,21 @@ function createScope(sessionId: symbol) {
  */
 export function createRenderVisualScene(session: RenderFrameSession): RenderVisualScene {
   const sessionId = requireTextureSession(session);
+  checkVisualEdit(session);
   if (occupiedSessions.has(session)) throw new TypeError('Graphics session already has an active visual scene');
   const scope = createScope(sessionId);
   const unsubscribe = onTextureSessionEnd(session, () => { scope.end('session-ended'); });
+  const detachFrame = attachVisualFrameSource(session, scope.captureFrame);
   scope.attach(() => {
+    detachFrame();
     occupiedSessions.delete(session);
     unsubscribe();
   }, input => prepareBinding(session, input),
   (instance, matrix, visible, renderOrder) => writeVisualTransform(session, instance, matrix, visible, renderOrder),
   (instance, visible) => writeVisualVisibility(session, instance, visible),
   writes => writeVisualOrdering(session, writes),
-  () => readVisualViewportSuspension(session));
+  () => readVisualViewportSuspension(session),
+  (invalidate, instance) => checkVisualEdit(session, invalidate, instance));
   occupiedSessions.add(session);
   return scope.handle;
 }

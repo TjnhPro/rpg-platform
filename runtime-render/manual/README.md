@@ -366,3 +366,8 @@ opening the in-app browser returned `Browser is not available: iab`.
 All browser/visual cases are NOT_OBSERVED, not behavioral PASS. No mock GPU,
 headless fallback, browser automation suite or screenshot assertions were added.
 RV18 runtime proof and Phase6 acceptance remain open.
+# Visual Scene frame integration — v0.8.9
+
+[Manual guide](visual-scene-frame.md): compile the optional public-root consumer
+and open the local two-PNG page to inspect real resource-backed sprite submission,
+hide/move/order/clear. Browser NOT_EXECUTED; build is not visual acceptance.

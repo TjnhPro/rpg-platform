@@ -4,6 +4,14 @@
 
 Read root agent guidance first.
 
+- [v0.8.9 SR14](../harness/checkpoints/scene-rendering-v0.8.9.md): explicit local
+  sprite layouts opt into actual mesh/frame drawing through the existing frame
+  session. Capture one ordered submission under the synchronous edit guard; rank
+  actual meshes. Borrow Phase7 allocations via Three ExternalTexture, never reupload
+  or delete them. Same clear/status/demand/terminal policy, no scheduler. See
+  [contract](docs/scene-rendering-v0.8.9.md) and [manual](manual/visual-scene-frame.md).
+  Draw is implemented but FEATURE_NOT_VERIFIED / VISUAL_NOT_VERIFIED remains.
+
 - [v0.8.8 SR11/SR12/SR13](../harness/checkpoints/scene-rendering-v0.8.8.md): opt-in
   layer depth-key/ground-y policies retain explicit-order default. Ground uses
   Phase4 source-plane attachment, exact unit/axes and declared front; missing

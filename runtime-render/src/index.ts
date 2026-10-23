@@ -46,6 +46,8 @@ export {
   getRenderVisualLayerOrderingPolicy,
   setRenderVisualInstanceDepthKey,
   getRenderVisualInstanceDepthKey,
+  setRenderVisualInstanceSpriteLayout,
+  getRenderVisualInstanceSpriteLayout,
 } from './visual-scene.js';
 export { getRenderVisualDepthFailure, type RenderVisualDepthFailure,
   type RenderVisualDepthKey, type RenderVisualLayerOrderingPolicy } from './visual-depth.js';
@@ -308,3 +310,5 @@ export {
 
 export { invalidateVisualResourceCache, getVisualResourceCacheFailure, type VisualResourceCacheFailure } from './visual-resource-cache.js';
 export type { AtlasMetadataLimits } from './unity-atlas.js';
+
+export { type RenderVisualSpriteLayout } from './visual-sprite-layout.js';
