@@ -53,7 +53,7 @@ const sessions = new WeakMap<RenderFrameSession, { readonly id: symbol;
   readonly upload: (image: PngImageDecode, options: RenderTextureOptions) => RenderTexture;
   terminal: boolean; readonly listeners: Set<() => void> }>();
 const textures = new WeakMap<RenderTexture, { readonly sessionId: symbol;
-  readonly read: () => RenderTextureSnapshot }>();
+  readonly read: () => RenderTextureSnapshot; readonly backing: RenderTexture }>();
 
 /** Internal registration; no backend objects are exposed through root declarations. */
 export function registerTextureSession(
@@ -62,9 +62,11 @@ export function registerTextureSession(
 ): void { sessions.set(session, { id, upload, terminal: false, listeners: new Set() }); }
 
 /** Internal capability branding, retained only while the caller holds the handle. */
-export function registerRenderTexture(handle: RenderTexture, sessionId: symbol, read: () => RenderTextureSnapshot): void {
-  textures.set(handle, { sessionId, read });
+export function registerRenderTexture(handle: RenderTexture, sessionId: symbol, read: () => RenderTextureSnapshot, backing = handle): void {
+  textures.set(handle, { sessionId, read, backing });
 }
+/** Private backing identity only; never returns a native object. Caller validates the live right. */
+export const textureBacking = (handle: RenderTexture): RenderTexture | undefined => textures.get(handle)?.backing;
 
 /** Synchronous upload into the existing canonical session. Never creates a session. */
 export function uploadPngTexture(

@@ -3,7 +3,9 @@ import { FrameError, getRenderFrameFailure } from './frame-failure.js';
 import { readBrowserCanvas } from './canvas-target.js';
 import type { RenderViewportSizePlan } from './viewport-size.js';
 import { createTextureLifetime } from './texture-lifetime.js';
-import { TextureError, type RenderTexture, type RenderTextureOptions } from './render-texture.js';
+import { TextureError, textureBacking, type RenderTexture, type RenderTextureOptions } from './render-texture.js';
+import { createDemoQuad } from './demo-quad.js';
+import type { DemoTextureRequest } from './visual-resource-demo.js';
 
 /** Private browser backend; never exposed through public declarations. */
 export interface ThreeFrameBackend {
@@ -13,7 +15,7 @@ export interface ThreeFrameBackend {
     readonly size: { readonly width: number; readonly height: number };
     readonly changed: boolean;
   };
-  readonly renderFrame: () => void;
+  readonly renderFrame: (demo?: DemoTextureRequest) => void;
   readonly uploadTexture: (sessionId: symbol, bitmap: ImageBitmap, options: RenderTextureOptions) => RenderTexture;
   readonly dispose: () => void;
 }
@@ -41,6 +43,8 @@ export function createThreeFrameBackend(
   let contextLost = false;
   let released = false;
   const textures = new Set<ReturnType<typeof createTextureLifetime>>();
+  const nativeTextures = new Map<RenderTexture, WebGLTexture>();
+  let demoQuad: ReturnType<typeof createDemoQuad> | undefined;
   let textureCleanupFailed = false;
   const handleContextLost = (): void => {
     // Synthetic browser events alone are not evidence of actual context loss.
@@ -62,6 +66,9 @@ export function createThreeFrameBackend(
       try { texture.invalidate(); } catch { failed = true; }
     }
     textures.clear();
+    nativeTextures.clear();
+    const quad = demoQuad; demoQuad = undefined;
+    try { quad?.dispose(); } catch { failed = true; }
     try { target.removeEventListener('webglcontextlost', handleContextLost); } catch { failed = true; }
     try { ownedScene?.clear(); } catch { failed = true; }
     try { ownedRenderer?.dispose(); } catch { failed = true; }
@@ -166,6 +173,7 @@ export function createThreeFrameBackend(
         const uploaded = native;
         const resource = createTextureLifetime(sessionId, width, height, options, () => {
           textures.delete(resource);
+          nativeTextures.delete(resource.handle);
           try { destroy(uploaded); }
           catch (error) {
             // Unknown errors remain original. Existing session cleanup records uncertainty.
@@ -174,6 +182,7 @@ export function createThreeFrameBackend(
           }
         }, handleContextLost);
         textures.add(resource);
+        nativeTextures.set(resource.handle, uploaded);
         native = null; // Ownership moved into the resource; no ImageBitmap reference retained.
         return resource.handle;
       } catch (error) {
@@ -231,7 +240,7 @@ export function createThreeFrameBackend(
         throw error; // Unknown exceptions remain unknown; session handles cleanup.
       }
     },
-    renderFrame: (): void => {
+    renderFrame: (demo?: DemoTextureRequest): void => {
       if (contextLost || context.isContextLost()) {
         contextLost = true;
         throw new FrameError('CONTEXT_LOST', 'renderFrame');
@@ -249,7 +258,22 @@ export function createThreeFrameBackend(
       const previousFrame = renderer.info.render.frame;
       try {
         renderer.render(scene, camera);
+        if (demo !== undefined) {
+          const backing = textureBacking(demo.texture);
+          const native = backing === undefined ? undefined : nativeTextures.get(backing);
+          if (native === undefined || context.getError() !== context.NO_ERROR) {
+            throw new FrameError('FRAME_FAILED', 'renderFrame');
+          }
+          renderer.resetState();
+          context.viewport(0, 0, viewportSize.width, viewportSize.height);
+          demoQuad ??= createDemoQuad(context);
+          demoQuad.draw(native, demo.uv);
+          renderer.resetState();
+          renderer.setViewport(0, 0, viewportSize.width, viewportSize.height);
+          renderer.setClearColor(0x147da8, 1);
+        }
       } catch (error) {
+        if (getRenderFrameFailure(error)?.cleanupFailed) textureCleanupFailed = true;
         if (context.isContextLost()) {
           contextLost = true;
           throw new FrameError('CONTEXT_LOST', 'renderFrame');

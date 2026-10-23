@@ -499,3 +499,7 @@ frame lookup performs no extra source reads and no image/GPU operation.
   public-root consumer. Compiled only; native reuse/cleanup requires manual observation.
 
 - [v0.7.10 explicit cache revision/limits](cache-invalidation.md): optional finite A/B consumer, compiled only; browser/GPU observations remain open.
+
+- [v0.7.13 visual resource MVP](../../runtime-render/manual/visual-resource-mvp.md):
+  Editor Catalog/reference and independent Client host adapters, shared Render
+  demonstration path, concurrent holders/release/revision controls. Browser NOT_EXECUTED.

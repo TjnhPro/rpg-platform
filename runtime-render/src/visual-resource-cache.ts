@@ -201,7 +201,7 @@ export function createVisualResourceCache(provider: VisualSourceProvider, inputL
         };
         const texture: RenderTexture = Object.freeze({ getSnapshot: read,
           release: () => { finish('released'); return read(); } });
-        registerRenderTexture(texture, sessionId, read);
+        registerRenderTexture(texture, sessionId, read, entry.texture);
         state = Object.freeze({ id, sessionId, state: 'usable', texture, resourceId: base.id,
           sourceRevision, cleanupFailed: false });
         settle();

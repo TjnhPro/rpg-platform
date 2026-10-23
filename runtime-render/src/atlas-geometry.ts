@@ -38,6 +38,8 @@ export type AtlasFrameGeometryResult =
     | 'PAGE_DIMENSION_MISMATCH' | 'INVALID_FRAME_BOUNDS' | 'UNSUPPORTED_FRAME_GEOMETRY' };
 
 const geometries = new WeakSet<AtlasFrameGeometry>();
+/** Private capability check for the finite resource demonstration. */
+export const isCanonicalAtlasGeometry = (geometry: AtlasFrameGeometry): boolean => geometries.has(geometry);
 const positive = (n: number): boolean => Number.isSafeInteger(n) && n > 0;
 
 /** Pure interpretation of a canonical atlas snapshot; no decode, crop, upload or authored placement. */

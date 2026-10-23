@@ -1,3 +1,4 @@
+export { renderVisualResourceDemo } from './visual-resource-demo.js';
 export {
   planRenderViewportSize,
   type RenderViewportMetrics,
