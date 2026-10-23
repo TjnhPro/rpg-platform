@@ -1,3 +1,8 @@
+# Manual Source Loading Lifecycle — v0.7.2
+
+[Async source guide](visual-source-load.md) traces independent requests, source-only
+acquisition, failure, release and late delivery through the Render public root.
+
 # Manual Resource Provider — v0.7.1
 
 [Source-access guide](visual-source.md) demonstrates the Render public provider

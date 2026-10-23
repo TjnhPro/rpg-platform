@@ -65,7 +65,15 @@ function nonblank(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;
 }
 
-const fail = (code: VisualSourceFailureCode): VisualSourceAcquisition => Object.freeze({ status: 'failed', code });
+type SourceFailure = Extract<VisualSourceAcquisition, { status: 'failed' }>;
+const fail = (code: VisualSourceFailureCode): SourceFailure => Object.freeze({ status: 'failed', code });
+
+/** Package-private capture shared by the one-shot API and source lifecycle. */
+export type CapturedVisualSourceAccess = SourceFailure | {
+  readonly status: 'admitted';
+  readonly request: VisualSourceRequest;
+  readonly invoke: () => Promise<VisualSourceResponse>;
+};
 
 /**
  * Acquire exactly one logical source via explicit host authority. Invalid caller
@@ -78,6 +86,19 @@ export async function acquireVisualSource(
   descriptor: VisualResourceDescriptor, sourceIndex: number,
   provider: VisualSourceProvider, maxBytes: number,
 ): Promise<VisualSourceAcquisition> {
+  const access = captureVisualSourceAccess(descriptor, sourceIndex, provider, maxBytes);
+  if (access.status === 'failed') return access;
+  let response: VisualSourceResponse;
+  try { response = await access.invoke(); }
+  catch { return fail('PROVIDER_FAILED'); }
+  return acceptVisualSourceResponse(response, access.request, false);
+}
+
+/** Internal, not a package-root export. Captures metadata without invoking IO. */
+export function captureVisualSourceAccess(
+  descriptor: VisualResourceDescriptor, sourceIndex: number,
+  provider: VisualSourceProvider, maxBytes: number,
+): CapturedVisualSourceAccess {
   const captured = prepareVisualResource(descriptor).descriptor;
   if (!Number.isSafeInteger(sourceIndex) || sourceIndex < 0 || sourceIndex >= captured.sources.length
     || !Number.isSafeInteger(maxBytes) || maxBytes <= 0) {
@@ -95,9 +116,13 @@ export async function acquireVisualSource(
   const source = captured.sources[sourceIndex]!;
   const request: VisualSourceRequest = Object.freeze({ scope, identity: captured.identity,
     source, sourceIndex, maxBytes, expectedMediaType: source.role === 'image' ? captured.mediaType : null });
-  let response: VisualSourceResponse;
-  try { response = await read.call(provider, request); }
-  catch { return fail('PROVIDER_FAILED'); }
+  return { status: 'admitted', request, invoke: () => read.call(provider, request) };
+}
+
+/** Internal response admission; lifecycle preserves unexpected original errors. */
+export function acceptVisualSourceResponse(
+  response: VisualSourceResponse, request: VisualSourceRequest, preserveErrors: boolean,
+): VisualSourceAcquisition {
   // Providers are trusted host code, but malformed/detached responses still fail
   // closed. Do not leak exceptions from response getters or copying its buffer.
   try {
@@ -115,11 +140,14 @@ export async function acquireVisualSource(
         || !/^[a-zA-Z0-9!#$&^_.+-]+\/[a-zA-Z0-9!#$&^_.+-]+$/u.test(mediaType)))) {
       return fail('INVALID_RESPONSE');
     }
-    if (contentLength > maxBytes) return fail('CONTENT_TOO_LARGE');
+    if (contentLength > request.maxBytes) return fail('CONTENT_TOO_LARGE');
     if (request.expectedMediaType !== null && (mediaType === null
       || request.expectedMediaType.toLowerCase() !== mediaType.toLowerCase())) return fail('MEDIA_TYPE_MISMATCH');
     const owned = new Uint8Array(contentLength);
     owned.set(bytes);
     return Object.freeze({ status: 'source-acquired', request, revision, mediaType, contentLength, bytes: owned });
-  } catch { return fail('INVALID_RESPONSE'); }
+  } catch (error) {
+    if (preserveErrors) throw error;
+    return fail('INVALID_RESPONSE');
+  }
 }
