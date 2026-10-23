@@ -4,11 +4,13 @@ import {
   invalidateRenderFrame, resizeRenderViewport, suspendRenderViewport, resumeRenderViewport,
   getRenderFailure, getRenderFrameFailure,
   type RenderFrameAcquisition, type RenderFrameSession, type RenderViewportMetrics,
+  type RenderViewportResizeReceipt,
 } from '@rpg-platform/runtime-render';
 
 /** One UI mount; closed mounts never adopt a late graphics result or revive. */
 export function mountEditorViewport(
   target: HTMLCanvasElement, notify: (event: string, detail?: unknown) => void,
+  pixelRatio: () => number = () => window.devicePixelRatio,
 ) {
   const limits = { maxWidthPixels: 4096, maxHeightPixels: 4096, maxPixelCount: 4_000_000 };
   let acquisition: RenderFrameAcquisition | undefined;
@@ -17,13 +19,14 @@ export function mountEditorViewport(
   let pending = false, closed = false, paused = false;
   let wanted: object | undefined;
   let lastMetrics: RenderViewportMetrics | undefined;
+  let lastConfiguration: RenderViewportResizeReceipt | undefined;
   let lastFailure: unknown = null;
   let requests = 0, submissions = 0;
   let ratioQuery: MediaQueryList | undefined;
 
   const snapshot = () => ({
     host: closed ? 'unmounted' : 'mounted', pending, paused, requests, submissions,
-    callbackPending: callback !== undefined, metrics: lastMetrics, lastFailure,
+    callbackPending: callback !== undefined, metrics: lastMetrics, lastConfiguration, lastFailure,
     viewport: acquisition && getRenderViewportSnapshot(acquisition),
     demand: session && getRenderFrameInvalidationSnapshot(session), display: 'NOT_VERIFIED',
   });
@@ -57,7 +60,7 @@ export function mountEditorViewport(
   const metrics = (): RenderViewportMetrics => {
     const bounds = target.getBoundingClientRect();
     return { logicalWidthCssPx: bounds.width, logicalHeightCssPx: bounds.height,
-      requestedPixelRatio: window.devicePixelRatio };
+      requestedPixelRatio: pixelRatio() };
   };
   const configure = (resume = false): boolean => {
     const current = ready();
@@ -75,6 +78,7 @@ export function mountEditorViewport(
     const receipt = resume ? resumeRenderViewport(current, next, limits)
       : resizeRenderViewport(current, next, limits);
     lastMetrics = Object.freeze(next);
+    lastConfiguration = receipt;
     if (resume) paused = false;
     notify('configured-not-submitted', receipt);
     return true;
@@ -109,7 +113,7 @@ export function mountEditorViewport(
   const start = (): void => {
     if (closed || pending || document.hidden) { notify('start-unavailable'); return; }
     release(); // Cleanup failure aborts replacement; never silently reset quarantine.
-    lastMetrics = undefined; lastFailure = null; requests = 0; submissions = 0;
+    lastMetrics = undefined; lastConfiguration = undefined; lastFailure = null; requests = 0; submissions = 0;
     paused = false; pending = true;
     const intent = {}; wanted = intent;
     const operation = beginRenderFrameSession({ target });

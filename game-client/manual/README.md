@@ -1,5 +1,14 @@
 # Manual Client viewport host — v0.6.12 RV17
 
+v0.6.13 also provides a [two-host manual composition](../../editor/manual/viewport-mvp.html)
+with independent A/Editor and B/Client canvas sections in one document/realm.
+Client still imports only Render root and scopes its DOM lookup to its own host.
+The optional ratio selector chooses 1/2/browser DPR; lastConfiguration retains
+the Render resize receipt (requested/native accepted/effective ratio).
+See [RV18 procedure/evidence](../../harness/checkpoints/render-viewport-v0.6.13.md).
+No browser was available to execute this composition; all browser cases remain
+NOT_OBSERVED. Existing standalone page behavior defaults to browser DPR.
+
 Build with `npm run build -- --force`, serve the workspace root, e.g.
 `python -m http.server 8080 --bind 127.0.0.1`, and open
 http://127.0.0.1:8080/game-client/manual/frame-continuous.html.

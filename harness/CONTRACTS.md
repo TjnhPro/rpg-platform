@@ -1,5 +1,11 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase6 v0.6.13 RV18: [two-host MVP](checkpoints/render-viewport-v0.6.13.md)
+composes existing manual browser entries in one realm with one Render root URL.
+No public API/schema/dependency change. Explicit demo ratio selection and retained
+resize receipts are host-local; requested/effective/native sizes remain distinct.
+Browser evidence is blocked, not inferred from build/receipt or source inspection.
+
 Phase6 v0.6.12 RV17: [Client viewport integration](checkpoints/render-viewport-v0.6.12.md)
 uses the same existing Render root as Editor, with Client-owned continuous browser
 requests and measured CSS/DPR resize/resume. Public exports/signatures, package

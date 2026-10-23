@@ -1,5 +1,11 @@
 # Ownership decisions — do not classify by similar names
 
+v0.6.13 RV18: Runtime Render owns the canonical two-session graphics contract;
+no backend/public changes needed. Editor owns a manual-only composition page;
+Editor/Client scope their existing browser entries and choose explicit demo ratios.
+No Render-to-host production import or Editor-to-Client package dependency.
+Browser proof blocked by unavailable browser; see [matrix](checkpoints/render-viewport-v0.6.13.md).
+
 v0.6.12 RV17: Client owns its independent browser viewport host, CSS/DPR metrics,
 continuous callbacks, explicit start/stop and observer/listener teardown. Existing
 Render root APIs suffice; no Editor dependency or Render/source ownership change.

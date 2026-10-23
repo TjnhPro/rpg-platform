@@ -3,16 +3,20 @@ import {
   beginRenderFrameSession, getRenderViewportSnapshot, getRenderFrameInvalidationSnapshot,
   resizeRenderViewport, resumeRenderViewport, suspendRenderViewport, getRenderFailure, getRenderFrameFailure,
   type RenderFrameAcquisition, type RenderFrameSession, type RenderViewportMetrics,
+  type RenderViewportResizeReceipt,
 } from '@rpg-platform/runtime-render';
 
-const canvas = document.querySelector<HTMLCanvasElement>('canvas');
-const output = document.querySelector<HTMLPreElement>('#output');
+const root = document.querySelector('[data-client-viewport]') ?? document;
+const canvas = root.querySelector<HTMLCanvasElement>('canvas');
+const output = root.querySelector<HTMLPreElement>('[data-output], #output');
+const ratio = root.querySelector<HTMLSelectElement>('[data-ratio]');
 if (!canvas || !output) throw new Error('Continuous host elements missing');
 const target = canvas, log = output;
 const limits = { maxWidthPixels: 4096, maxHeightPixels: 4096, maxPixelCount: 4_000_000 };
 let session: RenderFrameSession | undefined;
 let acquisition: RenderFrameAcquisition | undefined;
 let lastMetrics: RenderViewportMetrics | undefined;
+let lastConfiguration: RenderViewportResizeReceipt | undefined;
 let lastFailure: unknown = null;
 let ratioQuery: MediaQueryList | undefined;
 let callback: number | undefined;
@@ -21,7 +25,7 @@ let submissions = 0;
 
 function show(event: string, detail?: unknown): void {
   log.textContent = JSON.stringify({ event, detail, running, callbackPending: callback !== undefined,
-    pending, host: closed ? 'unmounted' : 'mounted', metrics: lastMetrics, lastFailure,
+    pending, host: closed ? 'unmounted' : 'mounted', metrics: lastMetrics, lastConfiguration, lastFailure,
     submissions, viewport: acquisition && getRenderViewportSnapshot(acquisition),
     demand: session && getRenderFrameInvalidationSnapshot(session), display: 'NOT_VERIFIED',
   }, (_key, value: unknown) => typeof value === 'symbol' ? String(value) : value, 2);
@@ -56,7 +60,7 @@ function configure(resume = false): boolean {
   // Render alone rounds/enforces budgets and writes the live backing buffer.
   const bounds = target.getBoundingClientRect();
   const next = { logicalWidthCssPx: bounds.width, logicalHeightCssPx: bounds.height,
-    requestedPixelRatio: window.devicePixelRatio };
+    requestedPixelRatio: ratio?.value === '1' ? 1 : ratio?.value === '2' ? 2 : window.devicePixelRatio };
   if (document.hidden || !target.isConnected || bounds.width <= 0 || bounds.height <= 0) {
     stop(); show('hidden-or-zero-explicit-start-required'); return false;
   }
@@ -66,6 +70,7 @@ function configure(resume = false): boolean {
   const receipt = resume ? resumeRenderViewport(session, next, limits)
     : resizeRenderViewport(session, next, limits);
   lastMetrics = Object.freeze(next);
+  lastConfiguration = receipt;
   show('configured-not-submitted', receipt);
   return true;
 }
@@ -102,14 +107,14 @@ function startFrames(): void {
   running = true; schedule(); show('started');
 }
 function button(id: string, action: () => void): void {
-  const element = document.querySelector<HTMLButtonElement>(`#${id}`);
+  const element = root.querySelector<HTMLButtonElement>(`[data-control="${id}"], #${id}`);
   if (!element) throw new Error(`Continuous control missing: ${id}`);
   element.onclick = () => { if (!closed) run(action); };
 }
 button('acquire', () => {
   if (pending || closed) return;
   dispose(); pending = true; wanted = true;
-  lastMetrics = undefined; lastFailure = null;
+  lastMetrics = undefined; lastConfiguration = undefined; lastFailure = null;
   const operation = beginRenderFrameSession({ target });
   acquisition = operation;
   show('acquiring');
@@ -134,6 +139,7 @@ button('resize', () => { target.style.width = target.style.width === '480px' ? '
 button('zero', () => { target.style.height = '0px'; layout(); });
 button('restore', () => { target.style.height = '180px'; layout(); });
 button('unmount', unmount);
+if (ratio) ratio.onchange = () => layout();
 
 function visibility(): void {
   run(() => { if (document.hidden) stop(); else show('visible-explicit-start-required'); });
@@ -150,6 +156,7 @@ const observer = new ResizeObserver(layout);
 function unmount(): void {
   if (closed) return;
   closed = true; wanted = false;
+  if (ratio) ratio.onchange = null;
   // Close first; independently drain host cleanup even if backend release fails.
   for (const cleanup of [cancel, () => observer.disconnect(),
     () => ratioQuery?.removeEventListener('change', ratioChanged),

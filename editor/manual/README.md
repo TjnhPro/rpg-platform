@@ -433,3 +433,13 @@ The real build compiles the browser entry and internal integration. There are no
 assertions, runners, mocks, browser automation or runtime CI. At v0.6.11 all browser
 procedures, pending/unmount races, native DPR/resize/loss and pixels remain
 **FEATURE_NOT_VERIFIED / VISUAL_NOT_VERIFIED**. Developer owns manual acceptance.
+# Two-host Viewport MVP — v0.6.13
+
+Open [viewport-mvp.html](viewport-mvp.html) after the workspace build and serving
+its root. This manual-only composition loads the existing Editor and Client
+browser entries into scoped sections of one document. Both resolve the same
+Render root; no package-to-package implementation import or new root API.
+A starts at 800×450 and toggles to 600×400; each host offers explicit ratio1/2 or
+browser DPR. Last accepted resize receipt remains visible beside current metrics.
+See the [manual procedure/evidence matrix](../../harness/checkpoints/render-viewport-v0.6.13.md).
+Browser execution unavailable here; FEATURE_NOT_VERIFIED / VISUAL_NOT_VERIFIED.

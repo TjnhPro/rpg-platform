@@ -346,3 +346,23 @@ claiming accepted metrics. Do not set canvas.width/height externally on a live
 session or feed this candidate into a viewport snapshot. Existing session snapshots
 remain last configured native extents; actual logical CSS size/ratio is unknown.
 No CSS style/layout writes or Phase4 screen/scene conversions occur here.
+# Two-host Viewport MVP — v0.6.13
+
+After a workspace build, serve its root and open
+http://127.0.0.1:8080/editor/manual/viewport-mvp.html.
+The Editor-owned manual composition page loads the existing Editor and Client
+browser entries in one document/realm. One import map resolves both entries to
+the same Render root module URL, not two iframe realms or copied Render engines.
+Neither package imports the other's source. Render backend/root is unchanged.
+
+Use the [RV18 procedure and expected/observed matrix](../../harness/checkpoints/render-viewport-v0.6.13.md).
+Both hosts expose measured CSS/requested ratio plus retained lastConfiguration:
+native accepted buffer size and effective x/y ratio. Requested ratio 1/2 is a
+manual host choice independent of the physical monitor DPR; Browser DPR remains
+available. On-demand A and continuous B keep their existing separate policies.
+
+**Browser execution BLOCKED in the agent environment:** browser inventory empty;
+opening the in-app browser returned `Browser is not available: iab`.
+All browser/visual cases are NOT_OBSERVED, not behavioral PASS. No mock GPU,
+headless fallback, browser automation suite or screenshot assertions were added.
+RV18 runtime proof and Phase6 acceptance remain open.
