@@ -16,10 +16,17 @@ export { getRenderFrameFailure, type RenderFrameFailure } from './frame-failure.
 export interface RenderFrameReceipt {
   readonly sessionId: symbol;
   readonly status: 'submitted';
+  /**
+   * Canonical sessions always attach the frozen active viewport used for this
+   * submission. Optional for compatibility with earlier structural receipts.
+   * Historical configuration, not live health or browser display evidence.
+   */
+  readonly viewport?: RenderViewportSnapshot & { readonly state: 'active' };
 }
 
 /** Explicit graphics session; existing binding-only factories remain unchanged. */
 export interface RenderFrameSession extends RenderSessionLifecycle {
+  /** Synchronous, on demand only. Nested requests reject; never queued/coalesced. */
   readonly renderFrame: () => RenderFrameReceipt;
 }
 
@@ -300,6 +307,7 @@ async function acquireRenderFrameSession(
     return failure;
   }
 
+  let frameInProgress = false;
   const session: RenderFrameSession = Object.freeze({
     getSnapshot: lifecycle.getSnapshot,
     initialize: lifecycle.initialize,
@@ -317,16 +325,28 @@ async function acquireRenderFrameSession(
       }
     },
     renderFrame: (): RenderFrameReceipt => {
-      const snapshot = lifecycle.getSnapshot(); // Disposed sessions use existing error semantics.
+      lifecycle.getSnapshot(); // Disposed sessions use existing error semantics.
       // Rejection is not a backend failure: no frame, cleanup or state transition.
       if (viewportControl.suspended) throw new FrameError('VIEWPORT_SUSPENDED', 'renderFrame');
+      if (frameInProgress) throw new FrameError('FRAME_IN_PROGRESS', 'renderFrame');
+      const viewport = getRenderViewportSnapshot(session);
+      if (viewport.state !== 'active' || viewport.graphics.state !== 'ready') {
+        throw failGraphics(new FrameError('FRAME_NOT_SUBMITTED', 'renderFrame'));
+      }
+      frameInProgress = true;
       try {
-        if (backend === undefined) throw new Error('Missing graphics resources');
-        backend.renderFrame();
+        const owned = backend;
+        if (owned === undefined) throw new FrameError('FRAME_FAILED', 'renderFrame');
+        owned.renderFrame();
+        // Do not receipt a frame whose session was released during backend work.
+        if (backend !== owned) throw new FrameError('FRAME_FAILED', 'renderFrame');
+        return Object.freeze({ sessionId: viewport.sessionId, status: 'submitted',
+          viewport: Object.freeze({ ...viewport, state: 'active' as const }) });
       } catch (error) {
         throw failGraphics(error);
+      } finally {
+        frameInProgress = false;
       }
-      return Object.freeze({ sessionId: snapshot.descriptor.id, status: 'submitted' });
     },
   });
   viewportSuspensions.set(session, (suspended) => {

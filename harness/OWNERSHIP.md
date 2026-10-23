@@ -1,5 +1,10 @@
 # Ownership decisions — do not classify by similar names
 
+v0.6.8 RV12: Runtime Render owns synchronous frame admission, nested-call rejection,
+backend submission diagnostics and historical viewport receipt on the existing
+session. Editor/Client choose when to call; Engine time/updates are independent.
+See [checkpoint](checkpoints/render-viewport-v0.6.8.md). Owner graph unchanged.
+
 v0.6.7 RV09–RV11: Runtime Render owns full-buffer region and explicit suspension/
 resume admission on canonical sessions. Editor/Client own hidden/zero-layout/frame
 policy and call Render; no global visibility bus or document mutation. See

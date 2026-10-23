@@ -2,7 +2,7 @@
 export interface RenderFrameFailure {
   readonly code: 'UNSUPPORTED_TARGET' | 'TARGET_IN_USE' | 'GRAPHICS_UNAVAILABLE'
     | 'ACQUISITION_FAILED' | 'CONTEXT_LOST' | 'FRAME_FAILED' | 'CLEANUP_FAILED' | 'RESIZE_FAILED'
-    | 'VIEWPORT_SUSPENDED';
+    | 'VIEWPORT_SUSPENDED' | 'FRAME_IN_PROGRESS' | 'FRAME_NOT_SUBMITTED';
   readonly stage: 'acquire' | 'renderFrame' | 'dispose' | 'resize';
   readonly cleanupFailed: boolean;
 }

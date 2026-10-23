@@ -89,7 +89,24 @@ function slot(label: string) {
       logicalHeightCssPx: measured.height, requestedPixelRatio: 1 }, limits);
     write({ label, receipt, sameIdentity: receipt.sessionId === before.sessionId });
   });
-  control('frame', (current) => write(current.renderFrame()));
+  control('frame', (current) => {
+    const before = getRenderViewportSnapshot(current);
+    const receipt = current.renderFrame(); // Exactly one explicit backend request.
+    const after = getRenderViewportSnapshot(current);
+    const submittedViewport = receipt.viewport;
+    write({ label, receipt, semantics: {
+      sameSession: receipt.sessionId === before.sessionId && receipt.sessionId === after.sessionId,
+      viewportPresent: submittedViewport !== undefined,
+      activeViewport: submittedViewport?.state === 'active',
+      readyGraphics: submittedViewport?.graphics.state === 'ready',
+      sameViewportIdentity: submittedViewport?.sessionId === receipt.sessionId,
+      sameConfiguredExtent: submittedViewport !== undefined && before.size !== null
+        && submittedViewport.size.width === before.size.width
+        && submittedViewport.size.height === before.size.height
+        && submittedViewport.size.unit === before.size.unit,
+      display: 'NOT_VERIFIED',
+    } });
+  });
   return { read, observe, release };
 }
 

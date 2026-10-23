@@ -146,6 +146,12 @@ export function createThreeFrameBackend(input: object, onContextLost: () => void
       if (renderer === undefined || scene === undefined || camera === undefined) {
         throw new FrameError('FRAME_FAILED', 'renderFrame');
       }
+      // Host must use the public resize path for a live session. A zero or
+      // externally replaced backing extent cannot receipt the configured viewport.
+      if (context.drawingBufferWidth !== viewportSize.width
+          || context.drawingBufferHeight !== viewportSize.height) {
+        throw new FrameError('FRAME_FAILED', 'renderFrame');
+      }
       // Empty scene deliberately submits a visible, opaque blue clear frame.
       const previousFrame = renderer.info.render.frame;
       try {
@@ -162,7 +168,16 @@ export function createThreeFrameBackend(input: object, onContextLost: () => void
         contextLost = true;
         throw new FrameError('CONTEXT_LOST', 'renderFrame');
       }
-      if (renderer.info.render.frame !== previousFrame + 1 || glError !== context.NO_ERROR) {
+      if (glError !== context.NO_ERROR) {
+        throw new FrameError('FRAME_FAILED', 'renderFrame');
+      }
+      // Three can return early without throwing (invalid camera/internal loss).
+      // Its counter alone is not GPU completion, but an unchanged counter cannot
+      // establish that this private opaque-clear render path submitted anything.
+      if (renderer.info.render.frame === previousFrame) {
+        throw new FrameError('FRAME_NOT_SUBMITTED', 'renderFrame');
+      }
+      if (renderer.info.render.frame !== previousFrame + 1) {
         throw new FrameError('FRAME_FAILED', 'renderFrame');
       }
     },

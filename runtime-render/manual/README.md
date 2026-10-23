@@ -1,5 +1,41 @@
 # Manual Render consumers
 
+## One explicit frame / receipt semantics — v0.6.8
+
+Use viewport-identity.html after building/serving as below. Acquire a target,
+then press Frame once. The typed public-root consumer calls renderFrame exactly
+once and logs the receipt plus actual symbol/extent comparisons against viewport
+observations before/after. Canonical receipts include a frozen active full-canvas
+viewport in drawing-buffer-px, matching the session identity. The optional type
+member preserves older structural receipt producers; this canonical path always
+populates it. A retained receipt is historical, even after resize or disposal.
+
+Expected manual review, **not executed evidence**: active + ready can submit an
+opaque blue clear; suspended rejects VIEWPORT_SUSPENDED without a receipt or
+cleanup. Resume with fresh positive metrics before another explicit request.
+Disposed/previously lost sessions reject SESSION_DISPOSED/getSnapshot; a newly
+detected native loss throws CONTEXT_LOST, records terminal failure and cleans up.
+Use the native DevTools loss procedure below if available; do not synthesize loss.
+If Three returns without advancing its frame counter and no GL/loss error is
+detected, FRAME_NOT_SUBMITTED terminates graphics without a submitted receipt.
+Unknown backend exceptions still propagate unchanged. No zero-size/externally
+changed native buffer is accepted as the last configured viewport.
+
+Requests are synchronous: sequential calls each request one frame. Nested calls
+reject FRAME_IN_PROGRESS before touching the backend, without queueing, merging,
+retrying or independently disposing the session. No public callback can currently
+request a nested frame; do not introduce a test hook to simulate one. The outer
+call still applies normal failure handling if its backend throws. Acquisition,
+resize and resume never start a frame loop. There is no timestamp/delta/gameplay
+update, animation update, GPU readback, finish/fence or compositor observation.
+
+Record actual diagnostics and semantic booleans when manually reviewed. A receipt
+means only the synchronous private render path returned with one counter increment
+and no detected GL/context error. Counter increment precedes background clear in
+the installed Three source; it is not GPU execution/completion evidence. Empty
+scene uses a real opaque clear, not a fabricated success receipt. No browser/GPU
+run was performed for this checkpoint: FEATURE_NOT_VERIFIED / VISUAL_NOT_VERIFIED.
+
 ## Viewport identity / independent sessions — v0.6.4
 
 After building and serving the workspace as below, open

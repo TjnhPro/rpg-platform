@@ -1,5 +1,13 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase6 v0.6.8 RV12: [explicit frame requests](checkpoints/render-viewport-v0.6.8.md)
+keeps renderFrame():RenderFrameReceipt. Optional receipt.viewport preserves old
+structural producers; canonical sessions always attach the active frozen viewport
+used for submission. No new root export/renderer/receipt variant. FRAME_IN_PROGRESS
+rejects nested requests; FRAME_NOT_SUBMITTED reports no backend counter increment
+without claiming submission. No queue/loop/update tick or display/GPU completion
+proof. Existing nonterminal suspension and terminal loss/disposal remain distinct.
+
 Phase6 v0.6.7 RV09–RV11: [region/suspension](checkpoints/render-viewport-v0.6.7.md)
 adds suspendRenderViewport/resumeRenderViewport (Render67). Full-canvas scope
 means native buffer bounds(0,0,width,height); subregions are documentation-only.

@@ -4,6 +4,16 @@
 
 Read root agent guidance first.
 
+- [v0.6.8 RV12](../harness/checkpoints/render-viewport-v0.6.8.md): preserve the
+  synchronous renderFrame and submitted-only receipt; add optional viewport for
+  structural compatibility, always populated by canonical sessions. Frozen active
+  full-canvas snapshot is historical submission configuration, never displayed
+  pixels/GPU completion. FRAME_IN_PROGRESS rejects nested calls without queue or
+  cleanup; FRAME_NOT_SUBMITTED distinguishes backend early-return/no counter
+  increment and terminates graphics. Existing suspension/loss/disposal semantics
+  remain. No automatic loop, gameplay/animation update or new root symbol. Manual
+  semantic receipt consumer compiled only, not browser/visual verified.
+
 - [v0.6.7 RV09–RV11](../harness/checkpoints/render-viewport-v0.6.7.md): Render67
   adds explicit suspendRenderViewport/resumeRenderViewport. Suspended keeps backend,
   last positive buffer extent and reservation; direct frame rejects nonterminal
