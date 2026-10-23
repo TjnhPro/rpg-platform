@@ -1,5 +1,11 @@
 # Ownership decisions — do not classify by similar names
 
+v0.9.4 CM07/CM08: **runtime-render** owns camera zoom/focus state and composes its
+Phase4 projection/inverse/affine APIs. Host selects explicit min/max policy; no
+authored/gameplay/instance mutation, implicit browser measurement or new owner.
+Editor/Client compile compatibility; Harness records evidence. See
+[checkpoint](checkpoints/camera-v0.9.4.md).
+
 v0.9.3 CM06: **runtime-render** owns source-plane center/pan and its state commit
 seam, reusing Phase4 validation/affine operations. Editor/Client are compatibility
 consumers only; authored/gameplay/instance state is never camera update authority.

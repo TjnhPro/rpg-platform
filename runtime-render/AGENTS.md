@@ -4,6 +4,11 @@
 
 Read root agent guidance first.
 
+- [v0.9.4 CM07/CM08](docs/camera-v0.9.4.md): configured cameras share the existing
+  handle/lifecycle, with additive immutable view snapshots and explicit zoom limits.
+  Center/focus zoom commit atomically; use canonical Phase4 inverse/affine/residual
+  policy and exact current logical CSS context. No session/GPU binding yet.
+
 - [v0.9.3 CM06](docs/camera-v0.9.3.md): additive issued-handle set-center/pan,
   source-plane units/axes, shared Phase4 admission/affine math and immutable commit
   seam. No live binding/invalidation yet; do not change authored or gameplay positions.

@@ -1,4 +1,4 @@
-import { captureCameraFields } from './camera.js';
+import { captureCameraFields } from './camera-data.js';
 import { captureProjectionPlane2D, captureProjectionPoint2D, type ProjectionPlane2D } from './plane-projection.js';
 import type { PlanarPoint2D } from './planar-affine.js';
 

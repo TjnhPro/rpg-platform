@@ -1,6 +1,22 @@
 import { captureProjectionPlane2D, captureProjectionPoint2D, captureSourcePlanePoint2D,
   type ProjectionPlane2D, type PlaneProjectionPoint2D } from './plane-projection.js';
 import { applyPlanarPoint2D, type PlanarPoint2D } from './planar-affine.js';
+import { captureCameraFields } from './camera-data.js';
+import { createOrthographicCameraConfiguration, type OrthographicCameraConfiguration,
+  type OrthographicCameraConfigurationInput } from './camera-configuration.js';
+import { captureCameraZoomLimits, cameraZoomCandidate, cameraFocusZoomCandidate,
+  type RenderCameraZoomLimits, type RenderCameraFocusZoomInput } from './camera-zoom.js';
+
+export { captureCameraFields } from './camera-data.js'; // Owner-local compatibility, not root API.
+
+/** Opt-in CPU view observation. Old camera revision still counts center changes only. */
+export interface RenderCameraViewSnapshot {
+  readonly camera: RenderCameraSnapshot;
+  readonly configuration: OrthographicCameraConfiguration;
+  readonly zoomLimits: RenderCameraZoomLimits;
+  /** Accepted center or zoom changes, once per atomic commit. Disposal does not increment. */
+  readonly revision: number;
+}
 
 /** Delta components use the camera source plane's axes and units, never pixels. */
 export interface RenderCameraPan {
@@ -11,6 +27,9 @@ export interface RenderCameraPan {
 interface CameraOperations {
   readonly setCenter: (input: PlaneProjectionPoint2D) => RenderCameraSnapshot;
   readonly pan: (input: RenderCameraPan) => RenderCameraSnapshot;
+  readonly view: () => RenderCameraViewSnapshot;
+  readonly setZoom: (zoom: number) => RenderCameraViewSnapshot;
+  readonly zoomAtFocus: (input: RenderCameraFocusZoomInput) => RenderCameraViewSnapshot;
 }
 
 // Weak capabilities of issued handles, not a current-camera/ID lookup or session registry.
@@ -30,6 +49,31 @@ export function setRenderCameraCenter(camera: RenderCamera, input: PlaneProjecti
 /** Relative source-plane translation; rejects overflow and completely absorbed nonzero components. */
 export function panRenderCamera(camera: RenderCamera, input: RenderCameraPan): RenderCameraSnapshot {
   return cameraOperations(camera).pan(input);
+}
+
+/** Create the same canonical camera capability with explicit zoom configuration/policy. */
+export function createConfiguredRenderCamera(input: OrthographicCameraConfigurationInput,
+  limits: RenderCameraZoomLimits): RenderCamera {
+  const configuration = createOrthographicCameraConfiguration(input);
+  const zoomLimits = captureCameraZoomLimits(limits);
+  cameraZoomCandidate(configuration, configuration.zoom, zoomLimits);
+  return createCamera({ kind: configuration.kind, source: configuration.source,
+    center: configuration.center }, { configuration, zoomLimits });
+}
+
+/** Readable after disposal; rejects a camera created without explicit view configuration. */
+export function getRenderCameraViewSnapshot(camera: RenderCamera): RenderCameraViewSnapshot {
+  return cameraOperations(camera).view();
+}
+
+/** Absolute zoom about current center. No implicit viewport context or clamp. */
+export function setRenderCameraZoom(camera: RenderCamera, zoom: number): RenderCameraViewSnapshot {
+  return cameraOperations(camera).setZoom(zoom);
+}
+
+/** Atomically commit zoom and compensating center using the supplied current CSS mapping. */
+export function zoomRenderCameraAtFocus(camera: RenderCamera, input: RenderCameraFocusZoomInput): RenderCameraViewSnapshot {
+  return cameraOperations(camera).zoomAtFocus(input);
 }
 
 /** Portable initial state. No caller-supplied identity, viewport, zoom or GPU state. */
@@ -62,30 +106,19 @@ export interface RenderCamera {
   readonly dispose: () => RenderCameraSnapshot;
 }
 
-/** Owner-local exact data capture; not a package-root export. */
-export function captureCameraFields(input: unknown, keys: readonly string[]): Record<string, unknown> {
-  if (typeof input !== 'object' || input === null || Array.isArray(input)
-    || (Object.getPrototypeOf(input) !== Object.prototype && Object.getPrototypeOf(input) !== null)
-    || Reflect.ownKeys(input).length !== keys.length) {
-    throw new TypeError('Camera input must be an exact plain data record');
-  }
-  const result: Record<string, unknown> = Object.create(null) as Record<string, unknown>;
-  for (const key of keys) {
-    const descriptor = Object.getOwnPropertyDescriptor(input, key);
-    if (!descriptor?.enumerable || !('value' in descriptor)) {
-      throw new TypeError('Camera input must contain the declared data fields only');
-    }
-    result[key] = descriptor.value;
-  }
-  return result;
-}
-
 /**
  * Pure CPU lifecycle with ephemeral identity; no graphics/session acquisition or
  * binding. Reuses Phase4 capture. Invalid records throw TypeError; host exceptions
  * propagate unchanged. No current-camera registry, zoom math or native types.
  */
 export function createRenderCamera(input: RenderCameraInput): RenderCamera {
+  return createCamera(input, null);
+}
+
+function createCamera(input: RenderCameraInput, configured: {
+  readonly configuration: OrthographicCameraConfiguration;
+  readonly zoomLimits: RenderCameraZoomLimits;
+} | null): RenderCamera {
   const initial = captureCameraFields(input, ['kind', 'source', 'center']);
   if (initial.kind !== 'orthographic') throw new TypeError('Only orthographic camera state is supported');
   const source = captureProjectionPlane2D(initial.source as ProjectionPlane2D);
@@ -93,16 +126,36 @@ export function createRenderCamera(input: RenderCameraInput): RenderCamera {
   let snapshot: RenderCameraSnapshot = Object.freeze({ id: Symbol('render-camera'),
     kind: 'orthographic', source, center, state: 'active', revision: 0,
     binding: 'unbound', application: 'not-applied' });
+  let view: RenderCameraViewSnapshot | null = configured === null ? null : Object.freeze({
+    camera: snapshot, configuration: configured.configuration, zoomLimits: configured.zoomLimits, revision: 0 });
+  const requireView = (): RenderCameraViewSnapshot => {
+    if (view === null) throw new TypeError('Camera has no explicit zoom configuration');
+    return view;
+  };
   const requireActive = (): void => {
     if (snapshot.state !== 'active') throw new TypeError('Camera is disposed');
   };
   // Single state commit seam: future live binding must invalidate after a changed
   // commit here. Unbound CPU cameras acquire no session and request no frame/RAF.
-  const commitCenter = (next: PlanarPoint2D): RenderCameraSnapshot => {
+  const commitCenter = (next: PlanarPoint2D, configuration?: OrthographicCameraConfiguration): RenderCameraSnapshot => {
     requireActive();
-    if (next.x === snapshot.center.x && next.y === snapshot.center.y) return snapshot;
-    if (snapshot.revision === Number.MAX_SAFE_INTEGER) throw new RangeError('Camera revision exhausted');
-    snapshot = Object.freeze({ ...snapshot, center: next, revision: snapshot.revision + 1 });
+    const centerChanged = next.x !== snapshot.center.x || next.y !== snapshot.center.y;
+    const zoomChanged = configuration !== undefined && configuration.zoom !== view?.configuration.zoom;
+    if (!centerChanged && !zoomChanged) return snapshot;
+    if ((centerChanged && snapshot.revision === Number.MAX_SAFE_INTEGER) || view?.revision === Number.MAX_SAFE_INTEGER) {
+      throw new RangeError('Camera revision exhausted');
+    }
+    const nextSnapshot = centerChanged
+      ? Object.freeze({ ...snapshot, center: next, revision: snapshot.revision + 1 }) : snapshot;
+    const nextView = view === null ? null : Object.freeze({ camera: nextSnapshot,
+      configuration: configuration ?? createOrthographicCameraConfiguration({
+        kind: view.configuration.kind, source, center: next, scale: view.configuration.scale,
+        zoom: view.configuration.zoom, viewportPolicy: view.configuration.viewportPolicy }),
+      zoomLimits: view.zoomLimits, revision: view.revision + 1 });
+    // Prepare both immutable observations before publishing either. Future live
+    // invalidation belongs after this commit, never between center and zoom.
+    snapshot = nextSnapshot;
+    view = nextView;
     return snapshot;
   };
   const camera: RenderCamera = Object.freeze({
@@ -116,11 +169,33 @@ export function createRenderCamera(input: RenderCameraInput): RenderCamera {
       return commitCenter(next);
     },
     dispose: (): RenderCameraSnapshot => {
-      if (snapshot.state === 'active') snapshot = Object.freeze({ ...snapshot, state: 'disposed' });
+      if (snapshot.state === 'active') {
+        snapshot = Object.freeze({ ...snapshot, state: 'disposed' });
+        if (view !== null) view = Object.freeze({ ...view, camera: snapshot });
+      }
       return snapshot;
     },
   });
   operations.set(camera, {
+    view: requireView,
+    setZoom: (zoom) => {
+      requireActive();
+      const before = requireView();
+      const candidate = cameraZoomCandidate(before.configuration, zoom, before.zoomLimits);
+      commitCenter(candidate.center, candidate);
+      return requireView();
+    },
+    zoomAtFocus: (input) => {
+      requireActive();
+      const before = requireView();
+      const candidate = cameraFocusZoomCandidate(before.configuration, input, before.zoomLimits);
+      requireActive();
+      // Host proxies may have reentered while capturing mapping/focus. Never
+      // publish an old focus solution over a newer center/zoom observation.
+      if (view !== before) throw new TypeError('Camera view changed during focus capture');
+      commitCenter(candidate.center, candidate);
+      return requireView();
+    },
     setCenter: (input) => {
       requireActive();
       const fields = captureCameraFields(input, ['plane', 'point']);

@@ -1,5 +1,11 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase9 v0.9.4 CM07/CM08 adds seven Render-root names for configured-camera creation,
+view readback, absolute center/focus zoom and three readonly types. Old declarations
+stay unchanged. Explicit inclusive zoom policy, current CSS mapping and canonical
+Phase4 inverse/residual admission; no partial commit or implicit DPR/clamp. See
+[contract](../runtime-render/docs/camera-v0.9.4.md) and [checkpoint](checkpoints/camera-v0.9.4.md).
+
 Phase9 v0.9.3 CM06 adds Render-root `setRenderCameraCenter`, `panRenderCamera`
 and `RenderCameraPan`; old declarations stay unchanged. Source-plane translation
 uses Phase4 canonical admission/affine math; no-op preserves snapshot/revision,

@@ -361,5 +361,8 @@ export { type RenderVisualSpriteLayout } from './visual-sprite-layout.js';
 export { createRenderCamera, type RenderCameraInput, type RenderCameraUpdate,
   type RenderCameraSnapshot, type RenderCamera } from './camera.js';
 export { setRenderCameraCenter, panRenderCamera, type RenderCameraPan } from './camera.js';
+export { createConfiguredRenderCamera, getRenderCameraViewSnapshot, setRenderCameraZoom,
+  zoomRenderCameraAtFocus, type RenderCameraViewSnapshot } from './camera.js';
+export { type RenderCameraZoomLimits, type RenderCameraFocusZoomInput } from './camera-zoom.js';
 export { createOrthographicCameraConfiguration, type OrthographicCameraConfigurationInput,
   type OrthographicCameraConfiguration } from './camera-configuration.js';
