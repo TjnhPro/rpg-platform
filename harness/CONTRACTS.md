@@ -835,3 +835,14 @@ or session lifecycle change. Stop before v0.4.9.
 ## Three data classes that must not be conflated
 
 Authored content/config != Editor local workspace state != Runtime mutable instance state. If an interface crosses two, specify which it carries and why.
+
+Phase 8 v0.8.1: [Runtime Visual Scene lifecycle SR02](checkpoints/scene-rendering-v0.8.1.md)
+adds Render-root createRenderVisualScene, RenderVisualScene,
+RenderVisualSceneSnapshot and RenderVisualSceneDisposal. One empty active scope
+per canonical live graphics session; no native scene allocation, resource loading
+or frame submission. clear is an active empty no-op and rejects after terminal.
+dispose is terminal/idempotent, first reason scene-disposed/session-ended preserved;
+canonical session termination closes the scope before backend cleanup. Metadata
+never contains session/canvas/backend references or claims GPU liveness/reclamation.
+No legacy signature or consumer migration. See the
+[contract/runbook](../runtime-render/docs/scene-rendering-v0.8.1.md).

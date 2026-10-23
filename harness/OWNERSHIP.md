@@ -1,5 +1,11 @@
 # Ownership decisions — do not classify by similar names
 
+v0.8.1 SR02: Runtime Render owns empty session-local visual scene lifetime through
+its public root. Reuse canonical graphics admission/terminal hooks; one active
+scope per session. Host owns graphics acquisition/disposal and borrowed canvas.
+No Editor/Client/Engine/Server source or dependency-direction change. See
+[checkpoint](checkpoints/scene-rendering-v0.8.1.md).
+
 v0.6.14 RV19: Runtime Render remains the canonical context/viewport/frame owner;
 Editor/Client are host consumers. Closure is Harness documentation only, with no
 source/dependency/owner changes. [Review packet](checkpoints/render-viewport-v0.6.14.md)

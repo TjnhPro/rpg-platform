@@ -1,3 +1,9 @@
+export {
+  createRenderVisualScene,
+  type RenderVisualScene,
+  type RenderVisualSceneSnapshot,
+  type RenderVisualSceneDisposal,
+} from './visual-scene.js';
 export { renderVisualResourceDemo } from './visual-resource-demo.js';
 export {
   planRenderViewportSize,

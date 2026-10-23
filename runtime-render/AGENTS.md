@@ -4,6 +4,13 @@
 
 Read root agent guidance first.
 
+- [v0.8.1 SR02](../harness/checkpoints/scene-rendering-v0.8.1.md): empty visual
+  scene scope accepts one canonical live graphics session, one active scene per
+  session. clear is empty-only; dispose/canonical session end is terminal and
+  idempotent with first reason preserved. Snapshots contain symbols/state only.
+  Reuse existing terminal subscription; no graphics/instances/resources/frame
+  allocation or authored-ID handles. Build/compiled consumer is not browser proof.
+
 - [v0.6.10 RV15/RV11](../harness/checkpoints/render-viewport-v0.6.10.md): canonical
   terminal graphics observations always supply cleanupFailed, independently of a
   null unknown failure. Optional member preserves structural producers; absence
