@@ -179,3 +179,8 @@ Read root agent guidance first.
   than clamp. No resize, CSS/global measurement, GPU capability/memory guarantee,
   suspension or change to actual session snapshots. Host must not apply candidate
   pixels directly to a live canvas. Future application remains Render-owned.
+
+- v0.8.13 SR20: optional seven-instance manual composition; existing public roots
+  only, no production API or schema delta. See the
+  [checkpoint](../harness/checkpoints/scene-rendering-v0.8.13.md).
+  Source PNG/atlas bytes are original; browser/visual acceptance remains open.

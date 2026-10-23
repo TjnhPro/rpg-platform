@@ -245,3 +245,8 @@ v0.8.12 SR19: **game-client** owns neutral sample presentation and browser host
 orchestration. Runtime Render remains canonical scene/resource/draw implementation;
 Harness manual composition alone wires Editor and Client, without a production
 dependency. No Engine/Server change or gameplay/network authority inferred.
+
+v0.8.13 SR20: runtime-render remains canonical scene/resource/presentation owner;
+Editor adapts local authored snapshots via its existing bridge, Client adapts neutral
+sample inputs. Harness manual wiring alone composes both optional consumers.
+No new project, production API, Engine/Server/L1/L2 change or gameplay policy.

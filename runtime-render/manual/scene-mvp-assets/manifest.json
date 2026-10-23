@@ -1,0 +1,51 @@
+{
+  "profile": "original-scene-mvp-art-v1",
+  "files": [
+    {
+      "name": "courtyard.png",
+      "mediaType": "image/png",
+      "bytes": 1701,
+      "sha256": "940cb2adf171150f6828d72c59f2534f412218145646fea02fd4a96390ef582f",
+      "width": 320,
+      "height": 240
+    },
+    {
+      "name": "traveler.png",
+      "mediaType": "image/png",
+      "bytes": 236,
+      "sha256": "2483022fb684d52f0054bf6baf4dc15d5a867a749a7828f89afbb51c4637cb2f",
+      "width": 32,
+      "height": 48
+    },
+    {
+      "name": "monsters.png",
+      "mediaType": "image/png",
+      "bytes": 424,
+      "sha256": "dad6342f4deae4f05c198d6f80ab2cf0e80b8b7bcd440d81e4a1fcd9048b56bf",
+      "width": 96,
+      "height": 48
+    },
+    {
+      "name": "potion.png",
+      "mediaType": "image/png",
+      "bytes": 138,
+      "sha256": "0698e240c226ac4720b70f0d8fc556790705917ab38c9401fd067fb564d1b244",
+      "width": 24,
+      "height": 24
+    },
+    {
+      "name": "static-spark.png",
+      "mediaType": "image/png",
+      "bytes": 151,
+      "sha256": "7a09914274bd459486b521e48776d4fe4fa9b80f1db3b7542cb429fac22b1f08",
+      "width": 32,
+      "height": 32
+    },
+    {
+      "name": "monsters.atlas.txt",
+      "mediaType": "text/plain",
+      "bytes": 178,
+      "sha256": "6f690ddfddf9ca86b1b8f6e08c11b0ec05c72575abeea9bbe3ac93bd9c86663f"
+    }
+  ]
+}

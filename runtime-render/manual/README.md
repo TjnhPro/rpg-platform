@@ -377,3 +377,8 @@ RV18 runtime proof and Phase6 acceptance remain open.
 [Manual guide](visual-scene-frame.md): compile the optional public-root consumer
 and open the local two-PNG page to inspect real resource-backed sprite submission,
 hide/move/order/clear. Browser NOT_EXECUTED; build is not visual acceptance.
+
+- [v0.8.13 seven-instance Scene MVP](../../runtime-render/manual/scene-mvp.md):
+  original PNG/atlas sources, independent Editor/Client hosts, canonical resource
+  leases and instance controls. Strict compiled manual consumer only; browser
+  NOT_EXECUTED, FEATURE_NOT_VERIFIED / VISUAL_NOT_VERIFIED.

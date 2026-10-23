@@ -506,3 +506,8 @@ frame lookup performs no extra source reads and no image/GPU operation.
 - [v0.8.11 Scene preview sync](scene-preview.md): public-root Editor bridge consumer,
   three shared-asset objects, missing reference, stable update/remove controls.
   Compiled only; browser NOT_EXECUTED.
+
+- [v0.8.13 seven-instance Scene MVP](../../runtime-render/manual/scene-mvp.md):
+  original PNG/atlas sources, independent Editor/Client hosts, canonical resource
+  leases and instance controls. Strict compiled manual consumer only; browser
+  NOT_EXECUTED, FEATURE_NOT_VERIFIED / VISUAL_NOT_VERIFIED.

@@ -131,3 +131,8 @@ Read root agent guidance first.
   preview-local authored-to-opaque-instance mapping. Use public Render operations
   and Phase7 leases; explicit spatial/presentation policy, serial partial outcomes,
   no Document writes/dirty effects, renderer/cache duplication or ID conflation.
+
+- v0.8.13 SR20: optional seven-instance manual composition; existing public roots
+  only, no production API or schema delta. See the
+  [checkpoint](../harness/checkpoints/scene-rendering-v0.8.13.md).
+  Source PNG/atlas bytes are original; browser/visual acceptance remains open.

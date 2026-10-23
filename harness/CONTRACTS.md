@@ -935,3 +935,8 @@ Render roots; zero public symbol/signature changes (Render186/Editor138/Client0)
 Separate host/provider/session/context, same Render implementation; no GPU sharing
 promise. [Contract](../game-client/docs/scene-rendering-v0.8.12.md),
 [checkpoint](checkpoints/scene-rendering-v0.8.12.md). Browser NOT_EXECUTED.
+
+Phase8 v0.8.13 SR20 adds optional manual consumers/content only. Public roots remain
+Render186 / Editor138 / Client0; no production signatures or dependency change.
+[Contract](../runtime-render/docs/scene-rendering-v0.8.13.md),
+[checkpoint](checkpoints/scene-rendering-v0.8.13.md). Browser NOT_EXECUTED.

@@ -26,3 +26,8 @@ Read root agent guidance first.
   neutral sample inputs/canvas/provider/rAF only, outside the public root. Render
   owns visual instances/resource/cache/backend. No Editor imports/authored formats,
   gameplay tick, protocol or cross-context GPU sharing claim. Build-only evidence.
+
+- v0.8.13 SR20: optional seven-instance manual composition; existing public roots
+  only, no production API or schema delta. See the
+  [checkpoint](../harness/checkpoints/scene-rendering-v0.8.13.md).
+  Source PNG/atlas bytes are original; browser/visual acceptance remains open.

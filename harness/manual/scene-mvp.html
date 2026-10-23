@@ -1,0 +1,22 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Scene Rendering MVP — v0.8.13</title>
+<style>
+body{font:16px system-ui;max-width:1200px;margin:2rem auto;padding:0 1rem;background:#182329;color:#e6ede6}
+.hosts{display:flex;flex-wrap:wrap;gap:2rem}section{width:350px}canvas{display:block;border:1px solid #a4bca9;image-rendering:pixelated}
+button{margin:4px;padding:6px}pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:36rem;overflow:auto;background:#10181c;padding:1rem}
+a{color:#b7dbea}
+</style>
+<h1>Seven-instance Scene Rendering MVP</h1>
+<p>Manual demonstration, browser observation pending. Each Open loads committed original PNGs and
+real atlas text through Phase7, then submits through the same Render module. No animation or gameplay.
+Read the <a href="/runtime-render/manual/scene-mvp.md">runbook</a> for expected pixels and limitations.</p>
+<p><button id="observe">Observe both contexts</button> Symbol labels below preserve identity in this page only.
+A submitted receipt is not visual proof. No cross-context GPU texture sharing.</p>
+<div class="hosts"><section id="editor"><h2>Editor authored preview</h2></section>
+<section id="client"><h2>Client neutral presentation</h2></section></div>
+<pre id="output"></pre>
+<script type="importmap">
+{"imports":{"@rpg-platform/runtime-render":"/runtime-render/dist/index.js","@rpg-platform/editor":"/editor/dist/index.js","three":"/node_modules/three/build/three.module.js"}}
+</script>
+<script type="module" src="/.artifacts/scene-mvp/harness/manual/scene-mvp.mjs"></script>
