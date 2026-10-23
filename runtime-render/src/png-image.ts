@@ -23,7 +23,8 @@ export type PngImageObservation = {
   | { readonly state: 'decoded'; readonly width: number; readonly height: number; readonly format: 'image/png' }
 );
 
-/** Owns one private browser bitmap. No borrowed bitmap, sharing or GPU handle. */
+/** Canonical decoded-image capability. Standalone factory owns one bitmap; scoped loads
+ * provide independently releasable waiter capabilities over one private shared bitmap. */
 export interface PngImageDecode {
   readonly getSnapshot: () => PngImageObservation;
   /** Source must already be acquired. Rejections preserve original browser errors. */
@@ -88,6 +89,11 @@ function inspect(bytes: Uint8Array<ArrayBuffer>, limits: PngDecodeLimits): Heade
  * Callers release each handle; releasing one cannot close another handle's bitmap.
  */
 export function createPngImageDecode(source: VisualSourceLoad, limits: PngDecodeLimits): PngImageDecode {
+  return createDecode(source, capturePngDecodeLimits(limits));
+}
+
+/** Package-private canonical budget capture, reused by scoped pending coordination. */
+export function capturePngDecodeLimits(limits: PngDecodeLimits): PngDecodeLimits {
   const captured = Object.freeze({ maxBytes: limits.maxBytes, maxDimension: limits.maxDimension,
     maxPixels: limits.maxPixels });
   if (!Number.isSafeInteger(captured.maxBytes) || captured.maxBytes <= 0 || captured.maxBytes > 16777216
@@ -95,7 +101,7 @@ export function createPngImageDecode(source: VisualSourceLoad, limits: PngDecode
     || !Number.isSafeInteger(captured.maxPixels) || captured.maxPixels <= 0 || captured.maxPixels > 16777216) {
     throw new TypeError('Positive integer PNG budgets within the documented hard ceilings are required');
   }
-  return createDecode(source, captured);
+  return captured;
 }
 
 function createDecode(source: VisualSourceLoad | undefined, limits: PngDecodeLimits): PngImageDecode {

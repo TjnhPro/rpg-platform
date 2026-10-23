@@ -244,3 +244,6 @@ export {
   resolveAtlasFrameGeometry, createAtlasTextureView,
   type AtlasPagePixels, type AtlasFrameGeometry, type AtlasFrameGeometryResult, type AtlasTextureView,
 } from './atlas-geometry.js';
+export {
+  createPngLoadScope, type PngLoadScope, type SharedPngLoad, type SharedPngLoadSnapshot,
+} from './png-load-scope.js';

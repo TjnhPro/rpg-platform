@@ -484,3 +484,6 @@ frame lookup performs no extra source reads and no image/GPU operation.
 
 - [v0.7.7 atlas geometry](atlas-geometry.md): finite rect/UV inspection over original
   metadata and an optional borrowed-texture hook. Numeric observation is not GPU display.
+
+- [v0.7.8 in-flight PNG scope](inflight-png.md): finite provider counters, waiter
+  release/failure/retry trace and optional browser-native decode entry.
