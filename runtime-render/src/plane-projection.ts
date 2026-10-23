@@ -111,14 +111,20 @@ export function projectPlanePoint2D(
   projectionInput: OrthographicPlaneProjection, input: PlaneProjectionPoint2D,
 ): PlaneProjectionPoint2D {
   const projection = createOrthographicPlaneProjection(projectionInput);
+  const p = captureSourcePlanePoint2D(projection.source, input);
+  let result = p;
+  for (const step of planeProjectionSteps(projection)) result = applyPlanarPoint2D(step, result);
+  return Object.freeze({ plane: projection.destination, point: result });
+}
+
+/** Owner-local shared admission; source is already canonically captured. */
+export function captureSourcePlanePoint2D(expected: ProjectionPlane2D, input: PlaneProjectionPoint2D): PlanarPoint2D {
   record(input, ['plane', 'point'], 'Projection input');
   const { plane: inputPlane, point: inputPoint } = input;
-  const actual = captureProjectionPlane2D(inputPlane), p = captureProjectionPoint2D(inputPoint), expected = projection.source;
+  const actual = captureProjectionPlane2D(inputPlane), p = captureProjectionPoint2D(inputPoint);
   if (actual.projectId !== expected.projectId || actual.coordinateSpaceId !== expected.coordinateSpaceId
     || actual.unit !== expected.unit || actual.axes.x !== expected.axes.x || actual.axes.y !== expected.axes.y) {
     throw new TypeError('Projection source plane, unit or axes mismatch');
   }
-  let result = p;
-  for (const step of planeProjectionSteps(projection)) result = applyPlanarPoint2D(step, result);
-  return Object.freeze({ plane: projection.destination, point: result });
+  return p;
 }

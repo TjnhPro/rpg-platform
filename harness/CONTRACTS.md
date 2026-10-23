@@ -1,5 +1,12 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase9 v0.9.3 CM06 adds Render-root `setRenderCameraCenter`, `panRenderCamera`
+and `RenderCameraPan`; old declarations stay unchanged. Source-plane translation
+uses Phase4 canonical admission/affine math; no-op preserves snapshot/revision,
+mismatch/nonfinite/absorbed/overflow rejects atomically. Issued handles only.
+See [contract](../runtime-render/docs/camera-v0.9.3.md) and
+[checkpoint](checkpoints/camera-v0.9.3.md). Live binding remains deferred.
+
 Phase9 v0.9.2 CM05 adds three Render-root names for pure orthographic configuration:
 explicit source/center, CSS-px/source-unit x/y scale, positive zoom, preserve-scale
 viewport policy and immutable effective ratios. No live binding/projection matrix,

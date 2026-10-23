@@ -1,5 +1,11 @@
 # Ownership decisions — do not classify by similar names
 
+v0.9.3 CM06: **runtime-render** owns source-plane center/pan and its state commit
+seam, reusing Phase4 validation/affine operations. Editor/Client are compatibility
+consumers only; authored/gameplay/instance state is never camera update authority.
+Harness records evidence. No owner or dependency transfer. See
+[checkpoint](checkpoints/camera-v0.9.3.md).
+
 v0.9.2 CM05: **runtime-render** owns portable orthographic scale/zoom/extent policy.
 Reuse canonical Phase4 plane/point capture and existing camera data capture;
 Editor/Client are compatibility consumers only. Harness records evidence.
