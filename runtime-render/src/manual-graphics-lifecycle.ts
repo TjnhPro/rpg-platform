@@ -1,6 +1,6 @@
 // Explicit manual browser entry only; never imported/exported by the package root.
 import {
-  beginRenderFrameSession, getRenderFailure, getRenderFrameFailure,
+  beginRenderFrameSession, getRenderFailure, getRenderFrameFailure, inspectRenderTarget,
   type RenderFrameAcquisition, type RenderFrameSession, type RenderGraphicsSnapshot,
 } from '@rpg-platform/runtime-render';
 
@@ -28,6 +28,7 @@ function write(value: unknown): void { output.textContent += `${JSON.stringify(v
 function observe(): void {
   const snapshot: RenderGraphicsSnapshot | undefined = acquisition?.getSnapshot();
   write(snapshot ?? { state: 'not-started' });
+  write(inspectRenderTarget(canvas));
 }
 function report(error: unknown): void {
   write(getRenderFailure(error) ?? getRenderFrameFailure(error) ?? { failure: 'UNRECOGNIZED' });
@@ -65,3 +66,14 @@ frameButton.onclick = () => {
 };
 window.addEventListener('pagehide', () => { leaving = true; dispose(); });
 window.addEventListener('pageshow', () => { leaving = false; });
+// Manual host listeners are separate from Render's private listener. Browser
+// restoration does not acquire a session; the user must click Begin again.
+canvas.addEventListener('webglcontextlost', (event) => {
+  event.preventDefault();
+  write({ browserEvent: 'webglcontextlost' });
+  queueMicrotask(observe); // Observe after Render's event cleanup in this dispatch.
+});
+canvas.addEventListener('webglcontextrestored', () => {
+  write({ browserEvent: 'webglcontextrestored', recreation: 'EXPLICIT_REQUEST_REQUIRED' });
+  observe();
+});

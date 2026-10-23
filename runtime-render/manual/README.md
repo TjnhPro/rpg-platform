@@ -1,5 +1,55 @@
 # Manual Render consumers
 
+## Context loss / explicit recreation — v0.6.3
+
+Use the graphics lifecycle page below. This is an optional manual procedure, with
+no runner, assertions, polyfill or production loss/recovery backdoor. The build
+compiles the consumer; **no browser run is recorded for v0.6.3**.
+
+1. Begin acquisition on the canvas. If it fails, record the actual diagnostic and
+   stop: no ready context exists to lose. If ready, optionally request one frame.
+2. In browser DevTools, explicitly obtain the existing context and optional native
+   extension (this command belongs only to the reviewer, not the public Render API):
+
+   ```js
+   const gl = document.querySelector('#canvas').getContext('webgl2');
+   const loss = gl?.getExtension('WEBGL_lose_context');
+   ```
+
+   If null/unavailable, record CONTEXT_LOSS_NOT_EXERCISED. Do not substitute a fake
+   event, mock or guessed PASS. If supported, call `loss.loseContext()` yourself.
+3. Wait for the actual webglcontextlost log. The host permits browser restoration
+   with preventDefault; Render checks native isContextLost, terminates the session,
+   attempts cleanup and removes its listener plus Three's listeners via dispose.
+   Expected observation after event dispatch: failed / CONTEXT_LOST / renderFrame,
+   cleanupFailed false on clean cleanup, true if cleanup failed. Inspect reservation:
+   unreserved only after clean cleanup; in-use if quarantined. These are expected
+   contract outcomes, not recorded observations. A frame request before event
+   delivery also checks native loss and must return no submitted receipt on loss.
+4. Request one frame on the old handle: expect SESSION_DISPOSED/getSnapshot, no
+   receipt. Explicit Dispose is idempotent and retains the terminal loss diagnostic.
+   It does not retry cleanup or remove a failed-cleanup quarantine.
+5. After loss event delivery, optionally call `loss.restoreContext()` in DevTools.
+   Restoration is asynchronous and may be refused by browser/driver. Wait for the
+   actual restored event; until then a new request can fail GRAPHICS_UNAVAILABLE.
+   The old snapshot remains failed and its session remains terminal even after
+   restoration. There is no automatic Render/Three recreation or asset upload.
+6. Only after a restored event and an unreserved usable target, click Begin again
+   for an explicit new session (new symbol). A submitted receipt from that request
+   is still not proof of displayed pixels. If quarantine persists, choose a fresh
+   host target/page; never force-release or promise that GPU memory was recovered.
+
+Record browser/version, actual state/failure/reservation output, extension support,
+event ordering, cleanup results and any visible frame separately. Restoration,
+failure cleanup and GPU recovery are NOT_VERIFIED until actually observed. Loss
+occurring after the final synchronous frame check can only be detected later;
+a submitted receipt is not a future context-health guarantee.
+
+Reference: [Khronos WEBGL_lose_context specification](https://registry.khronos.org/webgl/extensions/WEBGL_lose_context/)
+defines asynchronous restoration and its preventDefault prerequisite. The installed
+Three0.186.1 WebGLRenderer adds lost/restored listeners and removes them in dispose;
+the private Render backend uses that cleanup, not a competing recovery engine.
+
 ## Graphics lifecycle — v0.6.2
 
 After the workspace build, serve the root as below and open

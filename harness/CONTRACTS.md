@@ -2,6 +2,15 @@
 
 This describes the *interactions to audit*, not finalized types or APIs. Do not create interfaces just to satisfy this document before a real MVP needs them.
 
+Phase 6 v0.6.3 RV05: [Context loss policy](checkpoints/render-viewport-v0.6.3.md)
+adds CONTEXT_LOST to RenderFrameFailure.code (57 root symbols unchanged). Native
+loss events and pre/post-frame checks terminate the same acquired session and
+attempt cleanup; failed snapshot retains the loss diagnostic/cleanupFailed flag.
+Dispose removes Render/Three listeners; no automatic backend restoration. Host
+explicitly requests a new session on a usable unreserved target. Quarantine is
+never force-released. Unknown frame/host exceptions remain unknown and propagate;
+builds and compiled manual procedure do not verify actual GPU loss/restoration.
+
 Phase 6 v0.6.2 RV03/RV04: [Graphics lifecycle](checkpoints/render-viewport-v0.6.2.md)
 adds beginRenderFrameSession, RenderFrameAcquisition and RenderGraphicsSnapshot
 (Render57). An observation handle exposes pending/ready/failed/disposed for the

@@ -5,6 +5,9 @@
 <h1>Graphics lifecycle</h1>
 <p>Host-owned canvas. Acquire submits no frame. Ready records acquisition, not
 continuous GPU health or displayed pixels. Frame submission and visual review are separate.</p>
+<p>Context loss ends the acquired session. A browser restore event never revives it.
+Follow the manual guide for an optional real context-loss procedure in DevTools;
+this page does not force loss, retry or automatically recreate a backend.</p>
 <canvas id="canvas" width="320" height="180" aria-label="Host graphics target"></canvas>
 <p><label>Acquire target <select id="target">
   <option value="canvas">Supported browser canvas</option>

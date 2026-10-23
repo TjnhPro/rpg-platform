@@ -1,7 +1,7 @@
 /** Separate graphics diagnostics; existing RenderFailure remains unchanged. */
 export interface RenderFrameFailure {
   readonly code: 'UNSUPPORTED_TARGET' | 'TARGET_IN_USE' | 'GRAPHICS_UNAVAILABLE'
-    | 'ACQUISITION_FAILED' | 'FRAME_FAILED' | 'CLEANUP_FAILED';
+    | 'ACQUISITION_FAILED' | 'CONTEXT_LOST' | 'FRAME_FAILED' | 'CLEANUP_FAILED';
   readonly stage: 'acquire' | 'renderFrame' | 'dispose';
   readonly cleanupFailed: boolean;
 }

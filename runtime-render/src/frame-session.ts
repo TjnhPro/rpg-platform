@@ -118,7 +118,11 @@ async function acquireRenderFrameSession(
     }
     occupiedTargets.add(target);
     const { createThreeFrameBackend } = await import('./three-frame.js');
-    backend = createThreeFrameBackend(target);
+    backend = createThreeFrameBackend(target, () => {
+      // Native loss is asynchronous: publish its diagnostic, never throw from
+      // the browser event. Cleanup failure is retained in the same observation.
+      failGraphics(new FrameError('CONTEXT_LOST', 'renderFrame'));
+    });
   } catch (error) {
     lifecycle.dispose();
     if (target !== undefined && !getRenderFrameFailure(error)?.cleanupFailed) {
@@ -148,6 +152,17 @@ async function acquireRenderFrameSession(
     return observation;
   };
 
+  function failGraphics(error: unknown): unknown {
+    let cleanupFailed = false;
+    try { disposeResources(); } catch { cleanupFailed = true; }
+    const known = getRenderFrameFailure(error);
+    const failure = known === undefined ? error
+      : new FrameError(known.code, known.stage, known.cleanupFailed || cleanupFailed);
+    update({ state: 'failed', failure: getRenderFrameFailure(failure) ?? null });
+    // Unknown backend exceptions remain original exceptions, not guessed codes.
+    return failure;
+  }
+
   const session: RenderFrameSession = Object.freeze({
     getSnapshot: lifecycle.getSnapshot,
     initialize: lifecycle.initialize,
@@ -169,12 +184,8 @@ async function acquireRenderFrameSession(
       try {
         if (backend === undefined) throw new Error('Missing graphics resources');
         backend.renderFrame();
-      } catch {
-        let cleanupFailed = false;
-        try { disposeResources(); } catch { cleanupFailed = true; }
-        const error = new FrameError('FRAME_FAILED', 'renderFrame', cleanupFailed);
-        update({ state: 'failed', failure: getRenderFrameFailure(error) ?? null });
-        throw error;
+      } catch (error) {
+        throw failGraphics(error);
       }
       return Object.freeze({ sessionId: snapshot.descriptor.id, status: 'submitted' });
     },
