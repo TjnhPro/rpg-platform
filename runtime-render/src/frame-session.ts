@@ -13,6 +13,8 @@ import { planRenderViewportSize, type RenderViewportMetrics, type RenderViewport
 import { readDecodedPng } from './png-bitmap.js';
 import { registerTextureSession, endTextureSession, requireTextureSession, TextureError, getRenderTextureFailure } from './render-texture.js';
 import { registerVisualTransformSession, type VisualFrameItem } from './visual-transform-backend.js';
+import { registerCameraFrameSession, type CameraFrameState } from './camera-frame-link.js';
+import { recordCameraFrame } from './camera-scene.js';
 
 export { getRenderFrameFailure, type RenderFrameFailure } from './frame-failure.js';
 
@@ -336,12 +338,14 @@ async function acquireRenderFrameSession(
   }
 
   let visualFrameSource: (() => readonly VisualFrameItem[]) | undefined;
+  let cameraFrameSource: (() => CameraFrameState) | undefined;
   const disposeResources = () => {
     viewportControl.suspended = false;
     const owned = backend;
     backend = undefined;
     let cleanupFailed = endTextureSession(session);
     visualFrameSource = undefined;
+    cameraFrameSource = undefined;
     try {
       owned?.dispose();
     } catch {
@@ -386,18 +390,24 @@ async function acquireRenderFrameSession(
       throw failGraphics(new FrameError('FRAME_NOT_SUBMITTED', 'renderFrame'));
     }
     frameInProgress = true;
+    // Stale host CSS/resize context is admission rejection, not native failure.
+    let cameraFrame: CameraFrameState | undefined;
+    try { cameraFrame = cameraFrameSource?.(); }
+    catch (error) { frameInProgress = false; throw error; }
     const requestedToken = redrawToken;
     try {
       const owned = backend;
       if (owned === undefined) throw new FrameError('FRAME_FAILED', 'renderFrame');
       const items = visualFrameSource?.() ?? [];
       if (backend !== owned) throw new FrameError('FRAME_FAILED', 'renderFrame');
-      owned.renderFrame(demo, items);
+      owned.renderFrame(demo, items, cameraFrame);
       // Do not receipt a frame whose session was released during backend work.
       if (backend !== owned) throw new FrameError('FRAME_FAILED', 'renderFrame');
       submittedToken = requestedToken;
-      return Object.freeze({ sessionId: viewport.sessionId, status: 'submitted',
+      const receipt: RenderFrameReceipt = Object.freeze({ sessionId: viewport.sessionId, status: 'submitted',
         viewport: Object.freeze({ ...viewport, state: 'active' as const }) });
+      if (cameraFrame !== undefined) recordCameraFrame(receipt, cameraFrame);
+      return receipt;
     } catch (error) {
       throw failGraphics(error);
     } finally {
@@ -424,6 +434,15 @@ async function acquireRenderFrameSession(
     renderFrame: () => submit(),
   });
   registerVisualResourceDemo(session, submit);
+  registerCameraFrameSession(session, (read) => {
+    if (read !== undefined) {
+      lifecycle.getSnapshot();
+      if (frameInProgress) throw new FrameError('FRAME_IN_PROGRESS', 'renderFrame');
+      if (cameraFrameSource !== undefined) throw new TypeError('Camera frame source already attached');
+    }
+    cameraFrameSource = read;
+    redrawToken = {};
+  });
   registerVisualTransformSession(session, {
     source: (read) => {
       if (read !== undefined) {
@@ -518,12 +537,15 @@ async function acquireRenderFrameSession(
   });
   viewportSuspensions.set(session, (suspended) => {
     lifecycle.getSnapshot();
+    if (frameInProgress) throw new FrameError('FRAME_IN_PROGRESS', 'renderFrame');
     viewportControl.suspended = suspended;
   });
   viewportResizers.set(session, (metrics, limits) => {
     lifecycle.getSnapshot(); // Terminal guard precedes validation.
+    if (frameInProgress) throw new FrameError('FRAME_IN_PROGRESS', 'renderFrame');
     const plan = planRenderViewportSize(metrics, limits);
     lifecycle.getSnapshot(); // Host-supplied getters may have disposed the session.
+    if (frameInProgress) throw new FrameError('FRAME_IN_PROGRESS', 'renderFrame');
     const owned = backend;
     if (owned === undefined) throw new Error('Missing graphics resources');
     try {

@@ -378,3 +378,5 @@ export { createConfiguredRenderCamera, getRenderCameraViewSnapshot, setRenderCam
 export { type RenderCameraZoomLimits, type RenderCameraFocusZoomInput } from './camera-zoom.js';
 export { createOrthographicCameraConfiguration, type OrthographicCameraConfigurationInput,
   type OrthographicCameraConfiguration } from './camera-configuration.js';
+export { bindRenderCameraToVisualScene, getRenderCameraFrameSnapshot,
+  type RenderCameraSceneBinding, type RenderCameraSceneBindingSnapshot, type RenderCameraFrameSnapshot } from './camera-scene.js';

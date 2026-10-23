@@ -1,5 +1,11 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase9 v0.9.10 CM16/CM17 adds bindRenderCameraToVisualScene,
+getRenderCameraFrameSnapshot and three types. Canonical Phase6/8 path, optional
+private OrthographicCamera, localToScene once, exact issued resize/frame evidence.
+Render226->231; old declarations unchanged. No host scheduling/schema changes.
+See [contract](../runtime-render/docs/camera-v0.9.10.md).
+
 Phase9 v0.9.5 CM09/CM10 adds getRenderCameraViewportSnapshot and
 RenderCameraViewportSnapshot. Exact latest issued Phase6 receipt + matching CSS
 extent, preserve-scale logical mapping, no implicit DPR/native camera application.

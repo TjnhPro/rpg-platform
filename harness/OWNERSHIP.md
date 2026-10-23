@@ -1,5 +1,11 @@
 # Ownership decisions — do not classify by similar names
 
+v0.9.10 CM16/CM17: **runtime-render** owns optional camera/live Scene binding and
+private native application in the existing Phase6/8 frame path. Phase7 retains
+all resource lifetime ownership; host owns resize measurement/scheduling. Editor
+and Client compile compatibility only. No L1/L2/Engine/Server or owner transfer.
+See [checkpoint](checkpoints/camera-v0.9.10.md).
+
 v0.9.5 CM09/CM10: **runtime-render** owns camera/accepted-viewport read adapter.
 Phase6 retains native resize and issued-receipt freshness; host retains CSS/ratio
 measurement and visibility. Editor/Client compile compatibility; no owner transfer,

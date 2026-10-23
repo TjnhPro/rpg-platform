@@ -4,6 +4,12 @@
 
 Read root agent guidance first.
 
+- [v0.9.10 CM16/CM17](docs/camera-v0.9.10.md): optional live camera/Scene binding
+  uses canonical Phase6 submission and private orthographic backend. Bound draws
+  use localToScene once, preserve Phase8 snapshots/depth/resources. Camera edits
+  invalidate only; fresh configure after every accepted resize. Receipt application
+  is historical submission evidence, not pixels. Legacy no-binding path remains.
+
 - [v0.9.5 CM09/CM10](docs/camera-v0.9.5.md): read current camera CSS mapping only
   with exact latest Phase6 session resize receipt and matching host logical extent.
   Preserve scale, separate accepted buffer/ratio, reject suspended/terminal/stale.

@@ -25,12 +25,23 @@ export interface RenderCameraPan {
 }
 
 interface CameraOperations {
+  readonly observe: (observer: CameraObserver) => () => void;
   readonly setCenter: (input: PlaneProjectionPoint2D) => RenderCameraSnapshot;
   readonly pan: (input: RenderCameraPan) => RenderCameraSnapshot;
   readonly view: () => RenderCameraViewSnapshot;
   readonly setZoom: (zoom: number) => RenderCameraViewSnapshot;
   readonly zoomAtFocus: (input: RenderCameraFocusZoomInput) => RenderCameraViewSnapshot;
   readonly transition: (expected: RenderCameraViewSnapshot, center: PlanarPoint2D, zoom: number) => RenderCameraViewSnapshot;
+}
+
+/** Owner-local live binding hooks; no host callbacks or public subscription API. */
+export interface CameraObserver {
+  readonly beforeChange: () => void;
+  readonly changed: () => void;
+  readonly ended: () => void;
+}
+export function observeCamera(camera: RenderCamera, observer: CameraObserver): () => void {
+  return cameraOperations(camera).observe(observer);
 }
 
 // Weak capabilities of issued handles, not a current-camera/ID lookup or session registry.
@@ -158,8 +169,9 @@ function createCamera(input: RenderCameraInput, configured: {
   const requireActive = (): void => {
     if (snapshot.state !== 'active') throw new TypeError('Camera is disposed');
   };
-  // Single state commit seam: future live binding must invalidate after a changed
-  // commit here. Unbound CPU cameras acquire no session and request no frame/RAF.
+  let observer: CameraObserver | undefined;
+  // Single state commit seam. Live binding guards submission and invalidates only
+  // after a changed commit. Unbound cameras acquire no session/request no frame.
   const commitCenter = (next: PlanarPoint2D, configuration?: OrthographicCameraConfiguration): RenderCameraSnapshot => {
     requireActive();
     const centerChanged = next.x !== snapshot.center.x || next.y !== snapshot.center.y;
@@ -175,10 +187,12 @@ function createCamera(input: RenderCameraInput, configured: {
         kind: view.configuration.kind, source, center: next, scale: view.configuration.scale,
         zoom: view.configuration.zoom, viewportPolicy: view.configuration.viewportPolicy }),
       zoomLimits: view.zoomLimits, revision: view.revision + 1 });
-    // Prepare both immutable observations before publishing either. Future live
-    // invalidation belongs after this commit, never between center and zoom.
+    // Prepare both immutable observations before publishing either; reject edits
+    // during native submission and invalidate after the atomic center/zoom commit.
+    observer?.beforeChange();
     snapshot = nextSnapshot;
     view = nextView;
+    observer?.changed();
     return snapshot;
   };
   const camera: RenderCamera = Object.freeze({
@@ -193,13 +207,22 @@ function createCamera(input: RenderCameraInput, configured: {
     },
     dispose: (): RenderCameraSnapshot => {
       if (snapshot.state === 'active') {
+        observer?.beforeChange();
         snapshot = Object.freeze({ ...snapshot, state: 'disposed' });
         if (view !== null) view = Object.freeze({ ...view, camera: snapshot });
+        observer?.ended();
       }
       return snapshot;
     },
   });
   operations.set(camera, {
+    observe: (next) => {
+      requireActive();
+      requireView();
+      if (observer !== undefined) throw new TypeError('Camera already has a live binding');
+      observer = next;
+      return () => { if (observer === next) observer = undefined; };
+    },
     view: requireView,
     transition: (expected, center, zoom) => {
       requireActive();
