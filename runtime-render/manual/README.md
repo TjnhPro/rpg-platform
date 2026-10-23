@@ -1,5 +1,30 @@
 # Manual Render consumers
 
+## Host scheduling / invalidation — v0.6.9
+
+Use the real [Editor on-demand host](../../editor/manual/frame-demand.html) and
+[Client continuous host](../../game-client/manual/frame-continuous.html) after
+building/serving the workspace. Each is compiled in its own project, consumes only
+Render public APIs and owns its callback start/stop/cancel/visibility policy.
+See their manual guides for review steps. Compiled only; no browser run recorded.
+
+New getRenderFrameInvalidationSnapshot/invalidateRenderFrame expose session-local
+redraw demand, not scheduling. Initial acquisition starts invalidated. Accepted
+resize (including unchanged) and resume invalidate conservatively; admission
+rejection does not. Explicit invalidate is valid while active or suspended;
+terminal operations reject via existing SESSION_DISPOSED. Reading demand remains
+valid after termination, retaining the historical flag. Always consult the
+viewport snapshot: invalidated=true does not imply renderable/ready/alive.
+
+A successful renderFrame acknowledges the demand captured before its backend
+call. Later invalidation stays pending. Repeated invalidations coalesce to one
+boolean demand, not a queue/counter. Suspended/failed/no-op frames do not clear it.
+A clean session can still be explicitly rendered by a continuous host. Render
+never schedules, polls, acquires, submits or calls gameplay from invalidation.
+There is no timing API, implicit visual-change detector or authored Document dirty
+state. Future presentation operations must explicitly mark their actual change;
+none are fabricated here. Existing frame receipt/rejection semantics remain.
+
 ## One explicit frame / receipt semantics — v0.6.8
 
 Use viewport-identity.html after building/serving as below. Acquire a target,

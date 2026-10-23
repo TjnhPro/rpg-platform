@@ -361,3 +361,33 @@ This is an optional manual example with no assertions, runner, test helpers or C
 runtime job. It is not an image viewer, loader, asset importer or persisted format.
 Finite observed output and future compatibility limits are recorded in the
 [v0.2.9 checkpoint](../../harness/checkpoints/asset-contracts-v0.2.9.md).
+# On-demand browser frames — v0.6.9
+
+Build the workspace, serve its root (for example
+`python -m http.server 8080 --bind 127.0.0.1`), then open
+http://127.0.0.1:8080/editor/manual/frame-demand.html.
+The optional typed browser entry uses only the Render public root. It does not
+replace the earlier one-frame demo or import into Editor root.
+
+Acquire schedules one initial dirty frame. Observe without scheduling: after a
+successful submission, demand should be clean and no callback pending. Invalidate
+three times in one click: one pending browser callback should submit one redraw.
+The button signals a host-known presentation change; no Scene/asset mutation is
+fabricated. Resize changes host CSS width and calls Render resize; accepted resize
+marks demand before host scheduling. Stop cancels/suspends; invalidate while
+suspended retains demand without scheduling. Resume uses fresh host metrics, then
+schedules one redraw. Hidden documents stop/suspend; visibility alone never resumes.
+Stop/hidden/dispose while acquisition is pending releases the unwanted late result.
+
+Dispose/page exit cancels callbacks and releases resources. Native loss event
+cancels the host callback; Render owns actual native validation and cleanup. Use
+Observe after dispatch, since the host listener can run before Render's listener.
+The [Render manual](../../runtime-render/manual/README.md) describes real DevTools
+loss, terminal rejection and cleanup limits; do not synthesize a success/loss.
+No idle polling, gameplay tick, timestamp/delta, animation, Document dirty/save
+state or FPS guarantee is added. A clean demand flag is not displayed-frame proof.
+Compare the separate [Client continuous host](../../game-client/manual/README.md).
+
+These are manual review instructions, **not executed outcomes**. The genuine
+Editor build compiles the entry, without assertions/tests/mocks. At v0.6.9:
+FEATURE_NOT_VERIFIED / VISUAL_NOT_VERIFIED for scheduling, loss and actual pixels.

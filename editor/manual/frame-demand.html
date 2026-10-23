@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Editor on-demand frames — manual</title>
+<h1>Editor: on-demand redraw</h1>
+<p>Acquire schedules one initial frame. Invalidate marks redraw demand; repeated
+requests share one pending host callback. Resize/resume invalidate without submitting.
+Stop/hidden cancels and suspends. Resume is explicit. No authored content is changed;
+the visual-change button only signals redraw of the existing blue clear.</p>
+<canvas width="320" height="180" style="width:320px;height:180px" aria-label="On-demand target"></canvas>
+<p><button id="acquire">Acquire</button> <button id="invalidate">Invalidate ×3</button>
+<button id="resize">Resize CSS width + apply</button> <button id="stop">Stop / suspend</button>
+<button id="resume">Resume + schedule dirty</button> <button id="dispose">Dispose</button>
+<button id="observe">Observe without scheduling</button></p>
+<pre id="output" aria-live="polite">Not acquired. No callbacks scheduled.</pre>
+<script type="importmap">
+{"imports":{"@rpg-platform/runtime-render":"/runtime-render/dist/index.js","three":"/node_modules/three/build/three.module.js"}}
+</script>
+<script type="module" src="/editor/dist/manual-frame-demand.js"></script>
+</html>

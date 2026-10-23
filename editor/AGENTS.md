@@ -4,6 +4,12 @@
 
 Read root agent guidance first.
 
+- [v0.6.9 RV13/RV14](../harness/checkpoints/render-viewport-v0.6.9.md): optional
+  manual-frame-demand browser entry consumes Render root invalidation/viewport APIs.
+  Editor owns one pending browser callback, cancellation, layout and explicit
+  resume after hidden/stop. No idle polling or authored Document dirty mutation;
+  redraw demand is Render state. Compiled only, no browser/visual verification.
+
 - [v0.5.13 DC19 closure audit](../harness/checkpoints/document-v0.5.13.md) inventories all fourteen Phase 5 checkpoints, 44 added Editor root symbols (134 total), all emitted declarations, unchanged external pins and real filesystem MVP evidence. Closure adds no production API. Use the supported Scene Document metadata profile and canonical content owners; whole-content replacement and host receipts remain trusted seams. Existing-file CAS, recovery/durability, UI/visual review and phase acceptance remain open. READY_FOR_DEVELOPER_REVIEW; do not merge or start Feature 06 without a separate Developer instruction. Earlier checkpoint notes describe their own revisions.
 
 - [v0.5.12 DC19](../harness/checkpoints/document-v0.5.12.md) supplies a [manual Document workflow](manual/document-mvp.md) through existing public APIs only. Real local create-only hardlink Save/Load, conflict preservation, late revision2 acknowledgement while revision3 stays dirty, explicit migration candidate and saved-snapshot restore are finite observations. No source/API/schema change; Editor remains134 and Render52 exports. Planar 2.5D authoring data and opaque facing metadata are not rendered or semantically verified. No product IO adapter/CAS/recovery or tests; stop before v0.5.13.

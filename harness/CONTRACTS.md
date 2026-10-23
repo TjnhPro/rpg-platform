@@ -1,5 +1,13 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase6 v0.6.9 RV13/RV14: [frame demand](checkpoints/render-viewport-v0.6.9.md)
+adds invalidateRenderFrame/getRenderFrameInvalidationSnapshot and portable
+RenderFrameInvalidationSnapshot (Render70). Initial/accepted resize/resume demand
+is pending; only successful submission acknowledges the captured invalidation.
+Demand is not graphics readiness, a scheduled request, Document dirty or display.
+Render owns no clock/callback/loop. Editor on-demand and Client continuous manual
+hosts own browser callback coalescing, cancellation and explicit visibility resume.
+
 Phase6 v0.6.8 RV12: [explicit frame requests](checkpoints/render-viewport-v0.6.8.md)
 keeps renderFrame():RenderFrameReceipt. Optional receipt.viewport preserves old
 structural producers; canonical sessions always attach the active frozen viewport

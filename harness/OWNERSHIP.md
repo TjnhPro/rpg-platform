@@ -1,5 +1,10 @@
 # Ownership decisions — do not classify by similar names
 
+v0.6.9 RV13/RV14: Render owns per-session redraw demand/acknowledgement; Editor and
+Client own browser scheduling, visibility and cancellation. Public invalidation
+does not mutate authored state or submit a frame. Two optional manual hosts use
+the same Render implementation. See [checkpoint](checkpoints/render-viewport-v0.6.9.md).
+
 v0.6.8 RV12: Runtime Render owns synchronous frame admission, nested-call rejection,
 backend submission diagnostics and historical viewport receipt on the existing
 session. Editor/Client choose when to call; Engine time/updates are independent.

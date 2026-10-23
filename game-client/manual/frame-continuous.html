@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Client continuous frames — manual</title>
+<h1>Client: host-driven continuous requests</h1>
+<p>Acquire does not schedule. Start resumes with fresh host metrics and schedules
+one browser callback at a time. Stop/hidden cancels and suspends; returning visible
+requires explicit Start. Errors/native loss stop scheduling. Dispose releases the
+session, including an unwanted late acquisition. Counts are submissions, not FPS
+or displayed-frame measurements. The scene remains the same opaque blue clear.</p>
+<canvas width="320" height="180" style="width:320px;height:180px" aria-label="Continuous target"></canvas>
+<p><button id="acquire">Acquire</button> <button id="start">Start / resume</button>
+<button id="stop">Stop / suspend</button> <button id="dispose">Dispose</button>
+<button id="observe">Observe</button></p>
+<pre id="output" aria-live="polite">Not acquired. No callbacks scheduled.</pre>
+<script type="importmap">
+{"imports":{"@rpg-platform/runtime-render":"/runtime-render/dist/index.js","three":"/node_modules/three/build/three.module.js"}}
+</script>
+<script type="module" src="/game-client/dist/manual-frame-continuous.js"></script>
+</html>

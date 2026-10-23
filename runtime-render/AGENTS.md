@@ -4,6 +4,13 @@
 
 Read root agent guidance first.
 
+- [v0.6.9 RV13/RV14](../harness/checkpoints/render-viewport-v0.6.9.md): Render70 adds
+  per-session invalidation read/mark APIs. Initial demand and accepted resize/resume
+  invalidate; successful frame acknowledges only its captured token. Invalidate
+  never requests/submits/schedules or changes authored content. Demand survives
+  suspension/terminal state; consult viewport separately. Hosts own rAF/visibility/
+  cancellation; no Render clock or loop. Both manual host patterns compiled only.
+
 - [v0.6.8 RV12](../harness/checkpoints/render-viewport-v0.6.8.md): preserve the
   synchronous renderFrame and submitted-only receipt; add optional viewport for
   structural compatibility, always populated by canonical sessions. Frozen active

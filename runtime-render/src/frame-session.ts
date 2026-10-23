@@ -94,6 +94,36 @@ const viewportResizers = new WeakMap<RenderFrameSession,
   (metrics: RenderViewportMetrics, limits: RenderViewportSizeLimits) => RenderViewportResizeReceipt>();
 const viewportSuspensions = new WeakMap<RenderFrameSession, (suspended: boolean) => void>();
 
+/** Redraw demand only; neither readiness, a queued callback nor display evidence. */
+export interface RenderFrameInvalidationSnapshot {
+  readonly sessionId: symbol;
+  /** Retained after suspension/termination; consult viewport state before requesting. */
+  readonly invalidated: boolean;
+}
+
+const frameInvalidations = new WeakMap<RenderFrameSession, {
+  readonly read: () => RenderFrameInvalidationSnapshot;
+  readonly invalidate: () => RenderFrameInvalidationSnapshot;
+}>();
+
+/** Read historical demand even after disposal, without scheduling or acquiring. */
+export function getRenderFrameInvalidationSnapshot(session: RenderFrameSession): RenderFrameInvalidationSnapshot {
+  const control = frameInvalidations.get(session);
+  if (control === undefined) throw new TypeError('Expected a graphics session from this Render package instance');
+  return control.read();
+}
+
+/**
+ * Mark host-known presentation changes for redraw. Repeated invalidations coalesce
+ * into one pending demand, not frame requests. Suspended sessions retain demand;
+ * terminal sessions reject via the existing lifecycle guard. No scene update/IO.
+ */
+export function invalidateRenderFrame(session: RenderFrameSession): RenderFrameInvalidationSnapshot {
+  const control = frameInvalidations.get(session);
+  if (control === undefined) throw new TypeError('Expected a graphics session from this Render package instance');
+  return control.invalidate();
+}
+
 /**
  * Explicitly defer rendering for host-hidden, paused or zero logical size UI.
  * Idempotent; retains backend, positive native extent and target reservation.
@@ -308,6 +338,12 @@ async function acquireRenderFrameSession(
   }
 
   let frameInProgress = false;
+  // Bounded opaque tokens; no clock, unbounded revision, queue or callback.
+  // Capture the submitted token so invalidation during backend work stays pending.
+  let redrawToken: object = {};
+  let submittedToken: object | undefined;
+  const readInvalidation = (): RenderFrameInvalidationSnapshot =>
+    Object.freeze({ sessionId, invalidated: redrawToken !== submittedToken });
   const session: RenderFrameSession = Object.freeze({
     getSnapshot: lifecycle.getSnapshot,
     initialize: lifecycle.initialize,
@@ -334,12 +370,14 @@ async function acquireRenderFrameSession(
         throw failGraphics(new FrameError('FRAME_NOT_SUBMITTED', 'renderFrame'));
       }
       frameInProgress = true;
+      const requestedToken = redrawToken;
       try {
         const owned = backend;
         if (owned === undefined) throw new FrameError('FRAME_FAILED', 'renderFrame');
         owned.renderFrame();
         // Do not receipt a frame whose session was released during backend work.
         if (backend !== owned) throw new FrameError('FRAME_FAILED', 'renderFrame');
+        submittedToken = requestedToken;
         return Object.freeze({ sessionId: viewport.sessionId, status: 'submitted',
           viewport: Object.freeze({ ...viewport, state: 'active' as const }) });
       } catch (error) {
@@ -347,6 +385,14 @@ async function acquireRenderFrameSession(
       } finally {
         frameInProgress = false;
       }
+    },
+  });
+  frameInvalidations.set(session, {
+    read: readInvalidation,
+    invalidate: () => {
+      lifecycle.getSnapshot();
+      redrawToken = {};
+      return readInvalidation();
     },
   });
   viewportSuspensions.set(session, (suspended) => {
@@ -370,6 +416,9 @@ async function acquireRenderFrameSession(
     try {
       const accepted = owned.resize(plan);
       captureViewport(sessionId, accepted.size);
+      // Includes unchanged resize and resume: accepted configuration merits redraw,
+      // but never performs/schedules it. Rejected admission leaves demand unchanged.
+      redrawToken = {};
       return Object.freeze({
         sessionId, status: accepted.changed ? 'resized' : 'unchanged',
         requested: plan.requested,
