@@ -203,3 +203,5 @@ export function disposeEditorPreviewSession(session: RenderSessionLifecycle): Re
 export function getEditorPreviewFailure(error: unknown): RenderFailure | undefined {
   return getRenderFailure(error);
 }
+export { createScenePreviewBridge, type ScenePreviewBridge, type ScenePreviewPresentation,
+  type ScenePreviewOutcome } from './scene-preview.js';

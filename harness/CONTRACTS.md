@@ -925,3 +925,8 @@ canonical session termination closes the scope before backend cleanup. Metadata
 never contains session/canvas/backend references or claims GPU liveness/reclamation.
 No legacy signature or consumer migration. See the
 [contract/runbook](../runtime-render/docs/scene-rendering-v0.8.1.md).
+Phase8 v0.8.11 SR16/SR18 adds four Editor root names for explicit preview-local
+Scene synchronization, policy and per-object partial outcomes. Render roots and
+persisted schemas unchanged; reuse Phase2/3/4/7 and canonical visual instances.
+See [contract](../editor/docs/scene-rendering-v0.8.11.md) and
+[checkpoint](checkpoints/scene-rendering-v0.8.11.md). Browser NOT_EXECUTED.

@@ -236,3 +236,8 @@ Examples:
 ## Escalation
 
 Request Developer approval for a changed dependency direction, moved ownership, new public layer/package, modifying L1/L2, unexpected client/server authority model, or public schema break. Do not repair an unclear boundary by adding a generic service automatically.
+Phase8 v0.8.11: **editor** owns authored Scene preview synchronization and its
+runtime-only map. Runtime Render exclusively owns live instances, transforms,
+ordering, retained resource rights and drawing. No Engine/Client/Server change;
+no authored schema, public Render dependency direction or GPU ownership transfer.
+See [checkpoint](checkpoints/scene-rendering-v0.8.11.md).

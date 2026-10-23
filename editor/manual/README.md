@@ -503,3 +503,6 @@ frame lookup performs no extra source reads and no image/GPU operation.
 - [v0.7.13 visual resource MVP](../../runtime-render/manual/visual-resource-mvp.md):
   Editor Catalog/reference and independent Client host adapters, shared Render
   demonstration path, concurrent holders/release/revision controls. Browser NOT_EXECUTED.
+- [v0.8.11 Scene preview sync](scene-preview.md): public-root Editor bridge consumer,
+  three shared-asset objects, missing reference, stable update/remove controls.
+  Compiled only; browser NOT_EXECUTED.
