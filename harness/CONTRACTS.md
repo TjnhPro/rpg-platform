@@ -987,3 +987,5 @@ Render and four Editor additions; no removed/changed existing root declarations.
 Matching declarations do not prove semantic/runtime compatibility. renderFrame
 now draws the attached visual source. [Public inventory](../runtime-render/docs/public-api-delta-v0.8.14.md).
 READY_FOR_DEVELOPER_REVIEW; browser/visual MVP acceptance remains open.
+
+Phase9 v0.9.6 CM11/CM12 adds projectRenderCameraPoint and RenderCameraProjectionResult. Render208/Editor138/Client0; existing declarations unchanged. Reuse Phase4 mapping; explicit logical-only null or real current session/receipt. No implicit screen origin/DPR, no GPU application. [Contract](../runtime-render/docs/camera-v0.9.6.md), [evidence](checkpoints/camera-v0.9.6.md).

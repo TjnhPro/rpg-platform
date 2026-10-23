@@ -7,6 +7,7 @@ import { getRenderTextureFailure as textureFailure, type RenderTextureFailure } 
 import { getVisualResourceCacheFailure as cacheFailure, type VisualResourceCacheFailure } from './visual-resource-cache.js';
 import { VisualPresentationError } from './visual-presentation-error.js';
 export { getRenderCameraViewportSnapshot, type RenderCameraViewportSnapshot } from './camera-viewport.js';
+export { projectRenderCameraPoint, type RenderCameraProjectionResult } from './camera-projection.js';
 export { getRenderVisualSceneDiagnostics, type RenderVisualSceneDiagnostics } from './visual-scene.js';
 
 /** Safe error data only. null cleanup means unknown/not reported by that domain. */

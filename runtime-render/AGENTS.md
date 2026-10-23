@@ -219,3 +219,5 @@ Read root agent guidance first.
   audit and sixty-addition public declaration inventory; no production closure
   delta. Keep authored identity, live handle, lease and frame receipt distinct.
   READY_FOR_DEVELOPER_REVIEW does not establish visual/functional acceptance.
+
+- [v0.9.6 CM11/CM12](docs/camera-v0.9.6.md): canonical camera projection reuses Phase4 mapping. Explicit null is logical-only CPU context; non-null requires current real Phase6 receipt, never fallback. CSS and optional host screen mapping remain separate from accepted device buffer. No authored/gameplay/depth mutation or GPU application.

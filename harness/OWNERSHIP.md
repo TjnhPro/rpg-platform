@@ -292,3 +292,5 @@ records checkpoint/verification evidence, Editor/Client are compatibility consum
 Documentation-only closure, no ownership/dependency/API move or new subsystem.
 See [review packet](../runtime-render/docs/scene-rendering-v0.8.14.md). Developer
 alone accepts the phase and authorizes merge/release; no next phase is implemented.
+
+v0.9.6 CM11/CM12: runtime-render owns canonical camera-to-viewport/screen projection through Phase4, including explicit logical or accepted Phase6 context. Editor/Client compatibility consumers only; Harness evidence, no owner/dependency move, Engine/Server/L1/L2 unchanged. [Checkpoint](checkpoints/camera-v0.9.6.md).

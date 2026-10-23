@@ -15,6 +15,25 @@ export interface RenderCameraViewportSnapshot {
   readonly mapping: ViewportMapping2D;
 }
 
+/** Owner-local shared logical admission/composition; not native acceptance. */
+export function captureCameraViewportMapping(view: RenderCameraViewSnapshot,
+  logical: ViewportMetrics2D): ViewportMapping2D {
+  const fields = captureCameraFields(logical, ['plane', 'width', 'height', 'screen']);
+  if (typeof fields.width !== 'number' || typeof fields.height !== 'number') {
+    throw new TypeError('Camera logical extent must use numeric CSS dimensions');
+  }
+  const config = view.configuration;
+  const mapping = createViewportMapping2D({ projection: { kind: 'orthographic-plane',
+    source: config.source, destination: fields.plane as ViewportMetrics2D['plane'],
+    sourceOrigin: config.center, destinationOrigin: { x: fields.width / 2, y: fields.height / 2 },
+    destinationUnitsPerSourceUnit: config.effectiveCssPixelsPerSourceUnit },
+  metrics: fields as unknown as ViewportMetrics2D });
+  if (mapping.metrics.plane.unit !== 'css-px' || mapping.metrics.plane.projectId !== config.source.projectId) {
+    throw new TypeError('Camera logical viewport requires same-project CSS context');
+  }
+  return mapping;
+}
+
 /**
  * Pull adapter: recompute from current camera and latest accepted resize on the
  * same existing session. Preserve-scale changes visible spans, never zoom/center.
@@ -28,20 +47,9 @@ export function getRenderCameraViewportSnapshot(camera: RenderCamera, session: R
   requireCurrentViewportResize(session, receipt);
   const view = getRenderCameraViewSnapshot(camera);
   if (view.camera.state !== 'active') throw new TypeError('Camera is disposed');
-  const fields = captureCameraFields(logical, ['plane', 'width', 'height', 'screen']);
-  if (typeof fields.width !== 'number' || typeof fields.height !== 'number') {
-    throw new TypeError('Camera logical extent must use numeric CSS dimensions');
-  }
-  const config = view.configuration;
-  const mapping = createViewportMapping2D({ projection: { kind: 'orthographic-plane',
-    source: config.source, destination: fields.plane as ViewportMetrics2D['plane'],
-    sourceOrigin: config.center,
-    destinationOrigin: { x: fields.width / 2, y: fields.height / 2 },
-    destinationUnitsPerSourceUnit: config.effectiveCssPixelsPerSourceUnit },
-  metrics: fields as unknown as ViewportMetrics2D });
-  const { plane, width, height } = mapping.metrics;
-  if (plane.unit !== 'css-px' || plane.projectId !== config.source.projectId
-    || width !== receipt.requested.logicalWidthCssPx || height !== receipt.requested.logicalHeightCssPx) {
+  const mapping = captureCameraViewportMapping(view, logical);
+  const { width, height } = mapping.metrics;
+  if (width !== receipt.requested.logicalWidthCssPx || height !== receipt.requested.logicalHeightCssPx) {
     throw new TypeError('Camera logical CSS context must match accepted resize metrics and project');
   }
   const ratio = receipt.effectivePixelRatio;
