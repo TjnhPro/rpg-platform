@@ -474,3 +474,10 @@ See [finite atlas consumer](atlas-metadata.md) for read-only original TPSheet403
 metadata parsing, explicit multi-page source bindings and malformed-copy
 diagnostics. Local original metadata was observed; no authored catalog change,
 PNG decode, frame geometry or visual acceptance is implied.
+
+## Frame identity/resolution — v0.7.6
+
+See [finite frame consumer](frame-resolution.md) for two logical holders, exact key
+lookup, typed missing/unsupported/revision diagnostics and unchanged Phase2 catalog
+semantics. The optional `--frames` mode reuses the bounded original-file atlas host;
+frame lookup performs no extra source reads and no image/GPU operation.

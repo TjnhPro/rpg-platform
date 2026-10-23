@@ -2,7 +2,7 @@
 import {
   createVisualSourceLoad, parseUnityAtlasMetadata, prepareVisualResource,
   type VisualSourceProvider, type VisualSourceLoad, type VisualResourceDescriptor,
-  type AtlasSourceBinding, type UnityAtlasSheet, type AtlasMetadataResult,
+  type AtlasSourceBinding, type UnityAtlasSheet, type AtlasMetadataResult, type AtlasMetadata,
 } from '@rpg-platform/runtime-render';
 
 const limit = 1024 * 1024;
@@ -14,6 +14,7 @@ const hash = async (bytes: Uint8Array<ArrayBuffer>): Promise<string> =>
 export async function inspectAtlasMetadata(
   selected: readonly { readonly readMetadata: () => Promise<Uint8Array<ArrayBuffer>>;
     readonly textureReference: string; readonly imageLocator: string }[],
+  observeFrames?: (atlas: AtlasMetadata, revised: AtlasMetadata) => void,
 ): Promise<void> {
   const sources: VisualResourceDescriptor['sources'][number][] = [
     { role: 'image', locator: { type: 'project-relative', path: 'unused/decoy.png' } },
@@ -70,6 +71,18 @@ export async function inspectAtlasMetadata(
     if (first !== undefined && original != null) {
       const text = new TextDecoder('utf-8', { fatal: true }).decode(original);
       const firstFrame = text.split(/\r?\n/u).find(line => line.length > 0 && !line.startsWith('#') && !line.startsWith(':'));
+      if (observeFrames !== undefined && result.status === 'parsed' && firstFrame !== undefined) {
+        // Explicit valid in-memory revision, never an original dataset/format claim.
+        const revisedBytes = new TextEncoder().encode(text.replace(firstFrame, firstFrame.replace(';', '-revision;')));
+        const revisedLoad = makeLoad(1, async () => revisedBytes);
+        await revisedLoad.start();
+        const revised = parseUnityAtlasMetadata(descriptor, bindings, [{ ...first, metadata: revisedLoad }, ...sheets.slice(1)]);
+        if (revised.status === 'parsed') {
+          const before = reads;
+          observeFrames(result.atlas, revised.atlas);
+          log('frame lookup provider reads', { before, after: reads });
+        } else log('memory revision rejected', revised);
+      }
       if (firstFrame !== undefined) {
         const duplicate = new TextEncoder().encode(text + '\n' + firstFrame + '\n');
         const bad = makeLoad(1, async () => duplicate);

@@ -50,6 +50,8 @@ export {
 export { createPlanarTransform2D, type PlanarTransform2D } from './planar-transform.js';
 export { prepareVisualResource, type VisualResourceDescriptor, type VisualResourcePreparation } from './visual-resource.js';
 export { parseUnityAtlasMetadata } from './unity-atlas.js';
+export { createVisualFrameReference, resolveAtlasFrame, type VisualFrameReference, type AtlasFrameResolution } from './atlas-frame.js';
+export { getAtlasMetadataRevision, type AtlasMetadataRevision } from './atlas-metadata.js';
 export {
   type AtlasSourceBinding, type UnityAtlasSheet, type AtlasMetadataPage,
   type AtlasMetadataFrame, type AtlasMetadata, type AtlasMetadataResult,

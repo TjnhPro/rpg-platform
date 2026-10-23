@@ -1,4 +1,36 @@
 import type { VisualSourceLoad } from './visual-source-load.js';
+import type { VisualSourceScope } from './visual-source.js';
+
+/** Identity of one parsed snapshot, plus the metadata byte revisions it observed. */
+export interface AtlasMetadataRevision {
+  /** Package-instance-local; not an authored ID, serializable hash or image revision. */
+  readonly id: symbol;
+  readonly sources: readonly {
+    readonly sourceId: string;
+    readonly scope: VisualSourceScope;
+    readonly revision: string;
+  }[];
+}
+
+// Weak provenance only: no active registry, bytes, provider closures or IO/cache.
+const revisions = new WeakMap<AtlasMetadata, AtlasMetadataRevision>();
+
+/** Canonical parser snapshots only. Copies/JSON roundtrips require a fresh parse. */
+export function getAtlasMetadataRevision(atlas: AtlasMetadata): AtlasMetadataRevision | null {
+  return revisions.get(atlas) ?? null;
+}
+
+/** Package-private: attach actual acquired metadata provenance without changing v0.7.5 data. */
+export function registerAtlasMetadataRevision(
+  atlas: AtlasMetadata, sources: AtlasMetadataRevision['sources'],
+): AtlasMetadata {
+  revisions.set(atlas, Object.freeze({ id: Symbol('atlas-metadata-snapshot'),
+    sources: Object.freeze(sources.map(source => Object.freeze({ sourceId: source.sourceId,
+      revision: source.revision, scope: Object.freeze({ projectId: source.scope.projectId,
+        providerId: source.scope.providerId, authorizationGeneration: source.scope.authorizationGeneration }) }))),
+  }));
+  return atlas;
+}
 
 /** Caller-selected Render-local ID for an exact descriptor source, not an Asset ID. */
 export interface AtlasSourceBinding {

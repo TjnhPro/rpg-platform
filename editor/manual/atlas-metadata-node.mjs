@@ -27,6 +27,8 @@ async function readSelectedFile(path) {
 }
 
 const args = process.argv.slice(2);
+const frameMode = args[0] === '--frames';
+if (frameMode) args.shift();
 if (args.length === 0 || args.length % 3 !== 0 || args.length > 6) {
   throw new Error('Usage: atlas-metadata-node.mjs <original.tpsheet> <exact-header-texture> <image-source-locator> [second triple]');
 }
@@ -34,4 +36,5 @@ const selected = [];
 for (let index = 0; index < args.length; index += 3) selected.push({
   readMetadata: () => readSelectedFile(args[index]), textureReference: args[index + 1], imageLocator: args[index + 2],
 });
-await inspectAtlasMetadata(selected);
+const observer = frameMode ? (await import('../../.artifacts/atlas-manual/frame-resolution.mjs')).inspectFrameResolution : undefined;
+await inspectAtlasMetadata(selected, observer);

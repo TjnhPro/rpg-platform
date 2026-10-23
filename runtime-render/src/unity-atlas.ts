@@ -1,5 +1,5 @@
 import { prepareVisualResource, type VisualResourceDescriptor } from './visual-resource.js';
-import { captureAtlasMetadata, type AtlasSourceBinding, type UnityAtlasSheet,
+import { captureAtlasMetadata, registerAtlasMetadataRevision, type AtlasMetadataRevision, type AtlasSourceBinding, type UnityAtlasSheet,
   type AtlasMetadata, type AtlasMetadataPage, type AtlasMetadataFrame, type AtlasMetadataResult } from './atlas-metadata.js';
 
 const budgets = { bytesPerSheet: 1024 * 1024, totalBytes: 8 * 1024 * 1024,
@@ -73,6 +73,7 @@ export function parseUnityAtlasMetadata(
   }
   const pages: AtlasMetadataPage[] = [], frames: AtlasMetadataFrame[] = [];
   const pageIds = new Set<string>(), frameKeys = new Set<string>(), metadataIds = new Set<string>();
+  const revisionSources: AtlasMetadataRevision['sources'][number][] = [];
   let totalBytes = 0;
   for (const input of sheets) {
     const sheet = record(input, ['pageId', 'metadataSourceId', 'imageSourceId', 'textureReference', 'metadata']);
@@ -103,6 +104,7 @@ export function parseUnityAtlasMetadata(
     const bytes = source.copyBytes();
     if (bytes === null) return reject('SOURCE_NOT_ACQUIRED', pageId);
     if (bytes.length !== length) return reject('SOURCE_MISMATCH', pageId);
+    revisionSources.push({ sourceId: metadataSource.sourceId, scope: request.scope, revision: observation.source.revision });
     totalBytes += length;
     let text: string;
     try { text = new TextDecoder('utf-8', { fatal: true }).decode(bytes); }
@@ -154,5 +156,6 @@ export function parseUnityAtlasMetadata(
     }
     if (pageFrames === 0) return reject('INVALID_FRAME', pageId);
   }
-  return Object.freeze({ status: 'parsed', atlas: captureAtlasMetadata(captured.identity, sources, pages, frames) });
+  return Object.freeze({ status: 'parsed', atlas: registerAtlasMetadataRevision(
+    captureAtlasMetadata(captured.identity, sources, pages, frames), revisionSources) });
 }
