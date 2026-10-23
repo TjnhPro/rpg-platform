@@ -1,5 +1,119 @@
 import type { RenderFrameSession } from './frame-session.js';
-import { requireTextureSession, onTextureSessionEnd } from './render-texture.js';
+import { requireTextureSession, onTextureSessionEnd, getRenderTextureSnapshot } from './render-texture.js';
+import { retainVisualResourceLease, type VisualResourceLease } from './visual-resource-cache.js';
+import { resolveAtlasFrameGeometry, createAtlasTextureView, type AtlasPagePixels,
+  type AtlasFrameGeometry, type AtlasFrameGeometryResult } from './atlas-geometry.js';
+import type { VisualFrameReference } from './atlas-frame.js';
+import type { AtlasMetadata } from './atlas-metadata.js';
+
+export interface RenderVisualFrameBinding {
+  readonly reference: VisualFrameReference;
+  readonly atlas: AtlasMetadata | null;
+  readonly expectedRevision: symbol;
+  /** Explicit host attestation of page identity/layout, per Phase 7. */
+  readonly pixels: AtlasPagePixels;
+}
+
+export interface RenderVisualResourceBindingInput {
+  /** Borrowed only for admission; success retains a separate cache usage right. */
+  readonly resource: VisualResourceLease;
+  readonly expectedSourceRevision: string;
+  /** null selects the entire texture; a frame must resolve through Phase 7. */
+  readonly frame: RenderVisualFrameBinding | null;
+}
+
+/** Observation only; never exposes the instance's releasable usage capability. */
+export interface RenderVisualResourceBindingSnapshot {
+  readonly state: 'usable' | 'unavailable';
+  readonly resourceId: symbol;
+  readonly sessionId: symbol;
+  readonly sourceRevision: string;
+  readonly frame: AtlasFrameGeometry | null;
+  readonly cleanupFailed: boolean;
+}
+
+export interface RenderVisualBindingFailure {
+  readonly code: 'FOREIGN_RESOURCE' | 'RESOURCE_NOT_USABLE' | 'CONTEXT_MISMATCH'
+    | 'SOURCE_REVISION_MISMATCH'
+    | Extract<AtlasFrameGeometryResult, { status: 'rejected' }>['code'];
+}
+
+class BindingError extends TypeError {
+  readonly #failure: RenderVisualBindingFailure;
+  constructor(code: RenderVisualBindingFailure['code']) {
+    super(`Visual resource binding rejected: ${code}`);
+    this.#failure = Object.freeze({ code });
+  }
+  static classify(error: unknown): RenderVisualBindingFailure | undefined {
+    return typeof error === 'object' && error !== null && #failure in error ? error.#failure : undefined;
+  }
+}
+
+export function getRenderVisualBindingFailure(error: unknown): RenderVisualBindingFailure | undefined {
+  return BindingError.classify(error);
+}
+
+interface OwnedBinding {
+  readonly read: () => RenderVisualResourceBindingSnapshot;
+  readonly release: () => void;
+}
+
+// Separate environment: released bindings do not retain cache/session via a lease.
+function ownBinding(input: VisualResourceLease, frame: AtlasFrameGeometry | null): OwnedBinding {
+  let lease: VisualResourceLease | undefined = input;
+  const initial = input.getSnapshot();
+  if (initial.state !== 'usable') throw new BindingError('RESOURCE_NOT_USABLE');
+  let snapshot: RenderVisualResourceBindingSnapshot = Object.freeze({ state: 'usable',
+    resourceId: initial.resourceId, sessionId: initial.sessionId, sourceRevision: initial.sourceRevision,
+    frame, cleanupFailed: initial.cleanupFailed });
+  return {
+    read: () => {
+      const current = lease?.getSnapshot();
+      snapshot = Object.freeze({ ...snapshot, state: current?.state === 'usable' ? 'usable' : 'unavailable',
+        cleanupFailed: current?.cleanupFailed ?? snapshot.cleanupFailed });
+      return snapshot;
+    },
+    release: () => {
+      const previous = lease;
+      lease = undefined; // Unlink before native cleanup; release exactly once even on failure.
+      previous?.release();
+    },
+  };
+}
+
+function prepareBinding(session: RenderFrameSession, input: RenderVisualResourceBindingInput): OwnedBinding {
+  const data = dataRecord(input, ['resource', 'expectedSourceRevision', 'frame']);
+  if (typeof data.expectedSourceRevision !== 'string' || data.expectedSourceRevision.trim().length === 0) {
+    throw new InstanceError('INVALID_DESCRIPTOR');
+  }
+  // Canonical weak dispatch never invokes methods on an arbitrary host lease.
+  const retained = retainVisualResourceLease(data.resource as VisualResourceLease,
+    requireTextureSession(session), data.expectedSourceRevision);
+  if (typeof retained === 'string') throw new BindingError(retained);
+  try {
+    let geometry: AtlasFrameGeometry | null = null;
+    if (data.frame !== null) {
+      const frame = dataRecord(data.frame, ['reference', 'atlas', 'expectedRevision', 'pixels']);
+      const pixels = dataRecord(frame.pixels, ['imageSourceId', 'unit', 'width', 'height', 'layout']);
+      const resolved = resolveAtlasFrameGeometry(frame.reference as VisualFrameReference,
+        frame.atlas as AtlasMetadata | null, frame.expectedRevision as symbol, pixels as unknown as AtlasPagePixels);
+      if (resolved.status !== 'resolved') throw new BindingError(resolved.code);
+      geometry = resolved.geometry;
+      const current = retained.getSnapshot();
+      if (current.state !== 'usable') throw new BindingError('RESOURCE_NOT_USABLE');
+      const texture = getRenderTextureSnapshot(session, current.texture);
+      if (texture.width !== geometry.pagePixels.width || texture.height !== geometry.pagePixels.height) {
+        throw new BindingError('PAGE_DIMENSION_MISMATCH');
+      }
+      createAtlasTextureView(session, current.texture, geometry, geometry.imageSourceId);
+    }
+    requireTextureSession(session);
+    return ownBinding(retained, geometry);
+  } catch (error) {
+    retained.release(); // No previous binding touched; cleanup exception may propagate.
+    throw error;
+  }
+}
 
 /** Terminal logical ownership observation, not a native cleanup/GPU-health receipt. */
 export interface RenderVisualSceneDisposal {
@@ -99,6 +213,8 @@ interface MembershipControl {
   readonly remove: (instance: RenderVisualInstance) => boolean;
   readonly read: (instance: RenderVisualInstance) => RenderVisualInstanceSnapshot;
   readonly update: (instance: RenderVisualInstance, properties: RenderVisualInstanceProperties) => RenderVisualInstanceSnapshot;
+  readonly bind: (instance: RenderVisualInstance, input: RenderVisualResourceBindingInput | null) => RenderVisualResourceBindingSnapshot | null;
+  readonly binding: (instance: RenderVisualInstance) => RenderVisualResourceBindingSnapshot | null;
 }
 
 // Weak canonical capability dispatch only: no enumerable/global scene registry.
@@ -193,13 +309,27 @@ export function updateRenderVisualInstance(
   return membership(scene).update(instance, properties);
 }
 
+/** Retain a validated usage before replacing; null explicitly unbinds. Never loads/draws. */
+export function bindRenderVisualInstanceResource(scene: RenderVisualScene, instance: RenderVisualInstance,
+  input: RenderVisualResourceBindingInput | null): RenderVisualResourceBindingSnapshot | null {
+  return membership(scene).bind(instance, input);
+}
+
+/** Probe current usage, including cache revocation/context loss; history is not liveness. */
+export function getRenderVisualInstanceResource(scene: RenderVisualScene,
+  instance: RenderVisualInstance): RenderVisualResourceBindingSnapshot | null {
+  return membership(scene).binding(instance);
+}
+
 // Separate environment: retained terminal handles cannot keep the factory's session
 // parameter alive after the detach callback has been dropped.
 function createScope(sessionId: symbol) {
   const id = Symbol('visual-scene');
   let snapshot: RenderVisualSceneSnapshot = Object.freeze({ id, sessionId, state: 'active' });
   let detach: (() => void) | undefined;
-  const instances = new Map<string, { readonly handle: RenderVisualInstance; snapshot: RenderVisualInstanceSnapshot }>();
+  let prepare: ((input: RenderVisualResourceBindingInput) => OwnedBinding) | undefined;
+  const instances = new Map<string, { readonly handle: RenderVisualInstance; snapshot: RenderVisualInstanceSnapshot;
+    binding: OwnedBinding | undefined }>();
   const issued = new WeakSet<RenderVisualInstance>();
   let nextOrdinal = 0;
   const requireActive = (): void => {
@@ -215,20 +345,31 @@ function createScope(sessionId: symbol) {
     return entry;
   };
 
+  const drain = (): void => {
+    const previous = [...instances.values()];
+    instances.clear();
+    let failure: { error: unknown } | undefined;
+    for (const entry of previous) {
+      const binding = entry.binding;
+      entry.binding = undefined;
+      try { binding?.release(); } catch (error) { failure ??= { error }; }
+    }
+    if (failure !== undefined) throw failure.error;
+  };
   const end = (reason: RenderVisualSceneDisposal['reason']): RenderVisualSceneDisposal => {
     if (snapshot.state === 'disposed') return snapshot;
     snapshot = Object.freeze({ id, sessionId, state: 'disposed', reason });
-    instances.clear(); // No resources/native objects are owned by SR03/SR04 records.
+    prepare = undefined;
     const release = detach;
     detach = undefined; // Terminal before unlinking; no retained session/subscription.
-    release?.();
+    try { drain(); } finally { release?.(); }
     return snapshot;
   };
   const handle: RenderVisualScene = Object.freeze({
     getSnapshot: (): RenderVisualSceneSnapshot => snapshot,
     clear: (): RenderVisualSceneSnapshot => {
       requireActive();
-      instances.clear(); // Keep ordinal/provenance: old handles cannot target re-adds.
+      drain(); // Keep ordinal/provenance: old handles cannot target re-adds.
       return snapshot;
     },
     dispose: (): RenderVisualSceneDisposal => end('scene-disposed'),
@@ -244,7 +385,7 @@ function createScope(sessionId: symbol) {
       const observation: RenderVisualInstanceSnapshot = Object.freeze({ ...captured, sceneId: id, sessionId,
         insertionOrdinal: nextOrdinal });
       const instance = Object.freeze({ ...observation }) as RenderVisualInstance;
-      instances.set(instance.visualInstanceId, { handle: instance, snapshot: observation });
+      instances.set(instance.visualInstanceId, { handle: instance, snapshot: observation, binding: undefined });
       issued.add(instance);
       nextOrdinal += 1;
       return instance;
@@ -260,10 +401,36 @@ function createScope(sessionId: symbol) {
     remove: (instance): boolean => {
       requireActive();
       if (!issued.has(instance)) throw new InstanceError('FOREIGN_INSTANCE');
-      if (instances.get(instance.visualInstanceId)?.handle !== instance) return false;
-      return instances.delete(instance.visualInstanceId);
+      const entry = instances.get(instance.visualInstanceId);
+      if (entry?.handle !== instance) return false;
+      instances.delete(instance.visualInstanceId);
+      const binding = entry.binding;
+      entry.binding = undefined;
+      binding?.release();
+      return true;
     },
     read: (instance): RenderVisualInstanceSnapshot => requireEntry(instance).snapshot,
+    binding: (instance) => {
+      const binding = requireEntry(instance).binding;
+      const observation = binding?.read() ?? null;
+      requireEntry(instance); // Observation can terminate the canonical session.
+      return observation;
+    },
+    bind: (instance, input) => {
+      const entry = requireEntry(instance), before = entry.binding, beforeState = entry.snapshot;
+      const candidate = input === null ? undefined : prepare!(input);
+      try {
+        const current = requireEntry(instance);
+        if (current !== entry || current.binding !== before || current.snapshot !== beforeState) {
+          throw new InstanceError('INSTANCE_CHANGED');
+        }
+      } catch (error) { candidate?.release(); throw error; }
+      entry.binding = candidate; // Commit before old cleanup; cleanup failure does not roll back.
+      before?.release();
+      const observation = candidate?.read() ?? null;
+      requireEntry(instance);
+      return observation;
+    },
     update: (instance, properties): RenderVisualInstanceSnapshot => {
       const before = requireEntry(instance).snapshot;
       const data = dataRecord(properties, ['correlation']);
@@ -280,7 +447,9 @@ function createScope(sessionId: symbol) {
       return candidate;
     },
   });
-  return { handle, end, attach: (callback: () => void): void => { detach = callback; } };
+  return { handle, end, attach: (callback: () => void, factory: (input: RenderVisualResourceBindingInput) => OwnedBinding): void => {
+    detach = callback; prepare = factory;
+  } };
 }
 
 /**
@@ -304,7 +473,7 @@ export function createRenderVisualScene(session: RenderFrameSession): RenderVisu
   scope.attach(() => {
     occupiedSessions.delete(session);
     unsubscribe();
-  });
+  }, input => prepareBinding(session, input));
   occupiedSessions.add(session);
   return scope.handle;
 }

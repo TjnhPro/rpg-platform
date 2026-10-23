@@ -16,6 +16,13 @@ export {
   type RenderVisualInstanceProperties,
   type RenderVisualInstanceSnapshot,
   type RenderVisualInstanceFailure,
+  bindRenderVisualInstanceResource,
+  getRenderVisualInstanceResource,
+  getRenderVisualBindingFailure,
+  type RenderVisualResourceBindingInput,
+  type RenderVisualResourceBindingSnapshot,
+  type RenderVisualFrameBinding,
+  type RenderVisualBindingFailure,
 } from './visual-scene.js';
 export { renderVisualResourceDemo } from './visual-resource-demo.js';
 export {

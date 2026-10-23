@@ -1,5 +1,15 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase 8 v0.8.4: [SR06 binding](checkpoints/scene-rendering-v0.8.4.md) adds bind,
+read, safe binding classifier and four neutral input/snapshot/frame/failure types.
+Success retains independent Phase 7 cache usage; input lease remains host-owned.
+null unbinds. Explicit source/atlas revisions, canonical session and existing frame
+resolution gate admission. Replacement commits validated usage before old cleanup;
+cleanup error can propagate after commit. Remove/clear/terminal drain owned rights.
+No new cache-public signature or required instance snapshot member, native texture,
+loader/parser/math, resource serialization or draw. See
+[contract](../runtime-render/docs/scene-rendering-v0.8.4.md).
+
 Phase 8 v0.8.3: [SR05 operations](checkpoints/scene-rendering-v0.8.3.md) adds
 getRenderVisualInstanceSnapshot/updateRenderVisualInstance and typed props/snapshot/
 failure plus getRenderVisualInstanceFailure. Current correlation uses full replace;

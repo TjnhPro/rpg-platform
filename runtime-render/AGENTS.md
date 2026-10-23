@@ -4,6 +4,14 @@
 
 Read root agent guidance first.
 
+- [v0.8.4 SR06](../harness/checkpoints/scene-rendering-v0.8.4.md): bind through
+  the Phase 7 public lease, retain an independent waiter in the existing cache.
+  Host lease release cannot revoke instance usage; cache/session revocation can.
+  Reuse Phase 7 frame resolution/view admission and explicit revisions/page
+  attestation. Validate new usage before commit, release old after commit; unknown
+  cleanup failures propagate with committed state. Unlink/drain every owned usage
+  on removal/clear/terminal; no second cache, loader, native exposure or draw.
+
 - [v0.8.3 SR05](../harness/checkpoints/scene-rendering-v0.8.3.md): add remains
   creation; replace only current correlation through exact live handle. Read current
   state via getRenderVisualInstanceSnapshot; handle fields remain registration

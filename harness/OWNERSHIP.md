@@ -1,5 +1,11 @@
 # Ownership decisions — do not classify by similar names
 
+v0.8.4 SR06: Runtime Render owns per-instance resource binding and independent
+usage. Its existing Phase 7 cache retains another ready waiter; source loading,
+GPU allocation, shared retirement and atlas interpretation keep their canonical
+owners. Editor/Client are compatibility builds only. No dependency direction,
+Engine/L1/L2/Server change. See [checkpoint](checkpoints/scene-rendering-v0.8.4.md).
+
 v0.8.3 SR05: Runtime Render owns current correlation state, exact-handle read/
 replacement and admission classification in its existing visual scope. Host input
 is detached metadata; no authored/Engine/native ownership transfer. Editor/Client
