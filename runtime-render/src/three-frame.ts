@@ -1,5 +1,5 @@
 import { Camera, REVISION, Scene, WebGLRenderer } from 'three';
-import { FrameError } from './frame-failure.js';
+import { FrameError, getRenderFrameFailure } from './frame-failure.js';
 import { readBrowserCanvas } from './canvas-target.js';
 import type { RenderViewportSizePlan } from './viewport-size.js';
 
@@ -79,13 +79,17 @@ export function createThreeFrameBackend(input: object, onContextLost: () => void
     // Three's earlier listener permits browser restoration. Our terminal cleanup
     // disposes Three and removes its restore listener before a later restore event.
     target.addEventListener('webglcontextlost', handleContextLost);
-  } catch {
+  } catch (error) {
     let cleanupFailed = false;
     // A throwing constructor may leave inaccessible internal allocations. Never
     // promise full cleanup or reuse of that canvas when no renderer was returned.
     const constructionIncomplete = renderer === undefined;
     try { dispose(); } catch { cleanupFailed = true; }
-    throw new FrameError('ACQUISITION_FAILED', 'acquire', cleanupFailed || constructionIncomplete);
+    const known = getRenderFrameFailure(error);
+    // Preserve a recognized acquisition reason (e.g. an unusable initial
+    // drawing buffer), while retaining conservative partial-construction cleanup.
+    throw new FrameError(known?.code ?? 'ACQUISITION_FAILED', 'acquire',
+      cleanupFailed || constructionIncomplete || (known?.cleanupFailed ?? false));
   }
 
   return Object.freeze({

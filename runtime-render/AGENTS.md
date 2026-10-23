@@ -4,6 +4,13 @@
 
 Read root agent guidance first.
 
+- [v0.6.10 RV15/RV11](../harness/checkpoints/render-viewport-v0.6.10.md): canonical
+  terminal graphics observations always supply cleanupFailed, independently of a
+  null unknown failure. Optional member preserves structural producers; absence
+  is unknown. Preserve recognized acquisition codes and both branded classifiers.
+  Repeated disposal retains terminal diagnostics/quarantine; never clean another
+  session or host canvas/CSS. False is not GPU-memory reclamation evidence.
+
 - [v0.6.9 RV13/RV14](../harness/checkpoints/render-viewport-v0.6.9.md): Render70 adds
   per-session invalidation read/mark APIs. Initial demand and accepted resize/resume
   invalidate; successful frame acknowledges only its captured token. Invalidate

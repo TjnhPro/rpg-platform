@@ -1,5 +1,10 @@
 # Ownership decisions — do not classify by similar names
 
+v0.6.10 RV15/RV11: Render owns safe terminal cleanup observations and quarantine,
+including unknown backend failures. Editor/Client read public classifiers/snapshots
+and own only host recovery, callbacks/listeners and canvas UI. No new logger,
+resource manager or ownership direction. See [audit](checkpoints/render-viewport-v0.6.10.md).
+
 v0.6.9 RV13/RV14: Render owns per-session redraw demand/acknowledgement; Editor and
 Client own browser scheduling, visibility and cancellation. Public invalidation
 does not mutate authored state or submit a frame. Two optional manual hosts use

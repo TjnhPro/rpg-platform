@@ -28,6 +28,11 @@ function write(value: unknown): void { output.textContent += `${JSON.stringify(v
 function observe(): void {
   const snapshot: RenderGraphicsSnapshot | undefined = acquisition?.getSnapshot();
   write(snapshot ?? { state: 'not-started' });
+  if (snapshot?.state === 'failed' || snapshot?.state === 'disposed') {
+    // A null classifier is unknown, not success. Inspect cleanup independently.
+    write({ cleanup: snapshot.cleanupFailed === true ? 'FAILED_OR_UNCERTAIN'
+      : snapshot.cleanupFailed === false ? 'NO_REPORTED_CLEANUP_FAILURE' : 'NOT_REPORTED' });
+  }
   write(inspectRenderTarget(canvas));
 }
 function report(error: unknown): void {

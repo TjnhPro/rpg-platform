@@ -1,5 +1,26 @@
 # Manual Render consumers
 
+## Diagnostics and cleanup — v0.6.10
+
+The [checkpoint failure/cleanup matrix](../../harness/checkpoints/render-viewport-v0.6.10.md)
+gives manual reproduction steps using these existing real consumers. No browser
+execution is recorded. Build and serve as described below. graphics-lifecycle.html
+now prints terminal cleanup separately from classification: FAILED_OR_UNCERTAIN,
+NO_REPORTED_CLEANUP_FAILURE or NOT_REPORTED for older structural observations.
+Null failure never means success. Canonical terminal snapshots always supply the
+optional cleanupFailed member; absence means unknown. Do not expose raw exceptions
+or borrowed canvas/context objects in diagnostic UI. Both public classifiers retain
+their same-package branding; arbitrary Error/message text is not classified.
+
+Cleanup failure keeps the target reserved (quarantined) within this package instance.
+Repeated Dispose does not retry released allocations or erase the original terminal
+observation. Explicit reacquisition cannot bypass quarantine; use a different host
+canvas or reload after manual investigation. This is not cross-package arbitration.
+Clean release is not proof of GPU-memory reclamation. Host owns its canvas/CSS and
+its listeners; Render removes only its/Three's listeners and releases owned resources.
+Inspect canvas attributes/style/connection before and after Dispose; no disposal
+resize, CSS restoration, DOM removal or forced context loss is intended.
+
 ## Host scheduling / invalidation — v0.6.9
 
 Use the real [Editor on-demand host](../../editor/manual/frame-demand.html) and

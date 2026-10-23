@@ -37,6 +37,13 @@ export type RenderGraphicsSnapshot =
     readonly state: 'failed' | 'disposed';
     /** Null on clean disposal or an unrecognized failure; never raw host data. */
     readonly failure: RenderFailure | RenderFrameFailure | null;
+    /**
+     * Canonical terminal observations always supply this, including unknown
+     * exceptions. True also covers cleanup uncertainty requiring quarantine;
+     * false is not evidence that GPU memory was reclaimed. Optional for older
+     * structural producers; absence must not be interpreted as clean cleanup.
+     */
+    readonly cleanupFailed?: boolean;
   };
 
 /** Observation of one acquisition and its resulting session, not a second session. */
@@ -213,7 +220,8 @@ export function beginRenderFrameSession(host: RenderHostBinding): RenderFrameAcq
     viewportReaders.set(session, readViewport);
     return session;
   }).catch((error: unknown) => {
-    update({ state: 'failed', failure: getRenderFailure(error) ?? getRenderFrameFailure(error) ?? null });
+    update({ state: 'failed', failure: getRenderFailure(error) ?? getRenderFrameFailure(error) ?? null,
+      cleanupFailed: getRenderFrameFailure(error)?.cleanupFailed ?? false });
     throw error;
   });
   const operation = Object.freeze({ getSnapshot: () => snapshot, result });
@@ -332,7 +340,8 @@ async function acquireRenderFrameSession(
     const known = getRenderFrameFailure(error);
     const failure = known === undefined ? error
       : new FrameError(known.code, known.stage, known.cleanupFailed || cleanupFailed);
-    update({ state: 'failed', failure: getRenderFrameFailure(failure) ?? null });
+    update({ state: 'failed', failure: getRenderFrameFailure(failure) ?? null,
+      cleanupFailed: cleanupFailed || (known?.cleanupFailed ?? false) });
     // Unknown backend exceptions remain original exceptions, not guessed codes.
     return failure;
   }
@@ -353,10 +362,11 @@ async function acquireRenderFrameSession(
       const firstRelease = backend !== undefined;
       try {
         const observation = disposeResources();
-        if (firstRelease) update({ state: 'disposed', failure: null });
+        if (firstRelease) update({ state: 'disposed', failure: null, cleanupFailed: false });
         return observation;
       } catch (error) {
-        if (firstRelease) update({ state: 'disposed', failure: getRenderFrameFailure(error) ?? null });
+        if (firstRelease) update({ state: 'disposed', failure: getRenderFrameFailure(error) ?? null,
+          cleanupFailed: true });
         throw error;
       }
     },

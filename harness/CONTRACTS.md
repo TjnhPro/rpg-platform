@@ -1,5 +1,12 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase6 v0.6.10 RV15/RV11: [diagnostics/cleanup](checkpoints/render-viewport-v0.6.10.md)
+adds optional terminal RenderGraphicsSnapshot.cleanupFailed; canonical observations
+always populate it, even when the original exception remains unknown and failure
+is null. Absence is unknown; false is not GPU-memory evidence. Existing classifiers,
+symbols and signatures remain; recognized acquisition codes survive backend cleanup.
+Terminal cleanup/quarantine is Render-owned; host recovery is explicit. Render70.
+
 Phase6 v0.6.9 RV13/RV14: [frame demand](checkpoints/render-viewport-v0.6.9.md)
 adds invalidateRenderFrame/getRenderFrameInvalidationSnapshot and portable
 RenderFrameInvalidationSnapshot (Render70). Initial/accepted resize/resume demand
