@@ -1,5 +1,12 @@
 # Ownership decisions — do not classify by similar names
 
+v0.9.0 CM01: **runtime-render** owns the camera semantic/integration design;
+Harness records evidence. Editor/Client remain public consumers and host UI/intent
+owners; no source change there. Camera view is not authored placement, gameplay
+position or instance local transform. Phase4/6/7/8 retain canonical math, graphics,
+resource and visual instance ownership. Zero API/dependency/owner transfer.
+See [camera map](../runtime-render/docs/camera-v0.9.0.md).
+
 v0.8.10 SR15/SR17: Runtime Render owns scene usage observations, safe error
 projection and conservative visual-scope cleanup quarantine. Phase7 remains sole
 owner of acquisition/waiters/native allocation release; Phase6 owns graphics

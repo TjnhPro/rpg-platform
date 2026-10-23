@@ -1,5 +1,13 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase9 v0.9.0 CM01 is [Camera design only](../runtime-render/docs/camera-v0.9.0.md):
+no public exports, DTOs or failure-union changes. Preserve Phase4 axis-aligned
+inverse semantics, Phase6 accepted viewport/frame lifecycle, Phase7 resource
+rights and Phase8 instance/depth ownership. Future camera binding is opt-in;
+existing per-instance localToClip and fixed-camera consumers remain compatible.
+Camera description/view/result/live binding are distinct proposed concepts,
+not runtime capabilities. See [checkpoint](checkpoints/camera-v0.9.0.md).
+
 Phase8 v0.8.10 SR15/SR17 adds four root names for redacted caught-error diagnostics
 and count-only scope observations. Unknown is never success; scope cleanup failure
 is sticky and does not grant a new visual scope on the same session. Existing

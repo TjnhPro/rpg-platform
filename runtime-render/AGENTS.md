@@ -4,6 +4,12 @@
 
 Read root agent guidance first.
 
+- [v0.9.0 CM01](docs/camera-v0.9.0.md) is Camera API_DESIGN_ONLY. Existing Phase4
+  axis-aligned mapping is not an arbitrary oblique camera; Phase8 already bakes
+  per-instance localToClip and uses a fixed private Camera. Future opt-in view
+  must avoid double projection and preserve legacy behavior, source depth and
+  authored/gameplay truth. No live camera API or diagnostics union change yet.
+
 - [v0.8.10 SR15/SR17](../harness/checkpoints/scene-rendering-v0.8.10.md): use
   getRenderVisualDiagnostic for safe caught-error domain/code data; unknown never
   means success. Scene diagnostics count logical usages and preserve sticky cleanup
