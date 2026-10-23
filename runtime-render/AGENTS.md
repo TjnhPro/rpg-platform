@@ -4,6 +4,13 @@
 
 Read root agent guidance first.
 
+- [v0.8.6 SR08](../harness/checkpoints/scene-rendering-v0.8.6.md): per-instance
+  visible defaults true and only gates presentation. Effective flag includes
+  canonical Phase 6 viewport suspension without rewriting intent. Hide/show
+  preserves identity, transforms and resources; hidden updates keep latest matrix.
+  Equal updates do not invalidate. Native Object3D.visible is the existing backend
+  gate; DRAW_NOT_IMPLEMENTED remains explicit until real drawable integration.
+
 - [v0.8.5 SR07](../harness/checkpoints/scene-rendering-v0.8.5.md): current instance
   transforms reuse Phase 4 TRS/affine/alignment/projection with explicit units and
   axes. Fixed same-project render-clip-2d mapping feeds non-drawable private nodes

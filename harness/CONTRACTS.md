@@ -1,5 +1,14 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase 8 v0.8.6: [SR08 visibility](checkpoints/scene-rendering-v0.8.6.md) adds
+setRenderVisualInstanceVisible/getRenderVisualInstanceVisibility and a scalar
+snapshot. Default true; effectiveVisible is visible && !Phase6 viewportSuspended,
+a participation gate, not drawable/resource/pixel readiness. Repeated values do
+not invalidate; changed flags update the same private node and existing demand.
+Hidden transforms/resources remain live. No required-shape change, separate scene
+suspension, draw pipeline or authored/gameplay state. DRAW_NOT_IMPLEMENTED; see
+[contract](../runtime-render/docs/scene-rendering-v0.8.6.md).
+
 Phase 8 v0.8.5: [SR07 transform](checkpoints/scene-rendering-v0.8.5.md) adds
 set/get instance transform and two neutral input/snapshot types. Reuse Phase 4
 TRS/affine/alignment/projection in exact source units/axes; explicit same-project

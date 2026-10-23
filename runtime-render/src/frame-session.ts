@@ -11,7 +11,7 @@ import type { ThreeFrameBackend } from './three-frame.js';
 import { readBrowserCanvas } from './canvas-target.js';
 import { planRenderViewportSize, type RenderViewportMetrics, type RenderViewportSizeLimits } from './viewport-size.js';
 import { readDecodedPng } from './png-bitmap.js';
-import { registerTextureSession, endTextureSession, TextureError, getRenderTextureFailure } from './render-texture.js';
+import { registerTextureSession, endTextureSession, requireTextureSession, TextureError, getRenderTextureFailure } from './render-texture.js';
 import { registerVisualTransformSession } from './visual-transform-backend.js';
 
 export { getRenderFrameFailure, type RenderFrameFailure } from './frame-failure.js';
@@ -403,7 +403,7 @@ async function acquireRenderFrameSession(
     renderFrame: () => submit(),
   });
   registerVisualResourceDemo(session, submit);
-  registerVisualTransformSession(session, (instance, matrix) => {
+  registerVisualTransformSession(session, { transform: (instance, matrix, visible) => {
     const owned = backend;
     // Terminal cleanup listeners run after unlinking backend, before backend.dispose.
     if (matrix === null && owned === undefined) return;
@@ -412,11 +412,24 @@ async function acquireRenderFrameSession(
     if (matrix !== null && frameInProgress) throw new FrameError('FRAME_IN_PROGRESS', 'renderFrame');
     if (owned === undefined) throw new FrameError('FRAME_FAILED', 'renderFrame');
     try {
-      owned.setVisualTransform(instance, matrix);
+      owned.setVisualTransform(instance, matrix, visible);
       if (backend !== owned) throw new FrameError('FRAME_FAILED', 'renderFrame');
       redrawToken = {}; // Reuse demand; never schedule or submit a frame.
     } catch (error) { throw failGraphics(error); }
-  });
+  }, visibility: (instance, visible) => {
+    lifecycle.getSnapshot();
+    if (frameInProgress) throw new FrameError('FRAME_IN_PROGRESS', 'renderFrame');
+    const owned = backend;
+    if (owned === undefined) throw new FrameError('FRAME_FAILED', 'renderFrame');
+    try {
+      owned.setVisualVisibility(instance, visible);
+      if (backend !== owned) throw new FrameError('FRAME_FAILED', 'renderFrame');
+      redrawToken = {};
+    } catch (error) { throw failGraphics(error); }
+  }, suspended: () => {
+    requireTextureSession(session);
+    return viewportControl.suspended;
+  } });
   registerTextureSession(session, sessionId, (image, options) => {
     const owned = backend;
     if (owned === undefined) throw new TextureError('SESSION_UNAVAILABLE');

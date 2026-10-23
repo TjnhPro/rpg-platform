@@ -7,7 +7,7 @@ import type { VisualFrameReference } from './atlas-frame.js';
 import type { AtlasMetadata } from './atlas-metadata.js';
 import { captureVisualInstanceTransform, type RenderVisualInstanceTransformInput,
   type RenderVisualInstanceTransformSnapshot } from './visual-instance-transform.js';
-import { writeVisualTransform } from './visual-transform-backend.js';
+import { writeVisualTransform, writeVisualVisibility, readVisualViewportSuspension } from './visual-transform-backend.js';
 import type { AffineTransform2D } from './planar-affine.js';
 
 export interface RenderVisualFrameBinding {
@@ -16,6 +16,13 @@ export interface RenderVisualFrameBinding {
   readonly expectedRevision: symbol;
   /** Explicit host attestation of page identity/layout, per Phase 7. */
   readonly pixels: AtlasPagePixels;
+}
+
+/** Draw participation gate only, never resource readiness or observed pixels. */
+export interface RenderVisualInstanceVisibilitySnapshot {
+  readonly visible: boolean;
+  readonly viewportSuspended: boolean;
+  readonly effectiveVisible: boolean;
 }
 
 export interface RenderVisualResourceBindingInput {
@@ -221,6 +228,8 @@ interface MembershipControl {
   readonly binding: (instance: RenderVisualInstance) => RenderVisualResourceBindingSnapshot | null;
   readonly transform: (instance: RenderVisualInstance, input: RenderVisualInstanceTransformInput | null) => RenderVisualInstanceTransformSnapshot | null;
   readonly readTransform: (instance: RenderVisualInstance) => RenderVisualInstanceTransformSnapshot | null;
+  readonly visibility: (instance: RenderVisualInstance, visible: boolean) => RenderVisualInstanceVisibilitySnapshot;
+  readonly readVisibility: (instance: RenderVisualInstance) => RenderVisualInstanceVisibilitySnapshot;
 }
 
 // Weak canonical capability dispatch only: no enumerable/global scene registry.
@@ -339,6 +348,18 @@ export function getRenderVisualInstanceTransform(scene: RenderVisualScene,
   return membership(scene).readTransform(instance);
 }
 
+/** Hide/show changes only draw intent; repeated values do not invalidate a frame. */
+export function setRenderVisualInstanceVisible(scene: RenderVisualScene, instance: RenderVisualInstance,
+  visible: boolean): RenderVisualInstanceVisibilitySnapshot {
+  return membership(scene).visibility(instance, visible);
+}
+
+/** Fresh Phase 6 suspension observation; historical snapshots never track changes. */
+export function getRenderVisualInstanceVisibility(scene: RenderVisualScene,
+  instance: RenderVisualInstance): RenderVisualInstanceVisibilitySnapshot {
+  return membership(scene).readVisibility(instance);
+}
+
 // Separate environment: retained terminal handles cannot keep the factory's session
 // parameter alive after the detach callback has been dropped.
 function createScope(sessionId: symbol) {
@@ -346,9 +367,11 @@ function createScope(sessionId: symbol) {
   let snapshot: RenderVisualSceneSnapshot = Object.freeze({ id, sessionId, state: 'active' });
   let detach: (() => void) | undefined;
   let prepare: ((input: RenderVisualResourceBindingInput) => OwnedBinding) | undefined;
-  let writeTransform: ((instance: object, matrix: AffineTransform2D | null) => void) | undefined;
+  let writeTransform: ((instance: object, matrix: AffineTransform2D | null, visible: boolean) => void) | undefined;
+  let writeVisibility: ((instance: object, visible: boolean) => void) | undefined;
+  let readSuspended: (() => boolean) | undefined;
   const instances = new Map<string, { readonly handle: RenderVisualInstance; snapshot: RenderVisualInstanceSnapshot;
-    binding: OwnedBinding | undefined; transform: RenderVisualInstanceTransformSnapshot | null }>();
+    binding: OwnedBinding | undefined; transform: RenderVisualInstanceTransformSnapshot | null; visible: boolean }>();
   const issued = new WeakSet<RenderVisualInstance>();
   let nextOrdinal = 0;
   const requireActive = (): void => {
@@ -364,12 +387,19 @@ function createScope(sessionId: symbol) {
     return entry;
   };
 
+  const readVisibility = (instance: RenderVisualInstance): RenderVisualInstanceVisibilitySnapshot => {
+    const entry = requireEntry(instance);
+    const viewportSuspended = readSuspended!();
+    requireEntry(instance);
+    return Object.freeze({ visible: entry.visible, viewportSuspended,
+      effectiveVisible: entry.visible && !viewportSuspended });
+  };
   const releaseEntry = (entry: { readonly handle: RenderVisualInstance; binding: OwnedBinding | undefined;
-    transform: RenderVisualInstanceTransformSnapshot | null }): void => {
+    transform: RenderVisualInstanceTransformSnapshot | null; visible: boolean }): void => {
     const binding = entry.binding, transformed = entry.transform !== null;
     entry.binding = undefined; entry.transform = null;
     // Attempt resource cleanup even if native node removal fails.
-    try { if (transformed) writeTransform?.(entry.handle, null); }
+    try { if (transformed) writeTransform?.(entry.handle, null, entry.visible); }
     finally { binding?.release(); }
   };
   const drain = (): void => {
@@ -387,7 +417,9 @@ function createScope(sessionId: symbol) {
     prepare = undefined;
     const release = detach;
     detach = undefined; // Terminal before unlinking; no retained session/subscription.
-    try { drain(); } finally { writeTransform = undefined; release?.(); }
+    try { drain(); } finally {
+      writeTransform = undefined; writeVisibility = undefined; readSuspended = undefined; release?.();
+    }
     return snapshot;
   };
   const handle: RenderVisualScene = Object.freeze({
@@ -410,7 +442,8 @@ function createScope(sessionId: symbol) {
       const observation: RenderVisualInstanceSnapshot = Object.freeze({ ...captured, sceneId: id, sessionId,
         insertionOrdinal: nextOrdinal });
       const instance = Object.freeze({ ...observation }) as RenderVisualInstance;
-      instances.set(instance.visualInstanceId, { handle: instance, snapshot: observation, binding: undefined, transform: null });
+      instances.set(instance.visualInstanceId, { handle: instance, snapshot: observation,
+        binding: undefined, transform: null, visible: true });
       issued.add(instance);
       nextOrdinal += 1;
       return instance;
@@ -433,16 +466,26 @@ function createScope(sessionId: symbol) {
       return true;
     },
     read: (instance): RenderVisualInstanceSnapshot => requireEntry(instance).snapshot,
+    readVisibility,
+    visibility: (instance, visible) => {
+      const entry = requireEntry(instance);
+      if (typeof visible !== 'boolean') throw new InstanceError('INVALID_DESCRIPTOR');
+      if (entry.visible === visible) return readVisibility(instance);
+      writeVisibility!(instance, visible);
+      requireEntry(instance); // Native loss/failure must not publish a successful flag.
+      entry.visible = visible;
+      return readVisibility(instance);
+    },
     readTransform: (instance) => requireEntry(instance).transform,
     transform: (instance, input) => {
       const entry = requireEntry(instance), before = entry.transform, beforeState = entry.snapshot,
-        beforeBinding = entry.binding;
+        beforeBinding = entry.binding, beforeVisible = entry.visible;
       const candidate = input === null ? null : captureVisualInstanceTransform(input);
       const current = requireEntry(instance);
       if (current !== entry || current.transform !== before || current.snapshot !== beforeState
-        || current.binding !== beforeBinding) throw new InstanceError('INSTANCE_CHANGED');
+        || current.binding !== beforeBinding || current.visible !== beforeVisible) throw new InstanceError('INSTANCE_CHANGED');
       if (candidate === null && before === null) return null;
-      writeTransform!(instance, candidate?.localToClip ?? null);
+      writeTransform!(instance, candidate?.localToClip ?? null, entry.visible);
       requireEntry(instance); // Native loss/failure must not publish a successful transform.
       entry.transform = candidate;
       return candidate;
@@ -485,8 +528,10 @@ function createScope(sessionId: symbol) {
     },
   });
   return { handle, end, attach: (callback: () => void, factory: (input: RenderVisualResourceBindingInput) => OwnedBinding,
-    transformWriter: (instance: object, matrix: AffineTransform2D | null) => void): void => {
+    transformWriter: (instance: object, matrix: AffineTransform2D | null, visible: boolean) => void,
+    visibilityWriter: (instance: object, visible: boolean) => void, suspensionReader: () => boolean): void => {
     detach = callback; prepare = factory; writeTransform = transformWriter;
+    writeVisibility = visibilityWriter; readSuspended = suspensionReader;
   } };
 }
 
@@ -511,7 +556,10 @@ export function createRenderVisualScene(session: RenderFrameSession): RenderVisu
   scope.attach(() => {
     occupiedSessions.delete(session);
     unsubscribe();
-  }, input => prepareBinding(session, input), (instance, matrix) => writeVisualTransform(session, instance, matrix));
+  }, input => prepareBinding(session, input),
+  (instance, matrix, visible) => writeVisualTransform(session, instance, matrix, visible),
+  (instance, visible) => writeVisualVisibility(session, instance, visible),
+  () => readVisualViewportSuspension(session));
   occupiedSessions.add(session);
   return scope.handle;
 }

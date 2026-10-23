@@ -1,5 +1,11 @@
 # Ownership decisions — do not classify by similar names
 
+v0.8.6 SR08: Runtime Render owns transient instance visibility, private node gate
+and demand. Phase 6 retains viewport suspension and host-driven scheduling;
+Phase 7 retains valid resource rights while hidden. Editor/Client are public
+compatibility builds only; no authored dirty/gameplay/Engine/Server/L1/L2 change.
+See [checkpoint](checkpoints/scene-rendering-v0.8.6.md).
+
 v0.8.5 SR07: Runtime Render owns live instance transforms and private nodes in
 its existing Three backend. Phase 4 remains the canonical math/alignment owner;
 Phase 6 owns graphics lifetime/frame demand; Phase 7 keeps resource rights.

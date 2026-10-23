@@ -25,6 +25,9 @@ export {
   type RenderVisualBindingFailure,
   setRenderVisualInstanceTransform,
   getRenderVisualInstanceTransform,
+  setRenderVisualInstanceVisible,
+  getRenderVisualInstanceVisibility,
+  type RenderVisualInstanceVisibilitySnapshot,
 } from './visual-scene.js';
 export { type RenderVisualInstanceTransformInput, type RenderVisualInstanceTransformSnapshot } from './visual-instance-transform.js';
 export { renderVisualResourceDemo } from './visual-resource-demo.js';

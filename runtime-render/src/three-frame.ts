@@ -18,7 +18,8 @@ export interface ThreeFrameBackend {
   };
   readonly renderFrame: (demo?: DemoTextureRequest) => void;
   readonly uploadTexture: (sessionId: symbol, bitmap: ImageBitmap, options: RenderTextureOptions) => RenderTexture;
-  readonly setVisualTransform: (instance: object, matrix: AffineTransform2D | null) => void;
+  readonly setVisualTransform: (instance: object, matrix: AffineTransform2D | null, visible: boolean) => void;
+  readonly setVisualVisibility: (instance: object, visible: boolean) => void;
   readonly dispose: () => void;
 }
 
@@ -117,7 +118,13 @@ export function createThreeFrameBackend(
 
   return Object.freeze({
     get viewportSize() { return viewportSize; },
-    setVisualTransform: (instance: object, matrix: AffineTransform2D | null): void => {
+    setVisualVisibility: (instance: object, visible: boolean): void => {
+      if (contextLost || context.isContextLost()) throw new FrameError('CONTEXT_LOST', 'renderFrame');
+      if (released || scene === undefined) throw new FrameError('FRAME_FAILED', 'renderFrame');
+      const node = visualNodes.get(instance);
+      if (node !== undefined) node.visible = visible;
+    },
+    setVisualTransform: (instance: object, matrix: AffineTransform2D | null, visible: boolean): void => {
       if (contextLost || context.isContextLost()) throw new FrameError('CONTEXT_LOST', 'renderFrame');
       if (released || scene === undefined) throw new FrameError('FRAME_FAILED', 'renderFrame');
       const previous = visualNodes.get(instance);
@@ -127,6 +134,7 @@ export function createThreeFrameBackend(
         return;
       }
       const node = previous ?? new Object3D();
+      node.visible = visible; // Retain hidden intent on first placement and later updates.
       node.matrixAutoUpdate = false;
       // Explicit local-plane -> clip mapping; fixed existing identity Camera, z=0.
       // No TRS decomposition: preserve nonuniform scale/reflection/affine shear.
