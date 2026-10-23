@@ -13,7 +13,7 @@ import { planRenderViewportSize, type RenderViewportMetrics, type RenderViewport
 import { readDecodedPng } from './png-bitmap.js';
 import { registerTextureSession, endTextureSession, requireTextureSession, TextureError, getRenderTextureFailure } from './render-texture.js';
 import { registerVisualTransformSession, type VisualFrameItem } from './visual-transform-backend.js';
-import { registerCameraFrameSession, type CameraFrameState } from './camera-frame-link.js';
+import { registerCameraFrameSession, endCameraFrameSession, type CameraFrameState } from './camera-frame-link.js';
 import { recordCameraFrame } from './camera-scene.js';
 
 export { getRenderFrameFailure, type RenderFrameFailure } from './frame-failure.js';
@@ -343,6 +343,8 @@ async function acquireRenderFrameSession(
     viewportControl.suspended = false;
     const owned = backend;
     backend = undefined;
+    endCameraFrameSession(session);
+    latestViewportResizes.delete(session);
     let cleanupFailed = endTextureSession(session);
     visualFrameSource = undefined;
     cameraFrameSource = undefined;

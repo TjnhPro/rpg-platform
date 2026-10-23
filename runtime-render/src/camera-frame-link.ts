@@ -16,6 +16,10 @@ const scenes = new WeakMap<RenderVisualScene, {
 export function registerCameraFrameSession(session: RenderFrameSession, set: (source: Source | undefined) => void): void {
   sessions.set(session, set);
 }
+/** Terminal unlink; existing detach closures can still finish their own cleanup. */
+export function endCameraFrameSession(session: RenderFrameSession): void {
+  sessions.delete(session);
+}
 export function attachCameraFrameSource(session: RenderFrameSession, read: Source): () => void {
   const set = sessions.get(session);
   if (set === undefined) throw new TypeError('Expected canonical camera frame session');
@@ -40,6 +44,11 @@ export function endCameraScene(scene: RenderVisualScene): void {
   const scope = scenes.get(scene);
   scenes.delete(scene);
   if (scope === undefined) return;
-  try { for (const end of scope.listeners) end(); }
-  finally { scope.listeners.clear(); }
+  const listeners = [...scope.listeners];
+  scope.listeners.clear(); // Unsubscribe before callbacks, including reentrant teardown.
+  let failure: { readonly error: unknown } | undefined;
+  for (const end of listeners) {
+    try { end(); } catch (error) { failure ??= { error }; }
+  }
+  if (failure !== undefined) throw failure.error;
 }
