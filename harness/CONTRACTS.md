@@ -1,5 +1,12 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase9 v0.9.1 CM02/03/04 adds five Render-root names for a pure camera factory,
+handle, input/update and immutable snapshot. Ephemeral symbol, fixed source plane,
+finite center, no-op revision preservation and terminal/idempotent disposal;
+`unbound`/`not-applied` never means GPU state. No session binding/occupancy API yet.
+Existing declarations/unions stay unchanged. See [contract](../runtime-render/docs/camera-v0.9.1.md)
+and [checkpoint](checkpoints/camera-v0.9.1.md).
+
 Phase9 v0.9.0 CM01 is [Camera design only](../runtime-render/docs/camera-v0.9.0.md):
 no public exports, DTOs or failure-union changes. Preserve Phase4 axis-aligned
 inverse semantics, Phase6 accepted viewport/frame lifecycle, Phase7 resource

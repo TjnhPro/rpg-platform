@@ -358,3 +358,5 @@ export { invalidateVisualResourceCache, getVisualResourceCacheFailure, type Visu
 export type { AtlasMetadataLimits } from './unity-atlas.js';
 
 export { type RenderVisualSpriteLayout } from './visual-sprite-layout.js';
+export { createRenderCamera, type RenderCameraInput, type RenderCameraUpdate,
+  type RenderCameraSnapshot, type RenderCamera } from './camera.js';

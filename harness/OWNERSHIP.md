@@ -1,5 +1,10 @@
 # Ownership decisions — do not classify by similar names
 
+v0.9.1 CM02/03/04: **runtime-render** exclusively owns portable camera lifecycle
+and reuses its Phase4 canonical plane/point capture. Harness records evidence;
+Editor/Client compile existing consumers only. No binding, graphics, gameplay,
+authored data or resource ownership transfer. See [checkpoint](checkpoints/camera-v0.9.1.md).
+
 v0.9.0 CM01: **runtime-render** owns the camera semantic/integration design;
 Harness records evidence. Editor/Client remain public consumers and host UI/intent
 owners; no source change there. Camera view is not authored placement, gameplay
