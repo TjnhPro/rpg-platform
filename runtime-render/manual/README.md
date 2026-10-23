@@ -382,3 +382,10 @@ hide/move/order/clear. Browser NOT_EXECUTED; build is not visual acceptance.
   original PNG/atlas sources, independent Editor/Client hosts, canonical resource
   leases and instance controls. Strict compiled manual consumer only; browser
   NOT_EXECUTED, FEATURE_NOT_VERIFIED / VISUAL_NOT_VERIFIED.
+
+## Scene Rendering review packet — v0.8.14
+
+[Phase8 audit and SR01–SR21 matrix](../docs/scene-rendering-v0.8.14.md) links all
+consumers, residual evidence gaps and Developer review decisions. The
+[seven-instance procedure](scene-mvp.md) remains the manual MVP entry. Browser
+NOT_EXECUTED; no visual acceptance or automated browser suite at closure.

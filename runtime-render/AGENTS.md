@@ -184,3 +184,8 @@ Read root agent guidance first.
   only, no production API or schema delta. See the
   [checkpoint](../harness/checkpoints/scene-rendering-v0.8.13.md).
   Source PNG/atlas bytes are original; browser/visual acceptance remains open.
+
+- [v0.8.14 SR21 closure](docs/scene-rendering-v0.8.14.md): fifteen-checkpoint
+  audit and sixty-addition public declaration inventory; no production closure
+  delta. Keep authored identity, live handle, lease and frame receipt distinct.
+  READY_FOR_DEVELOPER_REVIEW does not establish visual/functional acceptance.

@@ -940,3 +940,10 @@ Phase8 v0.8.13 SR20 adds optional manual consumers/content only. Public roots re
 Render186 / Editor138 / Client0; no production signatures or dependency change.
 [Contract](../runtime-render/docs/scene-rendering-v0.8.13.md),
 [checkpoint](checkpoints/scene-rendering-v0.8.13.md). Browser NOT_EXECUTED.
+
+Phase8 v0.8.14 SR21: [closure audit](../runtime-render/docs/scene-rendering-v0.8.14.md)
+adds no public contract. Baseline Render126/Editor134/Client0 -> 186/138/0, sixty
+Render and four Editor additions; no removed/changed existing root declarations.
+Matching declarations do not prove semantic/runtime compatibility. renderFrame
+now draws the attached visual source. [Public inventory](../runtime-render/docs/public-api-delta-v0.8.14.md).
+READY_FOR_DEVELOPER_REVIEW; browser/visual MVP acceptance remains open.
