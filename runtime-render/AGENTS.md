@@ -4,6 +4,13 @@
 
 Read root agent guidance first.
 
+- [v0.8.7 SR09/SR10](../harness/checkpoints/scene-rendering-v0.8.7.md): scene-local
+  presentation layers and explicit instance order use priority, layer creation
+  ordinal, order, instance ordinal. Default layer preserves existing consumers;
+  missing/duplicate/invalid/in-use-delete rejects. Hidden layer gates the same
+  native node without releasing resources. Candidates are participation metadata,
+  not drawable readiness. See the [contract](docs/scene-rendering-v0.8.7.md).
+
 - [v0.8.6 SR08](../harness/checkpoints/scene-rendering-v0.8.6.md): per-instance
   visible defaults true and only gates presentation. Effective flag includes
   canonical Phase 6 viewport suspension without rewriting intent. Hide/show

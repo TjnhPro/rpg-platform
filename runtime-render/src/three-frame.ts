@@ -7,6 +7,7 @@ import { createTextureLifetime } from './texture-lifetime.js';
 import { TextureError, textureBacking, type RenderTexture, type RenderTextureOptions } from './render-texture.js';
 import { createDemoQuad } from './demo-quad.js';
 import type { DemoTextureRequest } from './visual-resource-demo.js';
+import type { VisualPresentationWrite } from './visual-transform-backend.js';
 
 /** Private browser backend; never exposed through public declarations. */
 export interface ThreeFrameBackend {
@@ -18,8 +19,9 @@ export interface ThreeFrameBackend {
   };
   readonly renderFrame: (demo?: DemoTextureRequest) => void;
   readonly uploadTexture: (sessionId: symbol, bitmap: ImageBitmap, options: RenderTextureOptions) => RenderTexture;
-  readonly setVisualTransform: (instance: object, matrix: AffineTransform2D | null, visible: boolean) => void;
+  readonly setVisualTransform: (instance: object, matrix: AffineTransform2D | null, visible: boolean, renderOrder: number) => void;
   readonly setVisualVisibility: (instance: object, visible: boolean) => void;
+  readonly setVisualOrdering: (writes: readonly VisualPresentationWrite[]) => void;
   readonly dispose: () => void;
 }
 
@@ -124,7 +126,15 @@ export function createThreeFrameBackend(
       const node = visualNodes.get(instance);
       if (node !== undefined) node.visible = visible;
     },
-    setVisualTransform: (instance: object, matrix: AffineTransform2D | null, visible: boolean): void => {
+    setVisualOrdering: (writes: readonly VisualPresentationWrite[]): void => {
+      if (contextLost || context.isContextLost()) throw new FrameError('CONTEXT_LOST', 'renderFrame');
+      if (released || scene === undefined) throw new FrameError('FRAME_FAILED', 'renderFrame');
+      for (const write of writes) {
+        const node = visualNodes.get(write.instance);
+        if (node !== undefined) { node.visible = write.visible; node.renderOrder = write.renderOrder; }
+      }
+    },
+    setVisualTransform: (instance: object, matrix: AffineTransform2D | null, visible: boolean, renderOrder: number): void => {
       if (contextLost || context.isContextLost()) throw new FrameError('CONTEXT_LOST', 'renderFrame');
       if (released || scene === undefined) throw new FrameError('FRAME_FAILED', 'renderFrame');
       const previous = visualNodes.get(instance);
@@ -135,6 +145,7 @@ export function createThreeFrameBackend(
       }
       const node = previous ?? new Object3D();
       node.visible = visible; // Retain hidden intent on first placement and later updates.
+      node.renderOrder = renderOrder; // Candidate rank, not a depth/transparency policy.
       node.matrixAutoUpdate = false;
       // Explicit local-plane -> clip mapping; fixed existing identity Camera, z=0.
       // No TRS decomposition: preserve nonuniform scale/reflection/affine shear.

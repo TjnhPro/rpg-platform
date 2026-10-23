@@ -1,5 +1,14 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase 8 v0.8.7: [SR09/SR10 layers/order](checkpoints/scene-rendering-v0.8.7.md)
+adds scene-local layer CRUD, exact-handle order replacement/read and ordered
+participation candidates. Fourteen additive root names, two optional creation
+fields; existing required inputs/failure unions stay compatible. Ordering is
+priority/layer ordinal/order/instance ordinal. Effective visibility additionally
+gates on layer visibility. Hidden layers retain resource rights; private ranks
+use the existing backend. No authored layer type, depth/alpha or drawable claim.
+See [contract](../runtime-render/docs/scene-rendering-v0.8.7.md).
+
 Phase 8 v0.8.6: [SR08 visibility](checkpoints/scene-rendering-v0.8.6.md) adds
 setRenderVisualInstanceVisible/getRenderVisualInstanceVisibility and a scalar
 snapshot. Default true; effectiveVisible is visible && !Phase6 viewportSuspended,

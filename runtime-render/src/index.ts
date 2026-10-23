@@ -28,6 +28,20 @@ export {
   setRenderVisualInstanceVisible,
   getRenderVisualInstanceVisibility,
   type RenderVisualInstanceVisibilitySnapshot,
+  addRenderVisualLayer,
+  updateRenderVisualLayer,
+  getRenderVisualLayer,
+  listRenderVisualLayers,
+  removeRenderVisualLayer,
+  setRenderVisualInstanceOrder,
+  getRenderVisualInstanceOrder,
+  listRenderVisualDrawCandidates,
+  getRenderVisualLayerFailure,
+  type RenderVisualLayerInput,
+  type RenderVisualLayerSnapshot,
+  type RenderVisualInstanceOrder,
+  type RenderVisualDrawCandidate,
+  type RenderVisualLayerFailure,
 } from './visual-scene.js';
 export { type RenderVisualInstanceTransformInput, type RenderVisualInstanceTransformSnapshot } from './visual-instance-transform.js';
 export { renderVisualResourceDemo } from './visual-resource-demo.js';

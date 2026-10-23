@@ -403,7 +403,7 @@ async function acquireRenderFrameSession(
     renderFrame: () => submit(),
   });
   registerVisualResourceDemo(session, submit);
-  registerVisualTransformSession(session, { transform: (instance, matrix, visible) => {
+  registerVisualTransformSession(session, { transform: (instance, matrix, visible, renderOrder) => {
     const owned = backend;
     // Terminal cleanup listeners run after unlinking backend, before backend.dispose.
     if (matrix === null && owned === undefined) return;
@@ -412,7 +412,7 @@ async function acquireRenderFrameSession(
     if (matrix !== null && frameInProgress) throw new FrameError('FRAME_IN_PROGRESS', 'renderFrame');
     if (owned === undefined) throw new FrameError('FRAME_FAILED', 'renderFrame');
     try {
-      owned.setVisualTransform(instance, matrix, visible);
+      owned.setVisualTransform(instance, matrix, visible, renderOrder);
       if (backend !== owned) throw new FrameError('FRAME_FAILED', 'renderFrame');
       redrawToken = {}; // Reuse demand; never schedule or submit a frame.
     } catch (error) { throw failGraphics(error); }
@@ -423,6 +423,16 @@ async function acquireRenderFrameSession(
     if (owned === undefined) throw new FrameError('FRAME_FAILED', 'renderFrame');
     try {
       owned.setVisualVisibility(instance, visible);
+      if (backend !== owned) throw new FrameError('FRAME_FAILED', 'renderFrame');
+      redrawToken = {};
+    } catch (error) { throw failGraphics(error); }
+  }, ordering: (writes) => {
+    lifecycle.getSnapshot();
+    if (frameInProgress) throw new FrameError('FRAME_IN_PROGRESS', 'renderFrame');
+    const owned = backend;
+    if (owned === undefined) throw new FrameError('FRAME_FAILED', 'renderFrame');
+    try {
+      owned.setVisualOrdering(writes);
       if (backend !== owned) throw new FrameError('FRAME_FAILED', 'renderFrame');
       redrawToken = {};
     } catch (error) { throw failGraphics(error); }

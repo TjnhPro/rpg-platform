@@ -7,7 +7,8 @@ import type { VisualFrameReference } from './atlas-frame.js';
 import type { AtlasMetadata } from './atlas-metadata.js';
 import { captureVisualInstanceTransform, type RenderVisualInstanceTransformInput,
   type RenderVisualInstanceTransformSnapshot } from './visual-instance-transform.js';
-import { writeVisualTransform, writeVisualVisibility, readVisualViewportSuspension } from './visual-transform-backend.js';
+import { writeVisualTransform, writeVisualVisibility, writeVisualOrdering, readVisualViewportSuspension,
+  type VisualPresentationWrite } from './visual-transform-backend.js';
 import type { AffineTransform2D } from './planar-affine.js';
 
 export interface RenderVisualFrameBinding {
@@ -22,6 +23,7 @@ export interface RenderVisualFrameBinding {
 export interface RenderVisualInstanceVisibilitySnapshot {
   readonly visible: boolean;
   readonly viewportSuspended: boolean;
+  /** Instance intent AND current layer visibility AND not viewport-suspended. */
   readonly effectiveVisible: boolean;
 }
 
@@ -164,6 +166,117 @@ export interface RenderVisualInstanceInput {
   /** Caller-selected, scene-local nonempty whitespace-free key; never inferred. */
   readonly visualInstanceId: string;
   readonly correlation?: RenderVisualCorrelation | null;
+  /** Omitted: scene-local built-in default layer and order zero. */
+  readonly layerKey?: string;
+  readonly order?: number;
+}
+
+export interface RenderVisualLayerInput {
+  readonly layerKey: string;
+  readonly priority: number;
+  /** Defaults true, including on full update replacement. */
+  readonly visible?: boolean;
+}
+
+export interface RenderVisualLayerSnapshot {
+  readonly layerKey: string;
+  readonly priority: number;
+  readonly visible: boolean;
+  readonly insertionOrdinal: number;
+}
+
+/** Full replacement of presentation assignment; neither field is gameplay depth. */
+export interface RenderVisualInstanceOrder {
+  readonly layerKey: string;
+  readonly order: number;
+}
+
+/** Participation candidate only: may have no resource, transform or drawable. */
+export interface RenderVisualDrawCandidate extends RenderVisualInstanceOrder {
+  readonly instance: RenderVisualInstance;
+  readonly layerPriority: number;
+  readonly layerInsertionOrdinal: number;
+  readonly insertionOrdinal: number;
+}
+
+export interface RenderVisualLayerFailure {
+  readonly code: 'INVALID_LAYER' | 'INVALID_PRIORITY' | 'INVALID_ORDER' | 'DUPLICATE_LAYER'
+    | 'MISSING_LAYER' | 'LAYER_IN_USE' | 'RESERVED_LAYER' | 'ORDERING_CHANGED';
+}
+
+class LayerError extends TypeError {
+  readonly #failure: RenderVisualLayerFailure;
+  constructor(code: RenderVisualLayerFailure['code']) {
+    super(`Visual layer operation rejected: ${code}`);
+    this.#failure = Object.freeze({ code });
+  }
+  static classify(error: unknown): RenderVisualLayerFailure | undefined {
+    return typeof error === 'object' && error !== null && #failure in error ? error.#failure : undefined;
+  }
+}
+
+export function getRenderVisualLayerFailure(error: unknown): RenderVisualLayerFailure | undefined {
+  return LayerError.classify(error);
+}
+
+function layerKey(value: unknown): string {
+  if (typeof value !== 'string' || value.length === 0 || /\s/u.test(value)) throw new LayerError('INVALID_LAYER');
+  return value;
+}
+
+function sortInteger(value: unknown, code: 'INVALID_PRIORITY' | 'INVALID_ORDER'): number {
+  if (typeof value !== 'number' || !Number.isSafeInteger(value)) throw new LayerError(code);
+  return value === 0 ? 0 : value;
+}
+
+function layerRecord(input: unknown, required: readonly string[], optional: readonly string[] = []): Record<string, unknown> {
+  try { return dataRecord(input, required, optional); }
+  catch (error) {
+    if (getRenderVisualInstanceFailure(error)?.code === 'INVALID_DESCRIPTOR') throw new LayerError('INVALID_LAYER');
+    throw error;
+  }
+}
+
+function captureLayer(input: RenderVisualLayerInput): Omit<RenderVisualLayerSnapshot, 'insertionOrdinal'> {
+  const data = layerRecord(input, ['layerKey', 'priority'], ['visible']);
+  const key = layerKey(data.layerKey), priority = sortInteger(data.priority, 'INVALID_PRIORITY');
+  const visible = Object.hasOwn(data, 'visible') ? data.visible : true;
+  if (typeof visible !== 'boolean') throw new LayerError('INVALID_LAYER');
+  return { layerKey: key, priority, visible };
+}
+
+function captureOrder(input: RenderVisualInstanceOrder): RenderVisualInstanceOrder {
+  const data = layerRecord(input, ['layerKey', 'order']);
+  return Object.freeze({ layerKey: layerKey(data.layerKey), order: sortInteger(data.order, 'INVALID_ORDER') });
+}
+
+export function addRenderVisualLayer(scene: RenderVisualScene, input: RenderVisualLayerInput): RenderVisualLayerSnapshot {
+  return membership(scene).addLayer(input);
+}
+export function updateRenderVisualLayer(scene: RenderVisualScene, input: RenderVisualLayerInput): RenderVisualLayerSnapshot {
+  return membership(scene).updateLayer(input);
+}
+export function getRenderVisualLayer(scene: RenderVisualScene, key: string): RenderVisualLayerSnapshot | undefined {
+  return membership(scene).getLayer(key);
+}
+/** Explicit priority/creation order, including hidden layers and the built-in default. */
+export function listRenderVisualLayers(scene: RenderVisualScene): readonly RenderVisualLayerSnapshot[] {
+  return membership(scene).listLayers();
+}
+/** Missing, built-in default or occupied layer rejects. No fallback/reassignment. */
+export function removeRenderVisualLayer(scene: RenderVisualScene, key: string): void {
+  membership(scene).removeLayer(key);
+}
+export function setRenderVisualInstanceOrder(scene: RenderVisualScene, instance: RenderVisualInstance,
+  input: RenderVisualInstanceOrder): RenderVisualInstanceOrder {
+  return membership(scene).order(instance, input);
+}
+export function getRenderVisualInstanceOrder(scene: RenderVisualScene, instance: RenderVisualInstance): RenderVisualInstanceOrder {
+  return membership(scene).readOrder(instance);
+}
+/** Frozen ordered membership observations, filtered by layer/instance visibility and suspension. */
+export function listRenderVisualDrawCandidates(scene: RenderVisualScene): readonly RenderVisualDrawCandidate[] {
+  return membership(scene).candidates();
 }
 
 declare const visualInstanceBrand: unique symbol;
@@ -218,6 +331,14 @@ export function getRenderVisualInstanceFailure(error: unknown): RenderVisualInst
 }
 
 interface MembershipControl {
+  readonly addLayer: (input: RenderVisualLayerInput) => RenderVisualLayerSnapshot;
+  readonly updateLayer: (input: RenderVisualLayerInput) => RenderVisualLayerSnapshot;
+  readonly getLayer: (key: string) => RenderVisualLayerSnapshot | undefined;
+  readonly listLayers: () => readonly RenderVisualLayerSnapshot[];
+  readonly removeLayer: (key: string) => void;
+  readonly order: (instance: RenderVisualInstance, input: RenderVisualInstanceOrder) => RenderVisualInstanceOrder;
+  readonly readOrder: (instance: RenderVisualInstance) => RenderVisualInstanceOrder;
+  readonly candidates: () => readonly RenderVisualDrawCandidate[];
   readonly add: (input: RenderVisualInstanceInput) => RenderVisualInstance;
   readonly get: (id: string) => RenderVisualInstance | undefined;
   readonly list: () => readonly RenderVisualInstance[];
@@ -277,11 +398,14 @@ function captureCorrelation(value: unknown): RenderVisualCorrelation | null {
 
 function captureInstance(input: RenderVisualInstanceInput): {
   readonly visualInstanceId: string; readonly correlation: RenderVisualCorrelation | null;
+  readonly ordering: RenderVisualInstanceOrder;
 } {
-  const data = dataRecord(input, ['visualInstanceId'], ['correlation']);
+  const data = dataRecord(input, ['visualInstanceId'], ['correlation', 'layerKey', 'order']);
   const visualInstanceId = instanceToken(data.visualInstanceId);
   const correlation = Object.hasOwn(data, 'correlation') ? captureCorrelation(data.correlation) : null;
-  return { visualInstanceId, correlation };
+  const ordering = captureOrder({ layerKey: Object.hasOwn(data, 'layerKey') ? data.layerKey : 'default',
+    order: Object.hasOwn(data, 'order') ? data.order : 0 } as RenderVisualInstanceOrder);
+  return { visualInstanceId, correlation, ordering };
 }
 
 /** Register metadata only, never a mesh/texture. Duplicate live IDs throw TypeError. */
@@ -367,11 +491,21 @@ function createScope(sessionId: symbol) {
   let snapshot: RenderVisualSceneSnapshot = Object.freeze({ id, sessionId, state: 'active' });
   let detach: (() => void) | undefined;
   let prepare: ((input: RenderVisualResourceBindingInput) => OwnedBinding) | undefined;
-  let writeTransform: ((instance: object, matrix: AffineTransform2D | null, visible: boolean) => void) | undefined;
+  let writeTransform: ((instance: object, matrix: AffineTransform2D | null, visible: boolean, renderOrder: number) => void) | undefined;
   let writeVisibility: ((instance: object, visible: boolean) => void) | undefined;
+  let writeOrdering: ((writes: readonly VisualPresentationWrite[]) => void) | undefined;
   let readSuspended: (() => boolean) | undefined;
-  const instances = new Map<string, { readonly handle: RenderVisualInstance; snapshot: RenderVisualInstanceSnapshot;
-    binding: OwnedBinding | undefined; transform: RenderVisualInstanceTransformSnapshot | null; visible: boolean }>();
+  interface Entry {
+    readonly handle: RenderVisualInstance; snapshot: RenderVisualInstanceSnapshot;
+    binding: OwnedBinding | undefined; transform: RenderVisualInstanceTransformSnapshot | null;
+    visible: boolean; ordering: RenderVisualInstanceOrder;
+  }
+  const instances = new Map<string, Entry>();
+  let layers = new Map<string, RenderVisualLayerSnapshot>([['default', Object.freeze({
+    layerKey: 'default', priority: 0, visible: true, insertionOrdinal: 0,
+  })]]);
+  let nextLayerOrdinal = 1;
+  let revision = {};
   const issued = new WeakSet<RenderVisualInstance>();
   let nextOrdinal = 0;
   const requireActive = (): void => {
@@ -387,24 +521,43 @@ function createScope(sessionId: symbol) {
     return entry;
   };
 
+  const compare = (a: number, b: number): number => a === b ? 0 : a < b ? -1 : 1;
+  const compareLayers = (a: RenderVisualLayerSnapshot, b: RenderVisualLayerSnapshot): number =>
+    compare(a.priority, b.priority) || compare(a.insertionOrdinal, b.insertionOrdinal);
+  const ordered = (entries: readonly Entry[] = [...instances.values()], definitions = layers): Entry[] =>
+    [...entries].sort((a, b) => compareLayers(definitions.get(a.ordering.layerKey)!, definitions.get(b.ordering.layerKey)!)
+      || compare(a.ordering.order, b.ordering.order) || compare(a.handle.insertionOrdinal, b.handle.insertionOrdinal));
+  const syncOrdering = (entries: readonly Entry[] = [...instances.values()], definitions = layers): Entry[] => {
+    const sorted = ordered(entries, definitions);
+    writeOrdering!(sorted.map((entry, renderOrder) => ({ instance: entry.handle, renderOrder,
+      visible: entry.visible && definitions.get(entry.ordering.layerKey)!.visible })));
+    requireActive(); // Native failure/loss is terminal, never an accepted logical edit.
+    return sorted;
+  };
+  const unchanged = (before: object): void => {
+    requireActive();
+    if (before !== revision) throw new LayerError('ORDERING_CHANGED');
+  };
+
   const readVisibility = (instance: RenderVisualInstance): RenderVisualInstanceVisibilitySnapshot => {
     const entry = requireEntry(instance);
     const viewportSuspended = readSuspended!();
     requireEntry(instance);
     return Object.freeze({ visible: entry.visible, viewportSuspended,
-      effectiveVisible: entry.visible && !viewportSuspended });
+      effectiveVisible: entry.visible && layers.get(entry.ordering.layerKey)!.visible && !viewportSuspended });
   };
   const releaseEntry = (entry: { readonly handle: RenderVisualInstance; binding: OwnedBinding | undefined;
     transform: RenderVisualInstanceTransformSnapshot | null; visible: boolean }): void => {
     const binding = entry.binding, transformed = entry.transform !== null;
     entry.binding = undefined; entry.transform = null;
     // Attempt resource cleanup even if native node removal fails.
-    try { if (transformed) writeTransform?.(entry.handle, null, entry.visible); }
+    try { if (transformed) writeTransform?.(entry.handle, null, entry.visible, 0); }
     finally { binding?.release(); }
   };
   const drain = (): void => {
     const previous = [...instances.values()];
     instances.clear();
+    revision = {};
     let failure: { error: unknown } | undefined;
     for (const entry of previous) {
       try { releaseEntry(entry); } catch (error) { failure ??= { error }; }
@@ -418,7 +571,9 @@ function createScope(sessionId: symbol) {
     const release = detach;
     detach = undefined; // Terminal before unlinking; no retained session/subscription.
     try { drain(); } finally {
-      writeTransform = undefined; writeVisibility = undefined; readSuspended = undefined; release?.();
+      layers.clear();
+      writeTransform = undefined; writeVisibility = undefined; writeOrdering = undefined;
+      readSuspended = undefined; release?.();
     }
     return snapshot;
   };
@@ -432,18 +587,78 @@ function createScope(sessionId: symbol) {
     dispose: (): RenderVisualSceneDisposal => end('scene-disposed'),
   });
   memberships.set(handle, {
+    addLayer: (input) => {
+      requireActive();
+      const before = revision, captured = captureLayer(input);
+      unchanged(before);
+      if (layers.has(captured.layerKey)) throw new LayerError('DUPLICATE_LAYER');
+      if (!Number.isSafeInteger(nextLayerOrdinal)) throw new RangeError('Visual layer insertion ordinal exhausted');
+      const result = Object.freeze({ ...captured, insertionOrdinal: nextLayerOrdinal++ });
+      layers.set(result.layerKey, result); revision = {};
+      return result;
+    },
+    updateLayer: (input) => {
+      requireActive();
+      const before = revision, captured = captureLayer(input);
+      unchanged(before);
+      const previous = layers.get(captured.layerKey);
+      if (previous === undefined) throw new LayerError('MISSING_LAYER');
+      if (previous.priority === captured.priority && previous.visible === captured.visible) return previous;
+      const result = Object.freeze({ ...captured, insertionOrdinal: previous.insertionOrdinal });
+      const candidate = new Map(layers); candidate.set(result.layerKey, result);
+      syncOrdering([...instances.values()], candidate);
+      unchanged(before);
+      layers = candidate; revision = {};
+      return result;
+    },
+    getLayer: (key) => { requireActive(); return layers.get(layerKey(key)); },
+    listLayers: () => { requireActive(); return Object.freeze([...layers.values()].sort(compareLayers)); },
+    removeLayer: (key) => {
+      requireActive();
+      const captured = layerKey(key);
+      if (!layers.has(captured)) throw new LayerError('MISSING_LAYER');
+      if (captured === 'default') throw new LayerError('RESERVED_LAYER');
+      if ([...instances.values()].some(entry => entry.ordering.layerKey === captured)) throw new LayerError('LAYER_IN_USE');
+      layers.delete(captured); revision = {};
+    },
+    readOrder: (instance) => requireEntry(instance).ordering,
+    order: (instance, input) => {
+      const entry = requireEntry(instance), before = revision;
+      const candidate = captureOrder(input);
+      requireEntry(instance); unchanged(before);
+      if (!layers.has(candidate.layerKey)) throw new LayerError('MISSING_LAYER');
+      if (entry.ordering.layerKey === candidate.layerKey && entry.ordering.order === candidate.order) return entry.ordering;
+      syncOrdering([...instances.values()].map(current => current === entry ? { ...entry, ordering: candidate } : current));
+      requireEntry(instance); unchanged(before);
+      entry.ordering = candidate; revision = {};
+      return candidate;
+    },
+    candidates: () => {
+      requireActive();
+      const suspended = readSuspended!(); requireActive();
+      return Object.freeze((suspended ? [] : ordered()).filter(entry => entry.visible && layers.get(entry.ordering.layerKey)!.visible)
+        .map(entry => {
+          const layer = layers.get(entry.ordering.layerKey)!;
+          return Object.freeze({ instance: entry.handle, ...entry.ordering, layerPriority: layer.priority,
+            layerInsertionOrdinal: layer.insertionOrdinal, insertionOrdinal: entry.handle.insertionOrdinal });
+        }));
+    },
     add: (input): RenderVisualInstance => {
       requireActive();
+      const before = revision;
       const captured = captureInstance(input);
       // Reflection on untrusted input may reenter/dispose; recheck before mutation.
-      requireActive();
+      unchanged(before);
       if (instances.has(captured.visualInstanceId)) throw new InstanceError('DUPLICATE_ID');
+      if (!layers.has(captured.ordering.layerKey)) throw new LayerError('MISSING_LAYER');
       if (!Number.isSafeInteger(nextOrdinal)) throw new RangeError('Visual instance insertion ordinal exhausted');
-      const observation: RenderVisualInstanceSnapshot = Object.freeze({ ...captured, sceneId: id, sessionId,
+      const observation: RenderVisualInstanceSnapshot = Object.freeze({ visualInstanceId: captured.visualInstanceId,
+        correlation: captured.correlation, sceneId: id, sessionId,
         insertionOrdinal: nextOrdinal });
       const instance = Object.freeze({ ...observation }) as RenderVisualInstance;
       instances.set(instance.visualInstanceId, { handle: instance, snapshot: observation,
-        binding: undefined, transform: null, visible: true });
+        binding: undefined, transform: null, visible: true, ordering: captured.ordering });
+      revision = {};
       issued.add(instance);
       nextOrdinal += 1;
       return instance;
@@ -462,6 +677,7 @@ function createScope(sessionId: symbol) {
       const entry = instances.get(instance.visualInstanceId);
       if (entry?.handle !== instance) return false;
       instances.delete(instance.visualInstanceId);
+      revision = {};
       releaseEntry(entry);
       return true;
     },
@@ -471,21 +687,27 @@ function createScope(sessionId: symbol) {
       const entry = requireEntry(instance);
       if (typeof visible !== 'boolean') throw new InstanceError('INVALID_DESCRIPTOR');
       if (entry.visible === visible) return readVisibility(instance);
-      writeVisibility!(instance, visible);
+      writeVisibility!(instance, visible && layers.get(entry.ordering.layerKey)!.visible);
       requireEntry(instance); // Native loss/failure must not publish a successful flag.
       entry.visible = visible;
+      revision = {};
       return readVisibility(instance);
     },
     readTransform: (instance) => requireEntry(instance).transform,
     transform: (instance, input) => {
-      const entry = requireEntry(instance), before = entry.transform, beforeState = entry.snapshot,
+      const entry = requireEntry(instance), beforeRevision = revision, before = entry.transform, beforeState = entry.snapshot,
         beforeBinding = entry.binding, beforeVisible = entry.visible;
       const candidate = input === null ? null : captureVisualInstanceTransform(input);
       const current = requireEntry(instance);
+      if (revision !== beforeRevision) throw new InstanceError('INSTANCE_CHANGED');
       if (current !== entry || current.transform !== before || current.snapshot !== beforeState
         || current.binding !== beforeBinding || current.visible !== beforeVisible) throw new InstanceError('INSTANCE_CHANGED');
       if (candidate === null && before === null) return null;
-      writeTransform!(instance, candidate?.localToClip ?? null, entry.visible);
+      // Recompute all native ranks before placement: intervening metadata-only
+      // adds/removals need no node writes, and cannot make ranks collide here.
+      const rank = candidate === null ? 0 : syncOrdering().findIndex(value => value === entry);
+      writeTransform!(instance, candidate?.localToClip ?? null,
+        entry.visible && layers.get(entry.ordering.layerKey)!.visible, rank);
       requireEntry(instance); // Native loss/failure must not publish a successful transform.
       entry.transform = candidate;
       return candidate;
@@ -528,10 +750,11 @@ function createScope(sessionId: symbol) {
     },
   });
   return { handle, end, attach: (callback: () => void, factory: (input: RenderVisualResourceBindingInput) => OwnedBinding,
-    transformWriter: (instance: object, matrix: AffineTransform2D | null, visible: boolean) => void,
-    visibilityWriter: (instance: object, visible: boolean) => void, suspensionReader: () => boolean): void => {
+    transformWriter: (instance: object, matrix: AffineTransform2D | null, visible: boolean, renderOrder: number) => void,
+    visibilityWriter: (instance: object, visible: boolean) => void,
+    orderingWriter: (writes: readonly VisualPresentationWrite[]) => void, suspensionReader: () => boolean): void => {
     detach = callback; prepare = factory; writeTransform = transformWriter;
-    writeVisibility = visibilityWriter; readSuspended = suspensionReader;
+    writeVisibility = visibilityWriter; writeOrdering = orderingWriter; readSuspended = suspensionReader;
   } };
 }
 
@@ -557,8 +780,9 @@ export function createRenderVisualScene(session: RenderFrameSession): RenderVisu
     occupiedSessions.delete(session);
     unsubscribe();
   }, input => prepareBinding(session, input),
-  (instance, matrix, visible) => writeVisualTransform(session, instance, matrix, visible),
+  (instance, matrix, visible, renderOrder) => writeVisualTransform(session, instance, matrix, visible, renderOrder),
   (instance, visible) => writeVisualVisibility(session, instance, visible),
+  writes => writeVisualOrdering(session, writes),
   () => readVisualViewportSuspension(session));
   occupiedSessions.add(session);
   return scope.handle;

@@ -1,5 +1,12 @@
 # Ownership decisions — do not classify by similar names
 
+v0.8.7 SR09/SR10: Runtime Render owns live scene-local presentation layer
+definitions, instance assignments, comparator and native participation/ranks.
+Editor authored layer refs/classification stay Editor-owned; no mapping policy
+is imposed here. Phase 6 retains session/frame/suspension; Phase 7 retains resource
+lifetime. Editor/Client are compatibility builds only. No Engine/Server/L1/L2
+or dependency-direction changes. See [checkpoint](checkpoints/scene-rendering-v0.8.7.md).
+
 v0.8.6 SR08: Runtime Render owns transient instance visibility, private node gate
 and demand. Phase 6 retains viewport suspension and host-driven scheduling;
 Phase 7 retains valid resource rights while hidden. Editor/Client are public
