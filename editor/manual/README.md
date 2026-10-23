@@ -454,3 +454,9 @@ A starts at 800×450 and toggles to 600×400; each host offers explicit ratio1/2
 browser DPR. Last accepted resize receipt remains visible beside current metrics.
 See the [manual procedure/evidence matrix](../../harness/checkpoints/render-viewport-v0.6.13.md).
 Browser execution unavailable here; FEATURE_NOT_VERIFIED / VISUAL_NOT_VERIFIED.
+
+## PNG decoding — v0.7.3
+
+See [optional PNG consumer](png-image.md) for an original 2x2 PNG, browser
+decode/cleanup procedure and finite headless admission-only trace. No GPU display,
+automated tests or headless decoder is provided.
