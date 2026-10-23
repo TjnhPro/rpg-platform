@@ -50,6 +50,15 @@ export {
 export { createPlanarTransform2D, type PlanarTransform2D } from './planar-transform.js';
 export { prepareVisualResource, type VisualResourceDescriptor, type VisualResourcePreparation } from './visual-resource.js';
 export {
+  uploadPngTexture,
+  getRenderTextureSnapshot,
+  getRenderTextureFailure,
+  type RenderTexture,
+  type RenderTextureSnapshot,
+  type RenderTextureOptions,
+  type RenderTextureFailure,
+} from './render-texture.js';
+export {
   createPngImageDecode,
   type PngDecodeLimits,
   type PngDecodeFailure,

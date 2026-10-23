@@ -9,6 +9,8 @@ import { FrameError, getRenderFrameFailure, type RenderFrameFailure } from './fr
 import type { ThreeFrameBackend } from './three-frame.js';
 import { readBrowserCanvas } from './canvas-target.js';
 import { planRenderViewportSize, type RenderViewportMetrics, type RenderViewportSizeLimits } from './viewport-size.js';
+import { readDecodedPng } from './png-bitmap.js';
+import { registerTextureSession, TextureError, getRenderTextureFailure } from './render-texture.js';
 
 export { getRenderFrameFailure, type RenderFrameFailure } from './frame-failure.js';
 
@@ -302,7 +304,7 @@ async function acquireRenderFrameSession(
       // Native loss is asynchronous: publish its diagnostic, never throw from
       // the browser event. Cleanup failure is retained in the same observation.
       failGraphics(new FrameError('CONTEXT_LOST', 'renderFrame'));
-    });
+    }, (error) => { failGraphics(error); });
     captureViewport(sessionId, backend.viewportSize);
   } catch (error) {
     lifecycle.dispose();
@@ -396,6 +398,31 @@ async function acquireRenderFrameSession(
         frameInProgress = false;
       }
     },
+  });
+  registerTextureSession(session, sessionId, (image, options) => {
+    const owned = backend;
+    if (owned === undefined) throw new TextureError('SESSION_UNAVAILABLE');
+    // Admission errors do not destroy another resource or a valid graphics session.
+    const bitmap = readDecodedPng(image);
+    if (bitmap === undefined) throw new TextureError('IMAGE_NOT_DECODED');
+    if (frameInProgress) throw new FrameError('FRAME_IN_PROGRESS', 'renderFrame');
+    try {
+      const resource = owned.uploadTexture(sessionId, bitmap, options);
+      if (backend !== owned) {
+        resource.release();
+        throw new TextureError('SESSION_UNAVAILABLE');
+      }
+      return resource;
+    } catch (error) {
+      // A dimension admission rejection is before allocation/mutation.
+      if (getRenderTextureFailure(error)?.code === 'TEXTURE_LIMIT_EXCEEDED') throw error;
+      if (backend === owned) {
+        // Keep Phase6's recognized native-loss diagnostic without expanding its union.
+        failGraphics(getRenderTextureFailure(error)?.code === 'CONTEXT_LOST'
+          ? new FrameError('CONTEXT_LOST', 'renderFrame') : error);
+      }
+      throw error;
+    }
   });
   frameInvalidations.set(session, {
     read: readInvalidation,

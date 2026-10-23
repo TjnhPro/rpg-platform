@@ -2,6 +2,8 @@ import { Camera, REVISION, Scene, WebGLRenderer } from 'three';
 import { FrameError, getRenderFrameFailure } from './frame-failure.js';
 import { readBrowserCanvas } from './canvas-target.js';
 import type { RenderViewportSizePlan } from './viewport-size.js';
+import { createTextureLifetime } from './texture-lifetime.js';
+import { TextureError, type RenderTexture, type RenderTextureOptions } from './render-texture.js';
 
 /** Private browser backend; never exposed through public declarations. */
 export interface ThreeFrameBackend {
@@ -12,10 +14,13 @@ export interface ThreeFrameBackend {
     readonly changed: boolean;
   };
   readonly renderFrame: () => void;
+  readonly uploadTexture: (sessionId: symbol, bitmap: ImageBitmap, options: RenderTextureOptions) => RenderTexture;
   readonly dispose: () => void;
 }
 
-export function createThreeFrameBackend(input: object, onContextLost: () => void): ThreeFrameBackend {
+export function createThreeFrameBackend(
+  input: object, onContextLost: () => void, onResourceFailure: (error: unknown) => void,
+): ThreeFrameBackend {
   const supported = readBrowserCanvas(input);
   if (supported === undefined || supported.width <= 0 || supported.height <= 0) {
     throw new FrameError('UNSUPPORTED_TARGET', 'acquire');
@@ -35,6 +40,8 @@ export function createThreeFrameBackend(input: object, onContextLost: () => void
   let viewportSize: ThreeFrameBackend['viewportSize'];
   let contextLost = false;
   let released = false;
+  const textures = new Set<ReturnType<typeof createTextureLifetime>>();
+  let textureCleanupFailed = false;
   const handleContextLost = (): void => {
     // Synthetic browser events alone are not evidence of actual context loss.
     if (released || contextLost || !context.isContextLost()) return;
@@ -49,7 +56,12 @@ export function createThreeFrameBackend(input: object, onContextLost: () => void
     renderer = undefined;
     scene = undefined;
     camera = undefined;
-    let failed = false;
+    let failed = textureCleanupFailed;
+    // Invalidate every resource before releasing the renderer; never close CPU images.
+    for (const texture of [...textures]) {
+      try { texture.invalidate(); } catch { failed = true; }
+    }
+    textures.clear();
     try { target.removeEventListener('webglcontextlost', handleContextLost); } catch { failed = true; }
     try { ownedScene?.clear(); } catch { failed = true; }
     try { ownedRenderer?.dispose(); } catch { failed = true; }
@@ -94,6 +106,83 @@ export function createThreeFrameBackend(input: object, onContextLost: () => void
 
   return Object.freeze({
     get viewportSize() { return viewportSize; },
+    uploadTexture: (sessionId: symbol, bitmap: ImageBitmap, options: RenderTextureOptions): RenderTexture => {
+      if (contextLost || context.isContextLost()) throw new TextureError('CONTEXT_LOST');
+      if (released || renderer === undefined) throw new TextureError('SESSION_UNAVAILABLE');
+      const ownedRenderer = renderer;
+      const { width, height } = bitmap;
+      const maxSize: unknown = context.getParameter(context.MAX_TEXTURE_SIZE);
+      if (typeof maxSize !== 'number' || !Number.isSafeInteger(maxSize) || maxSize <= 0) {
+        throw new TextureError('UPLOAD_FAILED');
+      }
+      if (!Number.isSafeInteger(width) || !Number.isSafeInteger(height) || width < 1 || height < 1
+        || width > maxSize || height > maxSize) throw new TextureError('TEXTURE_LIMIT_EXCEEDED');
+      // Never drain and hide an existing GL error before claiming our upload succeeded.
+      if (context.getError() !== context.NO_ERROR) throw new TextureError('GL_STATE_ERROR');
+      let native: WebGLTexture | null = null;
+      const destroy = (texture: WebGLTexture): void => {
+        try {
+          context.deleteTexture(texture);
+          const error = context.getError();
+          if (!context.isContextLost() && error !== context.NO_ERROR) throw new TextureError('CLEANUP_FAILED', true);
+        } catch (error) {
+          textureCleanupFailed = true;
+          throw error;
+        }
+      };
+      try {
+        // Public Three resetState synchronizes its state cache around private native work.
+        // Direct upload avoids Three r186's catch-and-log texImage2D wrapper.
+        ownedRenderer.resetState();
+        context.bindBuffer(context.PIXEL_UNPACK_BUFFER, null);
+        native = context.createTexture();
+        if (native === null) throw new TextureError('UPLOAD_FAILED');
+        context.activeTexture(context.TEXTURE0);
+        context.bindTexture(context.TEXTURE_2D, native);
+        const sampling = options.sampling === 'nearest' ? context.NEAREST : context.LINEAR;
+        context.texParameteri(context.TEXTURE_2D, context.TEXTURE_MIN_FILTER, sampling);
+        context.texParameteri(context.TEXTURE_2D, context.TEXTURE_MAG_FILTER, sampling);
+        context.texParameteri(context.TEXTURE_2D, context.TEXTURE_WRAP_S, context.CLAMP_TO_EDGE);
+        context.texParameteri(context.TEXTURE_2D, context.TEXTURE_WRAP_T, context.CLAMP_TO_EDGE);
+        context.texParameteri(context.TEXTURE_2D, context.TEXTURE_BASE_LEVEL, 0);
+        context.texParameteri(context.TEXTURE_2D, context.TEXTURE_MAX_LEVEL, 0);
+        context.pixelStorei(context.UNPACK_ALIGNMENT, 1);
+        context.pixelStorei(context.UNPACK_FLIP_Y_WEBGL, false);
+        context.pixelStorei(context.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+        context.pixelStorei(context.UNPACK_COLORSPACE_CONVERSION_WEBGL, context.NONE);
+        context.texImage2D(context.TEXTURE_2D, 0,
+          options.colorSpace === 'srgb' ? context.SRGB8_ALPHA8 : context.RGBA8,
+          context.RGBA, context.UNSIGNED_BYTE, bitmap);
+        const exists = context.isTexture(native);
+        context.bindTexture(context.TEXTURE_2D, null);
+        ownedRenderer.resetState();
+        ownedRenderer.setViewport(0, 0, viewportSize.width, viewportSize.height);
+        ownedRenderer.setClearColor(0x147da8, 1);
+        const glError = context.getError();
+        if (contextLost || context.isContextLost() || released || renderer !== ownedRenderer) {
+          throw new TextureError('CONTEXT_LOST');
+        }
+        if (!exists || glError !== context.NO_ERROR) throw new TextureError('UPLOAD_FAILED');
+        const uploaded = native;
+        const resource = createTextureLifetime(sessionId, width, height, options, () => {
+          textures.delete(resource);
+          try { destroy(uploaded); }
+          catch (error) {
+            // Unknown errors remain original. Existing session cleanup records uncertainty.
+            if (!released) onResourceFailure(error);
+            throw error;
+          }
+        }, handleContextLost);
+        textures.add(resource);
+        native = null; // Ownership moved into the resource; no ImageBitmap reference retained.
+        return resource.handle;
+      } catch (error) {
+        if (native !== null) {
+          try { destroy(native); } catch { /* sticky cleanup failure quarantines the session */ }
+        }
+        throw error;
+      }
+    },
     validateResize: (plan: RenderViewportSizePlan): void => {
       if (contextLost || context.isContextLost()) throw new FrameError('CONTEXT_LOST', 'resize');
       if (released || renderer === undefined) throw new FrameError('RESIZE_FAILED', 'resize');

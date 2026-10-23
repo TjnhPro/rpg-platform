@@ -460,3 +460,10 @@ Browser execution unavailable here; FEATURE_NOT_VERIFIED / VISUAL_NOT_VERIFIED.
 See [optional PNG consumer](png-image.md) for an original 2x2 PNG, browser
 decode/cleanup procedure and finite headless admission-only trace. No GPU display,
 automated tests or headless decoder is provided.
+
+## Texture upload — v0.7.4
+
+See [optional texture consumer](texture-upload.md) for bounded PNG acquisition,
+two real graphics sessions, opaque upload handles, independent CPU release,
+cross-session rejection, terminal cleanup and explicit reacquisition. This
+consumer submits no frames and has not been run in a browser here.

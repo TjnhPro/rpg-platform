@@ -1,4 +1,5 @@
 import type { VisualSourceLoad } from './visual-source-load.js';
+import { registerDecodedPng } from './png-bitmap.js';
 
 /** Required admission budgets; hard ceilings: 16 MiB, 8192/axis, 16M pixels. */
 export interface PngDecodeLimits {
@@ -118,7 +119,7 @@ function createDecode(source: VisualSourceLoad | undefined, limits: PngDecodeLim
     try { bitmap.close(); cleanup = 'closed'; }
     catch (error) { cleanup = 'close-failed'; throw error; }
   };
-  return Object.freeze({
+  const handle: PngImageDecode = Object.freeze({
     getSnapshot: () => snapshot,
     start: (): Promise<PngImageObservation> => {
       if (released()) return Promise.resolve(snapshot);
@@ -176,4 +177,6 @@ function createDecode(source: VisualSourceLoad | undefined, limits: PngDecodeLim
       return snapshot;
     },
   });
+  registerDecodedPng(handle, () => snapshot.state === 'decoded' ? owned : undefined);
+  return handle;
 }

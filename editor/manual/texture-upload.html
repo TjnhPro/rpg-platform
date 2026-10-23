@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Context-bound texture upload — manual consumer</title>
+<script type="importmap">
+{"imports":{"@rpg-platform/runtime-render":"/runtime-render/dist/index.js","three":"/node_modules/three/build/three.module.js"}}
+</script>
+<h1>Context-bound texture upload</h1>
+<p>Read-only 2 × 2 PNG sample. Inspect upload/lifetime trace; no sprite or frame is drawn.</p>
+<button id="run">Run finite upload / cleanup</button>
+<canvas id="a" width="64" height="64"></canvas><canvas id="b" width="64" height="64"></canvas>
+<pre id="output"></pre>
+<script type="module">
+import { inspectTextureUpload } from '/.artifacts/texture-manual/texture-upload.mjs';
+const button = document.querySelector('#run');
+const output = document.querySelector('#output');
+const log = (label, value) => {
+  output.textContent += label + '\n' + JSON.stringify(value, (key, item) =>
+    typeof item === 'symbol' ? String(item) : item instanceof Error ? { name: item.name, message: item.message } : item, 2) + '\n';
+};
+button.onclick = async () => {
+  button.disabled = true;
+  output.textContent = '';
+  try {
+    // Host authorizes this one fixed same-origin URL. Bounded stream, no arbitrary locator IO.
+    const response = await fetch('./png-sample/rgba-2x2.png', { cache: 'no-store' });
+    if (!response.ok || !response.body) throw new Error('Sample read unavailable');
+    const reader = response.body.getReader();
+    const buffer = new Uint8Array(4096);
+    let length = 0;
+    try {
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        if (length + value.length > buffer.length) throw new Error('Sample exceeds 4096-byte host budget');
+        buffer.set(value, length);
+        length += value.length;
+      }
+    } finally { try { await reader.cancel(); } finally { reader.releaseLock(); } }
+    const bytes = buffer.slice(0, length);
+    const digest = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)),
+      byte => byte.toString(16).padStart(2, '0')).join('');
+    log('sample provenance', { length, sha256: digest, expectedDimensions: '2x2; see png-sample/README.md' });
+    await inspectTextureUpload(document.querySelector('#a'), document.querySelector('#b'), bytes, digest, log);
+  } catch (error) { log('unexpected error', error); }
+  finally { button.disabled = false; }
+};
+</script>
+</html>
