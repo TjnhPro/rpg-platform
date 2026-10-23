@@ -1,6 +1,131 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase6 v0.6.14 RV19: [full-phase integration audit](checkpoints/render-viewport-v0.6.14.md)
+records all fifteen checkpoints and Phase1/public-root comparison. No API change
+at closure. Post-review: RV19-COMPAT is ACCEPTED_CONSUMER_MIGRATION, an intentional
+public diagnostic contract expansion, not universal source compatibility. Consumers
+using closed unions/exhaustive checks must handle the five added codes and resize
+stage. Unknown backend exceptions can propagate unchanged; classifiers may return
+undefined, which means unknown rather than success. No rollback/shim is required.
+RV19-BROWSER remains VERIFICATION_PENDING: browser MVP is NOT_OBSERVED, not a
+confirmed production defect. READY_FOR_DEVELOPER_REVIEW does not mean MVP_PASS
+or approval to merge with deferred runtime verification.
+
+Phase6 v0.6.13 RV18: [two-host MVP](checkpoints/render-viewport-v0.6.13.md)
+composes existing manual browser entries in one realm with one Render root URL.
+No public API/schema/dependency change. Explicit demo ratio selection and retained
+resize receipts are host-local; requested/effective/native sizes remain distinct.
+Browser evidence is blocked, not inferred from build/receipt or source inspection.
+
+Phase6 v0.6.12 RV17: [Client viewport integration](checkpoints/render-viewport-v0.6.12.md)
+uses the same existing Render root as Editor, with Client-owned continuous browser
+requests and measured CSS/DPR resize/resume. Public exports/signatures, package
+dependencies and authored Scene/Document contracts are unchanged. Browser entry
+is separate from the import-safe Client root; no Editor runtime dependency.
+
+Phase6 v0.6.11 RV16: [Editor viewport host](checkpoints/render-viewport-v0.6.11.md)
+integrates existing Render public graphics/viewport/demand APIs in an internal
+browser module, consumed by Editor's manual host. Root contracts remain
+Editor134/Render70/Client0; binding-only PreviewHost mounted is unchanged. Browser
+metrics/callbacks/visibility/teardown stay Editor-local, outside authored Documents.
+
+Phase6 v0.6.10 RV15/RV11: [diagnostics/cleanup](checkpoints/render-viewport-v0.6.10.md)
+adds optional terminal RenderGraphicsSnapshot.cleanupFailed; canonical observations
+always populate it, even when the original exception remains unknown and failure
+is null. Absence is unknown; false is not GPU-memory evidence. Existing classifiers,
+symbols and signatures remain; recognized acquisition codes survive backend cleanup.
+Terminal cleanup/quarantine is Render-owned; host recovery is explicit. Render70.
+
+Phase6 v0.6.9 RV13/RV14: [frame demand](checkpoints/render-viewport-v0.6.9.md)
+adds invalidateRenderFrame/getRenderFrameInvalidationSnapshot and portable
+RenderFrameInvalidationSnapshot (Render70). Initial/accepted resize/resume demand
+is pending; only successful submission acknowledges the captured invalidation.
+Demand is not graphics readiness, a scheduled request, Document dirty or display.
+Render owns no clock/callback/loop. Editor on-demand and Client continuous manual
+hosts own browser callback coalescing, cancellation and explicit visibility resume.
+
+Phase6 v0.6.8 RV12: [explicit frame requests](checkpoints/render-viewport-v0.6.8.md)
+keeps renderFrame():RenderFrameReceipt. Optional receipt.viewport preserves old
+structural producers; canonical sessions always attach the active frozen viewport
+used for submission. No new root export/renderer/receipt variant. FRAME_IN_PROGRESS
+rejects nested requests; FRAME_NOT_SUBMITTED reports no backend counter increment
+without claiming submission. No queue/loop/update tick or display/GPU completion
+proof. Existing nonterminal suspension and terminal loss/disposal remain distinct.
+
+Phase6 v0.6.7 RV09–RV11: [region/suspension](checkpoints/render-viewport-v0.6.7.md)
+adds suspendRenderViewport/resumeRenderViewport (Render67). Full-canvas scope
+means native buffer bounds(0,0,width,height); subregions are documentation-only.
+Suspended is now produced by an explicit host operation, retaining positive extent,
+ready graphics and reservation. Frame rejects VIEWPORT_SUSPENDED/renderFrame without
+cleanup/submission. Resume applies fresh positive RV08 metrics on the same session
+before enabling frames. Host-hidden/zero CSS is not native context loss or a zero
+backing buffer. No required session/snapshot shape change or authored-state mutation.
+
+Phase6 v0.6.6 RV08: [explicit resize](checkpoints/render-viewport-v0.6.6.md)
+adds resizeRenderViewport/RenderViewportResizeReceipt (Render65), without new
+required session members. Same canonical renderer/session; RV07 plan then native
+limits, setSize with CSS writes disabled, actual drawing-buffer capture. Rejected
+admission preserves state/reservation; mutation failure terminates via existing
+cleanup/quarantine. Add RESIZE_FAILED and resize stage to graphics diagnostic
+union. No frame, layout measurement, DPR inference or authored-state mutation.
+
+Phase 6 v0.6.5 RV07: [size/pixel validation](checkpoints/render-viewport-v0.6.5.md)
+adds planRenderViewportSize and three portable types (Render63). Host supplies
+positive CSS measurements, ratio and explicit dimension/pixel budgets. Frozen
+validated-not-applied candidate floors once and rejects unsafe/over-budget values;
+planned per-axis ratios are not backend acceptance. No resize/session change,
+clamp, CSS write, native capability query or allocation; actual session snapshots
+retain native configured dimensions. Editor/Client are build-only collaborators.
+
 This describes the *interactions to audit*, not finalized types or APIs. Do not create interfaces just to satisfy this document before a real MVP needs them.
+
+Phase 6 v0.6.4 RV06: [Viewport identity/state](checkpoints/render-viewport-v0.6.4.md)
+adds RenderViewportSnapshot/getRenderViewportSnapshot (Render59). Real canonical
+acquisition/session handles observe one full-canvas viewport with the existing
+session symbol and frozen scalar extent/graphics diagnostics. State derives from
+graphics, not a second lifecycle; no global active viewport. Suspended is a distinct
+contract-only slot, with no suspend/resume operation yet. Drawing-buffer-px is not
+CSS layout or authored placement; pure Phase 4 mapping and Scene/Document state
+remain untouched. Existing interfaces/factory signatures stay unchanged.
+
+Phase 6 v0.6.3 RV05: [Context loss policy](checkpoints/render-viewport-v0.6.3.md)
+adds CONTEXT_LOST to RenderFrameFailure.code (57 root symbols unchanged). Native
+loss events and pre/post-frame checks terminate the same acquired session and
+attempt cleanup; failed snapshot retains the loss diagnostic/cleanupFailed flag.
+Dispose removes Render/Three listeners; no automatic backend restoration. Host
+explicitly requests a new session on a usable unreserved target. Quarantine is
+never force-released. Unknown frame/host exceptions remain unknown and propagate;
+builds and compiled manual procedure do not verify actual GPU loss/restoration.
+
+Phase 6 v0.6.2 RV03/RV04: [Graphics lifecycle](checkpoints/render-viewport-v0.6.2.md)
+adds beginRenderFrameSession, RenderFrameAcquisition and RenderGraphicsSnapshot
+(Render57). An observation handle exposes pending/ready/failed/disposed for the
+same canonical acquisition/session used by the unchanged async factory signature.
+Ready is last acquired state, not live GPU-health or displayed pixels. Failed
+retains safe diagnostics (null if unknown) while Promise rejection is preserved;
+disposed is terminal even if cleanup fails. Binding-only factories/states and
+session required members/error unions are unchanged. Manual consumer is compiled,
+not browser-executed. Supplied RV03/RV04 tasks supersede provisional RV allocation.
+
+Phase 6 v0.6.1 RV02: [Canvas target capabilities](checkpoints/render-viewport-v0.6.1.md)
+adds inspectRenderTarget and RenderTargetCapabilities (Render54). Inspection is a
+frozen target/dimension/reservation observation without context acquisition; graphics
+is always NOT_CHECKED. Private native canvas validation is shared with existing
+graphics acquisition. Binding factories, error unions and exclusive reservation
+ownership remain unchanged. Manual public-root consumer supplied, not browser-verified.
+The supplied RV02 scope supersedes v0.6.0's provisional metrics allocation.
+
+Phase 6 v0.6.0 RV01: [Render Context architecture audit](checkpoints/render-viewport-v0.6.0.md)
+records the merged Phase 1–5 baseline, exact existing Render52 declarations and
+future-consumer matrix. API_DESIGN_ONLY: extend existing RenderFrameSession;
+no new APIs or behavior. Render owns graphics/viewport; Editor/Client own canvas
+UI/layout/measurements/frame requests. Host Canvas, graphics context and viewport
+state are separate; bound, acquisition returned, submitted and displayed are not
+interchangeable. Preserve binding-only hosts, pure Spatial math and authored
+Scene/Document isolation. RV02–RV19/version allocations are provisional until
+their tasks arrive; signatures, resize/ratio/zero-size/suspend/recovery policies
+remain open. Current v0.6.0 authorization supersedes older next-phase stop notes,
+without accepting prior functional/visual behavior. No phase completion implied.
 
 Phase 5 v0.5.13: [Document integration/closure DC19](checkpoints/document-v0.5.13.md)
 is the current Phase 5 inventory and safety disposition: fourteen checkpoints,

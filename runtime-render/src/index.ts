@@ -1,4 +1,10 @@
 export {
+  planRenderViewportSize,
+  type RenderViewportMetrics,
+  type RenderViewportSizeLimits,
+  type RenderViewportSizePlan,
+} from './viewport-size.js';
+export {
   createViewportMapping2D,
   projectPointToViewport2D,
   viewportPointToPlane2D,
@@ -45,6 +51,20 @@ export { createPlanarTransform2D, type PlanarTransform2D } from './planar-transf
 export { prepareVisualResource, type VisualResourceDescriptor, type VisualResourcePreparation } from './visual-resource.js';
 export {
   createRenderFrameSession,
+  beginRenderFrameSession,
+  type RenderFrameAcquisition,
+  type RenderGraphicsSnapshot,
+  getRenderViewportSnapshot,
+  type RenderViewportSnapshot,
+  resizeRenderViewport,
+  type RenderViewportResizeReceipt,
+  suspendRenderViewport,
+  resumeRenderViewport,
+  invalidateRenderFrame,
+  getRenderFrameInvalidationSnapshot,
+  type RenderFrameInvalidationSnapshot,
+  inspectRenderTarget,
+  type RenderTargetCapabilities,
   getRenderFrameFailure,
   type RenderFrameSession,
   type RenderFrameReceipt,

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Two-host viewport MVP — manual</title>
+<style>
+body { font: 16px system-ui; margin: 24px; }
+main { display: flex; flex-wrap: wrap; gap: 24px; align-items: start; }
+section { min-width: 360px; }
+canvas { display: block; border: 0; padding: 0; }
+pre { max-height: 360px; overflow: auto; font-size: 12px; background: #eee; padding: 12px; }
+button, select { margin: 4px 2px; }
+</style>
+<h1>Two hosts · one Render implementation</h1>
+<p>Manual consumer, no assertions or automatic acquisition. Both entries below
+resolve the same Render root URL in this document/realm. Each owns its canvas,
+session and callback policy. Clear frames only; no gameplay or Scene rendering.</p>
+<p>Mount A → Acquire A; Acquire B → Start B. Resize A 800×450 → 600×400,
+then choose requested ratio 2 (B remains 320×180 at its own ratio). Suspend,
+resume or unmount A while watching B. Mount + Acquire explicitly recreates A.
+Receipts and blue pixels are distinct observations. Reload resets this manual page.</p>
+<main>
+<section data-editor-viewport data-mvp aria-label="Editor host A">
+<h2>A · Editor on-demand</h2>
+<canvas width="800" height="450" style="width:800px;height:450px" aria-label="Editor canvas A"></canvas>
+<p><label>A requested pixel ratio <select data-ratio aria-label="A requested pixel ratio">
+<option value="1">1</option><option value="2">2</option><option value="browser">Browser DPR</option>
+</select></label></p>
+<p><button data-control="mount">Mount A</button><button data-control="acquire">Acquire A</button>
+<button data-control="frame">Frame A</button><button data-control="invalidate">Redraw A ×3</button>
+<button data-control="resize">Resize A 800×450 / 600×400</button>
+<button data-control="zero">Zero A width</button><button data-control="stop">Suspend A</button>
+<button data-control="resume">Resume A</button><button data-control="dispose">Unmount A / dispose</button>
+<button data-control="observe">Observe A</button></p>
+<pre data-output aria-live="off">A not mounted.</pre>
+</section>
+<section data-client-viewport aria-label="Client host B">
+<h2>B · Client continuous</h2>
+<canvas width="320" height="180" style="width:320px;height:180px" aria-label="Client canvas B"></canvas>
+<p><label>B requested pixel ratio <select data-ratio aria-label="B requested pixel ratio">
+<option value="1">1</option><option value="2">2</option><option value="browser">Browser DPR</option>
+</select></label></p>
+<p><button data-control="acquire">Acquire B</button><button data-control="start">Start B</button>
+<button data-control="stop">Stop B</button><button data-control="dispose">Dispose B</button>
+<button data-control="observe">Observe B</button><button data-control="resize">Resize B 320 / 480</button>
+<button data-control="zero">Zero B height</button><button data-control="restore">Restore B height</button>
+<button data-control="unmount">Unmount B</button></p>
+<pre data-output aria-live="off">B not acquired.</pre>
+</section>
+</main>
+<p><a href="/runtime-render/manual/graphics-lifecycle.html">Existing graphics failure/disposed-session consumer</a>
+· <a href="/editor/manual/frame-demand.html">Standalone Editor</a>
+· <a href="/game-client/manual/frame-continuous.html">Standalone Client</a></p>
+<script type="importmap">
+{"imports":{"@rpg-platform/runtime-render":"/runtime-render/dist/index.js","three":"/node_modules/three/build/three.module.js"}}
+</script>
+<script type="module" src="/editor/dist/manual-frame-demand.js"></script>
+<script type="module" src="/game-client/dist/manual-frame-continuous.js"></script>
+</html>

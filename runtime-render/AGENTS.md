@@ -4,6 +4,57 @@
 
 Read root agent guidance first.
 
+- [v0.6.10 RV15/RV11](../harness/checkpoints/render-viewport-v0.6.10.md): canonical
+  terminal graphics observations always supply cleanupFailed, independently of a
+  null unknown failure. Optional member preserves structural producers; absence
+  is unknown. Preserve recognized acquisition codes and both branded classifiers.
+  Repeated disposal retains terminal diagnostics/quarantine; never clean another
+  session or host canvas/CSS. False is not GPU-memory reclamation evidence.
+
+- [v0.6.9 RV13/RV14](../harness/checkpoints/render-viewport-v0.6.9.md): Render70 adds
+  per-session invalidation read/mark APIs. Initial demand and accepted resize/resume
+  invalidate; successful frame acknowledges only its captured token. Invalidate
+  never requests/submits/schedules or changes authored content. Demand survives
+  suspension/terminal state; consult viewport separately. Hosts own rAF/visibility/
+  cancellation; no Render clock or loop. Both manual host patterns compiled only.
+
+- [v0.6.8 RV12](../harness/checkpoints/render-viewport-v0.6.8.md): preserve the
+  synchronous renderFrame and submitted-only receipt; add optional viewport for
+  structural compatibility, always populated by canonical sessions. Frozen active
+  full-canvas snapshot is historical submission configuration, never displayed
+  pixels/GPU completion. FRAME_IN_PROGRESS rejects nested calls without queue or
+  cleanup; FRAME_NOT_SUBMITTED distinguishes backend early-return/no counter
+  increment and terminates graphics. Existing suspension/loss/disposal semantics
+  remain. No automatic loop, gameplay/animation update or new root symbol. Manual
+  semantic receipt consumer compiled only, not browser/visual verified.
+
+- [v0.6.7 RV09–RV11](../harness/checkpoints/render-viewport-v0.6.7.md): Render67
+  adds explicit suspendRenderViewport/resumeRenderViewport. Suspended keeps backend,
+  last positive buffer extent and reservation; direct frame rejects nonterminal
+  VIEWPORT_SUSPENDED/renderFrame. Resume requires fresh positive RV08 metrics before
+  enabling frames; resize alone keeps suspension. Host zero CSS/hidden remains UI
+  policy, never an automatic dispose, buffer0 or native-loss signal. Full-canvas
+  bounds only; no scissor/subregion implementation. Two-target manual compiled,
+  not browser/GPU/visual verified. Historical checkpoint notes below retain scope.
+
+- [v0.6.6 RV08](../harness/checkpoints/render-viewport-v0.6.6.md): Render65 adds
+  resizeRenderViewport/RenderViewportResizeReceipt; unchanged session interface.
+  Apply explicit RV07 plan once at Three ratio1 via setSize(...,false), enforce
+  native limits and capture actual extent. Rejected admission preserves state;
+  mutation failure uses terminal cleanup/quarantine. Graphics diagnostic adds
+  RESIZE_FAILED and resize stage. No CSS/global measurement, frame, camera or
+  Scene/Document mutation. Manual demo compiled, not browser/visual verified.
+
+- [v0.6.4 RV06](../harness/checkpoints/render-viewport-v0.6.4.md) adds RenderViewportSnapshot/getRenderViewportSnapshot (59 root symbols). One full-canvas viewport uses the existing session symbol. Immutable observations derive from the canonical graphics lifecycle; private weak handle lookup is not an active viewport manager. Last-configured extent uses drawing-buffer-px, independent of CSS and Phase 4 projection planes. Pending/unavailable/active/terminal are produced; suspended is contract-only until an explicit operation is authorized. No resize, suspend/resume, authored-state persistence or required interface/signature changes. Two-target typed manual consumer is compiled, not browser-verified.
+
+- [v0.6.3 RV05](../harness/checkpoints/render-viewport-v0.6.3.md) adds CONTEXT_LOST to the existing graphics failure code union; 57 exports unchanged. Native loss event/pre/post-frame checks terminate the same session via shared cleanup; remove private listener and dispose Three to prevent internal auto-restoration. Preserve terminal diagnostics and failed-cleanup quarantine. Host alone requests a new session on a usable target; no automatic recovery/upload/retry or forced context loss. Unknown frame and getContext exceptions remain original, with null safe failure observation. Manual DevTools native-extension procedure is unexecuted; build PASS is not context-loss/visual evidence.
+
+- [v0.6.2 RV03/RV04](../harness/checkpoints/render-viewport-v0.6.2.md) adds beginRenderFrameSession/RenderFrameAcquisition/RenderGraphicsSnapshot (57 root symbols). One canonical acquisition backs both entrypoints; observer handle is not a second session and has no render/dispose. Preserve existing async factory signature and binding states. Snapshot ready records acquired state, not continuous GPU health/display. Failed/disposed are terminal observations; repeated dispose preserves failure and existing cleanup/quarantine. Compiled manual browser entry is isolated from root evaluation, not runtime-verified. No resize/suspend/recovery or implicit frame.
+
+- [v0.6.1 RV02](../harness/checkpoints/render-viewport-v0.6.1.md) adds inspectRenderTarget/RenderTargetCapabilities (54 root symbols). Inspect raw target without context acquisition; supported native same-realm canvas dimensions and package-instance reservation are observations, never graphics readiness. Reuse private native brand validation in existing backend. Preserve opaque binding APIs/error unions and existing exclusive WeakSet ownership, including failed-cleanup quarantine. Manual consumer is optional and unverified in browser. RV02 task supersedes v0.6.0 provisional metrics allocation; no resize/pixel-ratio/suspend implementation.
+
+- [v0.6.0 RV01](../harness/checkpoints/render-viewport-v0.6.0.md) audits Render52 and merged Phase 1–5 without source/API changes. Extend existing RenderFrameSession, not a competing graphics lifecycle. Render owns graphics/viewport; host consumers own canvas UI/layout/measurements/frame requests. Preserve bound metadata semantics, submitted-only receipts, terminal cleanup, pure Spatial mappings and authored Document/Scene isolation. Proposed RV02–RV19 allocations and future signatures remain open until their supplied tasks. Phase 6 execution is authorized; this architecture checkpoint is API_DESIGN_ONLY, FEATURE_NOT_VERIFIED and VISUAL_NOT_VERIFIED, not phase acceptance.
+
 - [v0.4.12 SP18](../harness/checkpoints/spatial-contracts-v0.4.12.md) audits the complete Spatial surface without adding API/algorithms. Canonical math stays here; Editor only adapts public inputs. Preserve explicit context, binary64 limits, failure semantics and optional screen mapping. Root remains 52 symbols; no Scene instance/session binding or graphics integration is implied. Stop for Developer review before any separate phase. Earlier notes describe their own revisions.
 
 - [v0.4.8 SP13/SP14](../harness/checkpoints/spatial-contracts-v0.4.8.md) adds explicit viewport/screen mapping (52 root symbols). Viewport local top-left (0,0), right/down, css-px or device-px, positive finite dimensions; source is the declared orthographic plane. Screen needs explicit plane/origin/per-axis scale or remains null. Reuse canonical projection; no implicit DPR/DOM/camera or clipping. Inverse rejects normalized scale ratio <=1e-12/nonfinite reciprocal and checks destination residual <=1e-9*max(1,abs(component)); no universal source accuracy guarantee. TypeError for invalid/mismatched data; RangeError for numerical failures. Prior notes describe their own revisions. Stop before v0.4.9.
@@ -48,3 +99,9 @@ Read root agent guidance first.
 - Do not decide damage, collision authority, loot or session settlement in rendering callbacks.
 - Server may need scene geometry/data, but never require GPU frame rendering to validate game results.
 - No UI tests, screenshots-as-tests, added test suites or fake build scripts by default.
+- [v0.6.5 RV07](../harness/checkpoints/render-viewport-v0.6.5.md): Render63 adds
+  pure planRenderViewportSize and three portable types. Validation-only candidate,
+  floor once with explicit host CSS/ratio/dimension/pixel budgets; reject rather
+  than clamp. No resize, CSS/global measurement, GPU capability/memory guarantee,
+  suspension or change to actual session snapshots. Host must not apply candidate
+  pixels directly to a live canvas. Future application remains Render-owned.

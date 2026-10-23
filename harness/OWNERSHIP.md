@@ -1,9 +1,68 @@
 # Ownership decisions — do not classify by similar names
 
+v0.6.14 RV19: Runtime Render remains the canonical context/viewport/frame owner;
+Editor/Client are host consumers. Closure is Harness documentation only, with no
+source/dependency/owner changes. [Review packet](checkpoints/render-viewport-v0.6.14.md)
+records post-review RV19-COMPAT as ACCEPTED_CONSUMER_MIGRATION and RV19-BROWSER as
+VERIFICATION_PENDING, not a confirmed production defect. No renderer rewrite or
+ownership change is warranted by either finding. Developer alone accepts Phase6;
+no runtime deferral exception, merge or next phase is authorized by this update.
+
+v0.6.13 RV18: Runtime Render owns the canonical two-session graphics contract;
+no backend/public changes needed. Editor owns a manual-only composition page;
+Editor/Client scope their existing browser entries and choose explicit demo ratios.
+No Render-to-host production import or Editor-to-Client package dependency.
+Browser proof blocked by unavailable browser; see [matrix](checkpoints/render-viewport-v0.6.13.md).
+
+v0.6.12 RV17: Client owns its independent browser viewport host, CSS/DPR metrics,
+continuous callbacks, explicit start/stop and observer/listener teardown. Existing
+Render root APIs suffice; no Editor dependency or Render/source ownership change.
+See [checkpoint](checkpoints/render-viewport-v0.6.12.md).
+
+v0.6.11 RV16: Editor owns its browser viewport host, canvas/CSS/DPR measurement,
+on-demand callback, observers/listeners and pending-acquisition unmount policy.
+Render owns actual backend/viewport/cleanup; existing root APIs suffice. No Render
+or other project source changes. See [checkpoint](checkpoints/render-viewport-v0.6.11.md).
+
+v0.6.10 RV15/RV11: Render owns safe terminal cleanup observations and quarantine,
+including unknown backend failures. Editor/Client read public classifiers/snapshots
+and own only host recovery, callbacks/listeners and canvas UI. No new logger,
+resource manager or ownership direction. See [audit](checkpoints/render-viewport-v0.6.10.md).
+
+v0.6.9 RV13/RV14: Render owns per-session redraw demand/acknowledgement; Editor and
+Client own browser scheduling, visibility and cancellation. Public invalidation
+does not mutate authored state or submit a frame. Two optional manual hosts use
+the same Render implementation. See [checkpoint](checkpoints/render-viewport-v0.6.9.md).
+
+v0.6.8 RV12: Runtime Render owns synchronous frame admission, nested-call rejection,
+backend submission diagnostics and historical viewport receipt on the existing
+session. Editor/Client choose when to call; Engine time/updates are independent.
+See [checkpoint](checkpoints/render-viewport-v0.6.8.md). Owner graph unchanged.
+
+v0.6.7 RV09–RV11: Runtime Render owns full-buffer region and explicit suspension/
+resume admission on canonical sessions. Editor/Client own hidden/zero-layout/frame
+policy and call Render; no global visibility bus or document mutation. See
+[checkpoint](checkpoints/render-viewport-v0.6.7.md). Existing owner graph unchanged.
+
+v0.6.6 RV08: Runtime Render alone applies explicit viewport resize/DPR requests
+on its existing renderer/session. Editor/Client own measurement/layout/frame
+policy, call the public root and do not write a live backing buffer directly.
+See [checkpoint](checkpoints/render-viewport-v0.6.6.md). No other owner changes.
+
+v0.6.5 RV07: Runtime Render owns pure viewport size admission/rounding via its
+public root. Host owns CSS measurement and explicit ratio/budgets; no consumer
+backend math or direct live-buffer resize. Validation candidate is not accepted
+viewport state. See [checkpoint](checkpoints/render-viewport-v0.6.5.md).
+
 This table is for routing an implementation **after inspecting current source**. It is not a universal RPG feature list.
 
 | Change | Primary owner | Allowed collaborator / note |
 | --- | --- | --- |
+| Session-bound full-canvas viewport identity and immutable observation | **Runtime Render** | [v0.6.4 RV06](checkpoints/render-viewport-v0.6.4.md): one viewport per canonical graphics session, same symbol; host reads through root API, owns canvas layout/visibility, no authored Scene/Document mutation. Suspended contract slot does not implement suspension |
+| Context loss detection, terminal cleanup and recreation admission | **Runtime Render** | [v0.6.3 RV05](checkpoints/render-viewport-v0.6.3.md): native event plus render-operation checks; no backend auto-restoration. Host decides explicit new target/session, owns its own browser listeners and Promise handling; cleanup failure retains quarantine |
+| Observable graphics acquisition/release lifecycle | **Runtime Render** | [v0.6.2 RV03/RV04](checkpoints/render-viewport-v0.6.2.md): one canonical session/backend; immutable observations via acquisition handle. Host handles Promise/late-result release; binding-only EditorPreviewHost remains unchanged |
+| Browser canvas capability/brand validation and reservation observations | **Runtime Render** | [v0.6.1 RV02](checkpoints/render-viewport-v0.6.1.md): native same-realm target inspection; no GPU-readiness claim. Host retains canvas/CSS/listeners; acquisition and exclusive reservation remain existing session responsibilities |
+| Graphics context acquisition, effective viewport state/sizing, frame submission and native cleanup | **Runtime Render** | [v0.6.0 RV01](checkpoints/render-viewport-v0.6.0.md), architecture only: extend existing RenderFrameSession. Editor/Client own target UI/layout, measurement and frame requests; Engine time/authority and Editor Scene/Document state remain independent. Future signatures/policies require their supplied checkpoint tasks |
 | Game-specific projectile travel, hit, penetration and lifecycle | Runtime Engine | Render presents output; Editor authors *that game's* config |
 | Skill/monster/player/item RULE definition | Runtime Engine | L1/L2 are external public capabilities, not places to move rules |
 | Animation, VFX, sprite alignment, camera | Runtime Render | Editor controls/inspects via public API |
