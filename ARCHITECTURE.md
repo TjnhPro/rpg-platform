@@ -136,3 +136,11 @@ correspondence origins and ratios. Editor adapts authored coordinate definitions
 without projection formulas. Destination is a declared presentation plane, not
 viewport/screen coordinates or live camera state. No Scene/Asset schema change,
 inverse, perspective/isometric mapping or Phase 9 camera work is introduced.
+
+## Scene Rendering review packet — Phase 8
+
+[v0.8.14 integration audit](runtime-render/docs/scene-rendering-v0.8.14.md) records
+all fifteen checkpoints, SR01–SR21 traceability, public declaration deltas and
+prior-phase lifetime/ownership compatibility. Closure adds documentation only.
+READY_FOR_DEVELOPER_REVIEW; FEATURE_NOT_VERIFIED / VISUAL_NOT_VERIFIED.
+Manual MVP acceptance, merge and release remain Developer decisions.

@@ -11,7 +11,8 @@ import type { ThreeFrameBackend } from './three-frame.js';
 import { readBrowserCanvas } from './canvas-target.js';
 import { planRenderViewportSize, type RenderViewportMetrics, type RenderViewportSizeLimits } from './viewport-size.js';
 import { readDecodedPng } from './png-bitmap.js';
-import { registerTextureSession, endTextureSession, TextureError, getRenderTextureFailure } from './render-texture.js';
+import { registerTextureSession, endTextureSession, requireTextureSession, TextureError, getRenderTextureFailure } from './render-texture.js';
+import { registerVisualTransformSession, type VisualFrameItem } from './visual-transform-backend.js';
 
 export { getRenderFrameFailure, type RenderFrameFailure } from './frame-failure.js';
 
@@ -317,11 +318,13 @@ async function acquireRenderFrameSession(
     throw error;
   }
 
+  let visualFrameSource: (() => readonly VisualFrameItem[]) | undefined;
   const disposeResources = () => {
     viewportControl.suspended = false;
     const owned = backend;
     backend = undefined;
     let cleanupFailed = endTextureSession(session);
+    visualFrameSource = undefined;
     try {
       owned?.dispose();
     } catch {
@@ -370,7 +373,9 @@ async function acquireRenderFrameSession(
     try {
       const owned = backend;
       if (owned === undefined) throw new FrameError('FRAME_FAILED', 'renderFrame');
-      owned.renderFrame(demo);
+      const items = visualFrameSource?.() ?? [];
+      if (backend !== owned) throw new FrameError('FRAME_FAILED', 'renderFrame');
+      owned.renderFrame(demo, items);
       // Do not receipt a frame whose session was released during backend work.
       if (backend !== owned) throw new FrameError('FRAME_FAILED', 'renderFrame');
       submittedToken = requestedToken;
@@ -402,6 +407,65 @@ async function acquireRenderFrameSession(
     renderFrame: () => submit(),
   });
   registerVisualResourceDemo(session, submit);
+  registerVisualTransformSession(session, {
+    source: (read) => {
+      if (read !== undefined) {
+        lifecycle.getSnapshot();
+        if (frameInProgress) throw new FrameError('FRAME_IN_PROGRESS', 'renderFrame');
+        if (visualFrameSource !== undefined) throw new TypeError('Visual frame source already attached');
+      }
+      visualFrameSource = read; redrawToken = {};
+    },
+    edit: (invalidate, instance) => {
+      if (backend === undefined && invalidate) return; // Terminal listener cleanup, not a public edit.
+      lifecycle.getSnapshot();
+      if (frameInProgress) throw new FrameError('FRAME_IN_PROGRESS', 'renderFrame');
+      if (instance !== undefined) {
+        const owned = backend;
+        if (owned === undefined) throw new FrameError('FRAME_FAILED', 'renderFrame');
+        try { owned.clearVisualDrawable(instance); }
+        catch (error) { throw failGraphics(error); }
+        if (backend !== owned) throw new FrameError('FRAME_FAILED', 'renderFrame');
+      }
+      if (invalidate) redrawToken = {};
+    },
+    transform: (instance, matrix, visible, renderOrder) => {
+    const owned = backend;
+    // Terminal cleanup listeners run after unlinking backend, before backend.dispose.
+    if (matrix === null && owned === undefined) return;
+    lifecycle.getSnapshot();
+    // Removal must always unlink private nodes, including reentrant scope teardown.
+    if (matrix !== null && frameInProgress) throw new FrameError('FRAME_IN_PROGRESS', 'renderFrame');
+    if (owned === undefined) throw new FrameError('FRAME_FAILED', 'renderFrame');
+    try {
+      owned.setVisualTransform(instance, matrix, visible, renderOrder);
+      if (backend !== owned) throw new FrameError('FRAME_FAILED', 'renderFrame');
+      redrawToken = {}; // Reuse demand; never schedule or submit a frame.
+    } catch (error) { throw failGraphics(error); }
+  }, visibility: (instance, visible) => {
+    lifecycle.getSnapshot();
+    if (frameInProgress) throw new FrameError('FRAME_IN_PROGRESS', 'renderFrame');
+    const owned = backend;
+    if (owned === undefined) throw new FrameError('FRAME_FAILED', 'renderFrame');
+    try {
+      owned.setVisualVisibility(instance, visible);
+      if (backend !== owned) throw new FrameError('FRAME_FAILED', 'renderFrame');
+      redrawToken = {};
+    } catch (error) { throw failGraphics(error); }
+  }, ordering: (writes) => {
+    lifecycle.getSnapshot();
+    if (frameInProgress) throw new FrameError('FRAME_IN_PROGRESS', 'renderFrame');
+    const owned = backend;
+    if (owned === undefined) throw new FrameError('FRAME_FAILED', 'renderFrame');
+    try {
+      owned.setVisualOrdering(writes);
+      if (backend !== owned) throw new FrameError('FRAME_FAILED', 'renderFrame');
+      redrawToken = {};
+    } catch (error) { throw failGraphics(error); }
+  }, suspended: () => {
+    requireTextureSession(session);
+    return viewportControl.suspended;
+  } });
   registerTextureSession(session, sessionId, (image, options) => {
     const owned = backend;
     if (owned === undefined) throw new TextureError('SESSION_UNAVAILABLE');

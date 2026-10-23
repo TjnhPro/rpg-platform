@@ -1,0 +1,8 @@
+:format=40300
+:texture=monsters.png
+:size=96x48
+:pivotpoints=enabled
+:borders=disabled
+red;0;0;32;48;0.5;0;0;0;0;0
+green;32;0;32;48;0.5;0;0;0;0;0
+violet;64;0;32;48;0.5;0;0;0;0;0

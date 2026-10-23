@@ -1,4 +1,4 @@
-import { applyPlanarPoint2D, type PlanarPoint2D } from './planar-affine.js';
+import { applyPlanarPoint2D, type PlanarPoint2D, type AffineTransform2D } from './planar-affine.js';
 
 /** Explicit numeric plane context; labels do not perform lookup or unit conversion. */
 export interface ProjectionPlane2D {
@@ -81,6 +81,20 @@ export function createOrthographicPlaneProjection(input: OrthographicPlaneProjec
     destinationUnitsPerSourceUnit: ratios });
 }
 
+/** Owner-local ordered mapping steps shared by point and instance presentation.
+ * Caller has already captured the projection through the canonical factory. */
+export function planeProjectionSteps(projection: OrthographicPlaneProjection): readonly AffineTransform2D[] {
+  const expected = projection.source, destination = projection.destination;
+  const xSign = expected.axes.x === destination.axes.x ? 1 : -1;
+  const ySign = expected.axes.y === destination.axes.y ? 1 : -1;
+  return Object.freeze([
+    Object.freeze({ a: 1, b: 0, c: 0, d: 1, tx: -projection.sourceOrigin.x, ty: -projection.sourceOrigin.y }),
+    Object.freeze({ a: xSign * projection.destinationUnitsPerSourceUnit.x, b: 0, c: 0,
+      d: ySign * projection.destinationUnitsPerSourceUnit.y,
+      tx: projection.destinationOrigin.x, ty: projection.destinationOrigin.y }),
+  ]);
+}
+
 /**
  * q = destinationOrigin + axisSign * ratio * (p - sourceOrigin), per component.
  * axisSign is +1 when corresponding axes agree, -1 otherwise. Uses existing
@@ -102,13 +116,7 @@ export function projectPlanePoint2D(
     || actual.unit !== expected.unit || actual.axes.x !== expected.axes.x || actual.axes.y !== expected.axes.y) {
     throw new TypeError('Projection source plane, unit or axes mismatch');
   }
-  const relative = applyPlanarPoint2D({ a: 1, b: 0, c: 0, d: 1,
-    tx: -projection.sourceOrigin.x, ty: -projection.sourceOrigin.y }, p);
-  const destination = projection.destination;
-  const xSign = expected.axes.x === destination.axes.x ? 1 : -1;
-  const ySign = expected.axes.y === destination.axes.y ? 1 : -1;
-  const result = applyPlanarPoint2D({ a: xSign * projection.destinationUnitsPerSourceUnit.x,
-    b: 0, c: 0, d: ySign * projection.destinationUnitsPerSourceUnit.y,
-    tx: projection.destinationOrigin.x, ty: projection.destinationOrigin.y }, relative);
-  return Object.freeze({ plane: destination, point: result });
+  let result = p;
+  for (const step of planeProjectionSteps(projection)) result = applyPlanarPoint2D(step, result);
+  return Object.freeze({ plane: projection.destination, point: result });
 }

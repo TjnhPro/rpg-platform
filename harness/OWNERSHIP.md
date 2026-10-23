@@ -1,5 +1,67 @@
 # Ownership decisions — do not classify by similar names
 
+v0.8.10 SR15/SR17: Runtime Render owns scene usage observations, safe error
+projection and conservative visual-scope cleanup quarantine. Phase7 remains sole
+owner of acquisition/waiters/native allocation release; Phase6 owns graphics
+terminal policy. Editor/Client compatibility builds only. No global bus/profiler,
+new cache, Engine/Server/L1/L2 or dependency change. See
+[checkpoint](checkpoints/scene-rendering-v0.8.10.md).
+
+v0.8.9 SR14: Runtime Render owns live sprite layout, frozen frame snapshot and
+owned Three geometry/material/mesh integration. Phase4 math, Phase6 submission/
+terminal/frame demand, Phase7 usable resource/atlas/cache allocation lifetime stay
+canonical. Editor/Client are compatibility builds only; no authoring/gameplay/
+Engine/Server/L1/L2 changes. See [checkpoint](checkpoints/scene-rendering-v0.8.9.md).
+
+v0.8.8 SR11/SR12/SR13: Runtime Render owns opt-in live depth policies, finite
+keys, source-plane presentation attachment depth and stable comparator/cache.
+Phase4 math/plane validation, Phase6 lifetime/frame demand and Phase7 resource
+ownership remain canonical. Editor/Client build-only collaborators; no authored
+depth schema, gameplay spatial authority, Engine/Server/L1/L2 or dependency edit.
+See [checkpoint](checkpoints/scene-rendering-v0.8.8.md).
+
+v0.8.7 SR09/SR10: Runtime Render owns live scene-local presentation layer
+definitions, instance assignments, comparator and native participation/ranks.
+Editor authored layer refs/classification stay Editor-owned; no mapping policy
+is imposed here. Phase 6 retains session/frame/suspension; Phase 7 retains resource
+lifetime. Editor/Client are compatibility builds only. No Engine/Server/L1/L2
+or dependency-direction changes. See [checkpoint](checkpoints/scene-rendering-v0.8.7.md).
+
+v0.8.6 SR08: Runtime Render owns transient instance visibility, private node gate
+and demand. Phase 6 retains viewport suspension and host-driven scheduling;
+Phase 7 retains valid resource rights while hidden. Editor/Client are public
+compatibility builds only; no authored dirty/gameplay/Engine/Server/L1/L2 change.
+See [checkpoint](checkpoints/scene-rendering-v0.8.6.md).
+
+v0.8.5 SR07: Runtime Render owns live instance transforms and private nodes in
+its existing Three backend. Phase 4 remains the canonical math/alignment owner;
+Phase 6 owns graphics lifetime/frame demand; Phase 7 keeps resource rights.
+Editor/Client are compatibility builds only. No Engine/Server/L1/L2 edit or
+dependency reversal. See [checkpoint](checkpoints/scene-rendering-v0.8.5.md).
+
+v0.8.4 SR06: Runtime Render owns per-instance resource binding and independent
+usage. Its existing Phase 7 cache retains another ready waiter; source loading,
+GPU allocation, shared retirement and atlas interpretation keep their canonical
+owners. Editor/Client are compatibility builds only. No dependency direction,
+Engine/L1/L2/Server change. See [checkpoint](checkpoints/scene-rendering-v0.8.4.md).
+
+v0.8.3 SR05: Runtime Render owns current correlation state, exact-handle read/
+replacement and admission classification in its existing visual scope. Host input
+is detached metadata; no authored/Engine/native ownership transfer. Editor/Client
+are compatibility builds only. See [checkpoint](checkpoints/scene-rendering-v0.8.3.md).
+
+v0.8.2 SR03/SR04: Runtime Render owns live visual registration identity/membership
+inside the canonical visual scope. Neutral correlation is detached metadata, not
+an Editor dependency or unique live key. Editor/Client are build-only consumers;
+Engine/Server and dependency direction unchanged. See
+[checkpoint](checkpoints/scene-rendering-v0.8.2.md).
+
+v0.8.1 SR02: Runtime Render owns empty session-local visual scene lifetime through
+its public root. Reuse canonical graphics admission/terminal hooks; one active
+scope per session. Host owns graphics acquisition/disposal and borrowed canvas.
+No Editor/Client/Engine/Server source or dependency-direction change. See
+[checkpoint](checkpoints/scene-rendering-v0.8.1.md).
+
 v0.6.14 RV19: Runtime Render remains the canonical context/viewport/frame owner;
 Editor/Client are host consumers. Closure is Harness documentation only, with no
 source/dependency/owner changes. [Review packet](checkpoints/render-viewport-v0.6.14.md)
@@ -174,3 +236,23 @@ Examples:
 ## Escalation
 
 Request Developer approval for a changed dependency direction, moved ownership, new public layer/package, modifying L1/L2, unexpected client/server authority model, or public schema break. Do not repair an unclear boundary by adding a generic service automatically.
+Phase8 v0.8.11: **editor** owns authored Scene preview synchronization and its
+runtime-only map. Runtime Render exclusively owns live instances, transforms,
+ordering, retained resource rights and drawing. No Engine/Client/Server change;
+no authored schema, public Render dependency direction or GPU ownership transfer.
+See [checkpoint](checkpoints/scene-rendering-v0.8.11.md).
+v0.8.12 SR19: **game-client** owns neutral sample presentation and browser host
+orchestration. Runtime Render remains canonical scene/resource/draw implementation;
+Harness manual composition alone wires Editor and Client, without a production
+dependency. No Engine/Server change or gameplay/network authority inferred.
+
+v0.8.13 SR20: runtime-render remains canonical scene/resource/presentation owner;
+Editor adapts local authored snapshots via its existing bridge, Client adapts neutral
+sample inputs. Harness manual wiring alone composes both optional consumers.
+No new project, production API, Engine/Server/L1/L2 change or gameplay policy.
+
+v0.8.14 SR21: runtime-render owns the Scene Rendering integration audit; Harness
+records checkpoint/verification evidence, Editor/Client are compatibility consumers.
+Documentation-only closure, no ownership/dependency/API move or new subsystem.
+See [review packet](../runtime-render/docs/scene-rendering-v0.8.14.md). Developer
+alone accepts the phase and authorizes merge/release; no next phase is implemented.

@@ -4,6 +4,80 @@
 
 Read root agent guidance first.
 
+- [v0.8.10 SR15/SR17](../harness/checkpoints/scene-rendering-v0.8.10.md): use
+  getRenderVisualDiagnostic for safe caught-error domain/code data; unknown never
+  means success. Scene diagnostics count logical usages and preserve sticky cleanup
+  uncertainty after terminal/repeated disposal. Never release scope quarantine
+  after failed cleanup. Phase6/7 retain canonical lifetime ownership; no telemetry,
+  global error bus or leak-free claim. See [contract](docs/scene-rendering-v0.8.10.md).
+
+- [v0.8.9 SR14](../harness/checkpoints/scene-rendering-v0.8.9.md): explicit local
+  sprite layouts opt into actual mesh/frame drawing through the existing frame
+  session. Capture one ordered submission under the synchronous edit guard; rank
+  actual meshes. Borrow Phase7 allocations via Three ExternalTexture, never reupload
+  or delete them. Same clear/status/demand/terminal policy, no scheduler. See
+  [contract](docs/scene-rendering-v0.8.9.md) and [manual](manual/visual-scene-frame.md).
+  Draw is implemented but FEATURE_NOT_VERIFIED / VISUAL_NOT_VERIFIED remains.
+
+- [v0.8.8 SR11/SR12/SR13](../harness/checkpoints/scene-rendering-v0.8.8.md): opt-in
+  layer depth-key/ground-y policies retain explicit-order default. Ground uses
+  Phase4 source-plane attachment, exact unit/axes and declared front; missing
+  context rejects. Layer group precedes depth, then explicit order/ordinal ties.
+  Scene-local revision cache, proposed-transform sort before native commit.
+  Alpha profile selected for future draw; DRAW_NOT_IMPLEMENTED remains. See
+  [contract](docs/scene-rendering-v0.8.8.md).
+
+- [v0.8.7 SR09/SR10](../harness/checkpoints/scene-rendering-v0.8.7.md): scene-local
+  presentation layers and explicit instance order use priority, layer creation
+  ordinal, order, instance ordinal. Default layer preserves existing consumers;
+  missing/duplicate/invalid/in-use-delete rejects. Hidden layer gates the same
+  native node without releasing resources. Candidates are participation metadata,
+  not drawable readiness. See the [contract](docs/scene-rendering-v0.8.7.md).
+
+- [v0.8.6 SR08](../harness/checkpoints/scene-rendering-v0.8.6.md): per-instance
+  visible defaults true and only gates presentation. Effective flag includes
+  canonical Phase 6 viewport suspension without rewriting intent. Hide/show
+  preserves identity, transforms and resources; hidden updates keep latest matrix.
+  Equal updates do not invalidate. Native Object3D.visible is the existing backend
+  gate; DRAW_NOT_IMPLEMENTED remains explicit until real drawable integration.
+
+- [v0.8.5 SR07](../harness/checkpoints/scene-rendering-v0.8.5.md): current instance
+  transforms reuse Phase 4 TRS/affine/alignment/projection with explicit units and
+  axes. Fixed same-project render-clip-2d mapping feeds non-drawable private nodes
+  in the existing backend. Ground pivot=anchor keeps contact under rotate/scale;
+  no texture-center inference. Validate before native write/state commit, retain
+  identity/resource rights, unlink nodes on cleanup. No native public types,
+  camera/hierarchy/draw or behavior/visual PASS inferred from build.
+
+- [v0.8.4 SR06](../harness/checkpoints/scene-rendering-v0.8.4.md): bind through
+  the Phase 7 public lease, retain an independent waiter in the existing cache.
+  Host lease release cannot revoke instance usage; cache/session revocation can.
+  Reuse Phase 7 frame resolution/view admission and explicit revisions/page
+  attestation. Validate new usage before commit, release old after commit; unknown
+  cleanup failures propagate with committed state. Unlink/drain every owned usage
+  on removal/clear/terminal; no second cache, loader, native exposure or draw.
+
+- [v0.8.3 SR05](../harness/checkpoints/scene-rendering-v0.8.3.md): add remains
+  creation; replace only current correlation through exact live handle. Read current
+  state via getRenderVisualInstanceSnapshot; handle fields remain registration
+  history. Update preserves handle/ID/ordinal/order; equal props reuse snapshot.
+  Validate before commit, recheck provenance/terminal and nested changes. Known
+  admission errors classify safely; no transforms/resources/native state yet.
+
+- [v0.8.2 SR03/SR04](../harness/checkpoints/scene-rendering-v0.8.2.md): Render
+  root owns immutable scene-local membership. Caller string live keys differ from
+  runtime scene/session symbols and optional neutral authored correlation. Remove
+  by exact issued handle; stale handles never remove reused IDs. Ordinals increase
+  across clear/remove; terminal clears membership and rejects operations. No native
+  instances/resources/sorting; historical records are not live/GPU observations.
+
+- [v0.8.1 SR02](../harness/checkpoints/scene-rendering-v0.8.1.md): empty visual
+  scene scope accepts one canonical live graphics session, one active scene per
+  session. clear is empty-only; dispose/canonical session end is terminal and
+  idempotent with first reason preserved. Snapshots contain symbols/state only.
+  Reuse existing terminal subscription; no graphics/instances/resources/frame
+  allocation or authored-ID handles. Build/compiled consumer is not browser proof.
+
 - [v0.6.10 RV15/RV11](../harness/checkpoints/render-viewport-v0.6.10.md): canonical
   terminal graphics observations always supply cleanupFailed, independently of a
   null unknown failure. Optional member preserves structural producers; absence
@@ -105,3 +179,13 @@ Read root agent guidance first.
   than clamp. No resize, CSS/global measurement, GPU capability/memory guarantee,
   suspension or change to actual session snapshots. Host must not apply candidate
   pixels directly to a live canvas. Future application remains Render-owned.
+
+- v0.8.13 SR20: optional seven-instance manual composition; existing public roots
+  only, no production API or schema delta. See the
+  [checkpoint](../harness/checkpoints/scene-rendering-v0.8.13.md).
+  Source PNG/atlas bytes are original; browser/visual acceptance remains open.
+
+- [v0.8.14 SR21 closure](docs/scene-rendering-v0.8.14.md): fifteen-checkpoint
+  audit and sixty-addition public declaration inventory; no production closure
+  delta. Keep authored identity, live handle, lease and frame receipt distinct.
+  READY_FOR_DEVELOPER_REVIEW does not establish visual/functional acceptance.

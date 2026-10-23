@@ -1,3 +1,103 @@
+import { getRenderVisualInstanceFailure as instanceFailure, getRenderVisualBindingFailure as bindingFailure,
+  getRenderVisualLayerFailure as layerFailure, type RenderVisualInstanceFailure,
+  type RenderVisualBindingFailure, type RenderVisualLayerFailure } from './visual-scene.js';
+import { getRenderVisualDepthFailure as depthFailure, type RenderVisualDepthFailure } from './visual-depth.js';
+import { getRenderFrameFailure as frameFailure, type RenderFrameFailure } from './frame-failure.js';
+import { getRenderTextureFailure as textureFailure, type RenderTextureFailure } from './render-texture.js';
+import { getVisualResourceCacheFailure as cacheFailure, type VisualResourceCacheFailure } from './visual-resource-cache.js';
+import { VisualPresentationError } from './visual-presentation-error.js';
+export { getRenderVisualSceneDiagnostics, type RenderVisualSceneDiagnostics } from './visual-scene.js';
+
+/** Safe error data only. null cleanup means unknown/not reported by that domain. */
+export type RenderVisualDiagnostic =
+  | { readonly domain: 'instance'; readonly code: RenderVisualInstanceFailure['code']; readonly cleanupFailed: null }
+  | { readonly domain: 'binding'; readonly code: RenderVisualBindingFailure['code']; readonly cleanupFailed: null }
+  | { readonly domain: 'layer'; readonly code: RenderVisualLayerFailure['code']; readonly cleanupFailed: null }
+  | { readonly domain: 'depth'; readonly code: RenderVisualDepthFailure['code']; readonly cleanupFailed: null }
+  | { readonly domain: 'presentation'; readonly code: 'INVALID_TRANSFORM' | 'INVALID_SPRITE_LAYOUT' | 'LOCAL_UNIT_MISMATCH' | 'SCENE_IN_USE'; readonly cleanupFailed: null }
+  | { readonly domain: 'frame'; readonly code: RenderFrameFailure['code']; readonly cleanupFailed: boolean }
+  | { readonly domain: 'texture'; readonly code: RenderTextureFailure['code']; readonly cleanupFailed: boolean }
+  | { readonly domain: 'cache'; readonly code: VisualResourceCacheFailure['code']; readonly cleanupFailed: null }
+  | { readonly domain: 'session'; readonly code: RenderFailure['code']; readonly cleanupFailed: null }
+  | { readonly domain: 'unknown'; readonly code: 'UNKNOWN_FAILURE'; readonly cleanupFailed: null };
+
+/** Only call for caught failures, never as a success probe. No message/cause copying. */
+export function getRenderVisualDiagnostic(error: unknown): RenderVisualDiagnostic {
+  const instance = instanceFailure(error);
+  if (instance) return Object.freeze({ domain: 'instance', code: instance.code, cleanupFailed: null });
+  const binding = bindingFailure(error);
+  if (binding) return Object.freeze({ domain: 'binding', code: binding.code, cleanupFailed: null });
+  const layer = layerFailure(error);
+  if (layer) return Object.freeze({ domain: 'layer', code: layer.code, cleanupFailed: null });
+  const depth = depthFailure(error);
+  if (depth) return Object.freeze({ domain: 'depth', code: depth.code, cleanupFailed: null });
+  const presentation = VisualPresentationError.code(error);
+  if (presentation) return Object.freeze({ domain: 'presentation', code: presentation, cleanupFailed: null });
+  const frame = frameFailure(error);
+  if (frame) return Object.freeze({ domain: 'frame', code: frame.code, cleanupFailed: frame.cleanupFailed });
+  const texture = textureFailure(error);
+  if (texture) return Object.freeze({ domain: 'texture', code: texture.code, cleanupFailed: texture.cleanupFailed });
+  const cache = cacheFailure(error);
+  if (cache) return Object.freeze({ domain: 'cache', code: cache.code, cleanupFailed: null });
+  const session = getRenderFailure(error);
+  if (session) return Object.freeze({ domain: 'session', code: session.code, cleanupFailed: null });
+  return Object.freeze({ domain: 'unknown', code: 'UNKNOWN_FAILURE', cleanupFailed: null });
+}
+
+export {
+  createRenderVisualScene,
+  type RenderVisualScene,
+  type RenderVisualSceneSnapshot,
+  type RenderVisualSceneDisposal,
+  addRenderVisualInstance,
+  getRenderVisualInstance,
+  listRenderVisualInstances,
+  removeRenderVisualInstance,
+  type RenderVisualInstance,
+  type RenderVisualInstanceInput,
+  type RenderVisualCorrelation,
+  getRenderVisualInstanceSnapshot,
+  updateRenderVisualInstance,
+  getRenderVisualInstanceFailure,
+  type RenderVisualInstanceProperties,
+  type RenderVisualInstanceSnapshot,
+  type RenderVisualInstanceFailure,
+  bindRenderVisualInstanceResource,
+  getRenderVisualInstanceResource,
+  getRenderVisualBindingFailure,
+  type RenderVisualResourceBindingInput,
+  type RenderVisualResourceBindingSnapshot,
+  type RenderVisualFrameBinding,
+  type RenderVisualBindingFailure,
+  setRenderVisualInstanceTransform,
+  getRenderVisualInstanceTransform,
+  setRenderVisualInstanceVisible,
+  getRenderVisualInstanceVisibility,
+  type RenderVisualInstanceVisibilitySnapshot,
+  addRenderVisualLayer,
+  updateRenderVisualLayer,
+  getRenderVisualLayer,
+  listRenderVisualLayers,
+  removeRenderVisualLayer,
+  setRenderVisualInstanceOrder,
+  getRenderVisualInstanceOrder,
+  listRenderVisualDrawCandidates,
+  getRenderVisualLayerFailure,
+  type RenderVisualLayerInput,
+  type RenderVisualLayerSnapshot,
+  type RenderVisualInstanceOrder,
+  type RenderVisualDrawCandidate,
+  type RenderVisualLayerFailure,
+  setRenderVisualLayerOrderingPolicy,
+  getRenderVisualLayerOrderingPolicy,
+  setRenderVisualInstanceDepthKey,
+  getRenderVisualInstanceDepthKey,
+  setRenderVisualInstanceSpriteLayout,
+  getRenderVisualInstanceSpriteLayout,
+} from './visual-scene.js';
+export { getRenderVisualDepthFailure, type RenderVisualDepthFailure,
+  type RenderVisualDepthKey, type RenderVisualLayerOrderingPolicy } from './visual-depth.js';
+export { type RenderVisualInstanceTransformInput, type RenderVisualInstanceTransformSnapshot } from './visual-instance-transform.js';
 export { renderVisualResourceDemo } from './visual-resource-demo.js';
 export {
   planRenderViewportSize,
@@ -256,3 +356,5 @@ export {
 
 export { invalidateVisualResourceCache, getVisualResourceCacheFailure, type VisualResourceCacheFailure } from './visual-resource-cache.js';
 export type { AtlasMetadataLimits } from './unity-atlas.js';
+
+export { type RenderVisualSpriteLayout } from './visual-sprite-layout.js';

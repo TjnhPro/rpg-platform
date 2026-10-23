@@ -1,5 +1,84 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase8 v0.8.10 SR15/SR17 adds four root names for redacted caught-error diagnostics
+and count-only scope observations. Unknown is never success; scope cleanup failure
+is sticky and does not grant a new visual scope on the same session. Existing
+Phase4/6/7 contracts and receipt semantics remain. See
+[checkpoint](checkpoints/scene-rendering-v0.8.10.md) and
+[contract](../runtime-render/docs/scene-rendering-v0.8.10.md).
+
+Phase8 v0.8.9 SR14 adds exactly three root symbols: explicit local sprite layout
+type and set/get. Required old shapes and renderFrame submitted receipt unchanged.
+Existing metadata-only instances require explicit layout+transform+usable binding
+to draw. Private snapshot bridge feeds the same Three frame backend; Phase7 owns
+native allocations, Three ExternalTexture only borrows. No authored schema, GPU
+public type, second upload/cache/renderer or scheduling contract. See
+[checkpoint](checkpoints/scene-rendering-v0.8.9.md) and
+[contract](../runtime-render/docs/scene-rendering-v0.8.9.md).
+
+Phase8 v0.8.8: [depth/stability](checkpoints/scene-rendering-v0.8.8.md) adds eight
+root names for per-layer policy set/get, per-instance finite key set/get and
+branded depth failure/types. Existing shapes/unions unchanged. Policies are
+separate from layer definition updates; default explicit-order preserves SR09/10.
+Ground uses Phase4 source-plane attachment, explicit axes/unit/front, strict
+missing/mismatch rejection. Comparator keeps layer priority/group before depth,
+then explicit order/ordinal. Same native rank path, no new draw/material APIs.
+See [contract](../runtime-render/docs/scene-rendering-v0.8.8.md).
+
+Phase 8 v0.8.7: [SR09/SR10 layers/order](checkpoints/scene-rendering-v0.8.7.md)
+adds scene-local layer CRUD, exact-handle order replacement/read and ordered
+participation candidates. Fourteen additive root names, two optional creation
+fields; existing required inputs/failure unions stay compatible. Ordering is
+priority/layer ordinal/order/instance ordinal. Effective visibility additionally
+gates on layer visibility. Hidden layers retain resource rights; private ranks
+use the existing backend. No authored layer type, depth/alpha or drawable claim.
+See [contract](../runtime-render/docs/scene-rendering-v0.8.7.md).
+
+Phase 8 v0.8.6: [SR08 visibility](checkpoints/scene-rendering-v0.8.6.md) adds
+setRenderVisualInstanceVisible/getRenderVisualInstanceVisibility and a scalar
+snapshot. Default true; effectiveVisible is visible && !Phase6 viewportSuspended,
+a participation gate, not drawable/resource/pixel readiness. Repeated values do
+not invalidate; changed flags update the same private node and existing demand.
+Hidden transforms/resources remain live. No required-shape change, separate scene
+suspension, draw pipeline or authored/gameplay state. DRAW_NOT_IMPLEMENTED; see
+[contract](../runtime-render/docs/scene-rendering-v0.8.6.md).
+
+Phase 8 v0.8.5: [SR07 transform](checkpoints/scene-rendering-v0.8.5.md) adds
+set/get instance transform and two neutral input/snapshot types. Reuse Phase 4
+TRS/affine/alignment/projection in exact source units/axes; explicit same-project
+render-clip-2d mapping feeds private existing Three nodes. Invalid admission
+preserves last transform; native failure uses canonical terminal cleanup. null
+unsets presentation only; membership/resource rights remain. No drawable/camera
+controller, native public type, authored schema or required signature change.
+See [contract](../runtime-render/docs/scene-rendering-v0.8.5.md).
+
+Phase 8 v0.8.4: [SR06 binding](checkpoints/scene-rendering-v0.8.4.md) adds bind,
+read, safe binding classifier and four neutral input/snapshot/frame/failure types.
+Success retains independent Phase 7 cache usage; input lease remains host-owned.
+null unbinds. Explicit source/atlas revisions, canonical session and existing frame
+resolution gate admission. Replacement commits validated usage before old cleanup;
+cleanup error can propagate after commit. Remove/clear/terminal drain owned rights.
+No new cache-public signature or required instance snapshot member, native texture,
+loader/parser/math, resource serialization or draw. See
+[contract](../runtime-render/docs/scene-rendering-v0.8.4.md).
+
+Phase 8 v0.8.3: [SR05 operations](checkpoints/scene-rendering-v0.8.3.md) adds
+getRenderVisualInstanceSnapshot/updateRenderVisualInstance and typed props/snapshot/
+failure plus getRenderVisualInstanceFailure. Current correlation uses full replace;
+issued handles retain registration history. Update preserves identity/order/ordinal,
+validates candidate before one commit and rejects stale/foreign/terminal targets.
+No-op returns current snapshot; remove remains exact-handle/idempotent. Existing
+TypeError compatibility is preserved with branded safe codes; no native objects,
+resource rights or extra state schema. See [contract](../runtime-render/docs/scene-rendering-v0.8.3.md).
+
+Phase 8 v0.8.2: [SR03/SR04 membership](checkpoints/scene-rendering-v0.8.2.md)
+adds seven Render-root names for add/get/list/remove and immutable instance/input/
+correlation types. Exact issued handle required for removal; caller keys are live
+scene-local, correlation is optional nonunique metadata. ID reuse yields fresh
+handle/ordinal; stale remove is false. Clear/terminal empties owned membership;
+terminal operations reject. No required SR02 signature change, native objects,
+resources or sorting. See [contract](../runtime-render/docs/scene-rendering-v0.8.2.md).
+
 Phase6 v0.6.14 RV19: [full-phase integration audit](checkpoints/render-viewport-v0.6.14.md)
 records all fifteen checkpoints and Phase1/public-root comparison. No API change
 at closure. Post-review: RV19-COMPAT is ACCEPTED_CONSUMER_MIGRATION, an intentional
@@ -835,3 +914,36 @@ or session lifecycle change. Stop before v0.4.9.
 ## Three data classes that must not be conflated
 
 Authored content/config != Editor local workspace state != Runtime mutable instance state. If an interface crosses two, specify which it carries and why.
+
+Phase 8 v0.8.1: [Runtime Visual Scene lifecycle SR02](checkpoints/scene-rendering-v0.8.1.md)
+adds Render-root createRenderVisualScene, RenderVisualScene,
+RenderVisualSceneSnapshot and RenderVisualSceneDisposal. One empty active scope
+per canonical live graphics session; no native scene allocation, resource loading
+or frame submission. clear is an active empty no-op and rejects after terminal.
+dispose is terminal/idempotent, first reason scene-disposed/session-ended preserved;
+canonical session termination closes the scope before backend cleanup. Metadata
+never contains session/canvas/backend references or claims GPU liveness/reclamation.
+No legacy signature or consumer migration. See the
+[contract/runbook](../runtime-render/docs/scene-rendering-v0.8.1.md).
+Phase8 v0.8.11 SR16/SR18 adds four Editor root names for explicit preview-local
+Scene synchronization, policy and per-object partial outcomes. Render roots and
+persisted schemas unchanged; reuse Phase2/3/4/7 and canonical visual instances.
+See [contract](../editor/docs/scene-rendering-v0.8.11.md) and
+[checkpoint](checkpoints/scene-rendering-v0.8.11.md). Browser NOT_EXECUTED.
+Phase8 v0.8.12 SR19 adds an optional Client browser Scene consumer through existing
+Render roots; zero public symbol/signature changes (Render186/Editor138/Client0).
+Separate host/provider/session/context, same Render implementation; no GPU sharing
+promise. [Contract](../game-client/docs/scene-rendering-v0.8.12.md),
+[checkpoint](checkpoints/scene-rendering-v0.8.12.md). Browser NOT_EXECUTED.
+
+Phase8 v0.8.13 SR20 adds optional manual consumers/content only. Public roots remain
+Render186 / Editor138 / Client0; no production signatures or dependency change.
+[Contract](../runtime-render/docs/scene-rendering-v0.8.13.md),
+[checkpoint](checkpoints/scene-rendering-v0.8.13.md). Browser NOT_EXECUTED.
+
+Phase8 v0.8.14 SR21: [closure audit](../runtime-render/docs/scene-rendering-v0.8.14.md)
+adds no public contract. Baseline Render126/Editor134/Client0 -> 186/138/0, sixty
+Render and four Editor additions; no removed/changed existing root declarations.
+Matching declarations do not prove semantic/runtime compatibility. renderFrame
+now draws the attached visual source. [Public inventory](../runtime-render/docs/public-api-delta-v0.8.14.md).
+READY_FOR_DEVELOPER_REVIEW; browser/visual MVP acceptance remains open.

@@ -48,6 +48,16 @@ export interface VisualResourceLease {
   /** Terminal/idempotent, also when released through the texture capability. */
   readonly release: () => VisualResourceLeaseSnapshot;
 }
+
+// Owner-local retention dispatch, not a second cache or a public/deep-import API.
+type RetentionCode = 'FOREIGN_RESOURCE' | 'RESOURCE_NOT_USABLE' | 'CONTEXT_MISMATCH' | 'SOURCE_REVISION_MISMATCH';
+const retainers = new WeakMap<VisualResourceLease,
+  (sessionId: symbol, revision: string) => VisualResourceLease | RetentionCode>();
+/** Retain an already usable canonical right without IO, upload or revision inference. */
+export function retainVisualResourceLease(lease: VisualResourceLease, sessionId: symbol,
+  revision: string): VisualResourceLease | RetentionCode {
+  return retainers.get(lease)?.(sessionId, revision) ?? 'FOREIGN_RESOURCE';
+}
 export interface VisualResourceCacheSnapshot {
   readonly state: 'active' | 'disposed';
   readonly cpuEntries: number;
@@ -209,7 +219,18 @@ export function createVisualResourceCache(provider: VisualSourceProvider, inputL
     };
     entry.waiters.add(control); leaseCount++;
     if (ready !== undefined) control.deliver(ready.revision, ready.base);
-    return Object.freeze({ getSnapshot: observe, result, release: () => finish('released') });
+    const lease: VisualResourceLease = Object.freeze({ getSnapshot: observe, result, release: () => finish('released') });
+    retainers.set(lease, (expectedSession, revision) => {
+      if (sessionId !== expectedSession) return 'CONTEXT_MISMATCH';
+      const current = observe();
+      if (current.state !== 'usable' || entry.closed) return 'RESOURCE_NOT_USABLE';
+      if (current.sourceRevision !== revision) return 'SOURCE_REVISION_MISMATCH';
+      const base = entry.texture?.getSnapshot();
+      // Native observation can synchronously revoke the group on context loss.
+      if (base?.state !== 'usable' || entry.closed || observe().state !== 'usable') return 'RESOURCE_NOT_USABLE';
+      return waiter(entry, { revision: current.sourceRevision, base });
+    });
+    return lease;
   }
   async function populate(entry: Entry): Promise<void> {
     let failure: LoadFailure | { readonly stage: 'texture'; readonly code: RenderTextureFailure['code'] } = null;
