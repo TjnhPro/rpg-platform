@@ -225,3 +225,5 @@ Read root agent guidance first.
 - [v0.9.7 CM13](docs/camera-v0.9.7.md): viewport/screen inverse returns only the explicit selected source plane. Require current issued camera view and current logical/accepted context; reuse Phase4 inverse cutoff/residual policy. No inferred elevation, perfect-source recovery, picking or state mutation.
 
 - [v0.9.8 CM14](docs/camera-v0.9.8.md): Render-owned affine ground/elevation composition before existing camera. Explicit presentation basis/origins/units and supplied inverse height; singular rejection via Phase4. No sheared orthographic alias, Scene/depth/resource mutation or native application.
+
+- [v0.9.9 CM15](docs/camera-v0.9.9.md): optional per-request bounds transition uses current view/viewport and target zoom, full visible extent, explicit clamp/reject and oversize reject/center. Atomic center+zoom; old methods unrestricted, no automatic resize teleport or persisted map policy.

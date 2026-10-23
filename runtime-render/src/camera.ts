@@ -30,6 +30,7 @@ interface CameraOperations {
   readonly view: () => RenderCameraViewSnapshot;
   readonly setZoom: (zoom: number) => RenderCameraViewSnapshot;
   readonly zoomAtFocus: (input: RenderCameraFocusZoomInput) => RenderCameraViewSnapshot;
+  readonly transition: (expected: RenderCameraViewSnapshot, center: PlanarPoint2D, zoom: number) => RenderCameraViewSnapshot;
 }
 
 // Weak capabilities of issued handles, not a current-camera/ID lookup or session registry.
@@ -49,6 +50,28 @@ export function setRenderCameraCenter(camera: RenderCamera, input: PlaneProjecti
 /** Relative source-plane translation; rejects overflow and completely absorbed nonzero components. */
 export function panRenderCamera(camera: RenderCamera, input: RenderCameraPan): RenderCameraSnapshot {
   return cameraOperations(camera).pan(input);
+}
+
+/** Owner-local shared pan candidate. Capture before reading the current center. */
+export function captureCameraPanDelta(source: ProjectionPlane2D, input: RenderCameraPan): PlanarPoint2D {
+  const fields = captureCameraFields(input, ['plane', 'delta']);
+  return captureSourcePlanePoint2D(source, {
+    plane: fields.plane as ProjectionPlane2D, point: fields.delta as PlanarPoint2D });
+}
+
+/** Owner-local shared finite translation, preserving existing absorbed-component rejection. */
+export function cameraPanCenter(current: PlanarPoint2D, delta: PlanarPoint2D): PlanarPoint2D {
+  const next = applyPlanarPoint2D({ a: 1, b: 0, c: 0, d: 1, tx: delta.x, ty: delta.y }, current);
+  if ((delta.x !== 0 && next.x === current.x) || (delta.y !== 0 && next.y === current.y)) {
+    throw new RangeError('Camera pan component was absorbed by binary64 rounding');
+  }
+  return next;
+}
+
+/** Owner-local compare-and-commit seam; not a package-root contract. */
+export function commitCameraTransition(camera: RenderCamera, expected: RenderCameraViewSnapshot,
+  center: PlanarPoint2D, zoom: number): RenderCameraViewSnapshot {
+  return cameraOperations(camera).transition(expected, center, zoom);
 }
 
 /** Create the same canonical camera capability with explicit zoom configuration/policy. */
@@ -178,6 +201,19 @@ function createCamera(input: RenderCameraInput, configured: {
   });
   operations.set(camera, {
     view: requireView,
+    transition: (expected, center, zoom) => {
+      requireActive();
+      const before = requireView();
+      if (expected !== before) throw new TypeError('Camera transition requires current issued view');
+      const next = captureProjectionPoint2D(center);
+      const zoomed = cameraZoomCandidate(before.configuration, zoom, before.zoomLimits);
+      const candidate = createOrthographicCameraConfiguration({ kind: zoomed.kind, source,
+        center: next, scale: zoomed.scale, zoom: zoomed.zoom, viewportPolicy: zoomed.viewportPolicy });
+      requireActive();
+      if (view !== before) throw new TypeError('Camera changed during transition capture');
+      commitCenter(next, candidate);
+      return requireView();
+    },
     setZoom: (zoom) => {
       requireActive();
       const before = requireView();
@@ -204,16 +240,11 @@ function createCamera(input: RenderCameraInput, configured: {
     },
     pan: (input) => {
       requireActive();
-      const fields = captureCameraFields(input, ['plane', 'delta']);
-      const delta = captureSourcePlanePoint2D(source, {
-        plane: fields.plane as ProjectionPlane2D, point: fields.delta as PlanarPoint2D });
+      const delta = captureCameraPanDelta(source, input);
       // Host capture may reenter. Read the latest center only after it completes.
       requireActive();
       const current = snapshot.center;
-      const next = applyPlanarPoint2D({ a: 1, b: 0, c: 0, d: 1, tx: delta.x, ty: delta.y }, current);
-      if ((delta.x !== 0 && next.x === current.x) || (delta.y !== 0 && next.y === current.y)) {
-        throw new RangeError('Camera pan component was absorbed by binary64 rounding');
-      }
+      const next = cameraPanCenter(current, delta);
       return commitCenter(next);
     },
   });

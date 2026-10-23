@@ -10,6 +10,9 @@ export { getRenderCameraViewportSnapshot, type RenderCameraViewportSnapshot } fr
 export { projectRenderCameraPoint, type RenderCameraProjectionResult } from './camera-projection.js';
 export { viewportToRenderCameraSelectedPlane, screenToRenderCameraSelectedPlane,
   type RenderCameraSelectedPlaneInput, type RenderCameraSelectedPlaneResult } from './camera-inverse.js';
+export { transitionRenderCameraWithinBounds, type RenderCameraBoundsPolicy,
+  type RenderCameraBoundsMovement, type RenderCameraBoundsTransitionInput,
+  type RenderCameraBoundsTransitionResult } from './camera-bounds.js';
 export { createRenderCameraGroundConfiguration, projectRenderCameraGroundPoint,
   viewportToRenderCameraGround, screenToRenderCameraGround,
   type RenderCameraGroundConfiguration, type RenderCameraGroundPoint,

@@ -298,3 +298,5 @@ v0.9.6 CM11/CM12: runtime-render owns canonical camera-to-viewport/screen projec
 v0.9.7 CM13: runtime-render owns constrained selected-plane camera inverse through Phase4. Host owns logical/screen measurements; Phase6 owns accepted receipt freshness. Editor/Client are compatibility consumers, Harness records evidence. No owner/dependency transfer or Engine/Server/L1/L2 change. [Checkpoint](checkpoints/camera-v0.9.7.md).
 
 v0.9.8 CM14: runtime-render owns ground/elevation affine camera composition and constrained inverse. Editor/Client build consumers only; Harness evidence only. No Scene/depth/resource owner transfer, Engine/Server/L1/L2 change or native geometry application. [Checkpoint](checkpoints/camera-v0.9.8.md).
+
+v0.9.9 CM15: runtime-render owns optional bounds admission and atomic camera transitions; host supplies fresh scoped bounds/metrics/intent, Phase6 owns receipt freshness. Editor/Client build consumers only, Harness evidence; no map/gameplay/schema/dependency ownership change. [Checkpoint](checkpoints/camera-v0.9.9.md).
