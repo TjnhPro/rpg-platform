@@ -2,6 +2,18 @@
 
 This describes the *interactions to audit*, not finalized types or APIs. Do not create interfaces just to satisfy this document before a real MVP needs them.
 
+Phase 6 v0.6.0 RV01: [Render Context architecture audit](checkpoints/render-viewport-v0.6.0.md)
+records the merged Phase 1–5 baseline, exact existing Render52 declarations and
+future-consumer matrix. API_DESIGN_ONLY: extend existing RenderFrameSession;
+no new APIs or behavior. Render owns graphics/viewport; Editor/Client own canvas
+UI/layout/measurements/frame requests. Host Canvas, graphics context and viewport
+state are separate; bound, acquisition returned, submitted and displayed are not
+interchangeable. Preserve binding-only hosts, pure Spatial math and authored
+Scene/Document isolation. RV02–RV19/version allocations are provisional until
+their tasks arrive; signatures, resize/ratio/zero-size/suspend/recovery policies
+remain open. Current v0.6.0 authorization supersedes older next-phase stop notes,
+without accepting prior functional/visual behavior. No phase completion implied.
+
 Phase 5 v0.5.13: [Document integration/closure DC19](checkpoints/document-v0.5.13.md)
 is the current Phase 5 inventory and safety disposition: fourteen checkpoints,
 44 additive Editor symbols (134 total), Render52 unchanged, no closure API delta.
