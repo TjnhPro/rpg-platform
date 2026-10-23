@@ -64,3 +64,9 @@ No polyfill/fallback backend, gameplay tick, timing contract or Render-owned loo
 No browser frame, resize/DPR/visibility delivery, pending-close race, native loss,
 cleanup, GPU memory reclamation or visual blue pixels have been observed here.
 Manual functional/visual acceptance remains Developer-owned. Phase6 remains open.
+# Visual resource consumer — v0.7.12
+
+[Client resource guide](visual-resource.md) covers explicit local PNG/TPSheet
+selection, Render loading/cache/frame-view consumption, missing source and disposal.
+The Harness-only two-host page supports same-realm Editor isolation inspection.
+No Editor dependency, tests or sprite renderer. Browser NOT_EXECUTED.

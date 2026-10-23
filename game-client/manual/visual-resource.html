@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><title>Client visual resource consumer</title>
+<script type="importmap">{"imports":{"@rpg-platform/runtime-render":"/runtime-render/dist/index.js","three":"/node_modules/three/build/three.module.js"}}</script>
+<h1>Client: selected PNG and original TPSheet</h1>
+<p>Select an authorized original matching pair. Exact texture header label and frame key are explicit host inputs.
+No files are uploaded. No sprite is drawn; frame submission clears the canvas only.</p>
+<label>PNG <input id="png" type="file" accept=".png"></label>
+<label>TPSheet <input id="sheet" type="file" accept=".tpsheet"></label>
+<label>Exact :texture label <input id="label" value="Wound_7.png"></label>
+<label>Frame key <input id="key" value="0050"></label>
+<label><input id="missing" type="checkbox">Deny availability of selected image (SOURCE_NOT_FOUND)</label>
+<p><button id="open">Open / recreate session</button><button id="frame">Request one frame</button>
+<button id="observe">Observe</button><button id="dispose">Dispose resources/session</button><button id="unmount">Unmount</button></p>
+<canvas width="128" height="128"></canvas><pre></pre>
+<script type="module">
+import { mountClientVisualResource } from '/.artifacts/client-resource-manual/visual-resource.mjs';
+const output = document.querySelector('pre');
+const log = (event, data) => { output.textContent += event + '\n' + JSON.stringify(data, (_key, value) => typeof value === 'symbol' ? String(value) : value, 2) + '\n'; };
+const host = mountClientVisualResource(document.querySelector('canvas'), log);
+document.querySelector('#open').onclick = () => {
+  const png = document.querySelector('#png').files[0], sheet = document.querySelector('#sheet').files[0];
+  if (!png || !sheet) { log('selection-required', null); return; }
+  void host.open({ png, sheet, textureReference: document.querySelector('#label').value,
+    frameKey: document.querySelector('#key').value, missingImage: document.querySelector('#missing').checked })
+    .catch(() => log('unknown-host-error', { details: 'WITHHELD' }));
+};
+document.querySelector('#frame').onclick = host.frame;
+document.querySelector('#observe').onclick = () => log('observation', host.inspect());
+document.querySelector('#dispose').onclick = host.dispose;
+const unmount = () => {
+  host.unmount();
+  for (const id of ['open','frame','dispose','unmount']) document.querySelector('#' + id).disabled = true;
+  window.removeEventListener('pagehide', unmount);
+};
+document.querySelector('#unmount').onclick = unmount;
+window.addEventListener('pagehide', unmount);
+</script></html>

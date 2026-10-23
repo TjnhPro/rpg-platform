@@ -128,5 +128,14 @@ export function mountEditorVisualResource(target: HTMLCanvasElement, authored: P
     closed = true; close();
     log('unmounted-no-future-adoption', authoredObservation());
   };
-  return Object.freeze({ open, close, unmount, inspect: authoredObservation });
+  // Optional manual observation seams for same-realm Client/Editor isolation review.
+  const observe = () => ({ authored: authoredObservation(),
+    lease: owned?.lease?.getSnapshot(), cache: owned?.cache?.getSnapshot(),
+    graphics: owned ? getRenderViewportSnapshot(owned.session).graphics : null });
+  const frame = (): void => {
+    if (closed || !owned) { log('frame-unavailable', observe()); return; }
+    try { log('frame-submitted-not-display', owned.session.renderFrame()); }
+    catch (error) { log('frame-failed', classify(error)); }
+  };
+  return Object.freeze({ open, close, unmount, inspect: authoredObservation, observe, frame });
 }

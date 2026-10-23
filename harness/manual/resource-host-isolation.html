@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><title>Manual Editor / Client resource isolation</title>
+<script type="importmap">{"imports":{"@rpg-platform/editor":"/editor/dist/index.js","@rpg-platform/runtime-render":"/runtime-render/dist/index.js","@rpg-platform/runtime-engine":"/runtime-engine/dist/index.js","@rpg/core/kernel":"/node_modules/@rpg/core/dist/kernel/index.js","@rpg/gameplay":"/node_modules/@rpg/gameplay/dist/index.js","three":"/node_modules/three/build/three.module.js"}}</script>
+<h1>Two independent hosts, one realm / Render module</h1>
+<p>Harness tooling only. Start Editor PNG, then Client pair. Dispose Client, observe Editor and explicitly request its frame.
+Read actual diagnostics; snapshots and frame receipts are not display proof. No sprite drawing.</p>
+<label>Client PNG <input id="png" type="file" accept=".png"></label>
+<label>Client TPSheet <input id="sheet" type="file" accept=".tpsheet"></label>
+<label>Exact texture header <input id="label" value="Wound_7.png"></label>
+<label>Frame key <input id="key" value="0050"></label>
+<p><button id="editor-open">Open Editor PNG</button><button id="client-open">Open Client pair</button>
+<button id="client-dispose">Dispose Client only</button><button id="editor-frame">Observe / frame Editor</button>
+<button id="unmount">Unmount both</button></p>
+<p>Editor <canvas id="editor" width="128" height="128"></canvas> Client <canvas id="client" width="128" height="128"></canvas></p><pre></pre>
+<script type="module">
+import { createPreviewAuthoredSample, mountEditorVisualResource } from '/.artifacts/editor-resource-manual/editor-visual-resource.mjs';
+import { mountClientVisualResource } from '/.artifacts/client-resource-manual/visual-resource.mjs';
+const log = (event, data) => { document.querySelector('pre').textContent += event + '\n' + JSON.stringify(data, (_key, value) => typeof value === 'symbol' ? String(value) : value, 2) + '\n'; };
+const authored = createPreviewAuthoredSample();
+const editor = mountEditorVisualResource(document.querySelector('#editor'), authored, (event, data) => log('Editor ' + event, data));
+const client = mountClientVisualResource(document.querySelector('#client'), (event, data) => log('Client ' + event, data));
+const scope = { projectId: authored.catalog.projectId, providerId: Symbol(), authorizationGeneration: 'fixed-png' };
+const provider = { scope, async read(request) {
+  if (request.scope.providerId !== scope.providerId || request.scope.authorizationGeneration !== scope.authorizationGeneration
+    || request.identity.projectId !== scope.projectId || request.identity.resourceId !== 'sample-png'
+    || request.sourceIndex !== 0 || request.source.role !== 'image'
+    || request.source.locator.type !== 'project-relative' || request.source.locator.path !== 'png-sample/rgba-2x2.png') return { status: 'failed', code: 'SOURCE_DENIED' };
+  const response = await fetch('/editor/manual/png-sample/rgba-2x2.png', { cache: 'no-store' });
+  if (!response.ok) return { status: 'failed', code: 'SOURCE_NOT_FOUND' };
+  // Read only the bounded prefix of this explicitly allowed local response.
+  const storage = new Uint8Array(Math.min(request.maxBytes, 4096)), reader = response.body.getReader();
+  let length = 0;
+  try { while (true) {
+    const { done, value } = await reader.read(); if (done) break;
+    if (length + value.length > storage.length) return { status: 'failed', code: 'CONTENT_TOO_LARGE' };
+    storage.set(value, length); length += value.length;
+  } } finally { try { await reader.cancel(); } finally { reader.releaseLock(); } }
+  const bytes = storage.slice(0, length);
+  const revision = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)), byte => byte.toString(16).padStart(2, '0')).join('');
+  return { status: 'provided', bytes, contentLength: bytes.length, mediaType: 'image/png', revision };
+} };
+const run = action => { void Promise.resolve().then(action).catch(() => log('unknown-host-error', { details: 'WITHHELD' })); };
+document.querySelector('#editor-open').onclick = () => run(() => editor.open(authored.reference, provider, 'e9aa41812d69aa8ebbee3fb351fede258f2a159c4a547b3187ee54184dea0b79'));
+document.querySelector('#client-open').onclick = () => run(() => {
+  const png = document.querySelector('#png').files[0], sheet = document.querySelector('#sheet').files[0];
+  if (!png || !sheet) { log('selection-required', null); return; }
+  return client.open({ png, sheet, textureReference: document.querySelector('#label').value, frameKey: document.querySelector('#key').value, missingImage: false });
+});
+document.querySelector('#client-dispose').onclick = () => { log('Editor before Client disposal', editor.observe()); client.dispose(); log('Editor after Client disposal', editor.observe()); };
+document.querySelector('#editor-frame').onclick = () => { editor.frame(); log('Editor observation', editor.observe()); };
+const unmount = () => {
+  try { client.unmount(); } finally { editor.unmount(); }
+  for (const button of document.querySelectorAll('button')) button.disabled = true;
+  window.removeEventListener('pagehide', unmount);
+};
+document.querySelector('#unmount').onclick = unmount;
+window.addEventListener('pagehide', unmount);
+</script></html>
