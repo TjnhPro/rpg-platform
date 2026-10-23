@@ -4,6 +4,25 @@ import { captureAtlasMetadata, registerAtlasMetadataRevision, type AtlasMetadata
 
 const budgets = { bytesPerSheet: 1024 * 1024, totalBytes: 8 * 1024 * 1024,
   pages: 64, bindings: 256, frames: 65536, line: 2048, dimension: 32768 } as const;
+/** Optional host admission budgets, bounded by the existing parser ceilings. */
+export interface AtlasMetadataLimits {
+  readonly maxBytesPerSheet: number;
+  readonly maxTotalBytes: number;
+  readonly maxPages: number;
+  readonly maxFrames: number;
+}
+type Budgets = { readonly [Key in keyof typeof budgets]: number };
+function captureLimits(input?: AtlasMetadataLimits): Budgets {
+  if (input === undefined) return budgets;
+  const values = { bytesPerSheet: input.maxBytesPerSheet, totalBytes: input.maxTotalBytes,
+    pages: input.maxPages, frames: input.maxFrames };
+  for (const key of ['bytesPerSheet', 'totalBytes', 'pages', 'frames'] as const) {
+    if (!Number.isSafeInteger(values[key]) || values[key] < 1 || values[key] > budgets[key]) {
+      throw new TypeError('Atlas budgets must be positive safe integers within parser ceilings');
+    }
+  }
+  return { ...budgets, ...values };
+}
 type Rejection = Extract<AtlasMetadataResult, { status: 'rejected' }>;
 const reject = (code: Rejection['code'], pageId: string | null = null, line: number | null = null): Rejection =>
   Object.freeze({ status: 'rejected', code, pageId, line });
@@ -55,10 +74,12 @@ function decimal(value: string): number | undefined {
  * Known data rejections return a safe result; unknown host exceptions propagate.
  */
 export function parseUnityAtlasMetadata(
-  descriptor: VisualResourceDescriptor, bindings: readonly AtlasSourceBinding[], sheets: readonly UnityAtlasSheet[],
+  descriptor: VisualResourceDescriptor, bindings: readonly AtlasSourceBinding[], sheets: readonly UnityAtlasSheet[], inputLimits?: AtlasMetadataLimits,
 ): AtlasMetadataResult {
+  const limits = captureLimits(inputLimits);
   const captured = prepareVisualResource(descriptor).descriptor;
-  if (!dense(bindings, budgets.bindings) || !dense(sheets, budgets.pages)) return reject('INVALID_BINDING');
+  if (Array.isArray(sheets) && sheets.length > limits.pages) return reject('LIMIT_EXCEEDED');
+  if (!dense(bindings, limits.bindings) || !dense(sheets, limits.pages)) return reject('INVALID_BINDING');
   const sources: AtlasMetadata['sources'][number][] = [];
   const byId = new Map<string, AtlasMetadata['sources'][number]>();
   const indices = new Set<number>();
@@ -99,8 +120,8 @@ export function parseUnityAtlasMetadata(
       return reject('SOURCE_MISMATCH', pageId);
     }
     const length = observation.source.contentLength;
-    if (!Number.isSafeInteger(length) || length < 1 || length > budgets.bytesPerSheet
-      || totalBytes + length > budgets.totalBytes) return reject('LIMIT_EXCEEDED', pageId);
+    if (!Number.isSafeInteger(length) || length < 1 || length > limits.bytesPerSheet
+      || totalBytes + length > limits.totalBytes) return reject('LIMIT_EXCEEDED', pageId);
     const bytes = source.copyBytes();
     if (bytes === null) return reject('SOURCE_NOT_ACQUIRED', pageId);
     if (bytes.length !== length) return reject('SOURCE_MISMATCH', pageId);
@@ -115,7 +136,7 @@ export function parseUnityAtlasMetadata(
     let pageFrames = 0;
     for (let index = 0; index < lines.length; index++) {
       const line = lines[index]!;
-      if (line.length > budgets.line) return reject('LIMIT_EXCEEDED', pageId, index + 1);
+      if (line.length > limits.line) return reject('LIMIT_EXCEEDED', pageId, index + 1);
       if (line.trim().length === 0 || line.startsWith('#')) continue;
       if (line.startsWith(':')) {
         const equal = line.indexOf('=');
@@ -149,7 +170,7 @@ export function parseUnityAtlasMetadata(
         return reject('INVALID_FRAME', pageId, index + 1);
       }
       if (frameKeys.has(key)) return reject('DUPLICATE_FRAME_KEY', pageId, index + 1);
-      if (frames.length >= budgets.frames) return reject('LIMIT_EXCEEDED', pageId, index + 1);
+      if (frames.length >= limits.frames) return reject('LIMIT_EXCEEDED', pageId, index + 1);
       frameKeys.add(key); pageFrames++;
       frames.push({ key, pageId, rectangle: { x, y, width, height }, rotation: 'none', trim: null,
         sourcePivot: { x: pivotX, y: pivotY } });

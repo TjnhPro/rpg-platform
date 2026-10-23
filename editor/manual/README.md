@@ -490,3 +490,5 @@ frame lookup performs no extra source reads and no image/GPU operation.
 
 - [v0.7.9 resource cache](resource-cache.md): optional finite 100-lease/multi-session
   public-root consumer. Compiled only; native reuse/cleanup requires manual observation.
+
+- [v0.7.10 explicit cache revision/limits](cache-invalidation.md): optional finite A/B consumer, compiled only; browser/GPU observations remain open.

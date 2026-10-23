@@ -11,7 +11,26 @@ import { requireTextureSession, onTextureSessionEnd, uploadPngTexture, registerR
 export interface ResourceCacheLimits {
   readonly maxCpuEntries: number;
   readonly maxGpuEntries: number;
+  /** Defaults to maxCpuEntries; retained revision guards are never silently evicted. */
+  readonly maxRevisionEntries?: number;
 }
+/** Safe cache admission diagnostics only; source/decode/atlas/frame domains stay separate. */
+export interface VisualResourceCacheFailure {
+  readonly stage: 'cache';
+  readonly code: 'CACHE_DISPOSED' | 'REVISION_SUPERSEDED' | 'CPU_LIMIT_EXCEEDED'
+    | 'GPU_LIMIT_EXCEEDED' | 'REVISION_LIMIT_EXCEEDED';
+}
+const failures = new WeakMap<object, VisualResourceCacheFailure>();
+function cacheError(code: VisualResourceCacheFailure['code'], range = false): Error {
+  const error = range ? new RangeError(`Resource cache: ${code}`) : new TypeError(`Resource cache: ${code}`);
+  failures.set(error, Object.freeze({ stage: 'cache', code }));
+  return error;
+}
+/** Classifies only errors created by this package instance; no message/name guessing. */
+export function getVisualResourceCacheFailure(error: unknown): VisualResourceCacheFailure | undefined {
+  return typeof error === 'object' && error !== null ? failures.get(error) : undefined;
+}
+
 type LoadFailure = Extract<SharedPngLoadSnapshot, { state: 'failed' }>['failure'];
 export type VisualResourceLeaseSnapshot = { readonly id: symbol; readonly sessionId: symbol;
   readonly cleanupFailed: boolean } & (
@@ -40,6 +59,8 @@ export interface VisualResourceCacheSnapshot {
   readonly cpuHits: number;
   readonly gpuHits: number;
   readonly cleanupFailed: boolean;
+  /** Current explicit revision guards, retained until cache disposal. */
+  readonly revisionEntries?: number;
 }
 export interface VisualResourceCache {
   readonly acquire: (session: RenderFrameSession, descriptor: VisualResourceDescriptor, sourceIndex: number,
@@ -47,6 +68,18 @@ export interface VisualResourceCache {
   readonly getSnapshot: () => VisualResourceCacheSnapshot;
   /** Revokes all leases and attempts every cleanup. Does not dispose borrowed sessions. */
   readonly dispose: () => void;
+}
+
+// Weak canonical dispatch, consistent with the existing viewport/texture public APIs.
+const invalidators = new WeakMap<VisualResourceCache,
+  (descriptor: VisualResourceDescriptor, sourceIndex: number, revision: string) => void>();
+/** Require an exact revision for future acquisitions; existing rights stay pinned. No IO.
+ * Same revision is idempotent, not a forced reload. Host revisions must identify exact content. */
+export function invalidateVisualResourceCache(cache: VisualResourceCache,
+  descriptor: VisualResourceDescriptor, sourceIndex: number, nextRevision: string): void {
+  const invalidate = invalidators.get(cache);
+  if (invalidate === undefined) throw new TypeError('Expected a canonical visual resource cache');
+  invalidate(descriptor, sourceIndex, nextRevision);
 }
 
 interface CpuEntry { readonly key: string; load: SharedPngLoad | undefined;
@@ -67,12 +100,25 @@ const increment = (value: number): number => Math.min(Number.MAX_SAFE_INTEGER, v
 /** Explicit provider-bound cache. CPU entries survive only while a pending/live GPU entry owns them. */
 export function createVisualResourceCache(provider: VisualSourceProvider, inputLimits: ResourceCacheLimits): VisualResourceCache {
   const maxCpu = inputLimits.maxCpuEntries, maxGpu = inputLimits.maxGpuEntries;
+  const maxRevisions = inputLimits.maxRevisionEntries ?? maxCpu;
   if (!Number.isSafeInteger(maxCpu) || maxCpu < 1 || maxCpu > 1024
-    || !Number.isSafeInteger(maxGpu) || maxGpu < 1 || maxGpu > 4096) {
-    throw new TypeError('Explicit entry bounds required: CPU 1..1024, GPU 1..4096');
+    || !Number.isSafeInteger(maxGpu) || maxGpu < 1 || maxGpu > 4096
+    || !Number.isSafeInteger(maxRevisions) || maxRevisions < 1 || maxRevisions > 4096) {
+    throw new TypeError('Explicit entry bounds required: CPU 1..1024, GPU/revisions 1..4096');
   }
   const loads = createPngLoadScope(provider), cpus = new Map<string, CpuEntry>();
   const groups = new Map<RenderFrameSession, Group>();
+  const revisions = new Map<string, string>();
+  const sourceKey = (descriptor: VisualResourceDescriptor, index: number): string =>
+    JSON.stringify([descriptor.identity.projectId, descriptor.identity.resourceId, index]);
+  function revisionInput(input: VisualResourceDescriptor, index: number, revision: string): VisualResourceDescriptor {
+    const descriptor = prepareVisualResource(input).descriptor;
+    if (!Number.isSafeInteger(index) || descriptor.sources[index]?.role !== 'image'
+      || typeof revision !== 'string' || revision.trim().length === 0) {
+      throw new TypeError('Explicit image source and nonblank revision required');
+    }
+    return descriptor;
+  }
   let closed = false, gpuCount = 0, leaseCount = 0, cleanupFailed = false;
   let sourceJobs = 0, uploadCalls = 0, cpuHits = 0, gpuHits = 0;
 
@@ -193,9 +239,17 @@ export function createVisualResourceCache(provider: VisualSourceProvider, inputL
     try { retire(entry); } catch (value) { unexpected ??= { value }; }
     for (const control of [...entry.waiters]) control.fail(failure, unexpected);
   }
-  return Object.freeze<VisualResourceCache>({
+  const invalidate = (input: VisualResourceDescriptor, sourceIndex: number, nextRevision: string): void => {
+    if (closed) throw cacheError('CACHE_DISPOSED');
+    const descriptor = revisionInput(input, sourceIndex, nextRevision);
+    if (closed) throw cacheError('CACHE_DISPOSED');
+    const key = sourceKey(descriptor, sourceIndex);
+    if (!revisions.has(key) && revisions.size >= maxRevisions) throw cacheError('REVISION_LIMIT_EXCEEDED', true);
+    revisions.set(key, nextRevision);
+  };
+  const cache = Object.freeze<VisualResourceCache>({
     acquire: (session, input, sourceIndex, expectedRevision, inputDecodeLimits, inputOptions): VisualResourceLease => {
-      if (closed) throw new TypeError('Visual resource cache is disposed');
+      if (closed) throw cacheError('CACHE_DISPOSED');
       const sessionId = requireTextureSession(session);
       const descriptor = prepareVisualResource(input).descriptor;
       const limits = capturePngDecodeLimits(inputDecodeLimits);
@@ -206,8 +260,10 @@ export function createVisualResourceCache(provider: VisualSourceProvider, inputL
         || !Number.isSafeInteger(sourceIndex) || descriptor.sources[sourceIndex]?.role !== 'image') {
         throw new TypeError('Explicit image source/revision/decode and texture options required');
       }
-      if (closed) throw new TypeError('Visual resource cache is disposed');
+      if (closed) throw cacheError('CACHE_DISPOSED');
       requireTextureSession(session); // Input getters may have disposed it.
+      const requiredRevision = revisions.get(sourceKey(descriptor, sourceIndex));
+      if (requiredRevision !== undefined && requiredRevision !== expectedRevision) throw cacheError('REVISION_SUPERSEDED');
       const cpuKey = JSON.stringify([descriptor, sourceIndex, expectedRevision, limits,
         'browser-png-v1/from-image/alpha-none/color-none/no-resize']);
       const key = JSON.stringify([cpuKey, options]);
@@ -224,9 +280,9 @@ export function createVisualResourceCache(provider: VisualSourceProvider, inputL
         }
         return waiter(entry);
       }
-      if (gpuCount >= maxGpu) throw new RangeError('GPU cache entry limit reached');
+      if (gpuCount >= maxGpu) throw cacheError('GPU_LIMIT_EXCEEDED', true);
       let cpu = cpus.get(cpuKey);
-      if (cpu === undefined && cpus.size >= maxCpu) throw new RangeError('CPU cache entry limit reached');
+      if (cpu === undefined && cpus.size >= maxCpu) throw cacheError('CPU_LIMIT_EXCEEDED', true);
       if (cpu === undefined) {
         cpu = { key: cpuKey, load: undefined, users: 0, result: Promise.resolve(Object.freeze({
           id: Symbol(), stage: 'shared-png-load', state: 'released' })) };
@@ -259,14 +315,17 @@ export function createVisualResourceCache(provider: VisualSourceProvider, inputL
     },
     getSnapshot: (): VisualResourceCacheSnapshot => Object.freeze({ state: closed ? 'disposed' : 'active',
       cpuEntries: cpus.size, gpuEntries: gpuCount, leases: leaseCount, sourceJobs,
-      uploadCalls, cpuHits, gpuHits, cleanupFailed }),
+      uploadCalls, cpuHits, gpuHits, cleanupFailed, revisionEntries: revisions.size }),
     dispose: (): void => {
       if (closed) return;
       closed = true;
+      revisions.clear();
       let error: { value: unknown } | undefined;
       for (const group of [...groups.values()]) try { endGroup(group); } catch (value) { error ??= { value }; }
       try { loads.dispose(); } catch (value) { cleanupFailed = true; error ??= { value }; }
       if (error !== undefined) throw error.value;
     },
   });
+  invalidators.set(cache, invalidate);
+  return cache;
 }

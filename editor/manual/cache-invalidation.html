@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8">
+<title>Explicit image revision - finite manual consumer</title>
+<script type="importmap">{"imports":{"@rpg-platform/runtime-render":"/runtime-render/dist/index.js","three":"/node_modules/three/build/three.module.js"}}</script>
+<h1>Explicit image revision</h1>
+<p>Select real files A and B explicitly. Run once with valid PNG B, then with malformed B.
+Nothing is uploaded to a server. Logs omit filenames, paths, raw errors and bytes. No sprite display.</p>
+<label>A PNG <input id="a" type="file"></label>
+<label>B updated PNG or malformed file <input id="b" type="file"></label>
+<button id="run">Run finite revision trace</button><canvas width="64" height="64"></canvas><pre></pre>
+<script type="module">
+import { inspectCacheInvalidation } from '/.artifacts/cache-revision-manual/cache-invalidation.mjs';
+const log = (label, value) => { document.querySelector('pre').textContent += label + '\n' + JSON.stringify(value, null, 2) + '\n'; };
+async function selected(id) {
+  const file = document.querySelector(id).files[0];
+  if (!file || file.size < 1 || file.size > 16777216) throw new Error('SELECTION_OUTSIDE_BUDGET');
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const revision = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)), byte => byte.toString(16).padStart(2, '0')).join('');
+  return { bytes, revision };
+}
+document.querySelector('#run').onclick = async () => {
+  const button = document.querySelector('#run'); button.disabled = true; document.querySelector('pre').textContent = '';
+  try {
+    const a = await selected('#a'), b = await selected('#b');
+    if (a.revision === b.revision) { log('select different content for B', null); return; }
+    await inspectCacheInvalidation(document.querySelector('canvas'), a, b, log);
+  } catch { log('host selection or unknown error', { code: 'UNKNOWN_NOT_CLASSIFIED', details: 'WITHHELD' }); }
+  finally { button.disabled = false; }
+};
+</script></html>

@@ -252,3 +252,6 @@ export {
   createVisualResourceCache, type ResourceCacheLimits, type VisualResourceCache,
   type VisualResourceCacheSnapshot, type VisualResourceLease, type VisualResourceLeaseSnapshot,
 } from './visual-resource-cache.js';
+
+export { invalidateVisualResourceCache, getVisualResourceCacheFailure, type VisualResourceCacheFailure } from './visual-resource-cache.js';
+export type { AtlasMetadataLimits } from './unity-atlas.js';
