@@ -1,3 +1,4 @@
+import { VisualPresentationError } from './visual-presentation-error.js';
 import { createPlanarTransform2D, type PlanarTransform2D } from './planar-transform.js';
 import { composePlanarTransforms2D, applyPlanarPoint2D, type AffineTransform2D,
   type PlanarPoint2D } from './planar-affine.js';
@@ -28,11 +29,11 @@ export interface RenderVisualInstanceTransformSnapshot extends RenderVisualInsta
 function data(value: unknown, keys: readonly string[]): Record<string, unknown> {
   if (typeof value !== 'object' || value === null || Array.isArray(value)
     || (Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null)
-    || Reflect.ownKeys(value).length !== keys.length) throw new TypeError('Expected closed planar presentation data');
+    || Reflect.ownKeys(value).length !== keys.length) throw new VisualPresentationError('INVALID_TRANSFORM');
   const output: Record<string, unknown> = Object.create(null) as Record<string, unknown>;
   for (const key of keys) {
     const field = Object.getOwnPropertyDescriptor(value, key);
-    if (!field?.enumerable || !('value' in field)) throw new TypeError('Presentation fields must be own data');
+    if (!field?.enumerable || !('value' in field)) throw new VisualPresentationError('INVALID_TRANSFORM');
     output[key] = field.value;
   }
   return output;
@@ -52,13 +53,13 @@ export function captureVisualInstanceTransform(input: RenderVisualInstanceTransf
   const destination = projection.destination;
   if (destination.projectId !== projection.source.projectId || destination.coordinateSpaceId !== 'render-clip-2d'
     || destination.unit !== 'clip-unit' || destination.axes.x !== 'right' || destination.axes.y !== 'up') {
-    throw new TypeError('Unsupported backend projection: expected same-project render-clip-2d / clip-unit / right,up');
+    throw new VisualPresentationError('INVALID_TRANSFORM');
   }
   const local = createPlanarTransform2D(fields.local as PlanarTransform2D);
   const anchor = createVisualAnchor2D(fields.anchor as VisualAnchor2D);
   const orientation = createVisualOrientation2D(fields.orientation as VisualOrientation2D);
   if (orientation.axes.x !== projection.source.axes.x || orientation.axes.y !== projection.source.axes.y) {
-    throw new TypeError('Visual orientation and placement axes mismatch');
+    throw new VisualPresentationError('INVALID_TRANSFORM');
   }
   const placement = Object.freeze({ plane: projection.source, point });
   const alignment = resolveVisualAlignment2D(point, placement.plane.unit, anchor, orientation);

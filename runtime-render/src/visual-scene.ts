@@ -1,3 +1,4 @@
+import { VisualPresentationError } from './visual-presentation-error.js';
 import type { RenderFrameSession } from './frame-session.js';
 import { requireTextureSession, onTextureSessionEnd, getRenderTextureSnapshot } from './render-texture.js';
 import { retainVisualResourceLease, type VisualResourceLease } from './visual-resource-cache.js';
@@ -94,18 +95,21 @@ function ownBinding(input: VisualResourceLease, frame: AtlasFrameGeometry | null
     read: () => {
       const current = lease?.getSnapshot();
       snapshot = Object.freeze({ ...snapshot, state: current?.state === 'usable' ? 'usable' : 'unavailable',
-        cleanupFailed: current?.cleanupFailed ?? snapshot.cleanupFailed });
+        cleanupFailed: snapshot.cleanupFailed || (current?.cleanupFailed ?? false) });
       return snapshot;
     },
     release: () => {
       const previous = lease;
       lease = undefined; // Unlink before native cleanup; release exactly once even on failure.
-      previous?.release();
+      if (previous !== undefined) {
+        const ended = previous.release();
+        snapshot = Object.freeze({ ...snapshot, state: 'unavailable', cleanupFailed: snapshot.cleanupFailed || ended.cleanupFailed });
+      }
     },
   };
 }
 
-function prepareBinding(session: RenderFrameSession, input: RenderVisualResourceBindingInput): OwnedBinding {
+function prepareBinding(session: RenderFrameSession, input: RenderVisualResourceBindingInput, cleanupFailure: () => void): OwnedBinding {
   const data = dataRecord(input, ['resource', 'expectedSourceRevision', 'frame']);
   if (typeof data.expectedSourceRevision !== 'string' || data.expectedSourceRevision.trim().length === 0) {
     throw new InstanceError('INVALID_DESCRIPTOR');
@@ -134,7 +138,8 @@ function prepareBinding(session: RenderFrameSession, input: RenderVisualResource
     requireTextureSession(session);
     return ownBinding(retained, geometry);
   } catch (error) {
-    retained.release(); // No previous binding touched; cleanup exception may propagate.
+    try { if (retained.release().cleanupFailed) cleanupFailure(); } catch (cleanupError) { cleanupFailure(); throw cleanupError; }
+    // No previous binding touched; cleanup exception may replace the admission error.
     throw error;
   }
 }
@@ -368,7 +373,24 @@ export function getRenderVisualInstanceFailure(error: unknown): RenderVisualInst
   return InstanceError.classify(error);
 }
 
+export interface RenderVisualSceneDiagnostics {
+  readonly state: 'active' | 'disposed';
+  readonly instances: number;
+  readonly boundUsages: number;
+  readonly usableUsages: number;
+  readonly unavailableUsages: number;
+  /** Sticky scope-local cleanup uncertainty, not session/GPU health. */
+  readonly cleanupFailed: boolean;
+  readonly releaseAttempts: number;
+}
+
+/** Count-only observation; no native objects, IDs, revisions or host paths. */
+export function getRenderVisualSceneDiagnostics(scene: RenderVisualScene): RenderVisualSceneDiagnostics {
+  return membership(scene).diagnostics();
+}
+
 interface MembershipControl {
+  readonly diagnostics: () => RenderVisualSceneDiagnostics;
   readonly layout: (instance: RenderVisualInstance, input: RenderVisualSpriteLayout | null) => RenderVisualSpriteLayout | null;
   readonly readLayout: (instance: RenderVisualInstance) => RenderVisualSpriteLayout | null;
   readonly policy: (key: string, policy: RenderVisualLayerOrderingPolicy) => RenderVisualLayerOrderingPolicy;
@@ -535,7 +557,14 @@ function createScope(sessionId: symbol) {
   let snapshot: RenderVisualSceneSnapshot = Object.freeze({ id, sessionId, state: 'active' });
   let detach: (() => void) | undefined;
   let edit: ((invalidate: boolean, dropDrawable?: object) => void) | undefined;
-  let prepare: ((input: RenderVisualResourceBindingInput) => OwnedBinding) | undefined;
+  let prepare: ((input: RenderVisualResourceBindingInput, cleanupFailure: () => void) => OwnedBinding) | undefined;
+  let cleanupFailed = false, releaseAttempts = 0;
+  const noteCleanupFailure = (): void => { cleanupFailed = true; };
+  const releaseBinding = (binding: OwnedBinding | undefined): void => {
+    if (binding === undefined) return;
+    releaseAttempts += 1;
+    try { binding.release(); cleanupFailed ||= binding.read().cleanupFailed; } catch (error) { noteCleanupFailure(); throw error; }
+  };
   let writeTransform: ((instance: object, matrix: AffineTransform2D | null, visible: boolean, renderOrder: number) => void) | undefined;
   let writeVisibility: ((instance: object, visible: boolean) => void) | undefined;
   let writeOrdering: ((writes: readonly VisualPresentationWrite[]) => void) | undefined;
@@ -619,7 +648,8 @@ function createScope(sessionId: symbol) {
     entry.binding = undefined; entry.transform = null;
     // Attempt resource cleanup even if native node removal fails.
     try { if (transformed) writeTransform?.(entry.handle, null, entry.visible, 0); }
-    finally { binding?.release(); }
+    catch (error) { noteCleanupFailure(); throw error; }
+    finally { releaseBinding(binding); }
   };
   const drain = (): void => {
     const previous = [...instances.values()];
@@ -641,7 +671,8 @@ function createScope(sessionId: symbol) {
       layers.clear();
       policies.clear();
       writeTransform = undefined; writeVisibility = undefined; writeOrdering = undefined;
-      readSuspended = undefined; edit = undefined; release?.();
+      readSuspended = undefined; edit = undefined;
+      try { release?.(); } catch (error) { noteCleanupFailure(); throw error; }
     }
     return snapshot;
   };
@@ -655,6 +686,21 @@ function createScope(sessionId: symbol) {
     dispose: (): RenderVisualSceneDisposal => { if (snapshot.state === 'active') requireEdit(); return end('scene-disposed'); },
   });
   memberships.set(handle, {
+    diagnostics: () => {
+      const before = revision;
+      let boundUsages = 0, usableUsages = 0;
+      for (const entry of instances.values()) if (entry.binding !== undefined) {
+        boundUsages += 1;
+        const observation = entry.binding.read();
+        cleanupFailed ||= observation.cleanupFailed;
+        if (observation.state === 'usable') usableUsages += 1;
+      }
+      // Native context observation may terminate and drain the scope synchronously.
+      if (before !== revision) return Object.freeze({ state: snapshot.state, instances: instances.size,
+        boundUsages: 0, usableUsages: 0, unavailableUsages: 0, cleanupFailed, releaseAttempts });
+      return Object.freeze({ state: snapshot.state, instances: instances.size, boundUsages,
+        usableUsages, unavailableUsages: boundUsages - usableUsages, cleanupFailed, releaseAttempts });
+    },
     readLayout: (instance) => requireEntry(instance).layout,
     layout: (instance, input) => {
       requireEdit();
@@ -662,7 +708,7 @@ function createScope(sessionId: symbol) {
       const candidate = captureSpriteLayout(input);
       requireEntry(instance); unchanged(before);
       if (candidate !== null && entry.transform !== null && candidate.unit !== entry.transform.placement.plane.unit) {
-        throw new TypeError('Sprite layout and transform local unit mismatch');
+        throw new VisualPresentationError('LOCAL_UNIT_MISMATCH');
       }
       const previous = entry.layout;
       if (previous === candidate || (previous !== null && candidate !== null
@@ -830,7 +876,7 @@ function createScope(sessionId: symbol) {
       if (candidate === null && before === null) return null;
       visualDepth(policyFor(entry.ordering.layerKey), candidate, entry.depthKey);
       if (candidate !== null && entry.layout !== null && entry.layout.unit !== candidate.placement.plane.unit) {
-        throw new TypeError('Sprite layout and transform local unit mismatch');
+        throw new VisualPresentationError('LOCAL_UNIT_MISMATCH');
       }
       // Recompute all native ranks before placement: intervening metadata-only
       // adds/removals need no node writes, and cannot make ranks collide here.
@@ -853,16 +899,16 @@ function createScope(sessionId: symbol) {
     bind: (instance, input) => {
       requireEdit();
       const entry = requireEntry(instance), before = entry.binding, beforeState = entry.snapshot;
-      const candidate = input === null ? undefined : prepare!(input);
+      const candidate = input === null ? undefined : prepare!(input, noteCleanupFailure);
       try {
         const current = requireEntry(instance);
         if (current !== entry || current.binding !== before || current.snapshot !== beforeState) {
           throw new InstanceError('INSTANCE_CHANGED');
         }
-      } catch (error) { candidate?.release(); throw error; }
-      try { edit!(true, instance); } catch (error) { candidate?.release(); throw error; }
+      } catch (error) { releaseBinding(candidate); throw error; }
+      try { edit!(true, instance); } catch (error) { releaseBinding(candidate); throw error; }
       entry.binding = candidate; // Commit before old cleanup; cleanup failure does not roll back.
-      before?.release();
+      releaseBinding(before);
       const observation = candidate?.read() ?? null;
       requireEntry(instance);
       return observation;
@@ -900,7 +946,7 @@ function createScope(sessionId: symbol) {
     unchanged(before);
     return Object.freeze(items);
   };
-  return { handle, end, captureFrame, attach: (callback: () => void, factory: (input: RenderVisualResourceBindingInput) => OwnedBinding,
+  return { handle, end, captureFrame, cleanupUncertain: () => cleanupFailed, attach: (callback: () => void, factory: (input: RenderVisualResourceBindingInput, cleanupFailure: () => void) => OwnedBinding,
     transformWriter: (instance: object, matrix: AffineTransform2D | null, visible: boolean, renderOrder: number) => void,
     visibilityWriter: (instance: object, visible: boolean) => void,
     orderingWriter: (writes: readonly VisualPresentationWrite[]) => void, suspensionReader: () => boolean,
@@ -926,15 +972,16 @@ function createScope(sessionId: symbol) {
 export function createRenderVisualScene(session: RenderFrameSession): RenderVisualScene {
   const sessionId = requireTextureSession(session);
   checkVisualEdit(session);
-  if (occupiedSessions.has(session)) throw new TypeError('Graphics session already has an active visual scene');
+  if (occupiedSessions.has(session)) throw new VisualPresentationError('SCENE_IN_USE');
   const scope = createScope(sessionId);
   const unsubscribe = onTextureSessionEnd(session, () => { scope.end('session-ended'); });
   const detachFrame = attachVisualFrameSource(session, scope.captureFrame);
   scope.attach(() => {
     detachFrame();
-    occupiedSessions.delete(session);
+    // Uncertain cleanup never grants a new visual scope on this session.
+    if (!scope.cleanupUncertain()) occupiedSessions.delete(session);
     unsubscribe();
-  }, input => prepareBinding(session, input),
+  }, (input, cleanupFailure) => prepareBinding(session, input, cleanupFailure),
   (instance, matrix, visible, renderOrder) => writeVisualTransform(session, instance, matrix, visible, renderOrder),
   (instance, visible) => writeVisualVisibility(session, instance, visible),
   writes => writeVisualOrdering(session, writes),

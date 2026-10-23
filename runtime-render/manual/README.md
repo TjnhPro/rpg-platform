@@ -1,5 +1,11 @@
 # Manual Render consumers
 
+## Resource lifetime — v0.8.10
+
+[Two-session walkthrough](visual-lifetime.md) uses actual selected PNG loads,
+shared instance leases and explicit remove/dispose/released-bind controls.
+Count-only diagnostics are not GPU health. Browser NOT_EXECUTED.
+
 ## Diagnostics and cleanup — v0.6.10
 
 The [checkpoint failure/cleanup matrix](../../harness/checkpoints/render-viewport-v0.6.10.md)

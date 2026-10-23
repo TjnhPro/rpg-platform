@@ -1,5 +1,12 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase8 v0.8.10 SR15/SR17 adds four root names for redacted caught-error diagnostics
+and count-only scope observations. Unknown is never success; scope cleanup failure
+is sticky and does not grant a new visual scope on the same session. Existing
+Phase4/6/7 contracts and receipt semantics remain. See
+[checkpoint](checkpoints/scene-rendering-v0.8.10.md) and
+[contract](../runtime-render/docs/scene-rendering-v0.8.10.md).
+
 Phase8 v0.8.9 SR14 adds exactly three root symbols: explicit local sprite layout
 type and set/get. Required old shapes and renderFrame submitted receipt unchanged.
 Existing metadata-only instances require explicit layout+transform+usable binding

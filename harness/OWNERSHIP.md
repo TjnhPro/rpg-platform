@@ -1,5 +1,12 @@
 # Ownership decisions — do not classify by similar names
 
+v0.8.10 SR15/SR17: Runtime Render owns scene usage observations, safe error
+projection and conservative visual-scope cleanup quarantine. Phase7 remains sole
+owner of acquisition/waiters/native allocation release; Phase6 owns graphics
+terminal policy. Editor/Client compatibility builds only. No global bus/profiler,
+new cache, Engine/Server/L1/L2 or dependency change. See
+[checkpoint](checkpoints/scene-rendering-v0.8.10.md).
+
 v0.8.9 SR14: Runtime Render owns live sprite layout, frozen frame snapshot and
 owned Three geometry/material/mesh integration. Phase4 math, Phase6 submission/
 terminal/frame demand, Phase7 usable resource/atlas/cache allocation lifetime stay

@@ -4,6 +4,13 @@
 
 Read root agent guidance first.
 
+- [v0.8.10 SR15/SR17](../harness/checkpoints/scene-rendering-v0.8.10.md): use
+  getRenderVisualDiagnostic for safe caught-error domain/code data; unknown never
+  means success. Scene diagnostics count logical usages and preserve sticky cleanup
+  uncertainty after terminal/repeated disposal. Never release scope quarantine
+  after failed cleanup. Phase6/7 retain canonical lifetime ownership; no telemetry,
+  global error bus or leak-free claim. See [contract](docs/scene-rendering-v0.8.10.md).
+
 - [v0.8.9 SR14](../harness/checkpoints/scene-rendering-v0.8.9.md): explicit local
   sprite layouts opt into actual mesh/frame drawing through the existing frame
   session. Capture one ordered submission under the synchronous edit guard; rank

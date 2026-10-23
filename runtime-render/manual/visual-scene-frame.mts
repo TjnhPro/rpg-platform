@@ -1,5 +1,6 @@
 import {
   createRenderFrameSession, createRenderVisualScene, createVisualResourceCache,
+  removeRenderVisualInstance, getRenderVisualSceneDiagnostics, getRenderVisualDiagnostic,
   addRenderVisualInstance, bindRenderVisualInstanceResource, setRenderVisualInstanceTransform,
   setRenderVisualInstanceSpriteLayout, setRenderVisualInstanceVisible, setRenderVisualInstanceOrder,
   setRenderVisualLayerOrderingPolicy, listRenderVisualDrawCandidates, getRenderFrameInvalidationSnapshot,
@@ -80,6 +81,17 @@ export async function openVisualSceneFrames(host: RenderHostBinding, provider: V
     };
     draw();
     return Object.freeze({ draw, close,
+      inspect() { return getRenderVisualSceneDiagnostics(scene); },
+      removeFirst() { requireOpen(); return removeRenderVisualInstance(scene, first); },
+      disposeScene() { return scene.dispose(); },
+      disposeSession() { return session.dispose(); },
+      bindReleased() {
+        requireOpen();
+        try { bindRenderVisualInstanceResource(scene, second, { resource: leases[0]!,
+          expectedSourceRevision: inputs[0].sourceRevision, frame: inputs[0].frame }); }
+        catch (error) { return getRenderVisualDiagnostic(error); }
+        return null; // An unexpected successful admission remains visible to the observer.
+      },
       hideFirst(visible: boolean) { requireOpen(); setRenderVisualInstanceVisible(scene, first, visible); },
       moveFirst(y: number) { requireOpen(); setRenderVisualInstanceTransform(scene, first, placement(136, y)); },
       orderFirst(order: number) { requireOpen(); setRenderVisualInstanceOrder(scene, first, { layerKey: 'default', order }); },
