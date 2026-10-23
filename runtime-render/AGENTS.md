@@ -58,3 +58,9 @@ Read root agent guidance first.
 - Do not decide damage, collision authority, loot or session settlement in rendering callbacks.
 - Server may need scene geometry/data, but never require GPU frame rendering to validate game results.
 - No UI tests, screenshots-as-tests, added test suites or fake build scripts by default.
+- [v0.6.5 RV07](../harness/checkpoints/render-viewport-v0.6.5.md): Render63 adds
+  pure planRenderViewportSize and three portable types. Validation-only candidate,
+  floor once with explicit host CSS/ratio/dimension/pixel budgets; reject rather
+  than clamp. No resize, CSS/global measurement, GPU capability/memory guarantee,
+  suspension or change to actual session snapshots. Host must not apply candidate
+  pixels directly to a live canvas. Future application remains Render-owned.

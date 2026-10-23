@@ -143,3 +143,32 @@ never appends/removes them. Dispose releases Render resources, not the native
 canvas/context lifetime. Page exit releases any held or late-acquired session.
 No frame is requested by this consumer. No image or visual PASS is claimed.
 No OffscreenCanvas/cross-realm/worker/fallback support is implied.
+# Viewport size validation — v0.6.5
+
+After building, run `node runtime-render/manual/viewport-size.mjs` from the root.
+This optional public-root consumer prints real pure-API results, without assertions,
+canvas, mocks or graphics. **VALIDATION CONTRACT ONLY: no resize is implemented.**
+
+Host supplies logicalWidthCssPx/logicalHeightCssPx and requestedPixelRatio explicitly.
+800x450 at 2 yields a **candidate** 1600x900 (1,440,000 pixels), not a GPU allocation.
+Positive fractional CSS sizes/ratios are valid: 800.25x450 at 1.5 floors to 1200x675;
+planned effective x=1200/800.25 differs from requested 1.5, y=1.5. No integer-only
+CSS requirement, automatic DPR, rounding-to-nearest or adaptive clamp.
+
+Zero/negative/nonfinite metrics and fractional/nonpositive/unsafe integer limits
+throw TypeError. Rounded-empty size, overflow, signed-32-bit dimension budget
+overflow and exceeded width/height/total-pixel budget throw RangeError. No silent
+clamp, fallback ratio or partial plan. Zero means no positive drawable plan;
+this function does not suspend a session. Caller can retain its previous plan.
+Records are detached/frozen. Supplied maxPixelCount bounds pixel-driven memory
+pressure, not total GPU bytes: depth/stencil, multisampling, driver padding and
+other resources are not measured or allocated. No memory availability guarantee.
+
+Limits are caller admission budgets, **not detected backend capabilities**. Current
+backend does not query MAX_VIEWPORT_DIMS/MAX_RENDERBUFFER_SIZE or resize. Future
+Render application must combine actual context limits and budgets, avoid applying
+ratio twice, and read actual drawingBufferWidth/Height after allocation before
+claiming accepted metrics. Do not set canvas.width/height externally on a live
+session or feed this candidate into a viewport snapshot. Existing session snapshots
+remain last configured native extents; actual logical CSS size/ratio is unknown.
+No CSS style/layout writes or Phase4 screen/scene conversions occur here.

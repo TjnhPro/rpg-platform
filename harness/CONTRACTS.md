@@ -1,5 +1,13 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase 6 v0.6.5 RV07: [size/pixel validation](checkpoints/render-viewport-v0.6.5.md)
+adds planRenderViewportSize and three portable types (Render63). Host supplies
+positive CSS measurements, ratio and explicit dimension/pixel budgets. Frozen
+validated-not-applied candidate floors once and rejects unsafe/over-budget values;
+planned per-axis ratios are not backend acceptance. No resize/session change,
+clamp, CSS write, native capability query or allocation; actual session snapshots
+retain native configured dimensions. Editor/Client are build-only collaborators.
+
 This describes the *interactions to audit*, not finalized types or APIs. Do not create interfaces just to satisfy this document before a real MVP needs them.
 
 Phase 6 v0.6.4 RV06: [Viewport identity/state](checkpoints/render-viewport-v0.6.4.md)

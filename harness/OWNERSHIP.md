@@ -1,5 +1,10 @@
 # Ownership decisions — do not classify by similar names
 
+v0.6.5 RV07: Runtime Render owns pure viewport size admission/rounding via its
+public root. Host owns CSS measurement and explicit ratio/budgets; no consumer
+backend math or direct live-buffer resize. Validation candidate is not accepted
+viewport state. See [checkpoint](checkpoints/render-viewport-v0.6.5.md).
+
 This table is for routing an implementation **after inspecting current source**. It is not a universal RPG feature list.
 
 | Change | Primary owner | Allowed collaborator / note |

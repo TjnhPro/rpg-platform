@@ -1,4 +1,10 @@
 export {
+  planRenderViewportSize,
+  type RenderViewportMetrics,
+  type RenderViewportSizeLimits,
+  type RenderViewportSizePlan,
+} from './viewport-size.js';
+export {
   createViewportMapping2D,
   projectPointToViewport2D,
   viewportPointToPlane2D,
