@@ -467,3 +467,10 @@ See [optional texture consumer](texture-upload.md) for bounded PNG acquisition,
 two real graphics sessions, opaque upload handles, independent CPU release,
 cross-session rejection, terminal cleanup and explicit reacquisition. This
 consumer submits no frames and has not been run in a browser here.
+
+## Atlas metadata — v0.7.5
+
+See [finite atlas consumer](atlas-metadata.md) for read-only original TPSheet40300
+metadata parsing, explicit multi-page source bindings and malformed-copy
+diagnostics. Local original metadata was observed; no authored catalog change,
+PNG decode, frame geometry or visual acceptance is implied.

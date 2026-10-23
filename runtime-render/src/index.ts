@@ -49,6 +49,11 @@ export {
 } from './planar-affine.js';
 export { createPlanarTransform2D, type PlanarTransform2D } from './planar-transform.js';
 export { prepareVisualResource, type VisualResourceDescriptor, type VisualResourcePreparation } from './visual-resource.js';
+export { parseUnityAtlasMetadata } from './unity-atlas.js';
+export {
+  type AtlasSourceBinding, type UnityAtlasSheet, type AtlasMetadataPage,
+  type AtlasMetadataFrame, type AtlasMetadata, type AtlasMetadataResult,
+} from './atlas-metadata.js';
 export {
   uploadPngTexture,
   getRenderTextureSnapshot,
