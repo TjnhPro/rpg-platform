@@ -1,5 +1,11 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase9 v0.9.2 CM05 adds three Render-root names for pure orthographic configuration:
+explicit source/center, CSS-px/source-unit x/y scale, positive zoom, preserve-scale
+viewport policy and immutable effective ratios. No live binding/projection matrix,
+v0.9.1 lifecycle, existing signature or closed union change. See
+[contract](../runtime-render/docs/camera-v0.9.2.md) and [checkpoint](checkpoints/camera-v0.9.2.md).
+
 Phase9 v0.9.1 CM02/03/04 adds five Render-root names for a pure camera factory,
 handle, input/update and immutable snapshot. Ephemeral symbol, fixed source plane,
 finite center, no-op revision preservation and terminal/idempotent disposal;

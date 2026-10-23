@@ -1,5 +1,11 @@
 # Ownership decisions — do not classify by similar names
 
+v0.9.2 CM05: **runtime-render** owns portable orthographic scale/zoom/extent policy.
+Reuse canonical Phase4 plane/point capture and existing camera data capture;
+Editor/Client are compatibility consumers only. Harness records evidence.
+No graphics/resource/gameplay/authored ownership transfer or automatic binder.
+See [checkpoint](checkpoints/camera-v0.9.2.md).
+
 v0.9.1 CM02/03/04: **runtime-render** exclusively owns portable camera lifecycle
 and reuses its Phase4 canonical plane/point capture. Harness records evidence;
 Editor/Client compile existing consumers only. No binding, graphics, gameplay,

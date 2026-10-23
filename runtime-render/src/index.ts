@@ -360,3 +360,5 @@ export type { AtlasMetadataLimits } from './unity-atlas.js';
 export { type RenderVisualSpriteLayout } from './visual-sprite-layout.js';
 export { createRenderCamera, type RenderCameraInput, type RenderCameraUpdate,
   type RenderCameraSnapshot, type RenderCamera } from './camera.js';
+export { createOrthographicCameraConfiguration, type OrthographicCameraConfigurationInput,
+  type OrthographicCameraConfiguration } from './camera-configuration.js';

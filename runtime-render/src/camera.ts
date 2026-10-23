@@ -31,7 +31,8 @@ export interface RenderCamera {
   readonly dispose: () => RenderCameraSnapshot;
 }
 
-function fields(input: unknown, keys: readonly string[]): Record<string, unknown> {
+/** Owner-local exact data capture; not a package-root export. */
+export function captureCameraFields(input: unknown, keys: readonly string[]): Record<string, unknown> {
   if (typeof input !== 'object' || input === null || Array.isArray(input)
     || (Object.getPrototypeOf(input) !== Object.prototype && Object.getPrototypeOf(input) !== null)
     || Reflect.ownKeys(input).length !== keys.length) {
@@ -54,7 +55,7 @@ function fields(input: unknown, keys: readonly string[]): Record<string, unknown
  * propagate unchanged. No global registry, projection/pan/zoom math or native types.
  */
 export function createRenderCamera(input: RenderCameraInput): RenderCamera {
-  const initial = fields(input, ['kind', 'source', 'center']);
+  const initial = captureCameraFields(input, ['kind', 'source', 'center']);
   if (initial.kind !== 'orthographic') throw new TypeError('Only orthographic camera state is supported');
   const source = captureProjectionPlane2D(initial.source as ProjectionPlane2D);
   const center = captureProjectionPoint2D(initial.center as PlanarPoint2D);
@@ -68,7 +69,7 @@ export function createRenderCamera(input: RenderCameraInput): RenderCamera {
     getSnapshot: () => snapshot,
     update: (input: RenderCameraUpdate): RenderCameraSnapshot => {
       requireActive();
-      const candidate = fields(input, ['center']);
+      const candidate = captureCameraFields(input, ['center']);
       const next = captureProjectionPoint2D(candidate.center as PlanarPoint2D);
       // Host proxy/accessor evaluation may have disposed or updated this camera.
       // Read the current state only after capture; never commit over termination.

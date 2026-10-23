@@ -4,6 +4,11 @@
 
 Read root agent guidance first.
 
+- [v0.9.2 CM05](docs/camera-v0.9.2.md): pure orthographic configuration uses
+  explicit per-axis CSS-px/source-unit scale, positive zoom and preserve-scale
+  extent policy with center at logical midpoint. No implicit DPR/fit, projection
+  calculator, viewport acceptance or change to the v0.9.1 lifecycle contract.
+
 - [v0.9.1 CM02/03/04](docs/camera-v0.9.1.md) adds real pure CPU camera state,
   ephemeral identity and terminal lifecycle. Reuse Phase4 capture; preserve frozen
   observations, no-op revision and host-exception/reentrant-disposal semantics.
