@@ -361,33 +361,75 @@ This is an optional manual example with no assertions, runner, test helpers or C
 runtime job. It is not an image viewer, loader, asset importer or persisted format.
 Finite observed output and future compatibility limits are recorded in the
 [v0.2.9 checkpoint](../../harness/checkpoints/asset-contracts-v0.2.9.md).
-# On-demand browser frames — v0.6.9
+# Editor viewport host — v0.6.11
 
 Build the workspace, serve its root (for example
 `python -m http.server 8080 --bind 127.0.0.1`), then open
 http://127.0.0.1:8080/editor/manual/frame-demand.html.
-The optional typed browser entry uses only the Render public root. It does not
-replace the earlier one-frame demo or import into Editor root.
+This evolves the v0.6.9 on-demand consumer, using Editor's internal browser host
+and only Render public APIs. The Editor package root stays portable. Earlier
+index.html/manual-demo.ts remains the historical one-frame demo; it does not
+provide this integrated layout/observer/unmount workflow. The binding-only
+createEditorPreviewHost/openEditorPreviewHost API is unchanged and does not acquire
+WebGL: mounted there is not graphics-ready here.
 
-Acquire schedules one initial dirty frame. Observe without scheduling: after a
-successful submission, demand should be clean and no callback pending. Invalidate
-three times in one click: one pending browser callback should submit one redraw.
-The button signals a host-known presentation change; no Scene/asset mutation is
-fabricated. Resize changes host CSS width and calls Render resize; accepted resize
-marks demand before host scheduling. Stop cancels/suspends; invalidate while
-suspended retains demand without scheduling. Resume uses fresh host metrics, then
-schedules one redraw. Hidden documents stop/suspend; visibility alone never resumes.
-Stop/hidden/dispose while acquisition is pending releases the unwanted late result.
+Expected manual review steps below are **not executed results**:
 
-Dispose/page exit cancels callbacks and releases resources. Native loss event
-cancels the host callback; Render owns actual native validation and cleanup. Use
-Observe after dispatch, since the host listener can run before Render's listener.
-The [Render manual](../../runtime-render/manual/README.md) describes real DevTools
-loss, terminal rejection and cleanup limits; do not synthesize a success/loss.
-No idle polling, gameplay tick, timestamp/delta, animation, Document dirty/save
-state or FPS guarantee is added. A clean demand flag is not displayed-frame proof.
-Compare the separate [Client continuous host](../../game-client/manual/README.md).
+1. Mount host: UI mount installs ResizeObserver, resolution matchMedia, window
+   resize, document visibility, native-loss and page-exit listeners. No graphics
+   acquired/frame submitted. Start acquires one real Render session, then applies
+   measured logical CSS extent and current window.devicePixelRatio through Render
+   before scheduling the initial dirty frame. Observe prints host and graphics
+   separately, requests/submissions, CSS/DPR metrics and actual native viewport.
+2. Request one frame: one on-demand callback and synchronous renderFrame request.
+   Request redraw x3 in one click: coalesces to one pending callback/submission.
+   Observe never schedules; once clean there is no idle polling/requeue. Receipt
+   is Render submission evidence only. Inspect actual opaque blue pixels manually;
+   no Scene, authored object, gameplay tick, camera or animation is rendered.
+3. Resize CSS width toggles 320/400 and applies metrics. ResizeObserver also reacts
+   to external layout changes. Browser resize and re-armed resolution media query
+   capture zoom/monitor DPR changes. Changed positive metrics invalidate via Render
+   resize and schedule once; duplicate notifications with equal metrics do not
+   independently dirty the viewport. At the callback, sample metrics again before
+   submitting. Render owns pixel rounding/native limits; no direct canvas.width/
+   height edits. This host has no canvas border/padding/CSS transforms; content
+   measurement for arbitrary styled/transformed canvases is outside this demo.
+4. Stop or Zero CSS width cancels pending callback and suspends active graphics;
+   keep last positive native extent, reservation and redraw demand. Restore layout
+   or visibility alone does not resume. Restore/resume uses fresh metrics through
+   Render before scheduling. Switch tabs while active: hidden suspends; returning
+   requires explicit Resume. While acquisition is pending, Stop/hidden instead
+   invalidates intent and releases any late result; use Start after it settles.
+   No Document envelope/session/dirty/revision/save API is accessed by this host.
+5. Unmount closes immediately, cancels callback, disconnects observer and removes
+   its media/window/document/canvas listeners, then disposes owned graphics. Canvas
+   stays connected, CSS stays host-selected and Render does not force context loss.
+   Button controls remain page-owned so Mount can explicitly create a fresh host.
+   Repeated Unmount is inert. Start/Resume/redraw cannot revive a closed host.
+6. Review pending unmount on a cold load with cache disabled/network throttled:
+   Start then Unmount before backend acquisition settles. Observe pending:true
+   and unmounted, then pending:false with terminal graphics after late release.
+   Remount is refused until old acquisition drains. Public acquisition has no
+   abort API: temporary backend allocation can finish after close, but the result
+   is immediately disposed without adoption/metrics/frame scheduling. No fake
+   delays or hooks. pagehide uses the same teardown; BFCache return needs Mount.
+7. For native context loss use the real optional DevTools extension procedure in
+   the [Render guide](../../runtime-render/manual/README.md). Host only cancels;
+   Render detects actual loss and performs cleanup. Observe after dispatch for
+   terminal diagnostics. Resume cannot restore a terminal session; Start is an
+   explicit reacquisition attempt. Cleanup failure keeps Render quarantine. UI
+   retains safe lastFailure and terminal cleanupFailed even when failure is null;
+   unknown errors stay UNRECOGNIZED, not successful recovery. Invalid/budget-rejected
+   sizing cancels and suspends this host until an explicit valid Resume/Start.
 
-These are manual review instructions, **not executed outcomes**. The genuine
-Editor build compiles the entry, without assertions/tests/mocks. At v0.6.9:
-FEATURE_NOT_VERIFIED / VISUAL_NOT_VERIFIED for scheduling, loss and actual pixels.
+The fixed native buffer attributes are initial acquisition inputs; only CSS/DPR
+metrics accepted by Render configure the live viewport. Positive extents over the
+host's 4096-per-axis / 4,000,000-pixel budgets reject without clamping. Native limits
+may reject earlier. No GPU-memory reclamation or displayed-pixel claim follows from
+cleanup/submission. Modern ResizeObserver/matchMedia/WebGL2 are required; mount
+failure is shown as unrecognized rather than substituting a renderer or mock.
+
+The real build compiles the browser entry and internal integration. There are no
+assertions, runners, mocks, browser automation or runtime CI. At v0.6.11 all browser
+procedures, pending/unmount races, native DPR/resize/loss and pixels remain
+**FEATURE_NOT_VERIFIED / VISUAL_NOT_VERIFIED**. Developer owns manual acceptance.

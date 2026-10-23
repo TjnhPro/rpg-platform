@@ -4,6 +4,14 @@
 
 Read root agent guidance first.
 
+- [v0.6.11 RV16](../harness/checkpoints/render-viewport-v0.6.11.md): internal
+  viewport-host browser integration owns UI mount/unmount, CSS/DPR sampling,
+  observer/listener/rAF lifetime and explicit hidden/zero-size resume policy.
+  It consumes Render root only, closes before draining late acquisition, never
+  adopts/schedules a closed mount. No public root API change: PreviewHost remains
+  binding-only; its mounted state is not graphics-ready. No Document mutation.
+  Same on-demand demo now exercises real graphics/resize/frame/unmount. Build only.
+
 - [v0.6.9 RV13/RV14](../harness/checkpoints/render-viewport-v0.6.9.md): optional
   manual-frame-demand browser entry consumes Render root invalidation/viewport APIs.
   Editor owns one pending browser callback, cancellation, layout and explicit

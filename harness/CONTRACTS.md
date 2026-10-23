@@ -1,5 +1,11 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase6 v0.6.11 RV16: [Editor viewport host](checkpoints/render-viewport-v0.6.11.md)
+integrates existing Render public graphics/viewport/demand APIs in an internal
+browser module, consumed by Editor's manual host. Root contracts remain
+Editor134/Render70/Client0; binding-only PreviewHost mounted is unchanged. Browser
+metrics/callbacks/visibility/teardown stay Editor-local, outside authored Documents.
+
 Phase6 v0.6.10 RV15/RV11: [diagnostics/cleanup](checkpoints/render-viewport-v0.6.10.md)
 adds optional terminal RenderGraphicsSnapshot.cleanupFailed; canonical observations
 always populate it, even when the original exception remains unknown and failure
