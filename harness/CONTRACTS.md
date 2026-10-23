@@ -1,5 +1,13 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase6 v0.6.6 RV08: [explicit resize](checkpoints/render-viewport-v0.6.6.md)
+adds resizeRenderViewport/RenderViewportResizeReceipt (Render65), without new
+required session members. Same canonical renderer/session; RV07 plan then native
+limits, setSize with CSS writes disabled, actual drawing-buffer capture. Rejected
+admission preserves state/reservation; mutation failure terminates via existing
+cleanup/quarantine. Add RESIZE_FAILED and resize stage to graphics diagnostic
+union. No frame, layout measurement, DPR inference or authored-state mutation.
+
 Phase 6 v0.6.5 RV07: [size/pixel validation](checkpoints/render-viewport-v0.6.5.md)
 adds planRenderViewportSize and three portable types (Render63). Host supplies
 positive CSS measurements, ratio and explicit dimension/pixel budgets. Frozen

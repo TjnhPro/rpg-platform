@@ -56,6 +56,8 @@ export {
   type RenderGraphicsSnapshot,
   getRenderViewportSnapshot,
   type RenderViewportSnapshot,
+  resizeRenderViewport,
+  type RenderViewportResizeReceipt,
   inspectRenderTarget,
   type RenderTargetCapabilities,
   getRenderFrameFailure,

@@ -1,5 +1,10 @@
 # Ownership decisions — do not classify by similar names
 
+v0.6.6 RV08: Runtime Render alone applies explicit viewport resize/DPR requests
+on its existing renderer/session. Editor/Client own measurement/layout/frame
+policy, call the public root and do not write a live backing buffer directly.
+See [checkpoint](checkpoints/render-viewport-v0.6.6.md). No other owner changes.
+
 v0.6.5 RV07: Runtime Render owns pure viewport size admission/rounding via its
 public root. Host owns CSS measurement and explicit ratio/budgets; no consumer
 backend math or direct live-buffer resize. Validation candidate is not accepted

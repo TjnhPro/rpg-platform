@@ -8,6 +8,7 @@ import {
 import { FrameError, getRenderFrameFailure, type RenderFrameFailure } from './frame-failure.js';
 import type { ThreeFrameBackend } from './three-frame.js';
 import { readBrowserCanvas } from './canvas-target.js';
+import { planRenderViewportSize, type RenderViewportMetrics, type RenderViewportSizeLimits } from './viewport-size.js';
 
 export { getRenderFrameFailure, type RenderFrameFailure } from './frame-failure.js';
 
@@ -65,6 +66,39 @@ export type RenderViewportSnapshot = {
 // Identity lookup only: non-enumerable weak keys, no global selection or manager.
 // Readers retain only scalar state/immutable diagnostics, never targets/backends.
 const viewportReaders = new WeakMap<object, () => RenderViewportSnapshot>();
+
+/** Accepted synchronous backend configuration; not frame/display or memory evidence. */
+export interface RenderViewportResizeReceipt {
+  readonly sessionId: symbol;
+  /** Unchanged means no backing-buffer attribute write was necessary. */
+  readonly status: 'resized' | 'unchanged';
+  readonly requested: RenderViewportMetrics;
+  readonly size: {
+    readonly width: number;
+    readonly height: number;
+    readonly unit: 'drawing-buffer-px';
+  };
+  /** Native accepted size / supplied logical CSS extent, per axis. */
+  readonly effectivePixelRatio: { readonly x: number; readonly y: number };
+}
+
+const viewportResizers = new WeakMap<RenderFrameSession,
+  (metrics: RenderViewportMetrics, limits: RenderViewportSizeLimits) => RenderViewportResizeReceipt>();
+
+/**
+ * Resize a canonical acquired session without replacing its identity/backend.
+ * No CSS write, frame submission or implicit DPR. Foreign/custom handles throw
+ * TypeError; disposed sessions use existing SESSION_DISPOSED/getSnapshot.
+ * Invalid/over-budget admission leaves state untouched. Backend mutation failure
+ * terminates graphics and attempts cleanup; no success receipt is returned.
+ */
+export function resizeRenderViewport(
+  session: RenderFrameSession, metrics: RenderViewportMetrics, limits: RenderViewportSizeLimits,
+): RenderViewportResizeReceipt {
+  const resize = viewportResizers.get(session);
+  if (resize === undefined) throw new TypeError('Expected a graphics session from this Render package instance');
+  return resize(metrics, limits);
+}
 
 /**
  * Observe the viewport of a handle created by this package instance. Accepts
@@ -258,6 +292,34 @@ async function acquireRenderFrameSession(
       }
       return Object.freeze({ sessionId: snapshot.descriptor.id, status: 'submitted' });
     },
+  });
+  viewportResizers.set(session, (metrics, limits) => {
+    lifecycle.getSnapshot(); // Terminal guard precedes validation.
+    const plan = planRenderViewportSize(metrics, limits);
+    lifecycle.getSnapshot(); // Host-supplied getters may have disposed the session.
+    const owned = backend;
+    if (owned === undefined) throw new Error('Missing graphics resources');
+    try {
+      owned.validateResize(plan);
+    } catch (error) {
+      // Admission happens before mutation. Only recognized backend failure is
+      // terminal here; RangeError is rejection, never a pretend successful resize.
+      if (getRenderFrameFailure(error) !== undefined) throw failGraphics(error);
+      throw error;
+    }
+    try {
+      const accepted = owned.resize(plan);
+      captureViewport(sessionId, accepted.size);
+      return Object.freeze({
+        sessionId, status: accepted.changed ? 'resized' : 'unchanged',
+        requested: plan.requested,
+        size: Object.freeze({ ...accepted.size, unit: 'drawing-buffer-px' as const }),
+        effectivePixelRatio: Object.freeze({
+          x: accepted.size.width / plan.requested.logicalWidthCssPx,
+          y: accepted.size.height / plan.requested.logicalHeightCssPx,
+        }),
+      });
+    } catch (error) { throw failGraphics(error); }
   });
   update({ state: 'ready', failure: null });
   return session;

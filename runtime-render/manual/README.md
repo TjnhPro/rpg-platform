@@ -143,7 +143,48 @@ never appends/removes them. Dispose releases Render resources, not the native
 canvas/context lifetime. Page exit releases any held or late-acquired session.
 No frame is requested by this consumer. No image or visual PASS is claimed.
 No OffscreenCanvas/cross-realm/worker/fallback support is implied.
-# Viewport size validation — v0.6.5
+## Viewport resize — v0.6.6
+
+Build the workspace and serve the root (`python -m http.server 8080 --bind 127.0.0.1`).
+Open http://127.0.0.1:8080/runtime-render/manual/viewport-resize.html.
+The compiled TypeScript entry uses only the public Render root. No automatic
+resize/frame loop, assertions, test runner, mocked context or forced PASS.
+
+1. Acquire: initial native dimensions come from the existing 800x450 canvas, not
+   CSS measurement. No logical size or host ratio is inferred on acquisition.
+2. With explicit ratio1, click Resize800x450, then Resize600x400. Observe actual
+   snapshot extent and receipt; sameIdentity compares real session symbols.
+   Host inline CSS stays800x450, so the backing buffer is displayed stretched.
+   Request one frame after resize to inspect the opaque blue clear manually.
+3. Repeat accepted request: unchanged means no buffer attribute writes, with
+   native extent rechecked and a fresh frozen receipt. No renderer/context recreate.
+4. Set ratio2 and click Resize800x450: within host/native budgets, requested
+   candidate1600x900. Receipt records native accepted size and per-axis effective
+   ratio; native limits/allocation can reject or accept smaller than requested.
+   CSS still800x450. Fractional positive CSS/ratios use the RV07 floor policy.
+5. Invalid zero width prints INVALID_REQUEST (TypeError). Excessive ratio prints
+   REJECTED_REQUEST (RangeError). Snapshot/reservation should stay unchanged;
+   request another frame to inspect continued usability manually.
+6. Dispose, then try resize: existing SESSION_DISPOSED/getSnapshot. Terminal
+   snapshot has size:null. Reload to acquire a new session. Disposal during pending
+   acquisition/page exit releases its late result. No cancellation/recovery claim.
+
+Backend admission additionally queries MAX_VIEWPORT_DIMS/MAX_RENDERBUFFER_SIZE
+before mutation; exceeding these rejects with RangeError. Recognized lost context
+uses CONTEXT_LOST/resize and existing terminal cleanup; native loss events may have
+already terminated the session, in which case the disposed guard takes precedence.
+Failure after mutation clears the active extent and attempts existing cleanup,
+without claiming rollback. RESIZE_FAILED/resize covers known invalid native result
+or GL error; unknown native exceptions remain unknown. Clean cleanup releases the
+target reservation; failed cleanup quarantines it as before. No success receipt
+on failure. Native accepted configuration is not GPU-idle, submitted or displayed
+evidence. No allocation guarantee follows from pixel-count budget/context limits.
+
+**Compiled, not browser-executed** at this checkpoint. Real resize/repeated resize,
+native limits, loss/failure cleanup and visual clear remain FEATURE_NOT_VERIFIED /
+VISUAL_NOT_VERIFIED. Developer records actual browser/GPU observations separately.
+
+## Viewport size validation — v0.6.5 (historical checkpoint)
 
 After building, run `node runtime-render/manual/viewport-size.mjs` from the root.
 This optional public-root consumer prints real pure-API results, without assertions,
@@ -165,7 +206,7 @@ pressure, not total GPU bytes: depth/stencil, multisampling, driver padding and
 other resources are not measured or allocated. No memory availability guarantee.
 
 Limits are caller admission budgets, **not detected backend capabilities**. Current
-backend does not query MAX_VIEWPORT_DIMS/MAX_RENDERBUFFER_SIZE or resize. Future
+backend at v0.6.5 did not query MAX_VIEWPORT_DIMS/MAX_RENDERBUFFER_SIZE or resize. Future
 Render application must combine actual context limits and budgets, avoid applying
 ratio twice, and read actual drawingBufferWidth/Height after allocation before
 claiming accepted metrics. Do not set canvas.width/height externally on a live

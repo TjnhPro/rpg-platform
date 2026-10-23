@@ -4,6 +4,14 @@
 
 Read root agent guidance first.
 
+- [v0.6.6 RV08](../harness/checkpoints/render-viewport-v0.6.6.md): Render65 adds
+  resizeRenderViewport/RenderViewportResizeReceipt; unchanged session interface.
+  Apply explicit RV07 plan once at Three ratio1 via setSize(...,false), enforce
+  native limits and capture actual extent. Rejected admission preserves state;
+  mutation failure uses terminal cleanup/quarantine. Graphics diagnostic adds
+  RESIZE_FAILED and resize stage. No CSS/global measurement, frame, camera or
+  Scene/Document mutation. Manual demo compiled, not browser/visual verified.
+
 - [v0.6.4 RV06](../harness/checkpoints/render-viewport-v0.6.4.md) adds RenderViewportSnapshot/getRenderViewportSnapshot (59 root symbols). One full-canvas viewport uses the existing session symbol. Immutable observations derive from the canonical graphics lifecycle; private weak handle lookup is not an active viewport manager. Last-configured extent uses drawing-buffer-px, independent of CSS and Phase 4 projection planes. Pending/unavailable/active/terminal are produced; suspended is contract-only until an explicit operation is authorized. No resize, suspend/resume, authored-state persistence or required interface/signature changes. Two-target typed manual consumer is compiled, not browser-verified.
 
 - [v0.6.3 RV05](../harness/checkpoints/render-viewport-v0.6.3.md) adds CONTEXT_LOST to the existing graphics failure code union; 57 exports unchanged. Native loss event/pre/post-frame checks terminate the same session via shared cleanup; remove private listener and dispose Three to prevent internal auto-restoration. Preserve terminal diagnostics and failed-cleanup quarantine. Host alone requests a new session on a usable target; no automatic recovery/upload/retry or forced context loss. Unknown frame and getContext exceptions remain original, with null safe failure observation. Manual DevTools native-extension procedure is unexecuted; build PASS is not context-loss/visual evidence.

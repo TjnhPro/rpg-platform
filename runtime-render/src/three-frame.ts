@@ -1,10 +1,16 @@
 import { Camera, REVISION, Scene, WebGLRenderer } from 'three';
 import { FrameError } from './frame-failure.js';
 import { readBrowserCanvas } from './canvas-target.js';
+import type { RenderViewportSizePlan } from './viewport-size.js';
 
 /** Private browser backend; never exposed through public declarations. */
 export interface ThreeFrameBackend {
   readonly viewportSize: { readonly width: number; readonly height: number };
+  readonly validateResize: (plan: RenderViewportSizePlan) => void;
+  readonly resize: (plan: RenderViewportSizePlan) => {
+    readonly size: { readonly width: number; readonly height: number };
+    readonly changed: boolean;
+  };
   readonly renderFrame: () => void;
   readonly dispose: () => void;
 }
@@ -62,7 +68,7 @@ export function createThreeFrameBackend(input: object, onContextLost: () => void
   try {
     renderer = new WebGLRenderer({ canvas: target, context, preserveDrawingBuffer: true });
     renderer.setClearColor(0x147da8, 1);
-    // Full native drawing buffer; no CSS/layout measurement, DPR policy or resize.
+    // Initial native extent; CSS size/ratio remain unknown until an explicit resize.
     viewportSize = Object.freeze({ width: context.drawingBufferWidth, height: context.drawingBufferHeight });
     if (viewportSize.width <= 0 || viewportSize.height <= 0 || context.isContextLost()) {
       throw new FrameError('GRAPHICS_UNAVAILABLE', 'acquire');
@@ -83,7 +89,55 @@ export function createThreeFrameBackend(input: object, onContextLost: () => void
   }
 
   return Object.freeze({
-    viewportSize,
+    get viewportSize() { return viewportSize; },
+    validateResize: (plan: RenderViewportSizePlan): void => {
+      if (contextLost || context.isContextLost()) throw new FrameError('CONTEXT_LOST', 'resize');
+      if (released || renderer === undefined) throw new FrameError('RESIZE_FAILED', 'resize');
+      const viewportLimit: unknown = context.getParameter(context.MAX_VIEWPORT_DIMS);
+      const bufferLimit: unknown = context.getParameter(context.MAX_RENDERBUFFER_SIZE);
+      if (context.isContextLost()) throw new FrameError('CONTEXT_LOST', 'resize');
+      if (!(viewportLimit instanceof Int32Array) || viewportLimit.length < 2
+          || typeof bufferLimit !== 'number' || !Number.isSafeInteger(bufferLimit) || bufferLimit < 1
+          || !Number.isSafeInteger(viewportLimit[0]) || !Number.isSafeInteger(viewportLimit[1])
+          || viewportLimit[0]! < 1 || viewportLimit[1]! < 1) {
+        throw new FrameError('RESIZE_FAILED', 'resize');
+      }
+      if (plan.drawingBuffer.width > Math.min(viewportLimit[0]!, bufferLimit)
+          || plan.drawingBuffer.height > Math.min(viewportLimit[1]!, bufferLimit)) {
+        throw new RangeError('Viewport candidate exceeds native context dimension limits');
+      }
+    },
+    resize: (plan: RenderViewportSizePlan) => {
+      if (contextLost || context.isContextLost()) throw new FrameError('CONTEXT_LOST', 'resize');
+      if (released || renderer === undefined) throw new FrameError('RESIZE_FAILED', 'resize');
+      const { width, height } = plan.drawingBuffer;
+      // Plan already applied ratio and rounding. Three remains at its private
+      // default ratio 1: passing logical CSS extents here would scale incorrectly.
+      const changed = target.width !== width || target.height !== height;
+      try {
+        if (changed) renderer.setSize(width, height, false);
+        const actualWidth = context.drawingBufferWidth;
+        const actualHeight = context.drawingBufferHeight;
+        if (context.isContextLost()) throw new FrameError('CONTEXT_LOST', 'resize');
+        if (!Number.isSafeInteger(actualWidth) || !Number.isSafeInteger(actualHeight)
+            || actualWidth < 1 || actualHeight < 1 || actualWidth > width || actualHeight > height) {
+          throw new FrameError('RESIZE_FAILED', 'resize');
+        }
+        // Implementation may accept less than requested. Configure the viewport
+        // from native dimensions, not Three's requested-size bookkeeping.
+        renderer.setViewport(0, 0, actualWidth, actualHeight);
+        const glError = context.getError();
+        if (context.isContextLost() || glError === context.CONTEXT_LOST_WEBGL) {
+          throw new FrameError('CONTEXT_LOST', 'resize');
+        }
+        if (glError !== context.NO_ERROR) throw new FrameError('RESIZE_FAILED', 'resize');
+        viewportSize = Object.freeze({ width: actualWidth, height: actualHeight });
+        return Object.freeze({ size: viewportSize, changed });
+      } catch (error) {
+        if (context.isContextLost()) throw new FrameError('CONTEXT_LOST', 'resize');
+        throw error; // Unknown exceptions remain unknown; session handles cleanup.
+      }
+    },
     renderFrame: (): void => {
       if (contextLost || context.isContextLost()) {
         contextLost = true;

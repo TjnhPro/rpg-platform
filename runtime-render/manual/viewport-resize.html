@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Viewport resize — manual consumer</title>
+<h1>Explicit viewport resize and DPR</h1>
+<p>Host CSS stays 800×450. Buttons send explicit logical dimensions and ratio to
+Render; backing size changes independently. Request a frame after resize to inspect
+the blue clear. Receipt is not proof of displayed pixels.</p>
+<canvas id="canvas" width="800" height="450" style="width:800px;height:450px" aria-label="Resize target"></canvas>
+<p><label>Explicit ratio <input id="ratio" type="number" value="1" step="0.25"></label></p>
+<p><button id="acquire">Acquire</button>
+<button id="large">Resize 800×450</button> <button id="small">Resize 600×400</button>
+<button id="repeat">Repeat accepted request</button>
+<button id="invalid">Invalid zero width</button> <button id="excessive">Excessive ratio</button>
+<button id="frame">Request one frame</button> <button id="observe">Observe</button>
+<button id="dispose">Dispose (then try resize)</button></p>
+<pre id="output" aria-live="polite"></pre>
+<script type="importmap">
+{"imports": {
+  "@rpg-platform/runtime-render": "/runtime-render/dist/index.js",
+  "three": "/node_modules/three/build/three.module.js"
+}}
+</script>
+<script type="module" src="/runtime-render/dist/manual-viewport-resize.js"></script>
+</html>
