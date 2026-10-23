@@ -1,5 +1,12 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase6 v0.6.14 RV19: [full-phase integration audit](checkpoints/render-viewport-v0.6.14.md)
+records all fifteen checkpoints and Phase1/public-root comparison. No API change
+at closure. BLOCKED_WITH_EVIDENCE: expanded RenderFrameFailure code/stage unions
+reject old closed-union assignments (TS2322); browser MVP remains NOT_OBSERVED.
+Signature/build compatibility does not establish universal source compatibility
+or runtime/visual acceptance. Developer decisions RV19-COMPAT/RV19-BROWSER remain open.
+
 Phase6 v0.6.13 RV18: [two-host MVP](checkpoints/render-viewport-v0.6.13.md)
 composes existing manual browser entries in one realm with one Render root URL.
 No public API/schema/dependency change. Explicit demo ratio selection and retained
