@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Graphics lifecycle — manual consumer</title>
+<h1>Graphics lifecycle</h1>
+<p>Host-owned canvas. Acquire submits no frame. Ready records acquisition, not
+continuous GPU health or displayed pixels. Frame submission and visual review are separate.</p>
+<canvas id="canvas" width="320" height="180" aria-label="Host graphics target"></canvas>
+<p><label>Acquire target <select id="target">
+  <option value="canvas">Supported browser canvas</option>
+  <option value="object">Unsupported object (acquisition failure)</option>
+</select></label></p>
+<button id="acquire">Begin acquisition</button>
+<button id="observe">Observe graphics state</button>
+<button id="frame">Request one frame</button>
+<button id="dispose">Dispose / release late result</button>
+<pre id="output" aria-live="polite"></pre>
+<script type="importmap">
+{"imports": {
+  "@rpg-platform/runtime-render": "/runtime-render/dist/index.js",
+  "three": "/node_modules/three/build/three.module.js"
+}}
+</script>
+<script type="module" src="/runtime-render/dist/manual-graphics-lifecycle.js"></script>
+</html>

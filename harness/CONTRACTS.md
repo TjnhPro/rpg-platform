@@ -2,6 +2,16 @@
 
 This describes the *interactions to audit*, not finalized types or APIs. Do not create interfaces just to satisfy this document before a real MVP needs them.
 
+Phase 6 v0.6.2 RV03/RV04: [Graphics lifecycle](checkpoints/render-viewport-v0.6.2.md)
+adds beginRenderFrameSession, RenderFrameAcquisition and RenderGraphicsSnapshot
+(Render57). An observation handle exposes pending/ready/failed/disposed for the
+same canonical acquisition/session used by the unchanged async factory signature.
+Ready is last acquired state, not live GPU-health or displayed pixels. Failed
+retains safe diagnostics (null if unknown) while Promise rejection is preserved;
+disposed is terminal even if cleanup fails. Binding-only factories/states and
+session required members/error unions are unchanged. Manual consumer is compiled,
+not browser-executed. Supplied RV03/RV04 tasks supersede provisional RV allocation.
+
 Phase 6 v0.6.1 RV02: [Canvas target capabilities](checkpoints/render-viewport-v0.6.1.md)
 adds inspectRenderTarget and RenderTargetCapabilities (Render54). Inspection is a
 frozen target/dimension/reservation observation without context acquisition; graphics

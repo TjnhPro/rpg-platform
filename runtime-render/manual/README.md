@@ -1,4 +1,30 @@
-# Manual Render target consumer — v0.6.1
+# Manual Render consumers
+
+## Graphics lifecycle — v0.6.2
+
+After the workspace build, serve the root as below and open
+http://127.0.0.1:8080/runtime-render/manual/graphics-lifecycle.html.
+Its TypeScript browser entry is compiled by the genuine Render build, imports the
+public package root, and is isolated from the package root's module evaluation.
+No assertions, mocks, test runner or automatic frame loop.
+
+Begin acquisition reports pending, then ready or failed from the same operation.
+Unsupported object selects a real acquisition failure, not a simulated backend.
+On browser canvas, actual WebGL2 availability determines fulfillment/rejection.
+Observe reads the current immutable graphics snapshot. Binding still says bound
+on a ready session. Request one frame explicitly calls renderFrame; submitted is
+not displayed/visual PASS. Dispose reports terminal disposed (failure retained if
+cleanup throws); a later Request one frame uses the old handle and reports existing
+SESSION_DISPOSED/getSnapshot without submitting. Repeated disposal does not erase
+the terminal failure. Begin again is an explicit new request, not implicit recovery.
+Dispose while pending/page exit releases the late result; it does not cancel the
+backend request. Failure snapshots may have failure:null for unknown exceptions;
+the result Promise still rejects and the consumer reports UNRECOGNIZED.
+
+Browser sequence is supplied for manual review; build evidence does not establish
+these outcomes occurred on a real GPU. No browser run is recorded at v0.6.2.
+
+## Target capabilities consumer
 
 From the workspace root, build with `npm run build -- --force`, then serve the
 workspace locally, for example `python -m http.server 8080 --bind 127.0.0.1`.

@@ -1,9 +1,11 @@
 import {
   createRenderSessionLifecycle,
+  getRenderFailure,
+  type RenderFailure,
   type RenderHostBinding,
   type RenderSessionLifecycle,
 } from './index.js';
-import { FrameError, getRenderFrameFailure } from './frame-failure.js';
+import { FrameError, getRenderFrameFailure, type RenderFrameFailure } from './frame-failure.js';
 import type { ThreeFrameBackend } from './three-frame.js';
 import { readBrowserCanvas } from './canvas-target.js';
 
@@ -18,6 +20,37 @@ export interface RenderFrameReceipt {
 /** Explicit graphics session; existing binding-only factories remain unchanged. */
 export interface RenderFrameSession extends RenderSessionLifecycle {
   readonly renderFrame: () => RenderFrameReceipt;
+}
+
+/** Last observed graphics lifecycle, not a live GPU-health/display observation. */
+export type RenderGraphicsSnapshot =
+  | { readonly state: 'pending' | 'ready'; readonly failure: null }
+  | {
+    readonly state: 'failed' | 'disposed';
+    /** Null on clean disposal or an unrecognized failure; never raw host data. */
+    readonly failure: RenderFailure | RenderFrameFailure | null;
+  };
+
+/** Observation of one acquisition and its resulting session, not a second session. */
+export interface RenderFrameAcquisition {
+  readonly getSnapshot: () => RenderGraphicsSnapshot;
+  /** Rejects with the original exception. Caller must handle and release late results. */
+  readonly result: Promise<RenderFrameSession>;
+}
+
+/**
+ * Start the canonical async acquisition with pull-based lifecycle observations.
+ * No callbacks, cancellation, extra backend or implicit frame. Snapshot remains
+ * readable after failure/disposal, retaining no target or native handles.
+ */
+export function beginRenderFrameSession(host: RenderHostBinding): RenderFrameAcquisition {
+  let snapshot: RenderGraphicsSnapshot = Object.freeze({ state: 'pending', failure: null });
+  const update = (next: RenderGraphicsSnapshot): void => { snapshot = Object.freeze(next); };
+  const result = acquireRenderFrameSession(host, update).catch((error: unknown) => {
+    update({ state: 'failed', failure: getRenderFailure(error) ?? getRenderFrameFailure(error) ?? null });
+    throw error;
+  });
+  return Object.freeze({ getSnapshot: () => snapshot, result });
 }
 
 // Resource ownership guard, not a cache. Scoped to this package instance.
@@ -66,6 +99,13 @@ export function inspectRenderTarget(target: unknown): RenderTargetCapabilities {
  * Caller must await acquisition and dispose even a late/unwanted result.
  */
 export async function createRenderFrameSession(host: RenderHostBinding): Promise<RenderFrameSession> {
+  return beginRenderFrameSession(host).result;
+}
+
+/** One canonical implementation for both the existing factory and observation handle. */
+async function acquireRenderFrameSession(
+  host: RenderHostBinding, update: (snapshot: RenderGraphicsSnapshot) => void,
+): Promise<RenderFrameSession> {
   const lifecycle = createRenderSessionLifecycle(host);
   let target: object | undefined;
   let backend: ThreeFrameBackend | undefined;
@@ -89,7 +129,7 @@ export async function createRenderFrameSession(host: RenderHostBinding): Promise
     throw error;
   }
 
-  const dispose = () => {
+  const disposeResources = () => {
     const owned = backend;
     backend = undefined;
     let cleanupFailed = false;
@@ -108,10 +148,22 @@ export async function createRenderFrameSession(host: RenderHostBinding): Promise
     return observation;
   };
 
-  return Object.freeze({
+  const session: RenderFrameSession = Object.freeze({
     getSnapshot: lifecycle.getSnapshot,
     initialize: lifecycle.initialize,
-    dispose,
+    dispose: () => {
+      // Only the first release changes graphics observations. Repeated release
+      // must not erase a preceding frame failure or cleanup-failure diagnostic.
+      const firstRelease = backend !== undefined;
+      try {
+        const observation = disposeResources();
+        if (firstRelease) update({ state: 'disposed', failure: null });
+        return observation;
+      } catch (error) {
+        if (firstRelease) update({ state: 'disposed', failure: getRenderFrameFailure(error) ?? null });
+        throw error;
+      }
+    },
     renderFrame: (): RenderFrameReceipt => {
       const snapshot = lifecycle.getSnapshot(); // Disposed sessions use existing error semantics.
       try {
@@ -119,10 +171,14 @@ export async function createRenderFrameSession(host: RenderHostBinding): Promise
         backend.renderFrame();
       } catch {
         let cleanupFailed = false;
-        try { dispose(); } catch { cleanupFailed = true; }
-        throw new FrameError('FRAME_FAILED', 'renderFrame', cleanupFailed);
+        try { disposeResources(); } catch { cleanupFailed = true; }
+        const error = new FrameError('FRAME_FAILED', 'renderFrame', cleanupFailed);
+        update({ state: 'failed', failure: getRenderFrameFailure(error) ?? null });
+        throw error;
       }
       return Object.freeze({ sessionId: snapshot.descriptor.id, status: 'submitted' });
     },
   });
+  update({ state: 'ready', failure: null });
+  return session;
 }
