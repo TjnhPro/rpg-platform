@@ -1,5 +1,11 @@
 # Ownership decisions — do not classify by similar names
 
+v0.8.2 SR03/SR04: Runtime Render owns live visual registration identity/membership
+inside the canonical visual scope. Neutral correlation is detached metadata, not
+an Editor dependency or unique live key. Editor/Client are build-only consumers;
+Engine/Server and dependency direction unchanged. See
+[checkpoint](checkpoints/scene-rendering-v0.8.2.md).
+
 v0.8.1 SR02: Runtime Render owns empty session-local visual scene lifetime through
 its public root. Reuse canonical graphics admission/terminal hooks; one active
 scope per session. Host owns graphics acquisition/disposal and borrowed canvas.

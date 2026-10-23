@@ -4,6 +4,13 @@
 
 Read root agent guidance first.
 
+- [v0.8.2 SR03/SR04](../harness/checkpoints/scene-rendering-v0.8.2.md): Render
+  root owns immutable scene-local membership. Caller string live keys differ from
+  runtime scene/session symbols and optional neutral authored correlation. Remove
+  by exact issued handle; stale handles never remove reused IDs. Ordinals increase
+  across clear/remove; terminal clears membership and rejects operations. No native
+  instances/resources/sorting; historical records are not live/GPU observations.
+
 - [v0.8.1 SR02](../harness/checkpoints/scene-rendering-v0.8.1.md): empty visual
   scene scope accepts one canonical live graphics session, one active scene per
   session. clear is empty-only; dispose/canonical session end is terminal and

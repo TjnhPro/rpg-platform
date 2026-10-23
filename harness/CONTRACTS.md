@@ -1,5 +1,13 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase 8 v0.8.2: [SR03/SR04 membership](checkpoints/scene-rendering-v0.8.2.md)
+adds seven Render-root names for add/get/list/remove and immutable instance/input/
+correlation types. Exact issued handle required for removal; caller keys are live
+scene-local, correlation is optional nonunique metadata. ID reuse yields fresh
+handle/ordinal; stale remove is false. Clear/terminal empties owned membership;
+terminal operations reject. No required SR02 signature change, native objects,
+resources or sorting. See [contract](../runtime-render/docs/scene-rendering-v0.8.2.md).
+
 Phase6 v0.6.14 RV19: [full-phase integration audit](checkpoints/render-viewport-v0.6.14.md)
 records all fifteen checkpoints and Phase1/public-root comparison. No API change
 at closure. Post-review: RV19-COMPAT is ACCEPTED_CONSUMER_MIGRATION, an intentional

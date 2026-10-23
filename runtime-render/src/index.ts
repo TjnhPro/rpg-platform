@@ -3,6 +3,13 @@ export {
   type RenderVisualScene,
   type RenderVisualSceneSnapshot,
   type RenderVisualSceneDisposal,
+  addRenderVisualInstance,
+  getRenderVisualInstance,
+  listRenderVisualInstances,
+  removeRenderVisualInstance,
+  type RenderVisualInstance,
+  type RenderVisualInstanceInput,
+  type RenderVisualCorrelation,
 } from './visual-scene.js';
 export { renderVisualResourceDemo } from './visual-resource-demo.js';
 export {
