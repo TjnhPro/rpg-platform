@@ -1,3 +1,10 @@
+# Editor Visual Resource Integration — v0.7.11
+
+[Editor-owned host guide](editor-visual-resource.md): authored catalog/reference to
+Render resource lease, explicit provider permissions and preview replacement/close/
+unmount. Optional package-root consumer; no authored state mutation or public API
+extension. Browser NOT_EXECUTED; FEATURE_NOT_VERIFIED / VISUAL_NOT_VERIFIED.
+
 # Manual Source Loading Lifecycle — v0.7.2
 
 [Async source guide](visual-source-load.md) traces independent requests, source-only
