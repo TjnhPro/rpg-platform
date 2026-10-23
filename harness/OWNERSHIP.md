@@ -3,8 +3,10 @@
 v0.6.14 RV19: Runtime Render remains the canonical context/viewport/frame owner;
 Editor/Client are host consumers. Closure is Harness documentation only, with no
 source/dependency/owner changes. [Review packet](checkpoints/render-viewport-v0.6.14.md)
-is BLOCKED_WITH_EVIDENCE pending diagnostic-compatibility decision and real browser
-observations. Developer alone accepts Phase6; no merge or next phase authorized.
+records post-review RV19-COMPAT as ACCEPTED_CONSUMER_MIGRATION and RV19-BROWSER as
+VERIFICATION_PENDING, not a confirmed production defect. No renderer rewrite or
+ownership change is warranted by either finding. Developer alone accepts Phase6;
+no runtime deferral exception, merge or next phase is authorized by this update.
 
 v0.6.13 RV18: Runtime Render owns the canonical two-session graphics contract;
 no backend/public changes needed. Editor owns a manual-only composition page;

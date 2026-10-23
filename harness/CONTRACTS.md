@@ -2,10 +2,14 @@
 
 Phase6 v0.6.14 RV19: [full-phase integration audit](checkpoints/render-viewport-v0.6.14.md)
 records all fifteen checkpoints and Phase1/public-root comparison. No API change
-at closure. BLOCKED_WITH_EVIDENCE: expanded RenderFrameFailure code/stage unions
-reject old closed-union assignments (TS2322); browser MVP remains NOT_OBSERVED.
-Signature/build compatibility does not establish universal source compatibility
-or runtime/visual acceptance. Developer decisions RV19-COMPAT/RV19-BROWSER remain open.
+at closure. Post-review: RV19-COMPAT is ACCEPTED_CONSUMER_MIGRATION, an intentional
+public diagnostic contract expansion, not universal source compatibility. Consumers
+using closed unions/exhaustive checks must handle the five added codes and resize
+stage. Unknown backend exceptions can propagate unchanged; classifiers may return
+undefined, which means unknown rather than success. No rollback/shim is required.
+RV19-BROWSER remains VERIFICATION_PENDING: browser MVP is NOT_OBSERVED, not a
+confirmed production defect. READY_FOR_DEVELOPER_REVIEW does not mean MVP_PASS
+or approval to merge with deferred runtime verification.
 
 Phase6 v0.6.13 RV18: [two-host MVP](checkpoints/render-viewport-v0.6.13.md)
 composes existing manual browser entries in one realm with one Render root URL.

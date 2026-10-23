@@ -1,8 +1,46 @@
 # v0.6.14 — Render Context & Viewport integration audit
 
-RV19. **API_DESIGN_ONLY / BUILD_PASS / BLOCKED_WITH_EVIDENCE**.
+RV19. **API_DESIGN_ONLY / BUILD_PASS / READY_FOR_DEVELOPER_REVIEW**.
 **FEATURE_NOT_VERIFIED / VISUAL_NOT_VERIFIED**. This is the final Phase 6 review
 packet, not Developer acceptance or a declaration that the runtime MVP passed.
+
+## Post-review disposition — 2026-10-23
+
+The Developer-supplied PR #6 review refers to the original closure commit
+`92c95f260c176f2cfeb5b6d04571d1fd597c1054`. Its original
+BLOCKED_WITH_EVIDENCE audit and exact-head CI remain traceable at that commit.
+This documentation-only follow-up records the review disposition; it is not
+v0.6.15 or a sixteenth implementation checkpoint. There are fifteen checkpoint
+commits plus this review-response commit, on the same branch/PR.
+
+- **RV19-COMPAT: ACCEPTED_CONSUMER_MIGRATION.** The review accepts intentional
+  expansion of the public diagnostic contract (six to eleven error codes, plus
+  resize stage). Closed unions/exhaustive consumers must migrate. Keep the
+  diagnostic detail; no rollback, shim or production version just for the
+  illustrative old-union compiler failure. The two TS2322 findings remain true.
+  Unknown backend exceptions may propagate unchanged instead of normalizing to
+  FRAME_FAILED; consumers must retain unknown handling and must not interpret an
+  undefined classifier result as successful submission or cleanup. RenderFailure
+  binding-only diagnostics remain unchanged. No external production consumer
+  failure has been demonstrated; current repository consumers compile.
+- **RV19-BROWSER: VERIFICATION_PENDING.** Missing browser access is environment
+  evidence, not a confirmed renderer defect. All previous NOT_OBSERVED entries
+  remain unchanged; no manual runtime evidence was added by the review.
+- Implementation and audit deliverables are present. Functional MVP acceptance
+  remains pending. The review proposes an optional risk-acceptance merge with
+  IMPLEMENTATION_COMPLETE / BUILD_PASS / RUNTIME_VERIFICATION_DEFERRED; this
+  follow-up does not enact that exception or claim MVP_PASS. PR stays draft/open;
+  merge and Phase 7 require a separate Developer instruction. Any later confirmed
+  runtime bug must be fixed under Render ownership, without a consumer workaround.
+
+Scope is the three existing Harness docs only, with runtime-render the canonical
+contract owner. No source, public type, manifest, pin, dependency or test change.
+Review-response gate results and exact-head push/PR CI are recorded in the PR
+ledger separately from the original fifteen checkpoint entries.
+Local review-response gates: ARCH_CHECK_PASS (78 JS/TS files), SCOPE_PASS (three
+Harness docs plus excluded pre-existing .mcp.json), Render/Editor/Client builds
+with consumers PASS, forced five-project workspace build PASS, diff check PASS.
+No failed/unconfigured builds; no new runtime/visual evidence or automated tests.
 
 ## Preflight and exact scope
 
@@ -58,7 +96,7 @@ All graphics behavior remains NOT_VERIFIED; v0.6.13 manual evidence is blocked.
 | [v0.6.11](render-viewport-v0.6.11.md) <br> 90ea18c370af629b32257fcbf6fce2c89aa73f76 | R contract; E implementation | No root delta; internal Editor viewport host, CSS/DPR/visibility/on-demand/pending-close ownership. | [push PASS](https://github.com/TjnhPro/rpg-platform/actions/runs/39897353361), [pull_request PASS](https://github.com/TjnhPro/rpg-platform/actions/runs/39897359700) | Graphics behavior NOT_VERIFIED; full-phase review pending |
 | [v0.6.12](render-viewport-v0.6.12.md) <br> d80f9d15cae8d5ec7b3d4abeb1f92aaf319fb6ec | R contract; C implementation | No root delta; Client browser entry/DOM lib, continuous requests/start-stop/resize/release; root stays headless. | [push PASS](https://github.com/TjnhPro/rpg-platform/actions/runs/39898184335), [pull_request PASS](https://github.com/TjnhPro/rpg-platform/actions/runs/39898187544) | Graphics behavior NOT_VERIFIED; full-phase review pending |
 | [v0.6.13](render-viewport-v0.6.13.md) <br> 341742ea413c789efa554b433d0169e011be2876 | R contract; E/C consumers | No root delta; same-realm two-host manual composition, ratio policy and retained configuration receipts; browser blocked. | [push PASS](https://github.com/TjnhPro/rpg-platform/actions/runs/39898870081), [pull_request PASS](https://github.com/TjnhPro/rpg-platform/actions/runs/39898875505) | Manual MVP NOT_OBSERVED; RV19-BROWSER |
-| v0.6.14 <br> This checkpoint; full SHA in PR ledger | R primary; E/C review; H docs | API_DESIGN_ONLY; no export/source delta; compatibility and evidence audit | Local gates below; exact-head push/PR links in PR ledger | RV19-COMPAT and RV19-BROWSER OPEN |
+| v0.6.14 <br> Original closure 92c95f260c176f2cfeb5b6d04571d1fd597c1054; review follow-up in PR ledger | R primary; E/C review; H docs | API_DESIGN_ONLY; no export/source delta; compatibility and evidence audit | Local gates below; exact-head push/PR links in PR ledger | Post-review: COMPAT migration accepted; BROWSER verification pending |
 
 ## Public surface and compatibility
 
@@ -85,7 +123,7 @@ suspend/resume(2), invalidation(3). No removed/renamed root symbol was found.
   active viewport. A receipt is not display/GPU completion evidence.
 - `getRenderFailure` and its original union are unchanged. Both classifiers use
   same-package-instance branding; undefined means unknown, not successful cleanup.
-- **Compatibility decision RV19-COMPAT (OPEN/BLOCKER):** expanding
+- **Compatibility finding RV19-COMPAT (post-review: ACCEPTED_CONSUMER_MIGRATION):** expanding
   `RenderFrameFailure.code` and `.stage` is not universally source-compatible for
   old exhaustive consumers. The added codes are `CONTEXT_LOST`, `RESIZE_FAILED`,
   `VIEWPORT_SUSPENDED`, `FRAME_IN_PROGRESS`, `FRAME_NOT_SUBMITTED`; stage adds
@@ -93,9 +131,8 @@ suspend/resume(2), invalidation(3). No removed/renamed root symbol was found.
   current values. Strict ES2022-only consumer compilation produced **TS2322** for
   each assignment. This is an actual compatibility finding, not a workspace
   build failure or evidence of an existing in-repo consumer failure. Developer
-  must decide whether to accept consumer migration under the Phase 6 contract
-  or authorize a separately scoped compatibility change. No shim/widening/fix
-  has been smuggled into this closure.
+  supplied review accepts consumer migration under the Phase 6 contract as an
+  intentional diagnostic expansion. No shim/widening/fix is part of this closure.
 - Error behavior also changed: recognized native loss is terminal, resize has its
   own failure stage, suspended/reentrant/no-submission frames reject; unknown
   backend exceptions can propagate unchanged rather than always normalize to
@@ -176,7 +213,7 @@ Source audit findings (not runtime observations):
 
 ## Manual evidence and separate blocker
 
-**RV19-BROWSER (OPEN/BLOCKER):** retain the actual
+**RV19-BROWSER (VERIFICATION_PENDING; functional acceptance outstanding):** retain the actual
 [v0.6.13 reproduction and expected/observed matrix](render-viewport-v0.6.13.md#reproduction-and-expectedobserved-matrix).
 That run reported browser inventory `apps:[], browsers:[]`; opening the real page
 returned `Browser is not available: iab`. This closure adds no browser observation.
@@ -224,10 +261,12 @@ appended to the existing PR ledger at this checkpoint SHA after push.
   audited; Phase1 exports preserved; no duplicate backend or hidden deep import.
 - [x] Genuine builds/static gates and public consumer compilation run; compile
   incompatibility separated from project build status.
-- [ ] RV19-COMPAT: Developer decision on expanded diagnostics/semantic migration.
+- [x] RV19-COMPAT: supplied review accepts diagnostic expansion/consumer migration;
+  unknown-exception semantic change is disclosed above.
 - [ ] RV19-BROWSER: real manual MVP/native failure/resize/cleanup observations.
 - [ ] Developer decides full-phase acceptance and any merge separately.
 
 Stop after this checkpoint's commit/push/CI and PR update. Do not merge, tag,
 release, publish, modify upstream or implement v0.6.15. Review packet delivered;
-Phase 6 acceptance remains blocked by the two explicit items above.
+RV19-COMPAT is resolved by migration acceptance. Browser runtime verification and
+functional Phase 6 acceptance remain pending; no merge exception is enacted.
