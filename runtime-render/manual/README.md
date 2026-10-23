@@ -143,6 +143,57 @@ never appends/removes them. Dispose releases Render resources, not the native
 canvas/context lifetime. Page exit releases any held or late-acquired session.
 No frame is requested by this consumer. No image or visual PASS is claimed.
 No OffscreenCanvas/cross-realm/worker/fallback support is implied.
+## Full-canvas region and suspension — v0.6.7
+
+Build and serve the root (`python -m http.server 8080 --bind 127.0.0.1`), then open
+http://127.0.0.1:8080/runtime-render/manual/viewport-identity.html.
+This existing public-root manual consumer now includes independent A/B suspension
+controls. No assertions, test runner, browser automation or automatic frame loop.
+
+1. Acquire A and B; Observe both, Frame A and Frame B. Active viewport scope is
+   full-canvas with native buffer bounds(0,0,width,height), not CSS/screen/world
+   coordinates. Snapshot.size is the actual last-configured positive extent.
+2. Toggle host hidden A only. This toggles native host hidden UI, **not** Render
+   state. Browser composition/visibility and ability to display a frame may vary;
+   even a submitted frame is not evidence of display. No global tab listener.
+3. Suspend A explicitly (repeat allowed). Observe A suspended, graphics ready,
+   extent and reservation retained. Frame A rejects VIEWPORT_SUSPENDED/renderFrame
+   without native submission or cleanup; A remains suspended. Frame B remains an
+   independent request. Observe both; B state/identity/extent must be reviewed
+   separately, not inferred from A's source/build result.
+4. Host zero CSS + suspend A sets host CSS width/height0, measures zero, and calls
+   suspendRenderViewport. It never writes canvas.width/height. Logical zero means
+   host defers rendering while retaining the last positive backing extent; it is
+   neither invalid initial graphics target nor context loss. Zero resume rejects
+   TypeError and keeps suspension; resize/plan still require positive dimensions.
+5. Restore layout + resume A restores host CSS, measures fresh positive extents,
+   and calls resumeRenderViewport with explicit ratio1/budgets. Actual resize is
+   RV08; only success clears suspension. sameIdentity compares the real old/new
+   symbol. Frame A requests the normal clear frame; inspect output manually.
+6. Dispose A while suspended or active: terminal,size:null and existing cleanup.
+   Frame/suspend/resume on disposed A use SESSION_DISPOSED/getSnapshot. B is not
+   disposed. Page exit releases held/late sessions as before. Reload for fresh UI.
+
+Hosts should defer frame requests while hidden/zero/paused by explicit suspension.
+Calling renderFrame anyway rejects rather than returning a fake submitted/deferred
+receipt. Suspension is idempotent and does not poll context health. Real native
+loss still terminates via RV05 event; if loss is not observed yet a suspended frame
+may reject suspension first. Resume uses existing native loss checks; no implicit
+context/session recreation or visibility-driven dispose. Valid resize while
+suspended updates the last extent but does not enable frames. Rejected resume
+preserves state; post-mutation failure is terminal per RV08, without rollback.
+
+Region extension seam is documentation-only: any future subregion contract would
+need explicit buffer-unit origin/bounds, clipping and full-buffer resize policy.
+No consumer requires it here; no scissor stack, split-screen or render texture.
+No Scene/Document data, dirty/revision or gameplay tick is touched. Dispose resets
+the suspension scalar and reuses canonical backend cleanup/quarantine, without
+removing host elements/listeners or restoring/changing host CSS preferences.
+
+**Compiled, not browser-executed.** Active/suspended/resume/isolation, actual
+hidden-tab submission and visual clear remain FEATURE_NOT_VERIFIED /
+VISUAL_NOT_VERIFIED. Developer records browser/version and actual observations.
+
 ## Viewport resize — v0.6.6
 
 Build the workspace and serve the root (`python -m http.server 8080 --bind 127.0.0.1`).

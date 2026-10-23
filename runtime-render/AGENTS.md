@@ -4,6 +4,15 @@
 
 Read root agent guidance first.
 
+- [v0.6.7 RV09–RV11](../harness/checkpoints/render-viewport-v0.6.7.md): Render67
+  adds explicit suspendRenderViewport/resumeRenderViewport. Suspended keeps backend,
+  last positive buffer extent and reservation; direct frame rejects nonterminal
+  VIEWPORT_SUSPENDED/renderFrame. Resume requires fresh positive RV08 metrics before
+  enabling frames; resize alone keeps suspension. Host zero CSS/hidden remains UI
+  policy, never an automatic dispose, buffer0 or native-loss signal. Full-canvas
+  bounds only; no scissor/subregion implementation. Two-target manual compiled,
+  not browser/GPU/visual verified. Historical checkpoint notes below retain scope.
+
 - [v0.6.6 RV08](../harness/checkpoints/render-viewport-v0.6.6.md): Render65 adds
   resizeRenderViewport/RenderViewportResizeReceipt; unchanged session interface.
   Apply explicit RV07 plan once at Three ratio1 via setSize(...,false), enforce

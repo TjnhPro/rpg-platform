@@ -58,6 +58,8 @@ export {
   type RenderViewportSnapshot,
   resizeRenderViewport,
   type RenderViewportResizeReceipt,
+  suspendRenderViewport,
+  resumeRenderViewport,
   inspectRenderTarget,
   type RenderTargetCapabilities,
   getRenderFrameFailure,

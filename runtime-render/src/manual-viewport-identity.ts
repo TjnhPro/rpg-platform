@@ -2,6 +2,7 @@
 import {
   beginRenderFrameSession, getRenderViewportSnapshot, getRenderFailure, getRenderFrameFailure,
   type RenderFrameAcquisition, type RenderFrameSession, type RenderViewportSnapshot,
+  suspendRenderViewport, resumeRenderViewport, inspectRenderTarget,
 } from '@rpg-platform/runtime-render';
 
 const output = document.querySelector<HTMLPreElement>('#output');
@@ -10,7 +11,9 @@ function write(value: unknown): void {
   output!.textContent += `${JSON.stringify(value, (_key, item: unknown) => typeof item === 'symbol' ? String(item) : item)}\n`;
 }
 function report(error: unknown): void {
-  write(getRenderFailure(error) ?? getRenderFrameFailure(error) ?? { failure: 'UNRECOGNIZED' });
+  write(getRenderFailure(error) ?? getRenderFrameFailure(error) ?? {
+    failure: 'UNRECOGNIZED', exceptionName: error instanceof Error ? error.name : 'unknown',
+  });
 }
 
 function slot(label: string) {
@@ -18,6 +21,9 @@ function slot(label: string) {
   const acquire = document.querySelector<HTMLButtonElement>(`#acquire-${label}`);
   const dispose = document.querySelector<HTMLButtonElement>(`#dispose-${label}`);
   if (!canvas || !acquire || !dispose) throw new Error(`Manual viewport ${label} host missing`);
+  const target = canvas;
+  const logicalWidth = target.width, logicalHeight = target.height;
+  const limits = { maxWidthPixels: 4096, maxHeightPixels: 4096, maxPixelCount: 4_000_000 };
   let operation: RenderFrameAcquisition | undefined;
   let session: RenderFrameSession | undefined;
   let pending = false;
@@ -26,7 +32,9 @@ function slot(label: string) {
   const read = (): RenderViewportSnapshot | undefined => operation && getRenderViewportSnapshot(operation);
   const observe = (): void => {
     const current = read();
-    write({ label, previous, current });
+    write({ label, previous, current, target: inspectRenderTarget(target),
+      host: { hidden: target.hidden, measured: { width: target.getBoundingClientRect().width,
+        height: target.getBoundingClientRect().height }, visibility: document.visibilityState } });
     if (session) {
       const fromSession: RenderViewportSnapshot = getRenderViewportSnapshot(session);
       write({ label, sessionObservation: fromSession,
@@ -54,6 +62,34 @@ function slot(label: string) {
     finally { pending = false; observe(); }
   };
   dispose.onclick = release;
+  const control = (name: string, action: (current: RenderFrameSession) => void): void => {
+    const button = document.querySelector<HTMLButtonElement>(`#${name}-${label}`);
+    if (!button) throw new Error(`Manual viewport ${label}/${name} control missing`);
+    button.onclick = () => {
+      if (!session) { write({ label, status: 'NO_SESSION' }); return; }
+      try { action(session); } catch (error) { report(error); }
+      observe();
+    };
+  };
+  control('suspend', (current) => write(suspendRenderViewport(current)));
+  control('hidden', () => { target.hidden = !target.hidden; }); // Host UI only.
+  control('zero', (current) => {
+    target.style.width = '0px'; target.style.height = '0px'; // Host layout, not buffer.
+    const measured = target.getBoundingClientRect();
+    if (measured.width === 0 || measured.height === 0) write(suspendRenderViewport(current));
+  });
+  control('invalid-resume', (current) => write(resumeRenderViewport(current,
+    { logicalWidthCssPx: 0, logicalHeightCssPx: logicalHeight, requestedPixelRatio: 1 }, limits)));
+  control('resume', (current) => {
+    const before = getRenderViewportSnapshot(current);
+    target.hidden = false;
+    target.style.width = `${logicalWidth}px`; target.style.height = `${logicalHeight}px`;
+    const measured = target.getBoundingClientRect();
+    const receipt = resumeRenderViewport(current, { logicalWidthCssPx: measured.width,
+      logicalHeightCssPx: measured.height, requestedPixelRatio: 1 }, limits);
+    write({ label, receipt, sameIdentity: receipt.sessionId === before.sessionId });
+  });
+  control('frame', (current) => write(current.renderFrame()));
   return { read, observe, release };
 }
 

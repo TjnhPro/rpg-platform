@@ -1,5 +1,14 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase6 v0.6.7 RV09–RV11: [region/suspension](checkpoints/render-viewport-v0.6.7.md)
+adds suspendRenderViewport/resumeRenderViewport (Render67). Full-canvas scope
+means native buffer bounds(0,0,width,height); subregions are documentation-only.
+Suspended is now produced by an explicit host operation, retaining positive extent,
+ready graphics and reservation. Frame rejects VIEWPORT_SUSPENDED/renderFrame without
+cleanup/submission. Resume applies fresh positive RV08 metrics on the same session
+before enabling frames. Host-hidden/zero CSS is not native context loss or a zero
+backing buffer. No required session/snapshot shape change or authored-state mutation.
+
 Phase6 v0.6.6 RV08: [explicit resize](checkpoints/render-viewport-v0.6.6.md)
 adds resizeRenderViewport/RenderViewportResizeReceipt (Render65), without new
 required session members. Same canonical renderer/session; RV07 plan then native

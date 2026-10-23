@@ -41,6 +41,7 @@ export interface RenderFrameAcquisition {
 
 /** Detached, last-configured extent; not CSS size, world placement or screen mapping. */
 export type RenderViewportSnapshot = {
+  /** Buffer bounds (0,0,width,height) in drawing-buffer pixels; no subregions. */
   readonly scope: 'full-canvas';
   readonly graphics: RenderGraphicsSnapshot;
 } & (
@@ -53,7 +54,7 @@ export type RenderViewportSnapshot = {
   | {
     /** One full-canvas viewport per session; existing symbol is its identity. */
     readonly sessionId: symbol;
-    /** Suspended is reserved for a future explicit operation; not produced yet. */
+    /** Host-controlled suspension retains the last configured positive extent. */
     readonly state: 'active' | 'suspended';
     readonly size: {
       readonly width: number;
@@ -84,6 +85,35 @@ export interface RenderViewportResizeReceipt {
 
 const viewportResizers = new WeakMap<RenderFrameSession,
   (metrics: RenderViewportMetrics, limits: RenderViewportSizeLimits) => RenderViewportResizeReceipt>();
+const viewportSuspensions = new WeakMap<RenderFrameSession, (suspended: boolean) => void>();
+
+/**
+ * Explicitly defer rendering for host-hidden, paused or zero logical size UI.
+ * Idempotent; retains backend, positive native extent and target reservation.
+ * No CSS/native-buffer writes or GPU-health/readiness claim. Terminal guards
+ * remain unchanged; custom/foreign handles throw TypeError.
+ */
+export function suspendRenderViewport(session: RenderFrameSession): RenderViewportSnapshot {
+  const change = viewportSuspensions.get(session);
+  if (change === undefined) throw new TypeError('Expected a graphics session from this Render package instance');
+  change(true);
+  return getRenderViewportSnapshot(session);
+}
+
+/**
+ * Apply fresh positive host metrics on the same session before enabling frames.
+ * Admission rejection preserves suspension; backend failure remains terminal.
+ * Also valid on active sessions. Never implicitly creates/restores graphics.
+ */
+export function resumeRenderViewport(
+  session: RenderFrameSession, metrics: RenderViewportMetrics, limits: RenderViewportSizeLimits,
+): RenderViewportResizeReceipt {
+  const change = viewportSuspensions.get(session);
+  if (change === undefined) throw new TypeError('Expected a graphics session from this Render package instance');
+  const receipt = resizeRenderViewport(session, metrics, limits);
+  change(false);
+  return receipt;
+}
 
 /**
  * Resize a canonical acquired session without replacing its identity/backend.
@@ -119,6 +149,8 @@ export function getRenderViewportSnapshot(
  * readable after failure/disposal, retaining no target or native handles.
  */
 export function beginRenderFrameSession(host: RenderHostBinding): RenderFrameAcquisition {
+  // One local flag shared with canonical session operations, not a second lifecycle.
+  const viewportControl = { suspended: false };
   let snapshot: RenderGraphicsSnapshot = Object.freeze({ state: 'pending', failure: null });
   let sessionId: symbol | null = null;
   let size: { readonly width: number; readonly height: number; readonly unit: 'drawing-buffer-px' } | null = null;
@@ -131,7 +163,7 @@ export function beginRenderFrameSession(host: RenderHostBinding): RenderFrameAcq
   const readViewport = (): RenderViewportSnapshot => {
     const common = { scope: 'full-canvas' as const, graphics: snapshot };
     if (snapshot.state === 'ready' && size !== null && sessionId !== null) {
-      return Object.freeze({ ...common, sessionId, state: 'active', size });
+      return Object.freeze({ ...common, sessionId, state: viewportControl.suspended ? 'suspended' : 'active', size });
     }
     const state = snapshot.state === 'pending' ? 'uninitialized'
       : acquired ? 'terminal' : 'unavailable';
@@ -140,7 +172,7 @@ export function beginRenderFrameSession(host: RenderHostBinding): RenderFrameAcq
   const result = acquireRenderFrameSession(host, update, (id, extent) => {
     sessionId = id;
     size = extent === null ? null : Object.freeze({ ...extent, unit: 'drawing-buffer-px' });
-  }).then((session) => {
+  }, viewportControl).then((session) => {
     viewportReaders.set(session, readViewport);
     return session;
   }).catch((error: unknown) => {
@@ -205,6 +237,7 @@ export async function createRenderFrameSession(host: RenderHostBinding): Promise
 async function acquireRenderFrameSession(
   host: RenderHostBinding, update: (snapshot: RenderGraphicsSnapshot) => void,
   captureViewport: (id: symbol, size: { readonly width: number; readonly height: number } | null) => void,
+  viewportControl: { suspended: boolean },
 ): Promise<RenderFrameSession> {
   const lifecycle = createRenderSessionLifecycle(host);
   const sessionId = lifecycle.getSnapshot().descriptor.id;
@@ -237,6 +270,7 @@ async function acquireRenderFrameSession(
   }
 
   const disposeResources = () => {
+    viewportControl.suspended = false;
     const owned = backend;
     backend = undefined;
     let cleanupFailed = false;
@@ -284,6 +318,8 @@ async function acquireRenderFrameSession(
     },
     renderFrame: (): RenderFrameReceipt => {
       const snapshot = lifecycle.getSnapshot(); // Disposed sessions use existing error semantics.
+      // Rejection is not a backend failure: no frame, cleanup or state transition.
+      if (viewportControl.suspended) throw new FrameError('VIEWPORT_SUSPENDED', 'renderFrame');
       try {
         if (backend === undefined) throw new Error('Missing graphics resources');
         backend.renderFrame();
@@ -292,6 +328,10 @@ async function acquireRenderFrameSession(
       }
       return Object.freeze({ sessionId: snapshot.descriptor.id, status: 'submitted' });
     },
+  });
+  viewportSuspensions.set(session, (suspended) => {
+    lifecycle.getSnapshot();
+    viewportControl.suspended = suspended;
   });
   viewportResizers.set(session, (metrics, limits) => {
     lifecycle.getSnapshot(); // Terminal guard precedes validation.
