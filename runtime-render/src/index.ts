@@ -240,3 +240,7 @@ export function createRenderSessionLifecycle(host: RenderHostBinding): RenderSes
     },
   });
 }
+export {
+  resolveAtlasFrameGeometry, createAtlasTextureView,
+  type AtlasPagePixels, type AtlasFrameGeometry, type AtlasFrameGeometryResult, type AtlasTextureView,
+} from './atlas-geometry.js';

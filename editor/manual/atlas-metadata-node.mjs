@@ -28,7 +28,8 @@ async function readSelectedFile(path) {
 
 const args = process.argv.slice(2);
 const frameMode = args[0] === '--frames';
-if (frameMode) args.shift();
+const geometryMode = args[0] === '--geometry';
+if (frameMode || geometryMode) args.shift();
 if (args.length === 0 || args.length % 3 !== 0 || args.length > 6) {
   throw new Error('Usage: atlas-metadata-node.mjs <original.tpsheet> <exact-header-texture> <image-source-locator> [second triple]');
 }
@@ -36,5 +37,15 @@ const selected = [];
 for (let index = 0; index < args.length; index += 3) selected.push({
   readMetadata: () => readSelectedFile(args[index]), textureReference: args[index + 1], imageLocator: args[index + 2],
 });
-const observer = frameMode ? (await import('../../.artifacts/atlas-manual/frame-resolution.mjs')).inspectFrameResolution : undefined;
+const observer = geometryMode ? (await import('../../.artifacts/atlas-manual/atlas-geometry.mjs')).inspectAtlasGeometry : frameMode ? (await import('../../.artifacts/atlas-manual/frame-resolution.mjs')).inspectFrameResolution : undefined;
 await inspectAtlasMetadata(selected, observer);
+
+if (geometryMode) {
+  console.log('Explicit malformed in-memory variant; original remains unchanged');
+  const first = selected[0];
+  await inspectAtlasMetadata([{ ...first, readMetadata: async () => {
+    const text = new TextDecoder().decode(await first.readMetadata());
+    const bad = text.replace(/^([^#:\r\n][^;]*);[^;]+;/mu, '$1;9007199254740991;');
+    return new TextEncoder().encode(bad);
+  } }]);
+}

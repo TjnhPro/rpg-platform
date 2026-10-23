@@ -481,3 +481,6 @@ See [finite frame consumer](frame-resolution.md) for two logical holders, exact 
 lookup, typed missing/unsupported/revision diagnostics and unchanged Phase2 catalog
 semantics. The optional `--frames` mode reuses the bounded original-file atlas host;
 frame lookup performs no extra source reads and no image/GPU operation.
+
+- [v0.7.7 atlas geometry](atlas-geometry.md): finite rect/UV inspection over original
+  metadata and an optional borrowed-texture hook. Numeric observation is not GPU display.
