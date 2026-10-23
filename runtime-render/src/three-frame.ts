@@ -1,5 +1,6 @@
 import { Camera, REVISION, Scene, WebGLRenderer } from 'three';
 import { FrameError } from './frame-failure.js';
+import { readBrowserCanvas } from './canvas-target.js';
 
 /** Private browser backend; never exposed through public declarations. */
 export interface ThreeFrameBackend {
@@ -7,11 +8,12 @@ export interface ThreeFrameBackend {
   readonly dispose: () => void;
 }
 
-export function createThreeFrameBackend(target: object): ThreeFrameBackend {
-  if (typeof HTMLCanvasElement === 'undefined' || !(target instanceof HTMLCanvasElement)
-    || target.width <= 0 || target.height <= 0) {
+export function createThreeFrameBackend(input: object): ThreeFrameBackend {
+  const supported = readBrowserCanvas(input);
+  if (supported === undefined || supported.width <= 0 || supported.height <= 0) {
     throw new FrameError('UNSUPPORTED_TARGET', 'acquire');
   }
+  const target = supported.canvas;
 
   let context: WebGL2RenderingContext | null;
   try {

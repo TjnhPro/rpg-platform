@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Render target capabilities — manual consumer</title>
+<h1>Render target capabilities</h1>
+<p>The host owns both canvases, layout and listeners. Inspection does not acquire
+graphics. Acquisition submits no frame. No visual success is inferred.</p>
+<canvas id="canvas" width="320" height="180" aria-label="Host-owned canvas"></canvas>
+<canvas id="empty" width="0" height="180" aria-label="Zero-width host canvas"></canvas>
+<p><label>Target <select id="target">
+  <option value="canvas">Browser canvas</option>
+  <option value="empty">Zero-width canvas</option>
+  <option value="object">Unsupported object</option>
+  <option value="null">Invalid null</option>
+</select></label></p>
+<button id="inspect">Inspect</button>
+<button id="acquire">Acquire</button>
+<button id="duplicate">Acquire same target again</button>
+<button id="dispose">Dispose</button>
+<pre id="output" aria-live="polite"></pre>
+<script type="importmap">
+{"imports": {
+  "@rpg-platform/runtime-render": "/runtime-render/dist/index.js",
+  "three": "/node_modules/three/build/three.module.js"
+}}
+</script>
+<script type="module">
+import { inspectRenderTarget, createRenderFrameSession, getRenderFailure,
+  getRenderFrameFailure } from '@rpg-platform/runtime-render';
+
+const canvas = document.querySelector('#canvas');
+const empty = document.querySelector('#empty');
+const select = document.querySelector('#target');
+const output = document.querySelector('#output');
+const targets = { canvas, empty, object: {}, null: null };
+let owned;
+let ownedTarget;
+let pending = false;
+let leaving = false;
+let cancelled = false;
+const write = value => { output.textContent += `${JSON.stringify(value)}\n`; };
+const report = error => write(getRenderFrameFailure(error)
+  ?? getRenderFailure(error) ?? { status: 'unknown-failure' });
+
+document.querySelector('#inspect').onclick = () => write(inspectRenderTarget(targets[select.value]));
+document.querySelector('#acquire').onclick = async () => {
+  if (pending || owned || leaving) { write({ status: 'dispose-or-wait-first' }); return; }
+  pending = true;
+  cancelled = false;
+  const target = targets[select.value];
+  write(inspectRenderTarget(target));
+  try {
+    const acquisition = createRenderFrameSession({ target });
+    write({ duringAcquisition: inspectRenderTarget(target) });
+    const acquired = await acquisition;
+    if (leaving || cancelled) { acquired.dispose(); return; }
+    owned = acquired;
+    ownedTarget = target;
+    write({ status: 'acquisition-returned', target: inspectRenderTarget(target),
+      bindingState: owned.getSnapshot().state, frame: 'NOT_SUBMITTED' });
+  } catch (error) { report(error); }
+  finally { pending = false; }
+};
+document.querySelector('#duplicate').onclick = async () => {
+  if (!owned || pending || leaving) { write({ status: 'acquire-first' }); return; }
+  pending = true;
+  try {
+    const extra = await createRenderFrameSession({ target: ownedTarget });
+    // Release every returned handle, even an unexpected acquisition result.
+    extra.dispose();
+    write({ status: 'second-acquisition-returned-and-disposed' });
+  } catch (error) { report(error); }
+  finally {
+    write({ reservationAfterAttempt: inspectRenderTarget(ownedTarget) });
+    pending = false;
+  }
+};
+function dispose() {
+  cancelled = true;
+  const session = owned;
+  owned = undefined;
+  try {
+    const observation = session?.dispose();
+    write({ disposal: observation?.state, target: inspectRenderTarget(ownedTarget) });
+  } catch (error) { report(error); }
+  finally { ownedTarget = undefined; }
+}
+document.querySelector('#dispose').onclick = dispose;
+window.addEventListener('pagehide', () => { leaving = true; dispose(); });
+window.addEventListener('pageshow', () => { leaving = false; });
+</script>
+</html>

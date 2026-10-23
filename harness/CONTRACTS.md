@@ -2,6 +2,14 @@
 
 This describes the *interactions to audit*, not finalized types or APIs. Do not create interfaces just to satisfy this document before a real MVP needs them.
 
+Phase 6 v0.6.1 RV02: [Canvas target capabilities](checkpoints/render-viewport-v0.6.1.md)
+adds inspectRenderTarget and RenderTargetCapabilities (Render54). Inspection is a
+frozen target/dimension/reservation observation without context acquisition; graphics
+is always NOT_CHECKED. Private native canvas validation is shared with existing
+graphics acquisition. Binding factories, error unions and exclusive reservation
+ownership remain unchanged. Manual public-root consumer supplied, not browser-verified.
+The supplied RV02 scope supersedes v0.6.0's provisional metrics allocation.
+
 Phase 6 v0.6.0 RV01: [Render Context architecture audit](checkpoints/render-viewport-v0.6.0.md)
 records the merged Phase 1–5 baseline, exact existing Render52 declarations and
 future-consumer matrix. API_DESIGN_ONLY: extend existing RenderFrameSession;

@@ -45,6 +45,8 @@ export { createPlanarTransform2D, type PlanarTransform2D } from './planar-transf
 export { prepareVisualResource, type VisualResourceDescriptor, type VisualResourcePreparation } from './visual-resource.js';
 export {
   createRenderFrameSession,
+  inspectRenderTarget,
+  type RenderTargetCapabilities,
   getRenderFrameFailure,
   type RenderFrameSession,
   type RenderFrameReceipt,

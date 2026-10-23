@@ -5,6 +5,7 @@ import {
 } from './index.js';
 import { FrameError, getRenderFrameFailure } from './frame-failure.js';
 import type { ThreeFrameBackend } from './three-frame.js';
+import { readBrowserCanvas } from './canvas-target.js';
 
 export { getRenderFrameFailure, type RenderFrameFailure } from './frame-failure.js';
 
@@ -21,6 +22,43 @@ export interface RenderFrameSession extends RenderSessionLifecycle {
 
 // Resource ownership guard, not a cache. Scoped to this package instance.
 const occupiedTargets = new WeakSet<object>();
+
+/** Detached target observation, never an acquisition/readiness guarantee. */
+export type RenderTargetCapabilities =
+  | { readonly status: 'invalid-target' | 'unsupported-target' }
+  | {
+    readonly status: 'supported-target';
+    readonly kind: 'html-canvas';
+    /** Native drawing-buffer attributes, not CSS/logical layout measurements. */
+    readonly width: number;
+    readonly height: number;
+    readonly dimensions: 'valid' | 'invalid';
+    /** Includes pending acquisition and cleanup-failure quarantine. */
+    readonly reservation: 'unreserved' | 'in-use';
+    readonly graphics: 'NOT_CHECKED';
+  };
+
+/**
+ * Inspect a raw target without creating a context, reserving it or loading Three.
+ * Only same-realm native browser canvases are supported. No target property duck
+ * typing, DOM mutations or cached observations. Unreserved does not promise that
+ * acquisition will succeed: graphics availability is checked by the async factory.
+ * Safe to call without DOM globals; object targets then report unsupported.
+ */
+export function inspectRenderTarget(target: unknown): RenderTargetCapabilities {
+  if (target === null || (typeof target !== 'object' && typeof target !== 'function')) {
+    return Object.freeze({ status: 'invalid-target' });
+  }
+  const supported = readBrowserCanvas(target);
+  if (supported === undefined) return Object.freeze({ status: 'unsupported-target' });
+  const { width, height } = supported;
+  return Object.freeze({
+    status: 'supported-target', kind: 'html-canvas', width, height,
+    dimensions: width > 0 && height > 0 ? 'valid' : 'invalid',
+    reservation: occupiedTargets.has(target) ? 'in-use' : 'unreserved',
+    graphics: 'NOT_CHECKED',
+  });
+}
 
 /**
  * Bind then acquire Three.js resources on an explicit async path. Supports one

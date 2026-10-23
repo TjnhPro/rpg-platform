@@ -4,6 +4,7 @@ This table is for routing an implementation **after inspecting current source**.
 
 | Change | Primary owner | Allowed collaborator / note |
 | --- | --- | --- |
+| Browser canvas capability/brand validation and reservation observations | **Runtime Render** | [v0.6.1 RV02](checkpoints/render-viewport-v0.6.1.md): native same-realm target inspection; no GPU-readiness claim. Host retains canvas/CSS/listeners; acquisition and exclusive reservation remain existing session responsibilities |
 | Graphics context acquisition, effective viewport state/sizing, frame submission and native cleanup | **Runtime Render** | [v0.6.0 RV01](checkpoints/render-viewport-v0.6.0.md), architecture only: extend existing RenderFrameSession. Editor/Client own target UI/layout, measurement and frame requests; Engine time/authority and Editor Scene/Document state remain independent. Future signatures/policies require their supplied checkpoint tasks |
 | Game-specific projectile travel, hit, penetration and lifecycle | Runtime Engine | Render presents output; Editor authors *that game's* config |
 | Skill/monster/player/item RULE definition | Runtime Engine | L1/L2 are external public capabilities, not places to move rules |
