@@ -103,7 +103,24 @@ export interface RenderViewportResizeReceipt {
 
 const viewportResizers = new WeakMap<RenderFrameSession,
   (metrics: RenderViewportMetrics, limits: RenderViewportSizeLimits) => RenderViewportResizeReceipt>();
+// Issuance/freshness only. Even an unchanged accepted resize replaces the token.
+const latestViewportResizes = new WeakMap<RenderFrameSession, RenderViewportResizeReceipt>();
 const viewportSuspensions = new WeakMap<RenderFrameSession, (suspended: boolean) => void>();
+
+/** Owner-local camera adapter guard; not a root API or structural receipt port. */
+export function requireCurrentViewportResize(session: RenderFrameSession,
+  receipt: RenderViewportResizeReceipt): RenderViewportSnapshot & { readonly state: 'active' } {
+  const viewport = getRenderViewportSnapshot(session);
+  if (viewport.state !== 'active' || viewport.graphics.state !== 'ready') {
+    throw new TypeError('Camera viewport requires an active graphics viewport');
+  }
+  const latest = latestViewportResizes.get(session);
+  if (latest === undefined || latest !== receipt || receipt.sessionId !== viewport.sessionId
+    || receipt.size.width !== viewport.size.width || receipt.size.height !== viewport.size.height) {
+    throw new TypeError('Camera viewport requires the latest issued resize receipt for this session');
+  }
+  return Object.freeze({ ...viewport, state: 'active' });
+}
 
 /** Redraw demand only; neither readiness, a queued callback nor display evidence. */
 export interface RenderFrameInvalidationSnapshot {
@@ -523,7 +540,7 @@ async function acquireRenderFrameSession(
       // Includes unchanged resize and resume: accepted configuration merits redraw,
       // but never performs/schedules it. Rejected admission leaves demand unchanged.
       redrawToken = {};
-      return Object.freeze({
+      const receipt: RenderViewportResizeReceipt = Object.freeze({
         sessionId, status: accepted.changed ? 'resized' : 'unchanged',
         requested: plan.requested,
         size: Object.freeze({ ...accepted.size, unit: 'drawing-buffer-px' as const }),
@@ -532,6 +549,8 @@ async function acquireRenderFrameSession(
           y: accepted.size.height / plan.requested.logicalHeightCssPx,
         }),
       });
+      latestViewportResizes.set(session, receipt);
+      return receipt;
     } catch (error) { throw failGraphics(error); }
   });
   update({ state: 'ready', failure: null });

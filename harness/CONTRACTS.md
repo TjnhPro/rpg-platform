@@ -1,5 +1,11 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase9 v0.9.5 CM09/CM10 adds getRenderCameraViewportSnapshot and
+RenderCameraViewportSnapshot. Exact latest issued Phase6 receipt + matching CSS
+extent, preserve-scale logical mapping, no implicit DPR/native camera application.
+Existing declarations/unions unchanged. See [contract](../runtime-render/docs/camera-v0.9.5.md)
+and [checkpoint](checkpoints/camera-v0.9.5.md).
+
 Phase9 v0.9.4 CM07/CM08 adds seven Render-root names for configured-camera creation,
 view readback, absolute center/focus zoom and three readonly types. Old declarations
 stay unchanged. Explicit inclusive zoom policy, current CSS mapping and canonical

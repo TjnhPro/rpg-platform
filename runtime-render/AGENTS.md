@@ -4,6 +4,11 @@
 
 Read root agent guidance first.
 
+- [v0.9.5 CM09/CM10](docs/camera-v0.9.5.md): read current camera CSS mapping only
+  with exact latest Phase6 session resize receipt and matching host logical extent.
+  Preserve scale, separate accepted buffer/ratio, reject suspended/terminal/stale.
+  Historical configured-not-applied result is not a native camera/session binder.
+
 - [v0.9.4 CM07/CM08](docs/camera-v0.9.4.md): configured cameras share the existing
   handle/lifecycle, with additive immutable view snapshots and explicit zoom limits.
   Center/focus zoom commit atomically; use canonical Phase4 inverse/affine/residual

@@ -1,5 +1,11 @@
 # Ownership decisions — do not classify by similar names
 
+v0.9.5 CM09/CM10: **runtime-render** owns camera/accepted-viewport read adapter.
+Phase6 retains native resize and issued-receipt freshness; host retains CSS/ratio
+measurement and visibility. Editor/Client compile compatibility; no owner transfer,
+camera manager, GPU application or resource mutation. See
+[checkpoint](checkpoints/camera-v0.9.5.md).
+
 v0.9.4 CM07/CM08: **runtime-render** owns camera zoom/focus state and composes its
 Phase4 projection/inverse/affine APIs. Host selects explicit min/max policy; no
 authored/gameplay/instance mutation, implicit browser measurement or new owner.
