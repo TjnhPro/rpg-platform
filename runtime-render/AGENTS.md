@@ -223,3 +223,5 @@ Read root agent guidance first.
 - [v0.9.6 CM11/CM12](docs/camera-v0.9.6.md): canonical camera projection reuses Phase4 mapping. Explicit null is logical-only CPU context; non-null requires current real Phase6 receipt, never fallback. CSS and optional host screen mapping remain separate from accepted device buffer. No authored/gameplay/depth mutation or GPU application.
 
 - [v0.9.7 CM13](docs/camera-v0.9.7.md): viewport/screen inverse returns only the explicit selected source plane. Require current issued camera view and current logical/accepted context; reuse Phase4 inverse cutoff/residual policy. No inferred elevation, perfect-source recovery, picking or state mutation.
+
+- [v0.9.8 CM14](docs/camera-v0.9.8.md): Render-owned affine ground/elevation composition before existing camera. Explicit presentation basis/origins/units and supplied inverse height; singular rejection via Phase4. No sheared orthographic alias, Scene/depth/resource mutation or native application.

@@ -10,6 +10,11 @@ export { getRenderCameraViewportSnapshot, type RenderCameraViewportSnapshot } fr
 export { projectRenderCameraPoint, type RenderCameraProjectionResult } from './camera-projection.js';
 export { viewportToRenderCameraSelectedPlane, screenToRenderCameraSelectedPlane,
   type RenderCameraSelectedPlaneInput, type RenderCameraSelectedPlaneResult } from './camera-inverse.js';
+export { createRenderCameraGroundConfiguration, projectRenderCameraGroundPoint,
+  viewportToRenderCameraGround, screenToRenderCameraGround,
+  type RenderCameraGroundConfiguration, type RenderCameraGroundPoint,
+  type RenderCameraGroundProjectionResult, type RenderCameraGroundInverseInput,
+  type RenderCameraGroundInverseResult } from './camera-ground.js';
 export { getRenderVisualSceneDiagnostics, type RenderVisualSceneDiagnostics } from './visual-scene.js';
 
 /** Safe error data only. null cleanup means unknown/not reported by that domain. */
