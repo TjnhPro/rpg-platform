@@ -205,3 +205,9 @@ export function getEditorPreviewFailure(error: unknown): RenderFailure | undefin
 }
 export { createScenePreviewBridge, type ScenePreviewBridge, type ScenePreviewPresentation,
   type ScenePreviewOutcome } from './scene-preview.js';
+export { createProjectManifest, readProjectManifest } from './project-manifest.js';
+export type { ProjectManifest, ProjectManifestInput, ProjectMetadata, ProjectResourceRoot,
+  ProjectDocumentReference, ProjectActiveScene } from './project-manifest.js';
+export { diagnoseProjectManifest } from './project-diagnostics.js';
+export type { ProjectDiagnostic, ProjectManifestDiagnosis } from './project-diagnostics.js';
+export { ProjectValidationError } from './project-validation.js';

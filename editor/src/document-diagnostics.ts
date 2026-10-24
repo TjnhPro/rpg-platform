@@ -10,6 +10,7 @@ import { createCoordinateSpaceDefinition, type CoordinateSpaceDefinition,
   type CoordinateSpaceReference } from './coordinate-space.js';
 import { describeSceneObjectSpatialPoint } from './scene-spatial-point.js';
 import { matchesSceneDocumentProfile } from './document-scene-profile.js';
+import { diagnoseProjectManifest } from './project-diagnostics.js';
 
 export type DocumentDiagnosticCode = DocumentDecodeDiagnostic['code'] | SceneDiagnosticCode | AssetDiagnosticCode
   | 'CONTENT_NOT_CHECKED' | 'CONTENT_CONTRACT_MISMATCH' | 'DOCUMENT_PROJECT_MISMATCH'
@@ -41,6 +42,7 @@ export type DocumentValidationContext = {
   | { readonly owner: 'asset'; readonly catalog?: AssetCatalog }
   | { readonly owner: 'coordinate-space' }
   | { readonly owner: 'text' }
+  | { readonly owner: 'project' }
 );
 
 export interface DocumentValidationResult {
@@ -119,7 +121,7 @@ export function diagnoseDocument(text: string, context?: DocumentValidationConte
     return finish();
   }
   const { owner, documentKind, contentSchemaVersion } = context;
-  if (!['scene', 'asset', 'coordinate-space', 'text'].includes(owner)
+  if (!['scene', 'asset', 'coordinate-space', 'text', 'project'].includes(owner)
     || typeof documentKind !== 'string' || documentKind.length === 0 || /\s/u.test(documentKind)
     || (contentSchemaVersion !== null && (!Number.isSafeInteger(contentSchemaVersion) || contentSchemaVersion < 1))) {
     throw new TypeError('Document validation requires a supported explicit host binding');
@@ -230,6 +232,17 @@ export function diagnoseDocument(text: string, context?: DocumentValidationConte
       return finish();
     }
     project(space.reference.projectId, 'document.content.reference.projectId');
+  } else if (context.owner === 'project') {
+    content = 'CHECKED';
+    if (documentKind !== 'project' || contentSchemaVersion !== 1) {
+      diagnostics.push(diagnostic('schema', 'CONTENT_CONTRACT_MISMATCH', 'document.documentKind',
+        {}, { expectedKind: 'project', expectedContentSchemaVersion: 1 }));
+      return finish();
+    }
+    const result = diagnoseProjectManifest(source.content);
+    for (const item of result.diagnostics) diagnostics.push(diagnostic('payload',
+      'CONTENT_CONTRACT_MISMATCH', 'document.content' + item.path.slice('project'.length), {}, { projectCode: item.code }));
+    if (result.manifest !== null) project(result.manifest.projectId, 'document.content.projectId');
   } else {
     content = 'CHECKED';
     if (typeof source.content !== 'string') {
