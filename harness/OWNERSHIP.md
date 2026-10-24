@@ -1,5 +1,10 @@
 # Ownership decisions — do not classify by similar names
 
+Phase18 Animation/VFX Preview: Editor-only transient consumer of read-only Render
+playback/parser/resource/instance/camera APIs. Follow14 ordered capability commits
+v0.18.0→v0.18.13, one phase PR, build-only gates and finite observations; no routine
+approval pauses or auto-merge. [Source-backed design](../editor/docs/animation-vfx-preview-v0.18.0.md).
+
 Phase17 Visual Object Placement: Editor-only ordinary Scene authoring, consuming
 canonical Phase14–16/Scene/Document/Render APIs. Follow13 ordered capability commits
 v0.17.0→v0.17.12, one phase PR, genuine builds and exact-head audit; no routine

@@ -9,6 +9,8 @@ import {
 
 /** Private composition seam; the viewport host retains session/scheduling ownership. */
 export interface EditorViewportContent {
+  /** Optional playback consumer notification; no transfer of native scheduling rights. */
+  readonly availabilityChanged?: (available: boolean) => void;
   readonly acquired: (session: RenderFrameSession) => void;
   readonly configured: (session: RenderFrameSession, receipt: RenderViewportResizeReceipt,
     metrics: RenderViewportMetrics) => void;
@@ -47,6 +49,7 @@ export function mountEditorViewport(
     getRenderFrameFailure(error) ?? getRenderFailure(error) ?? 'UNRECOGNIZED';
   const report = (error: unknown): void => {
     cancel(); paused = true;
+    content?.availabilityChanged?.(false);
     lastFailure = classify(error);
     // Rejected metrics must not leave a queued frame using stale configuration.
     if (!closed && session && getRenderViewportSnapshot(session).graphics.state === 'ready') {
@@ -60,6 +63,7 @@ export function mountEditorViewport(
     && getRenderViewportSnapshot(session).graphics.state === 'ready' ? session : undefined;
   const pause = (event: string): void => {
     wanted = undefined; paused = true; cancel();
+    content?.availabilityChanged?.(false);
     const current = ready();
     if (current) suspendRenderViewport(current);
     notify(event);
@@ -90,6 +94,7 @@ export function mountEditorViewport(
     lastConfiguration = receipt;
     if (resume) paused = false;
     content?.configured(current, receipt, next);
+    content?.availabilityChanged?.(true);
     notify('configured-not-submitted', receipt);
     return true;
   };
@@ -118,6 +123,7 @@ export function mountEditorViewport(
     const owned = session;
     session = undefined;
     cancel();
+    content?.availabilityChanged?.(false);
     try { content?.release(); }
     finally { owned?.dispose(); } // Retain acquisition for safe terminal observations.
   };
@@ -158,6 +164,7 @@ export function mountEditorViewport(
     if (closed) return;
     // Render decides actual context loss/cleanup; Observe reads after dispatch.
     cancel(); paused = true; wanted = undefined;
+    content?.availabilityChanged?.(false);
     notify('native-loss-event-observe-after-dispatch');
   };
   const watchRatio = (): void => {
@@ -207,3 +214,39 @@ export function mountEditorViewport(
     unmount,
   });
 }
+/** Optional browser playback demand. Viewport host alone submits/resizes Render frames. */
+export function createEditorPreviewClock(input: {
+  readonly playing: () => boolean; readonly advance: (deltaMs: number) => void;
+  readonly present: () => Promise<void>; readonly suspend: () => void; readonly failure: (error: unknown) => void;
+}) {
+  let closed = false, available = false, generation = 0, callback: number | undefined;
+  let previous: number | null = null, running = false;
+  const stop = () => { running = false; generation++; previous = null;
+    if (callback !== undefined) cancelAnimationFrame(callback); callback = undefined; };
+  const schedule = () => {
+    if (closed || !running || !available || document.hidden || !input.playing() || callback !== undefined) return;
+    const current = generation;
+    callback = requestAnimationFrame(timestamp => {
+      callback = undefined;
+      if (closed || !running || !available || document.hidden || current !== generation) return;
+      const delta = previous === null ? 0 : Math.min(100, Math.max(0, timestamp - previous));
+      previous = timestamp;
+      void (async () => {
+        try {
+          input.advance(delta); await input.present();
+          if (current === generation && input.playing()) schedule();
+          else if (current === generation) stop();
+        } catch (error) { if (current === generation) { stop(); input.failure(error); } }
+      })();
+    });
+  };
+  return Object.freeze({
+    start() { if (closed || !available || document.hidden) throw new TypeError('PREVIEW_CLOCK_UNAVAILABLE');
+      stop(); running = true; schedule(); }, stop,
+    setAvailable(value: boolean) { available = value;
+      if (!value) { stop(); if (!closed) input.suspend(); } },
+    read: () => Object.freeze({ closed, available, running, callbackPending: callback !== undefined }),
+    dispose() { if (!closed) { stop(); closed = true; available = false; } }
+  });
+}
+

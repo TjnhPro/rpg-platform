@@ -11,6 +11,7 @@ import type { ActiveEditorProject } from '../features/project-manager/ProjectMan
 import type { ReactNode } from 'react';
 import { MapWorkspace } from '../features/map/MapWorkspace.js';
 import { VisualObjectPlacementWorkspace } from '../features/visual-object-placement/VisualObjectPlacementWorkspace.js';
+import { AnimationVfxPreviewWorkspace } from '../features/animation-vfx-preview/AnimationVfxPreviewPanel.js';
 
 export function App() {
   const [showGuidance, setShowGuidance] = useState(true);
@@ -24,25 +25,27 @@ function AssetWorkspace({ active, projectPanel, showGuidance, setShowGuidance }:
   const [tool, setTool] = useState<string | null>('map');
   return <AssetBrowserWorkspace active={active} resourcePort={grant?.existing}>
     {(context, browser) => <VisualObjectPlacementWorkspace active={active} context={context} grant={grant} showGuidance={showGuidance}>
-      {(visualPanel, visualViewport) => <MapWorkspace active={active} context={context} grant={grant} showGuidance={showGuidance}>
-      {(mapPanel, mapViewport) => <EditorShell
+      {(visualPanel, visualViewport, previewDocument) => <MapWorkspace active={active} context={context} grant={grant} showGuidance={showGuidance}>
+      {(mapPanel, mapViewport) => <AnimationVfxPreviewWorkspace active={active} context={context} grant={grant} sceneDocument={previewDocument} showGuidance={showGuidance}>
+      {(previewPanel, previewViewport) => <EditorShell
       header={<Group gap={editorTokens.spacing.standard}>
         <Title order={1} size="md">RPG Editor</Title>
         <Badge color={editorTokens.colors.neutral}>Scene Editor</Badge>
       </Group>}
       toolbar={<Group gap={editorTokens.spacing.standard}>
-        <Select label="Workspace" data={[{ value: 'map', label: 'Map Editor' }, { value: 'assets', label: 'Asset Browser' }, { value: 'visual', label: 'Visual Placement & Inspector' }]}
+        <Select label="Workspace" data={[{ value: 'map', label: 'Map Editor' }, { value: 'assets', label: 'Asset Browser' }, { value: 'visual', label: 'Visual Placement & Inspector' }, { value: 'preview', label: 'Animation & VFX Preview' }]}
           value={tool} allowDeselect={false} onChange={setTool} />
         <Switch label="Show guidance" checked={showGuidance}
           onChange={event => setShowGuidance(event.currentTarget.checked)} />
       </Group>}
       navigator={projectPanel}
-      inspector={tool === 'map' ? mapPanel : tool === 'visual' ? visualPanel : browser}
+      inspector={tool === 'map' ? mapPanel : tool === 'visual' ? visualPanel : tool === 'preview' ? previewPanel : browser}
       status={<EditorPanel title="Status" variant="status">
         <Text>Map, Project and Asset saves report separately. Preview outcomes do not verify displayed pixels.</Text>
       </EditorPanel>}>
-      {tool === 'map' ? mapViewport : tool === 'visual' ? visualViewport : <AssetViewport context={context} grant={grant} showGuidance={showGuidance} />}
+      {tool === 'map' ? mapViewport : tool === 'visual' ? visualViewport : tool === 'preview' ? previewViewport : <AssetViewport context={context} grant={grant} showGuidance={showGuidance} />}
     </EditorShell>}
+    </AnimationVfxPreviewWorkspace>}
     </MapWorkspace>}
     </VisualObjectPlacementWorkspace>}
   </AssetBrowserWorkspace>;

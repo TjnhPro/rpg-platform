@@ -246,6 +246,14 @@ function inspectImport(specifier, node, isModuleBinding = true) {
     return;
   }
   if (specifier.startsWith('.')) {
+    // Developer-approved Phase18 seam: only emitted forms of these exact adapters.
+    // Package-root consumers must share their canonical handle registries.
+    // Check source ownership even on a clean checkout before tsc emits declarations.
+    const previewAdapter = inside(path.join(ui, 'src/features/animation-vfx-preview'), file)
+      && ['context', 'atlas', 'clips', 'sprite', 'config', 'effect', 'effect-instance', 'resource', 'alignment', 'scene']
+        .some(name => specifier === `../../../../dist/animation-vfx-preview-${name}.js`
+          && fs.existsSync(path.join(editor, `src/animation-vfx-preview-${name}.ts`)));
+    if (previewAdapter) return;
     const resolved = ts.resolveModuleName(specifier, file, program.getCompilerOptions(), ts.sys).resolvedModule;
     if (!resolved) {
       at(node, 'EC-04', 'Cannot resolve local UI input; use an inspectable same-Editor source module.');
