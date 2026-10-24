@@ -439,3 +439,9 @@ Harness owns evidence-only phase closure, Editor/Client are build consumers.
 Zero production/API/dependency change. Architecture/build audit does not accept
 the incomplete VE12 visual MVP; Developer owns acceptance or explicit deferral.
 [Closure audit](checkpoints/visual-effect-v0.11.12.md).
+
+Phase15: Editor owns a versioned Map profile in one Scene Document. Scene/Document/Project/Asset and Render retain canonical ownership. Follow v0.15.0 through v0.15.12 sequentially, one checkpoint commit each, exact HEAD/scope/declaration audit and genuine check/build gates; stop on real upstream delta, no generated tests. See editor/docs/map-editor-v0.15.0.md.
+
+Phase15 [closure](checkpoints/map-editor-v0.15.12.md):13 sequential checkpoints;
+Editor-only additive Map surface, unchanged canonical owners. Finite disk/PNG
+evidence and genuine builds; native UI/pixel acceptance remains Developer-owned.
