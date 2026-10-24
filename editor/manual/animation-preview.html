@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><title>Editor animation preview — SA10</title>
+<style>body{font:16px system-ui;max-width:960px;margin:24px auto;padding:0 16px;background:#f4f4f4;color:#222}canvas{width:320px;height:240px;border:1px solid #666;image-rendering:pixelated;background:#ddd}fieldset{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}label{display:flex;align-items:center;gap:6px}input{width:80px}pre{white-space:pre-wrap;font-size:13px}button,select,input{font:inherit}</style>
+<main data-animation-preview>
+<h1>Editor animation preview</h1>
+<p>Manual stepping: choose clip and slot, Play, then Step. Render owns timing. Source compass, authored FPS, anatomical ground and original untrimmed origin are unverified. The explicit inspection origin is frame top-left (0,0).</p>
+<canvas width="640" height="480" aria-label="Animation viewport"></canvas>
+<fieldset disabled><legend>Preview only</legend>
+<label>Clip <select data-clip><option>idle</option><option>walk</option></select></label>
+<label>Direction slot <select data-direction><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option></select></label>
+<button data-command="play">Play</button><button data-command="pause">Pause</button><button data-command="resume">Resume</button><button data-command="stop">Stop</button>
+<label>Delta ms <input data-delta type="number" value="125" step="any"></label><button data-step>Step</button>
+</fieldset><button data-close>Close preview</button>
+<pre data-status aria-live="polite">Loading authorized local sources…</pre>
+</main>
+<script type="importmap">{"imports":{"@rpg-platform/editor":"/editor/index.js","@rpg-platform/runtime-render":"/render/index.js","@rpg-platform/runtime-engine":"/engine/index.js","@rpg/core/kernel":"/foundation/core/kernel/index.js","@rpg/gameplay":"/foundation/gameplay/index.js","three":"/three/three.module.js"}}</script>
+<script type="module" src="/preview.mjs"></script></html>

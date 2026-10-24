@@ -1,3 +1,9 @@
+# Animation preview - v0.10.9
+
+[Manual browser entry](animation-preview.md): two authored clips, eight explicit
+source slots, same-handle controls and Render-owned live frame binding. Includes
+run commands, source/anchor limitations and finite observation report.
+
 # Camera host integration - v0.9.12
 
 [Two-host manual guide](../../harness/manual/camera-hosts.md): canonical camera,

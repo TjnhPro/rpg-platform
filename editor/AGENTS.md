@@ -4,6 +4,13 @@
 
 Read root agent guidance first.
 
+- [v0.10.9 SA10](../harness/checkpoints/sprite-animation-v0.10.9.md): optional
+  manual animation host consumes only Editor/Render roots. Editor owns explicit
+  authored Asset/frame slots, Scene correlation, DOM/provider/commands/deltas and
+  teardown; Render owns timing/selection/binding. Two real clips/eight distinct
+  source refs; no inferred compass, artist ground, authored FPS or persistent
+  animation schema. Preview retains Document revision/dirty. No root API change.
+
 - [v0.6.11 RV16](../harness/checkpoints/render-viewport-v0.6.11.md): internal
   viewport-host browser integration owns UI mount/unmount, CSS/DPR sampling,
   observer/listener/rAF lifetime and explicit hidden/zero-size resume policy.

@@ -1,5 +1,11 @@
 # Ownership decisions — do not classify by similar names
 
+v0.10.9 SA10: **editor** owns the optional authored-reference/browser preview
+adapter. **runtime-render** remains sole animation, resource and live instance
+owner, consumed through its public root without changes. Harness records finite
+observations/builds. No gameplay, public API, dependency or schema transfer.
+See [checkpoint](checkpoints/sprite-animation-v0.10.9.md).
+
 v0.10.0 SA01: **runtime-render** owns proposed sprite definition validation,
 eight-way mapping, explicit-delta playback and frame binding. Harness records
 design/evidence only. Editor authors references/config, Client owns scheduling,
