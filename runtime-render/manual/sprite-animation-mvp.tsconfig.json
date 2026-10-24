@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "target": "ES2022", "module": "NodeNext", "strict": true,
+    "noUncheckedIndexedAccess": true, "exactOptionalPropertyTypes": true,
+    "types": [], "lib": ["ES2022", "DOM", "DOM.Iterable"], "skipLibCheck": false,
+    "rootDir": ".", "outDir": "../../.artifacts/sa12-manual"
+  },
+  "files": ["sprite-animation-mvp.mts"]
+}

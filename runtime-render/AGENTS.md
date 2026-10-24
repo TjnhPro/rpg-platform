@@ -4,6 +4,60 @@
 
 Read root agent guidance first.
 
+- [v0.10.8 SA09](docs/sprite-animation-v0.10.8.md): playback shares canonical
+  deeply frozen clip definitions via weak issuance provenance; structural input
+  still validates/detaches. Keep per-handle clip map/transport/snapshot independent.
+  Host owns playback/acquired leases; Phase8 owns separate retained usage. Hide
+  has no timing policy; removal/session end closes binding, never resurrects late
+  readiness or disposes another actor. Optional manual host has one close path.
+
+- [v0.10.7 SA08](docs/sprite-animation-v0.10.7.md): bind one borrowed playback
+  to one existing instance through canonical Phase7 rights/geometry, SA07 origin
+  and an owner-local Phase8 resource/transform/layout transaction. Identity local
+  TRS only; preserve placement/ground offset/order/depth/visibility. Pending or
+  released lease is FRAME_NOT_READY. Host advances/draws; sync invalidates only.
+  Unbind/replace never dispose borrowed handles; instance/session end closes scope.
+
+- [v0.10.6 SA07](docs/sprite-animation-v0.10.6.md): pure frame alignment through
+  Phase4 anchor/affine APIs and canonical Phase7 geometry/revision. Explicit
+  verified per-frame pixel anchor/pivot/offset or FRAME_ORIGIN_UNAVAILABLE.
+  Preserve normalized bottom-left sourcePivot; never infer missing original
+  layout, modify placement or bind/draw/crop/upload here.
+
+- [v0.10.5 SA06](docs/sprite-animation-v0.10.5.md): explicit advance on the same
+  playback transition path; only playing progresses. Keep bounded logical time
+  for repeat, clamp once, sample through SA03. Frozen per-call address-change/
+  completion observations; no clock, invalidation, Scene binding or GPU.
+
+- [v0.10.4 SA05](docs/sprite-animation-v0.10.4.md): independent CPU playback
+  handles, frozen readback and one canonical command transition path. Start
+  stopped0; direction keeps logical time; dispose terminal/idempotent. No delta
+  advance, Scene binding or GPU. Nonzero/completed-handle observations await SA06.
+
+- [v0.10.3 SA04](docs/sprite-animation-v0.10.3.md): exactly eight authored slots,
+  Phase4 orientation quantizer and Phase7 selected-frame resolution. No stateful
+  playback/GPU. Latest task overrides earlier direction progress proposal: retain
+  SAME logical elapsed, sample target duration modulo/clamp, never cycle rescale.
+
+- [v0.10.2 SA03](docs/sprite-animation-v0.10.2.md): pure exclusive FPS/interval
+  normalization, immutable timed clip and stateless once/repeat sampling. No
+  playhead/timer/direction/GPU. Binary64 half-open product boundaries, explicit
+  finite interval/duration/elapsed limits; preserve existing SA02 signatures.
+
+- [v0.10.1 SA02](docs/sprite-animation-v0.10.1.md): actual Render root sequence
+  and basic clip metadata capture only. Ordered exact Phase7 addresses, deep
+  detached/frozen, one project/resource, up to65,536 entries. Repeated holds
+  allowed. No timing/direction/playback/IO/GPU; capture is not FRAME_RESOLVED.
+  Host must later resolve against canonical atlas plus exact revision token.
+
+- [v0.10.0 SA01](docs/sprite-animation-v0.10.0.md) is API_DESIGN_ONLY:
+  Render owns proposed sequence/8-way mapping/explicit-delta playback and binding.
+  Exactly eight slots; Phase4 +x/toward+y canonical orientation. Phase7 retains
+  atlas/revision/lease authority, Phase8 instance/layout/depth, Phase6 frames,
+  Phase9 camera. No production exports yet. Explicit fixed local draw rectangle,
+  no inferred sourcePivot/trim or animation gameplay authority. Future native MVP
+  needs verified eight-way assets; build is not animation or pixel acceptance.
+
 - [v0.9.10 CM16/CM17](docs/camera-v0.9.10.md): optional live camera/Scene binding
   uses canonical Phase6 submission and private orthographic backend. Bound draws
   use localToScene once, preserve Phase8 snapshots/depth/resources. Camera edits
@@ -233,3 +287,10 @@ Read root agent guidance first.
 - [v0.9.8 CM14](docs/camera-v0.9.8.md): Render-owned affine ground/elevation composition before existing camera. Explicit presentation basis/origins/units and supplied inverse height; singular rejection via Phase4. No sheared orthographic alias, Scene/depth/resource mutation or native application.
 
 - [v0.9.9 CM15](docs/camera-v0.9.9.md): optional per-request bounds transition uses current view/viewport and target zoom, full visible extent, explicit clamp/reject and oversize reject/center. Atomic center+zoom; old methods unrestricted, no automatic resize teleport or persisted map policy.
+
+- [v0.10.12 SA13 closure](../harness/checkpoints/sprite-animation-v0.10.12.md):
+  Render remains the canonical animation owner; Editor/Client reuse its public
+  root. Keep clip, direction map, playback, binding, instance and gameplay intent
+  distinct. Forty additive roots across Phase10; closure adds documentation only.
+  Finite real-source pixels/logical cleanup do not establish universal visual
+  acceptance or native memory reclamation. Developer review is pending.

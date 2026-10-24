@@ -380,3 +380,27 @@ export { createOrthographicCameraConfiguration, type OrthographicCameraConfigura
   type OrthographicCameraConfiguration } from './camera-configuration.js';
 export { bindRenderCameraToVisualScene, getRenderCameraFrameSnapshot,
   type RenderCameraSceneBinding, type RenderCameraSceneBindingSnapshot, type RenderCameraFrameSnapshot } from './camera-scene.js';
+export {
+  createSpriteFrameSequence, createSpriteAnimationClip,
+  type SpriteFrameSequence, type SpriteAnimationClip,
+} from './sprite-frame-sequence.js';
+export {
+  createSpriteAnimationTiming, createSpriteTimedClip, sampleSpriteAnimationTiming,
+  type SpriteAnimationTimingInput, type SpriteAnimationTiming, type SpriteAnimationRepeat,
+  type SpriteTimedClipInput, type SpriteTimedClip, type SpriteAnimationFrameSample,
+} from './sprite-animation-timing.js';
+export {
+  createEightWaySpriteClip, selectEightWaySpriteDirection, resolveEightWaySpriteFrame,
+  type SpriteDirectionIndex, type SpriteDirectionSequences, type SpriteEightWayConvention,
+  type EightWaySpriteClipInput, type EightWaySpriteClip, type EightWaySpriteFrameResolution,
+} from './sprite-eight-way.js';
+export {
+  createSpriteAnimationPlayback, getSpriteAnimationPlaybackSnapshot, commandSpriteAnimationPlayback,
+  type SpriteAnimationPlayback, type SpriteAnimationPlaybackInput, type SpriteAnimationPlaybackSnapshot,
+  type SpriteAnimationPlaybackState, type SpriteAnimationPlaybackCommand,
+} from './sprite-animation-playback.js';
+export { advanceSpriteAnimationPlayback, type SpriteAnimationAdvanceResult } from './sprite-animation-playback.js';
+export { resolveSpriteFrameAlignment, type SpriteFrameAlignmentData,
+  type SpriteFrameAlignmentInput, type SpriteFrameAlignmentResult } from './sprite-frame-alignment.js';
+export { createSpriteAnimationVisualBinding, type SpriteAnimationVisualBinding,
+  type SpriteAnimationVisualFrameInput, type SpriteAnimationVisualFrameResult } from './sprite-animation-visual-binding.js';

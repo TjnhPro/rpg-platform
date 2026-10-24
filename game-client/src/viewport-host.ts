@@ -12,6 +12,9 @@ export interface ClientViewportContent {
   readonly configured: (session: RenderFrameSession, receipt: RenderViewportResizeReceipt,
     metrics: RenderViewportMetrics) => void;
   readonly release: () => void;
+  /** Optional presentation hook before submission. Host-selected RAF delta only;
+   * first frame after every start/cancel is zero, including hidden-page gaps. */
+  readonly frame?: (session: RenderFrameSession, deltaMs: number) => void;
 }
 
 /** Existing Phase6 continuous policy, independently scoped to one canvas. */
@@ -29,6 +32,7 @@ export function mountClientViewport(target: HTMLCanvasElement,
   let callback: number | undefined;
   let running = false, pending = false, wanted = false, closed = false;
   let submissions = 0;
+  let previousTimestamp: number | undefined;
 
   function snapshot() { return { running, callbackPending: callback !== undefined,
     pending, host: closed ? 'unmounted' : 'mounted', metrics: lastMetrics, lastConfiguration, lastFailure,
@@ -37,6 +41,7 @@ export function mountClientViewport(target: HTMLCanvasElement,
   function show(event: string, detail?: unknown): void { notify(event, detail); }
   function cancel(): void {
     running = false;
+    previousTimestamp = undefined;
     if (callback !== undefined) cancelAnimationFrame(callback);
     callback = undefined;
   }
@@ -84,15 +89,18 @@ export function mountClientViewport(target: HTMLCanvasElement,
   function schedule(): void {
     const current = session;
     if (!running || !current || closed || document.hidden || callback !== undefined) return;
-    callback = requestAnimationFrame(() => {
+    callback = requestAnimationFrame(timestamp => {
       callback = undefined;
       if (!running || session !== current || closed || document.hidden) { cancel(); return; }
       if (getRenderViewportSnapshot(current).state !== 'active') { cancel(); show('not-renderable'); return; }
       try {
         // Observer delivery may lag layout/DPR; remeasure before submission.
         if (!configure()) return;
-        // Continuous policy requests even when invalidated=false. Timestamp unused:
-        // a Render submission never advances gameplay/simulation/animation time.
+        // Host clock policy only. Render alone accumulates animation elapsed;
+        // no gameplay/simulation tick is introduced by this optional callback.
+        const deltaMs = previousTimestamp === undefined ? 0 : timestamp - previousTimestamp;
+        previousTimestamp = timestamp;
+        content?.frame?.(current, deltaMs);
         const receipt = current.renderFrame();
         submissions++;
         schedule();
@@ -112,6 +120,7 @@ export function mountClientViewport(target: HTMLCanvasElement,
   function startFrames(): void {
     if (!session || closed || document.hidden || pending) { show('start-unavailable'); return; }
     if (!configure(true)) return;
+    if (!running) previousTimestamp = undefined;
     running = true; schedule(); show('started');
   }
   function acquire(): void {

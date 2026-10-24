@@ -1,5 +1,12 @@
 # Manual Render consumers
 
+## Sprite playback isolation — v0.10.8
+
+[Actor lifetime walkthrough](sprite-instance-isolation.md) supplies an optional
+public-root host composition for separate playback/leases on existing instances.
+SA09 records finite actual-browser observations, including late readiness and
+native context loss. This is not an automated suite or Phase10 MVP acceptance.
+
 ## Resource lifetime — v0.8.10
 
 [Two-session walkthrough](visual-lifetime.md) uses actual selected PNG loads,
@@ -389,3 +396,20 @@ hide/move/order/clear. Browser NOT_EXECUTED; build is not visual acceptance.
 consumers, residual evidence gaps and Developer review decisions. The
 [seven-instance procedure](scene-mvp.md) remains the manual MVP entry. Browser
 NOT_EXECUTED; no visual acceptance or automated browser suite at closure.
+
+## Sprite animation real MVP — v0.10.11
+
+[Runnable eight-direction Player/Monster demo](sprite-animation-mvp.md) composes
+the canonical Phase4/6/7/8/9/10 public APIs with original PNG/TPSheet sources,
+explicit manual deltas and independent playback/session lifetimes. See the
+[SA12 evidence report](../../harness/checkpoints/sprite-animation-v0.10.11.md)
+for actual finite Chrome observations, screenshots and unverified limitations.
+
+## Sprite animation closure — v0.10.12
+
+[SA13 audit](../../harness/checkpoints/sprite-animation-v0.10.12.md) records
+all thirteen checkpoints, exact public declaration compatibility, all-five builds,
+installed-root checks and fresh finite browser smoke. Use the
+[real-source procedure](sprite-animation-mvp.md) for Developer review.
+Supported sampled pixels and logical cleanup were observed; remaining visual and
+host lifecycle cases are explicitly unverified. Phase10 acceptance is pending.

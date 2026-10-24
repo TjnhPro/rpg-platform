@@ -391,6 +391,9 @@ export function getRenderVisualSceneDiagnostics(scene: RenderVisualScene): Rende
 }
 
 interface MembershipControl {
+  readonly onInstanceEnd: (instance: RenderVisualInstance, listener: () => void) => () => void;
+  readonly frameState: (instance: RenderVisualInstance) => VisualInstanceFrameState;
+  readonly frame: (instance: RenderVisualInstance, input: VisualInstanceFrameUpdate) => RenderVisualResourceBindingSnapshot;
   readonly diagnostics: () => RenderVisualSceneDiagnostics;
   readonly layout: (instance: RenderVisualInstance, input: RenderVisualSpriteLayout | null) => RenderVisualSpriteLayout | null;
   readonly readLayout: (instance: RenderVisualInstance) => RenderVisualSpriteLayout | null;
@@ -418,6 +421,34 @@ interface MembershipControl {
   readonly readTransform: (instance: RenderVisualInstance) => RenderVisualInstanceTransformSnapshot | null;
   readonly visibility: (instance: RenderVisualInstance, visible: boolean) => RenderVisualInstanceVisibilitySnapshot;
   readonly readVisibility: (instance: RenderVisualInstance) => RenderVisualInstanceVisibilitySnapshot;
+}
+
+/** Owner-local transaction seam. No retained lease capability escapes. */
+export interface VisualInstanceFrameState {
+  readonly revision: object;
+  readonly snapshot: RenderVisualInstanceSnapshot;
+  readonly binding: object | undefined;
+  readonly transform: RenderVisualInstanceTransformSnapshot | null;
+  readonly layout: RenderVisualSpriteLayout | null;
+}
+export interface VisualInstanceFrameUpdate {
+  readonly before: VisualInstanceFrameState;
+  readonly binding: RenderVisualResourceBindingInput;
+  readonly transform: RenderVisualInstanceTransformInput;
+  readonly layout: RenderVisualSpriteLayout;
+  /** Owner-supplied admission check; runs before any native writes. */
+  readonly validate: () => void;
+  readonly committed: (snapshot: RenderVisualResourceBindingSnapshot) => void;
+}
+export function onVisualInstanceEnd(scene: RenderVisualScene, instance: RenderVisualInstance, listener: () => void): () => void {
+  return membership(scene).onInstanceEnd(instance, listener);
+}
+export function readVisualInstanceFrameState(scene: RenderVisualScene, instance: RenderVisualInstance): VisualInstanceFrameState {
+  return membership(scene).frameState(instance);
+}
+export function commitVisualInstanceFrame(scene: RenderVisualScene, instance: RenderVisualInstance,
+  input: VisualInstanceFrameUpdate): RenderVisualResourceBindingSnapshot {
+  return membership(scene).frame(instance, input);
 }
 
 // Weak canonical capability dispatch only: no enumerable/global scene registry.
@@ -575,6 +606,7 @@ function createScope(sessionId: symbol) {
     binding: OwnedBinding | undefined; transform: RenderVisualInstanceTransformSnapshot | null;
     visible: boolean; ordering: RenderVisualInstanceOrder; depthKey: RenderVisualDepthKey | null;
     layout: RenderVisualSpriteLayout | null;
+    readonly endListeners: Set<() => void>;
   }
   const instances = new Map<string, Entry>();
   let layers = new Map<string, RenderVisualLayerSnapshot>([['default', Object.freeze({
@@ -644,9 +676,11 @@ function createScope(sessionId: symbol) {
       effectiveVisible: entry.visible && layers.get(entry.ordering.layerKey)!.visible && !viewportSuspended });
   };
   const releaseEntry = (entry: { readonly handle: RenderVisualInstance; binding: OwnedBinding | undefined;
-    transform: RenderVisualInstanceTransformSnapshot | null; visible: boolean }): void => {
+    transform: RenderVisualInstanceTransformSnapshot | null; visible: boolean; readonly endListeners: Set<() => void> }): void => {
     const binding = entry.binding, transformed = entry.transform !== null;
     entry.binding = undefined; entry.transform = null;
+    const listeners = [...entry.endListeners]; entry.endListeners.clear();
+    for (const listener of listeners) listener(); // Owner-local lifecycle unlinking, no host callbacks.
     // Attempt resource cleanup even if native node removal fails.
     try { if (transformed) writeTransform?.(entry.handle, null, entry.visible, 0); }
     catch (error) { noteCleanupFailure(); throw error; }
@@ -689,6 +723,63 @@ function createScope(sessionId: symbol) {
     dispose: (): RenderVisualSceneDisposal => { if (snapshot.state === 'active') requireEdit(); return end('scene-disposed'); },
   });
   memberships.set(handle, {
+    onInstanceEnd: (instance, listener) => {
+      const entry = requireEntry(instance);
+      entry.endListeners.add(listener);
+      return () => { entry.endListeners.delete(listener); };
+    },
+    frameState: (instance) => {
+      requireEdit();
+      const entry = requireEntry(instance);
+      return Object.freeze({ revision, snapshot: entry.snapshot, binding: entry.binding,
+        transform: entry.transform, layout: entry.layout });
+    },
+    frame: (instance, input) => {
+      requireEdit();
+      const entry = requireEntry(instance), before = input.before;
+      const admit = (): void => {
+        const current = requireEntry(instance);
+        if (current !== entry || revision !== before.revision || current.snapshot !== before.snapshot
+          || current.binding !== before.binding || current.transform !== before.transform || current.layout !== before.layout) {
+          throw new InstanceError('INSTANCE_CHANGED');
+        }
+      };
+      admit();
+      const transform = captureVisualInstanceTransform(input.transform), layout = captureSpriteLayout(input.layout)!;
+      if (layout.unit !== transform.placement.plane.unit) throw new VisualPresentationError('LOCAL_UNIT_MISMATCH');
+      visualDepth(policyFor(entry.ordering.layerKey), transform, entry.depthKey);
+      admit();
+      const candidate = prepare!(input.binding, noteCleanupFailure);
+      let committed = false;
+      try {
+        input.validate(); admit();
+        const observation = candidate.read();
+        if (observation.state !== 'usable') throw new BindingError('RESOURCE_NOT_USABLE');
+        admit();
+        const proposed = [...instances.values()].map(value => value === entry ? { ...entry, transform } : value);
+        const sorted = syncOrdering(proposed);
+        writeTransform!(instance, transform.localToClip,
+          entry.visible && layers.get(entry.ordering.layerKey)!.visible,
+          sorted.findIndex(value => value.handle === instance));
+        requireEntry(instance);
+        edit!(true, instance); // Existing Phase6 demand + old drawable cleanup, never schedules/submits.
+        requireEntry(instance);
+        const previous = entry.binding;
+        entry.binding = candidate; entry.transform = transform; entry.layout = layout;
+        committed = true;
+        input.committed(observation); // Track ownership even if later old-usage cleanup fails.
+        invalidateOrdering();
+        // Same Phase8 rule: commit before old cleanup; cleanup failure is not rollback.
+        releaseBinding(previous);
+        const accepted = candidate.read();
+        requireEntry(instance);
+        if (accepted.state !== 'usable') throw new BindingError('RESOURCE_NOT_USABLE');
+        return accepted;
+      } catch (error) {
+        if (!committed) releaseBinding(candidate);
+        throw error;
+      }
+    },
     diagnostics: () => {
       const before = revision;
       let boundUsages = 0, usableUsages = 0;
@@ -828,7 +919,8 @@ function createScope(sessionId: symbol) {
         insertionOrdinal: nextOrdinal });
       const instance = Object.freeze({ ...observation }) as RenderVisualInstance;
       instances.set(instance.visualInstanceId, { handle: instance, snapshot: observation,
-        binding: undefined, transform: null, visible: true, ordering: captured.ordering, depthKey: null, layout: null });
+        binding: undefined, transform: null, visible: true, ordering: captured.ordering, depthKey: null, layout: null,
+        endListeners: new Set() });
       invalidateOrdering();
       issued.add(instance);
       nextOrdinal += 1;

@@ -1,5 +1,61 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase10 [v0.10.8 SA09](../runtime-render/docs/sprite-animation-v0.10.8.md) reuses
+canonical immutable clip definitions while keeping playback state/collections
+per handle. Structural inputs still deep-capture. Zero public-root declaration
+delta; no new membership/cache/timing manager. Phase8 instance rights and host
+acquired leases have separate canonical cleanup owners. Manual host/evidence
+cover pause/hide/select/remove, late readiness and independent session loss.
+
+Phase10 [v0.10.7 SA08](../runtime-render/docs/sprite-animation-v0.10.7.md) adds
+createSpriteAnimationVisualBinding and three neutral types. Existing Phase7
+retained page rights/geometry and SA07 alignment feed a Phase8 atomic resource,
+transform and layout commit; identity local TRS only. Preserve placement/ground
+offset and presentation metadata. Pending/released lease returns FRAME_NOT_READY;
+host schedules/draws. No old signature, dependency or ownership changes.
+
+Phase10 [v0.10.6 SA07](../runtime-render/docs/sprite-animation-v0.10.6.md) adds
+resolveSpriteFrameAlignment and three portable types. Phase4 alignment/affine
+math, canonical Phase7 geometry/token, explicit verified frame-local pixel data
+and plane ratios. Missing original layout/data returns FRAME_ORIGIN_UNAVAILABLE;
+preserve raw sourcePivot with verified normalized bottom-left convention. No old
+declaration change, authored placement write, instance binding or GPU work.
+
+Phase10 [v0.10.5 SA06](../runtime-render/docs/sprite-animation-v0.10.5.md) adds
+advanceSpriteAnimationPlayback/SpriteAnimationAdvanceResult without changing old
+commands/snapshots. Explicit bounded host delta, shared transition and SA03 sampler;
+no timer, gameplay clock, invalidation, resource acquisition or instance binding.
+
+Phase10 [v0.10.4 SA05](../runtime-render/docs/sprite-animation-v0.10.4.md) adds
+independent Render playback handles/snapshots and a single command path. Captured
+immutable clips, exact issued identity, atomic rejection and terminal disposal;
+no delta advance, Scene/resource binding, host clock or gameplay authority.
+
+Phase10 [v0.10.3 SA04](../runtime-render/docs/sprite-animation-v0.10.3.md) adds
+eight-slot capture, pure Phase4 angular selection and Phase7 frame resolution.
+Same logical elapsed applies to target modulo/clamp; this explicitly supersedes
+SA01/SA03's future direction fraction proposal. No old implemented API changes.
+
+Phase10 [v0.10.2 SA03](../runtime-render/docs/sprite-animation-v0.10.2.md) adds
+normalized timing, timed metadata composition and stateless once/repeat sampling
+at Render root. No old signature/union change or live playhead. Half-open numeric
+policy and switch policy are explicit; no timer/render-FPS coupling.
+
+Phase10 [v0.10.1 SA02](../runtime-render/docs/sprite-animation-v0.10.1.md) adds
+SpriteFrameSequence/createSpriteFrameSequence and
+SpriteAnimationClip/createSpriteAnimationClip at Render root. Immutable ordered
+metadata only; atlas/revision resolution remains Phase7. No prior signature or
+diagnostic union changes, no timing/direction/live resource surface yet.
+
+Phase10 v0.10.0 SA01 is [sprite animation design only](../runtime-render/docs/sprite-animation-v0.10.0.md).
+Existing Phase4/6/7/8/9 APIs and unions unchanged; no runtime animation export.
+Proposed ordered Phase7 references, explicit eight directions, normalized positive
+interval, host delta-only independent playback and Phase8 resource binding use
+one canonical Render path. Explicit origin/layout, no trim/pivot inference.
+See [source/API audit](../runtime-render/docs/sprite-animation-api-inventory-v0.10.0.md)
+and [checkpoint](checkpoints/sprite-animation-v0.10.0.md). API_DESIGN_ONLY;
+FEATURE_NOT_VERIFIED / VISUAL_NOT_VERIFIED, no pre-implemented v0.10.1.
+
 Phase9 v0.9.14 CM20 closure is documentation/audit only. See the
 [15-checkpoint review packet](checkpoints/camera-v0.9.14.md) and
 [exact declaration/commit inventory](checkpoints/camera-v0.9.14-api.md).
@@ -1010,3 +1066,10 @@ Phase9 v0.9.7 CM13 adds viewportToRenderCameraSelectedPlane, screenToRenderCamer
 Phase9 v0.9.8 CM14 adds discriminated affine-ground-elevation config, forward and supplied-height viewport/screen inverse through Phase4. Existing camera declarations/unions unchanged. Presentation plane must match camera source; scale/zoom apply once to ground and height together. [Contract](../runtime-render/docs/camera-v0.9.8.md), [checkpoint](checkpoints/camera-v0.9.8.md).
 
 Phase9 v0.9.9 CM15 adds transitionRenderCameraWithinBounds and four types. Per-request disabled/rectangle bounds, center/pan plus target zoom; full visible extent via Phase4 inverse, explicit oversized status, atomic rejection/commit. Existing root contracts unchanged. [Contract](../runtime-render/docs/camera-v0.9.9.md), [checkpoint](checkpoints/camera-v0.9.9.md).
+
+Phase10 v0.10.12 SA13: documentation-only closure, zero new public contracts.
+Exact baseline Render231/Editor138/Client0 → 271/138/0: forty additive Render
+root names, zero removed or changed old declarations, including old unions.
+[Exact inventory](../runtime-render/docs/sprite-animation-api-inventory-v0.10.12.md)
+and [closure report](checkpoints/sprite-animation-v0.10.12.md) distinguish
+compile compatibility from finite API/pixel evidence and Developer acceptance.
