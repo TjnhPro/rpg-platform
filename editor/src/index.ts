@@ -252,3 +252,4 @@ export { addMapLayer, updateMapLayer, reorderMapLayers, removeMapLayer, describe
 export { setMapBackground, clearMapBackground, describeMapBackgroundLayout } from './map-background.js';
 export { setMapTile, removeMapTile } from './map-tiles.js';
 export { createMap, type CreateMapOptions, type CreateMapResult } from './map-create.js';
+export { openMap, type OpenMapOptions, type OpenMapResult } from './map-open.js';
