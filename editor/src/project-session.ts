@@ -102,8 +102,13 @@ export function replaceProjectManifest(session: ProjectSession, manifest: Projec
 }
 /** Explicit discard only. Borrowed ports and unrelated documents/resources stay owned by host. */
 export function closeProjectSession(session: ProjectSession, disposition: 'discard'): ProjectSessionSnapshot {
-  const { document } = requireOpenProjectSession(session);
   const record = recordFor(session);
+  if (record.document === null || record.root === null) return projectFail('PROJECT_SESSION_CLOSED', 'session');
+  const document = record.document;
+  const snapshot = document.getSnapshot();
+  validate(record, snapshot);
+  if (snapshot.state === 'closed') return projectFail('PROJECT_SESSION_CLOSED', 'session');
+  requireProjectRoot(record.root, record.projectId);
   record.closed = document.close(disposition);
   record.document = null;
   record.root = null;
