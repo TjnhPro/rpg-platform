@@ -222,3 +222,5 @@ export { createProjectSession, getProjectSessionSnapshot, openProjectSession,
 export type { ProjectSession, ProjectSessionSnapshot } from './project-session.js';
 export { createProject } from './project-create.js';
 export type { CreateProjectOptions } from './project-create.js';
+export { openProject, projectDocumentContext } from './project-open.js';
+export type { OpenProjectOptions, ProjectOpenResult } from './project-open.js';
