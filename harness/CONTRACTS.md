@@ -1,5 +1,12 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase10 [v0.10.6 SA07](../runtime-render/docs/sprite-animation-v0.10.6.md) adds
+resolveSpriteFrameAlignment and three portable types. Phase4 alignment/affine
+math, canonical Phase7 geometry/token, explicit verified frame-local pixel data
+and plane ratios. Missing original layout/data returns FRAME_ORIGIN_UNAVAILABLE;
+preserve raw sourcePivot with verified normalized bottom-left convention. No old
+declaration change, authored placement write, instance binding or GPU work.
+
 Phase10 [v0.10.5 SA06](../runtime-render/docs/sprite-animation-v0.10.5.md) adds
 advanceSpriteAnimationPlayback/SpriteAnimationAdvanceResult without changing old
 commands/snapshots. Explicit bounded host delta, shared transition and SA03 sampler;

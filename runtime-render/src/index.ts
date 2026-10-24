@@ -400,3 +400,5 @@ export {
   type SpriteAnimationPlaybackState, type SpriteAnimationPlaybackCommand,
 } from './sprite-animation-playback.js';
 export { advanceSpriteAnimationPlayback, type SpriteAnimationAdvanceResult } from './sprite-animation-playback.js';
+export { resolveSpriteFrameAlignment, type SpriteFrameAlignmentData,
+  type SpriteFrameAlignmentInput, type SpriteFrameAlignmentResult } from './sprite-frame-alignment.js';

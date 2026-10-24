@@ -4,6 +4,12 @@
 
 Read root agent guidance first.
 
+- [v0.10.6 SA07](docs/sprite-animation-v0.10.6.md): pure frame alignment through
+  Phase4 anchor/affine APIs and canonical Phase7 geometry/revision. Explicit
+  verified per-frame pixel anchor/pivot/offset or FRAME_ORIGIN_UNAVAILABLE.
+  Preserve normalized bottom-left sourcePivot; never infer missing original
+  layout, modify placement or bind/draw/crop/upload here.
+
 - [v0.10.5 SA06](docs/sprite-animation-v0.10.5.md): explicit advance on the same
   playback transition path; only playing progresses. Keep bounded logical time
   for repeat, clamp once, sample through SA03. Frozen per-call address-change/
