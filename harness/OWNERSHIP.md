@@ -369,3 +369,9 @@ v0.11.3 VE04: **runtime-render** owns effect command admission over the already
 owned Phase10 playback and Phase8 visibility. No ticker/resource/renderer or
 boundary expansion; Editor/Client unchanged build consumers, Harness evidence.
 No Engine/L1/L2/gameplay changes. [Checkpoint](checkpoints/visual-effect-v0.11.3.md).
+
+v0.11.4 VE05: **runtime-render** owns presentation completion/lifetime admission,
+using existing Phase10 explicit advance and VE03/Phase8 retirement. No separate
+clock, frame sampler, scene registry or gameplay timer. Editor/Client unchanged
+build consumers; Harness evidence only. No owner expansion or L1/L2 change.
+[Checkpoint](checkpoints/visual-effect-v0.11.4.md).

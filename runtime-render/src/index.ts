@@ -422,3 +422,6 @@ export { createVisualEffectInstance, getVisualEffectInstanceSnapshot, listVisual
 export { commandVisualEffectPlayback, getVisualEffectPlaybackSnapshot, getVisualEffectPlaybackFailure,
   type VisualEffectPlaybackCommand, type VisualEffectPlaybackSnapshot,
   type VisualEffectPlaybackFailure } from './visual-effect-instance.js';
+export { createVisualEffectTimedInstance, getVisualEffectLifetimeSnapshot, advanceVisualEffectInstance,
+  getVisualEffectLifetimeFailure, type VisualEffectTimedInstanceInput, type VisualEffectCompletionReceipt,
+  type VisualEffectLifetimeSnapshot, type VisualEffectAdvanceResult, type VisualEffectLifetimeFailure } from './visual-effect-instance.js';

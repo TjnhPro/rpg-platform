@@ -1,7 +1,7 @@
 import type { RenderFrameSession } from './frame-session.js';
 import { requireTextureSession, getRenderTextureFailure } from './render-texture.js';
 import { requireVisualEffectDefinition, getVisualEffectDefinitionFailure, type VisualEffectDefinition } from './visual-effect-definition.js';
-import { createSpriteSequencePlayback, commandSpriteSequencePlayback, getSpriteSequencePlaybackSnapshot,
+import { createSpriteSequencePlayback, commandSpriteSequencePlayback, getSpriteSequencePlaybackSnapshot, advanceSpriteSequencePlayback,
   type SpriteSequencePlayback, type SpriteSequencePlaybackSnapshot } from './sprite-animation-playback.js';
 import { addRenderVisualInstance, getRenderVisualInstance, listRenderVisualInstances,
   removeRenderVisualInstance, readVisualInstanceFrameState, onVisualInstanceEnd, setRenderVisualInstanceVisible,
@@ -59,6 +59,9 @@ interface Data {
   active: Active | undefined;
   terminalPlayback: SpriteSequencePlaybackSnapshot;
   commanding: boolean;
+  readonly mode: 'once' | 'repeat' | 'timed-repeat';
+  readonly durationMs: number | null;
+  completion: VisualEffectCompletionReceipt | null;
 }
 // Issuance/correlation only. Phase8 alone stores/enumerates live scene membership.
 const instances = new WeakMap<VisualEffectInstance, Data>();
@@ -120,10 +123,15 @@ function membershipEnded(data: Data): void {
 /** Own a stopped CPU playback and an empty Phase8 metadata membership; never draws. */
 export function createVisualEffectInstance(session: RenderFrameSession, scene: RenderVisualScene,
   input: VisualEffectInstanceInput): VisualEffectInstance {
+  return createEffect(session, scene, input, null);
+}
+function createEffect(session: RenderFrameSession, scene: RenderVisualScene,
+  input: VisualEffectInstanceInput, durationMs: number | null): VisualEffectInstance {
   const value = record(input);
   let definition: VisualEffectDefinition;
   try { definition = requireVisualEffectDefinition(value.definition as VisualEffectDefinition); }
   catch (error) { if (getVisualEffectDefinitionFailure(error)) invalid('INVALID_DEFINITION'); throw error; }
+  if (durationMs !== null && definition.clip.repeat !== 'repeat') lifetimeInvalid('INVALID_MODE');
   // Canonical dispatch first; no method invocation on arbitrary host scene objects.
   sceneOperation(() => listRenderVisualInstances(scene));
   const scope = scene.getSnapshot();
@@ -145,6 +153,8 @@ export function createVisualEffectInstance(session: RenderFrameSession, scene: R
     const handle = Object.freeze({ id: Symbol('visual-effect-instance') }) as VisualEffectInstance;
     data = { handle, owner: new WeakRef(scene), active: { scene, visual, definition, playback, unsubscribe: () => {} },
       terminalPlayback: getSpriteSequencePlaybackSnapshot(playback), commanding: false,
+      mode: durationMs !== null ? 'timed-repeat' : definition.clip.repeat,
+      durationMs: durationMs ?? (definition.clip.repeat === 'once' ? definition.clip.durationMs : null), completion: null,
       snapshot: Object.freeze({ id: handle.id, effectId: definition.effectId,
         projectId: definition.resource.identity.projectId, sceneId: visual.sceneId, sessionId,
         visualInstanceId: visual.visualInstanceId, state: 'created', reason: null, cleanupFailed: false }) };
@@ -284,5 +294,98 @@ export function commandVisualEffectPlayback(handle: VisualEffectInstance,
       commandSpriteSequencePlayback(active.playback, { type: command.type as 'pause' | 'resume' | 'stop' });
     }
     return getVisualEffectPlaybackSnapshot(handle);
+  } finally { data.commanding = false; }
+}
+
+/** Finite presentation lifetime applies only to an explicitly repeating definition. */
+export interface VisualEffectTimedInstanceInput extends VisualEffectInstanceInput {
+  readonly durationMs: number;
+}
+export interface VisualEffectCompletionReceipt {
+  readonly instanceId: symbol;
+  readonly reason: 'clip-completed' | 'duration-elapsed';
+  readonly elapsedMs: number;
+  /** Final address/time before owned transport disposal, never a live capability. */
+  readonly playback: SpriteSequencePlaybackSnapshot;
+}
+export interface VisualEffectLifetimeSnapshot {
+  readonly instance: VisualEffectInstanceSnapshot;
+  readonly mode: 'once' | 'repeat' | 'timed-repeat';
+  readonly state: 'stopped' | 'playing' | 'paused' | 'completed' | 'removed';
+  readonly durationMs: number | null;
+  readonly elapsedMs: number;
+  readonly playback: SpriteSequencePlaybackSnapshot;
+  readonly completion: VisualEffectCompletionReceipt | null;
+}
+export interface VisualEffectAdvanceResult {
+  readonly snapshot: VisualEffectLifetimeSnapshot;
+  readonly frameChanged: boolean;
+  /** True only on the call that first retired this effect through completion. */
+  readonly completedNow: boolean;
+}
+export interface VisualEffectLifetimeFailure {
+  readonly code: 'INVALID_DURATION' | 'INVALID_MODE' | 'INVALID_DELTA';
+}
+const lifetimeFailures = new WeakMap<object, VisualEffectLifetimeFailure>();
+function lifetimeInvalid(code: VisualEffectLifetimeFailure['code']): never {
+  const error = new TypeError(`Visual effect lifetime: ${code}`);
+  lifetimeFailures.set(error, Object.freeze({ code }));
+  throw error;
+}
+export function getVisualEffectLifetimeFailure(error: unknown): VisualEffectLifetimeFailure | undefined {
+  return typeof error === 'object' && error !== null ? lifetimeFailures.get(error) : undefined;
+}
+export function createVisualEffectTimedInstance(session: RenderFrameSession, scene: RenderVisualScene,
+  input: VisualEffectTimedInstanceInput): VisualEffectInstance {
+  // Capture all host data before any effect allocation; common creation rechecks scope.
+  if (typeof input !== 'object' || input === null || Array.isArray(input)
+    || (Object.getPrototypeOf(input) !== Object.prototype && Object.getPrototypeOf(input) !== null)
+    || Reflect.ownKeys(input).length !== 3) invalid('INVALID_STRUCTURE');
+  const fields: Record<string, unknown> = {};
+  for (const key of ['definition', 'visualInstanceId', 'durationMs']) {
+    const field = Object.getOwnPropertyDescriptor(input, key);
+    if (!field?.enumerable || !('value' in field)) invalid('INVALID_STRUCTURE');
+    fields[key] = field.value;
+  }
+  const durationMs = fields.durationMs;
+  if (typeof durationMs !== 'number' || !Number.isFinite(durationMs)
+    || durationMs < 0.000001 || durationMs > Number.MAX_SAFE_INTEGER) lifetimeInvalid('INVALID_DURATION');
+  return createEffect(session, scene, { definition: fields.definition as VisualEffectDefinition,
+    visualInstanceId: fields.visualInstanceId as string }, durationMs);
+}
+/** Completion history is separate from the backward-compatible VE03 membership state. */
+export function getVisualEffectLifetimeSnapshot(handle: VisualEffectInstance): VisualEffectLifetimeSnapshot {
+  const data = playbackData(handle), current = getVisualEffectPlaybackSnapshot(handle);
+  const playback = data.completion?.playback ?? current.playback;
+  return Object.freeze({ instance: current.instance, mode: data.mode, durationMs: data.durationMs,
+    state: data.completion ? 'completed' : current.instance.state === 'removed' ? 'removed'
+      : playback.state as 'stopped' | 'playing' | 'paused',
+    elapsedMs: playback.elapsedMs, playback, completion: data.completion });
+}
+/** One bounded canonical advance, no per-frame loop or independent VFX time accumulator. */
+export function advanceVisualEffectInstance(handle: VisualEffectInstance, deltaMs: number): VisualEffectAdvanceResult {
+  const data = playbackData(handle);
+  if (data.commanding) playbackInvalid('TRANSITION_IN_PROGRESS');
+  data.commanding = true;
+  try {
+    if (typeof deltaMs !== 'number' || !Number.isFinite(deltaMs) || deltaMs < 0
+      || deltaMs > Number.MAX_SAFE_INTEGER) lifetimeInvalid('INVALID_DELTA');
+    if (data.completion) return Object.freeze({ snapshot: getVisualEffectLifetimeSnapshot(handle), frameChanged: false, completedNow: false });
+    const active = livePlayback(data), before = getSpriteSequencePlaybackSnapshot(active.playback);
+    // Validate caller budget even while paused/stopped, then honor canonical no-op semantics.
+    const bound = data.durationMs;
+    const admitted = before.state === 'playing' && bound !== null
+      ? Math.min(deltaMs, bound - before.elapsedMs) : deltaMs;
+    const advanced = advanceSpriteSequencePlayback(active.playback, admitted);
+    const after = advanced.snapshot;
+    const complete = after.state === 'playing' && data.mode === 'timed-repeat' && after.elapsedMs >= bound!
+      || data.mode === 'once' && after.completed;
+    if (complete) {
+      data.completion = Object.freeze({ instanceId: handle.id,
+        reason: data.mode === 'once' ? 'clip-completed' : 'duration-elapsed', elapsedMs: after.elapsedMs, playback: after });
+      end(data, 'removed', true); // One canonical membership/playback cleanup, terminal before native release.
+      if (data.snapshot.cleanupFailed) invalid('CLEANUP_FAILED', true);
+    }
+    return Object.freeze({ snapshot: getVisualEffectLifetimeSnapshot(handle), frameChanged: advanced.frameChanged, completedNow: complete });
   } finally { data.commanding = false; }
 }

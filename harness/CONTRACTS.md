@@ -1105,3 +1105,9 @@ canonical readback, Render302→308; no old root declarations change. Commands u
 owned U1 transport; stop hides retained Phase8 membership, restart delegates to
 stop/play. Readiness is NOT_CHECKED; no effect advance/duration/binding yet.
 [Contract](../runtime-render/docs/visual-effect-v0.11.3.md), [checkpoint](checkpoints/visual-effect-v0.11.3.md).
+
+Phase11 v0.11.4 VE05 adds nine Render roots for explicit-delta effect advance,
+finite repeat creation and detached completion history. Render308→317, all prior
+root declarations unchanged. Canonical Phase10 run elapsed drives both frame and
+presentation lifetime; completion retires Phase8 membership and retained usage.
+[Contract](../runtime-render/docs/visual-effect-v0.11.4.md), [checkpoint](checkpoints/visual-effect-v0.11.4.md).
