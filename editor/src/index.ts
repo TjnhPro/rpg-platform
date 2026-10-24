@@ -237,3 +237,5 @@ export { registerExistingAssetResource } from './asset-manager-import.js';
 export type { ExistingResourceRequest, ExistingResourceObservation, ExistingResourcePort, ExistingResourceResult } from './asset-manager-import.js';
 export { searchManagedAssets } from './asset-manager-search.js';
 export type { AssetSearchRequest, AssetSearchResult } from './asset-manager-search.js';
+export { inspectManagedAsset } from './asset-manager-inspector.js';
+export type { AssetInspectorResult } from './asset-manager-inspector.js';
