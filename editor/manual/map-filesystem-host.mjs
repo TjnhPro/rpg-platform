@@ -1,5 +1,6 @@
 // Finite trusted-topology tooling, not a general filesystem security boundary.
-import { lstat, realpath, open, link, unlink } from 'node:fs/promises';
+import { lstat, realpath, open, link, unlink, copyFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { createHash, randomUUID } from 'node:crypto';
 import { createProjectRootBinding, deserializeDocument } from '@rpg-platform/editor';
@@ -8,6 +9,8 @@ import { createAssetManagerFilesystemHost } from './asset-manager-host.mjs';
 export const mapDocuments = new Set(['map.scene.json', 'ordinary.scene.json', 'future.scene.json', 'invalid.scene.json']);
 export async function createMapFilesystemHost() {
   const base = await createAssetManagerFilesystemHost(), roots = new Map();
+  await copyFile(fileURLToPath(new URL('../../runtime-render/manual/scene-mvp-assets/courtyard.png', import.meta.url)),
+    path.join(base.roots.get('game-a').directory, 'sprites/background.png'));
   for (const [projectId, original] of base.roots) {
     const directory = await realpath(original.directory);
     async function target(locator) {
@@ -55,7 +58,21 @@ export async function createMapFilesystemHost() {
       try { await unlink(temporary); artifacts.delete(request); return { status: 'cleaned' }; } catch { return { status: 'failed' }; }
     } };
     const binding = createProjectRootBinding({ projectId, bindingId: original.binding.bindingId, readPort, writePort });
-    roots.set(projectId, { directory, binding, readBytes: original.readBytes, target });
+    async function readBytes(locator, maximum = 4_194_304) {
+      if (locator !== 'sprites/background.png') return original.readBytes(locator, maximum);
+      if (projectId !== 'game-a') throw new TypeError('PATH_DENIED');
+      const parent = path.join(directory, 'sprites'), file = path.join(parent, 'background.png');
+      const rootStat = await lstat(directory), parentStat = await lstat(parent), fileStat = await lstat(file);
+      if (!rootStat.isDirectory() || rootStat.isSymbolicLink() || await realpath(directory) !== directory
+        || !parentStat.isDirectory() || parentStat.isSymbolicLink() || !fileStat.isFile() || fileStat.isSymbolicLink()) throw new TypeError('PATH_DENIED');
+      const handle = await open(file, 'r');
+      try { const bytes = Buffer.alloc(maximum + 1); let length = 0;
+        while (length < bytes.length) { const result = await handle.read(bytes, length, bytes.length - length, null); if (!result.bytesRead) break; length += result.bytesRead; }
+        if (length > maximum) throw new RangeError('READ_LIMIT');
+        return bytes.subarray(0, length);
+      } finally { await handle.close(); }
+    }
+    roots.set(projectId, { directory, binding, readBytes, target });
   }
   return { base: base.base, roots };
 }
