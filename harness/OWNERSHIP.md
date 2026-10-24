@@ -335,3 +335,9 @@ playback/advance/frame-binding/resource/Scene/camera ownership; no Render change
 Existing selected-File capability gains optional scoped identity and revocation,
 not another loader/cache. No root API, dependency, gameplay authority or foundation
 change. See [checkpoint](checkpoints/sprite-animation-v0.10.10.md).
+
+v0.10.12 SA13: **runtime-render** owns the Sprite Animation integration audit;
+Harness records evidence and Editor/Client are reviewed consumers. Documentation
+only, no dependency or ownership move, Engine/Server/foundation change or new
+subsystem. [Closure report](checkpoints/sprite-animation-v0.10.12.md).
+Developer review pending; no automatic Phase11, merge or release.

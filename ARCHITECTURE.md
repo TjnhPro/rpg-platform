@@ -144,3 +144,12 @@ all fifteen checkpoints, SR01–SR21 traceability, public declaration deltas and
 prior-phase lifetime/ownership compatibility. Closure adds documentation only.
 READY_FOR_DEVELOPER_REVIEW; FEATURE_NOT_VERIFIED / VISUAL_NOT_VERIFIED.
 Manual MVP acceptance, merge and release remain Developer decisions.
+
+## Sprite Animation review packet — Phase 10
+
+[SA13 closure audit](harness/checkpoints/sprite-animation-v0.10.12.md) traces the
+canonical Render animation path and all thirteen checkpoints. Render owns clip,
+direction, playback and live frame binding; Editor authors/previews and Client
+passes presentation intent and elapsed deltas. Existing Phase4/6/7/8/9 owners
+remain authoritative. Closure is documentation only; Developer acceptance is
+pending, with finite real-asset evidence and explicit lifecycle/visual gaps.

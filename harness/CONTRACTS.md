@@ -1066,3 +1066,10 @@ Phase9 v0.9.7 CM13 adds viewportToRenderCameraSelectedPlane, screenToRenderCamer
 Phase9 v0.9.8 CM14 adds discriminated affine-ground-elevation config, forward and supplied-height viewport/screen inverse through Phase4. Existing camera declarations/unions unchanged. Presentation plane must match camera source; scale/zoom apply once to ground and height together. [Contract](../runtime-render/docs/camera-v0.9.8.md), [checkpoint](checkpoints/camera-v0.9.8.md).
 
 Phase9 v0.9.9 CM15 adds transitionRenderCameraWithinBounds and four types. Per-request disabled/rectangle bounds, center/pan plus target zoom; full visible extent via Phase4 inverse, explicit oversized status, atomic rejection/commit. Existing root contracts unchanged. [Contract](../runtime-render/docs/camera-v0.9.9.md), [checkpoint](checkpoints/camera-v0.9.9.md).
+
+Phase10 v0.10.12 SA13: documentation-only closure, zero new public contracts.
+Exact baseline Render231/Editor138/Client0 → 271/138/0: forty additive Render
+root names, zero removed or changed old declarations, including old unions.
+[Exact inventory](../runtime-render/docs/sprite-animation-api-inventory-v0.10.12.md)
+and [closure report](checkpoints/sprite-animation-v0.10.12.md) distinguish
+compile compatibility from finite API/pixel evidence and Developer acceptance.

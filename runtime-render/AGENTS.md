@@ -287,3 +287,10 @@ Read root agent guidance first.
 - [v0.9.8 CM14](docs/camera-v0.9.8.md): Render-owned affine ground/elevation composition before existing camera. Explicit presentation basis/origins/units and supplied inverse height; singular rejection via Phase4. No sheared orthographic alias, Scene/depth/resource mutation or native application.
 
 - [v0.9.9 CM15](docs/camera-v0.9.9.md): optional per-request bounds transition uses current view/viewport and target zoom, full visible extent, explicit clamp/reject and oversize reject/center. Atomic center+zoom; old methods unrestricted, no automatic resize teleport or persisted map policy.
+
+- [v0.10.12 SA13 closure](../harness/checkpoints/sprite-animation-v0.10.12.md):
+  Render remains the canonical animation owner; Editor/Client reuse its public
+  root. Keep clip, direction map, playback, binding, instance and gameplay intent
+  distinct. Forty additive roots across Phase10; closure adds documentation only.
+  Finite real-source pixels/logical cleanup do not establish universal visual
+  acceptance or native memory reclamation. Developer review is pending.

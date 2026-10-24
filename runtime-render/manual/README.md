@@ -404,3 +404,12 @@ the canonical Phase4/6/7/8/9/10 public APIs with original PNG/TPSheet sources,
 explicit manual deltas and independent playback/session lifetimes. See the
 [SA12 evidence report](../../harness/checkpoints/sprite-animation-v0.10.11.md)
 for actual finite Chrome observations, screenshots and unverified limitations.
+
+## Sprite animation closure — v0.10.12
+
+[SA13 audit](../../harness/checkpoints/sprite-animation-v0.10.12.md) records
+all thirteen checkpoints, exact public declaration compatibility, all-five builds,
+installed-root checks and fresh finite browser smoke. Use the
+[real-source procedure](sprite-animation-mvp.md) for Developer review.
+Supported sampled pixels and logical cleanup were observed; remaining visual and
+host lifecycle cases are explicitly unverified. Phase10 acceptance is pending.
