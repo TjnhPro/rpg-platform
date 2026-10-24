@@ -229,3 +229,5 @@ export type { ProjectSaveResult } from './project-save.js';
 export { createAssetManagerProject, getAssetManagerProjectSnapshot, adoptAssetManagerCatalog,
   closeAssetManagerProject, admitAssetManagerIdentity, rebuildAssetManagerCatalog } from './asset-manager-project.js';
 export type { AssetManagerProject, AssetManagerProjectSnapshot } from './asset-manager-project.js';
+export { assetBrowserCategories, describeAssetBrowserCategory } from './asset-manager-category.js';
+export type { AssetBrowserCategoryResult } from './asset-manager-category.js';
