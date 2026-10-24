@@ -407,3 +407,9 @@ consumers; Harness evidence only, no foundation/boundary expansion.
 [Checkpoint](checkpoints/visual-effect-v0.11.7.md).
 
 v0.11.8 VE09: **runtime-render** owns bounded effect diagnostics/admission and owned cleanup orchestration over existing Phase7/8/U1 rights. Host owns acquired leases and async IO; no new cache/pool/clock or gameplay authority. Editor/Client unchanged build consumers; Harness evidence only. [Checkpoint](checkpoints/visual-effect-v0.11.8.md).
+
+v0.11.12 VE13: **runtime-render** remains the canonical VFX behavior owner;
+Harness owns evidence-only phase closure, Editor/Client are build consumers.
+Zero production/API/dependency change. Architecture/build audit does not accept
+the incomplete VE12 visual MVP; Developer owns acceptance or explicit deferral.
+[Closure audit](checkpoints/visual-effect-v0.11.12.md).

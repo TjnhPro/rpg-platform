@@ -1,0 +1,384 @@
+{
+  "runtime-render": {
+    "baselineCount": 271,
+    "currentCount": 339,
+    "removed": [],
+    "changed": [],
+    "added": [
+      "getVisualEffectDiagnostic",
+      "VisualEffectDiagnostic",
+      "createVisualEffectDefinition",
+      "resolveVisualEffectDefinition",
+      "getVisualEffectDefinitionFailure",
+      "VisualEffectDefinitionInput",
+      "VisualEffectDefinition",
+      "VisualEffectSourceRevision",
+      "VisualEffectDefinitionFailure",
+      "VisualEffectDefinitionBindingInput",
+      "VisualEffectDefinitionBindingResult",
+      "createSpriteSequencePlayback",
+      "getSpriteSequencePlaybackSnapshot",
+      "commandSpriteSequencePlayback",
+      "advanceSpriteSequencePlayback",
+      "SpriteSequencePlayback",
+      "SpriteSequencePlaybackInput",
+      "SpriteSequencePlaybackSnapshot",
+      "SpriteSequencePlaybackCommand",
+      "SpriteSequenceAdvanceResult",
+      "createSpriteSequenceVisualBinding",
+      "SpriteSequenceVisualBinding",
+      "SpriteSequenceVisualFrameResult",
+      "createVisualEffectInstance",
+      "getVisualEffectInstanceSnapshot",
+      "listVisualEffectInstances",
+      "getVisualEffectInstance",
+      "removeVisualEffectInstance",
+      "getVisualEffectInstanceFailure",
+      "VisualEffectInstance",
+      "VisualEffectInstanceInput",
+      "VisualEffectInstanceSnapshot",
+      "VisualEffectInstanceFailure",
+      "commandVisualEffectPlayback",
+      "getVisualEffectPlaybackSnapshot",
+      "getVisualEffectPlaybackFailure",
+      "VisualEffectPlaybackCommand",
+      "VisualEffectPlaybackSnapshot",
+      "VisualEffectPlaybackFailure",
+      "createVisualEffectTimedInstance",
+      "getVisualEffectLifetimeSnapshot",
+      "advanceVisualEffectInstance",
+      "getVisualEffectLifetimeFailure",
+      "VisualEffectTimedInstanceInput",
+      "VisualEffectCompletionReceipt",
+      "VisualEffectLifetimeSnapshot",
+      "VisualEffectAdvanceResult",
+      "VisualEffectLifetimeFailure",
+      "setVisualEffectWorldPlacement",
+      "getVisualEffectWorldPlacementSnapshot",
+      "VisualEffectWorldPlacementInput",
+      "VisualEffectWorldPlacementSnapshot",
+      "attachVisualEffectInstance",
+      "syncVisualEffectAttachment",
+      "detachVisualEffectInstance",
+      "getVisualEffectAttachmentSnapshot",
+      "VisualEffectAttachmentInput",
+      "VisualEffectAttachmentSnapshot",
+      "syncVisualEffectFrame",
+      "VisualEffectFrameInput",
+      "VisualEffectFrameResult",
+      "getVisualEffectDiagnosticsSnapshot",
+      "getVisualEffectWorkSnapshot",
+      "getVisualEffectWorkFailure",
+      "VisualEffectDiagnosticsSnapshot",
+      "VisualEffectResourceObservation",
+      "VisualEffectWorkSnapshot",
+      "VisualEffectWorkFailure"
+    ],
+    "addedDeclarations": {
+      "getVisualEffectDiagnostic": {
+        "source": "runtime-render/src/index.ts",
+        "declaration": "export declare function getVisualEffectDiagnostic(error: unknown): VisualEffectDiagnostic;"
+      },
+      "VisualEffectDiagnostic": {
+        "source": "runtime-render/src/index.ts",
+        "declaration": "export type VisualEffectDiagnostic = RenderVisualDiagnostic | {\n    readonly domain: 'effect-coordinate';\n    readonly code: 'INVALID_COORDINATE';\n    readonly cleanupFailed: null;\n} | {\n    readonly domain: 'effect-definition';\n    readonly code: NonNullable<ReturnType<typeof effectDefinitionFailure>>['code'];\n    readonly cleanupFailed: null;\n} | {\n    readonly domain: 'effect-instance';\n    readonly code: NonNullable<ReturnType<typeof effectInstanceFailure>>['code'];\n    readonly cleanupFailed: boolean;\n} | {\n    readonly domain: 'effect-playback';\n    readonly code: NonNullable<ReturnType<typeof effectPlaybackFailure>>['code'];\n    readonly cleanupFailed: null;\n} | {\n    readonly domain: 'effect-lifetime';\n    readonly code: NonNullable<ReturnType<typeof effectLifetimeFailure>>['code'];\n    readonly cleanupFailed: null;\n} | {\n    readonly domain: 'effect-work';\n    readonly code: NonNullable<ReturnType<typeof effectWorkFailure>>['code'];\n    readonly cleanupFailed: null;\n};"
+      },
+      "createVisualEffectDefinition": {
+        "source": "runtime-render/src/visual-effect-definition.ts",
+        "declaration": "export declare function createVisualEffectDefinition(input: VisualEffectDefinitionInput): VisualEffectDefinition;"
+      },
+      "resolveVisualEffectDefinition": {
+        "source": "runtime-render/src/visual-effect-definition.ts",
+        "declaration": "export declare function resolveVisualEffectDefinition(definition: VisualEffectDefinition, input: VisualEffectDefinitionBindingInput): VisualEffectDefinitionBindingResult;"
+      },
+      "getVisualEffectDefinitionFailure": {
+        "source": "runtime-render/src/visual-effect-definition.ts",
+        "declaration": "export declare function getVisualEffectDefinitionFailure(error: unknown): VisualEffectDefinitionFailure | undefined;"
+      },
+      "VisualEffectDefinitionInput": {
+        "source": "runtime-render/src/visual-effect-definition.ts",
+        "declaration": "export interface VisualEffectDefinitionInput {\n    readonly effectId: string;\n    readonly kind: 'sprite-sequence';\n    readonly clip: SpriteTimedClipInput;\n    readonly resource: VisualResourceDescriptor;\n    readonly sources: readonly VisualEffectSourceRevision[];\n}"
+      },
+      "VisualEffectDefinition": {
+        "source": "runtime-render/src/visual-effect-definition.ts",
+        "declaration": "export interface VisualEffectDefinition {\n    readonly effectId: string;\n    readonly kind: 'sprite-sequence';\n    readonly clip: SpriteTimedClip;\n    readonly resource: VisualResourceDescriptor;\n    readonly sources: readonly VisualEffectSourceRevision[];\n}"
+      },
+      "VisualEffectSourceRevision": {
+        "source": "runtime-render/src/visual-effect-definition.ts",
+        "declaration": "export interface VisualEffectSourceRevision {\n    readonly sourceId: string;\n    readonly sourceIndex: number;\n    readonly revision: string;\n}"
+      },
+      "VisualEffectDefinitionFailure": {
+        "source": "runtime-render/src/visual-effect-definition.ts",
+        "declaration": "export interface VisualEffectDefinitionFailure {\n    readonly code: 'INVALID_STRUCTURE' | 'INVALID_EFFECT_ID' | 'UNSUPPORTED_KIND' | 'INVALID_CLIP' | 'INVALID_RESOURCE' | 'INVALID_SOURCE_BINDING' | 'RESOURCE_SCOPE_MISMATCH' | 'FOREIGN_DEFINITION';\n}"
+      },
+      "VisualEffectDefinitionBindingInput": {
+        "source": "runtime-render/src/visual-effect-definition.ts",
+        "declaration": "export interface VisualEffectDefinitionBindingInput {\n    readonly atlas: AtlasMetadata | null;\n    readonly expectedRevision: symbol;\n    readonly pages: readonly AtlasPagePixels[];\n}"
+      },
+      "VisualEffectDefinitionBindingResult": {
+        "source": "runtime-render/src/visual-effect-definition.ts",
+        "declaration": "export type VisualEffectDefinitionBindingResult = {\n    readonly status: 'resolved';\n    readonly resourceLoading: 'NOT_PERFORMED';\n    readonly effectId: string;\n    readonly atlasRevision: symbol;\n    readonly frames: readonly AtlasFrameGeometry[];\n} | {\n    readonly status: 'rejected';\n    readonly code: Extract<AtlasFrameGeometryResult, {\n        status: 'rejected';\n    }>['code'] | 'SOURCE_BINDING_MISMATCH' | 'SOURCE_REVISION_MISMATCH' | 'PAGE_BINDING_MISMATCH';\n    readonly frameIndex: number | null;\n};"
+      },
+      "createSpriteSequencePlayback": {
+        "source": "runtime-render/src/sprite-animation-playback.ts",
+        "declaration": "export declare function createSpriteSequencePlayback(input: SpriteSequencePlaybackInput): SpriteSequencePlayback;"
+      },
+      "getSpriteSequencePlaybackSnapshot": {
+        "source": "runtime-render/src/sprite-animation-playback.ts",
+        "declaration": "export declare function getSpriteSequencePlaybackSnapshot(handle: SpriteSequencePlayback): SpriteSequencePlaybackSnapshot;"
+      },
+      "commandSpriteSequencePlayback": {
+        "source": "runtime-render/src/sprite-animation-playback.ts",
+        "declaration": "export declare function commandSpriteSequencePlayback(handle: SpriteSequencePlayback, input: SpriteSequencePlaybackCommand): SpriteSequencePlaybackSnapshot;"
+      },
+      "advanceSpriteSequencePlayback": {
+        "source": "runtime-render/src/sprite-animation-playback.ts",
+        "declaration": "export declare function advanceSpriteSequencePlayback(handle: SpriteSequencePlayback, deltaMs: number): SpriteSequenceAdvanceResult;"
+      },
+      "SpriteSequencePlayback": {
+        "source": "runtime-render/src/sprite-animation-playback.ts",
+        "declaration": "export interface SpriteSequencePlayback {\n    readonly id: symbol;\n}"
+      },
+      "SpriteSequencePlaybackInput": {
+        "source": "runtime-render/src/sprite-animation-playback.ts",
+        "declaration": "export interface SpriteSequencePlaybackInput {\n    readonly clips: readonly SpriteTimedClip[];\n    readonly clipId: string;\n}"
+      },
+      "SpriteSequencePlaybackSnapshot": {
+        "source": "runtime-render/src/sprite-animation-playback.ts",
+        "declaration": "export interface SpriteSequencePlaybackSnapshot extends Omit<SpriteAnimationPlaybackSnapshot, 'directionIndex'> {\n    readonly directionIndex: null;\n}"
+      },
+      "SpriteSequencePlaybackCommand": {
+        "source": "runtime-render/src/sprite-animation-playback.ts",
+        "declaration": "export type SpriteSequencePlaybackCommand = Exclude<SpriteAnimationPlaybackCommand, {\n    readonly type: 'setDirection';\n}>;"
+      },
+      "SpriteSequenceAdvanceResult": {
+        "source": "runtime-render/src/sprite-animation-playback.ts",
+        "declaration": "export interface SpriteSequenceAdvanceResult {\n    readonly snapshot: SpriteSequencePlaybackSnapshot;\n    readonly frameChanged: boolean;\n    readonly completedNow: boolean;\n}"
+      },
+      "createSpriteSequenceVisualBinding": {
+        "source": "runtime-render/src/sprite-animation-visual-binding.ts",
+        "declaration": "export declare function createSpriteSequenceVisualBinding(session: RenderFrameSession, scene: RenderVisualScene, instance: RenderVisualInstance, playback: SpriteSequencePlayback): SpriteSequenceVisualBinding;"
+      },
+      "SpriteSequenceVisualBinding": {
+        "source": "runtime-render/src/sprite-animation-visual-binding.ts",
+        "declaration": "export interface SpriteSequenceVisualBinding {\n    readonly sync: (input: SpriteAnimationVisualFrameInput) => SpriteSequenceVisualFrameResult;\n    readonly replacePlayback: (playback: SpriteSequencePlayback) => void;\n    readonly unbind: () => void;\n}"
+      },
+      "SpriteSequenceVisualFrameResult": {
+        "source": "runtime-render/src/sprite-animation-visual-binding.ts",
+        "declaration": "export type SpriteSequenceVisualFrameResult = {\n    readonly status: 'bound';\n    readonly playback: SpriteSequencePlaybackSnapshot;\n    readonly resource: RenderVisualResourceBindingSnapshot;\n    readonly alignment: Extract<SpriteFrameAlignmentResult, {\n        status: 'resolved';\n    }>;\n} | Extract<SpriteAnimationVisualFrameResult, {\n    status: 'rejected';\n}>;"
+      },
+      "createVisualEffectInstance": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export declare function createVisualEffectInstance(session: RenderFrameSession, scene: RenderVisualScene, input: VisualEffectInstanceInput): VisualEffectInstance;"
+      },
+      "getVisualEffectInstanceSnapshot": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export declare function getVisualEffectInstanceSnapshot(handle: VisualEffectInstance): VisualEffectInstanceSnapshot;"
+      },
+      "listVisualEffectInstances": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export declare function listVisualEffectInstances(scene: RenderVisualScene): readonly VisualEffectInstance[];"
+      },
+      "getVisualEffectInstance": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export declare function getVisualEffectInstance(scene: RenderVisualScene, id: symbol): VisualEffectInstance | undefined;"
+      },
+      "removeVisualEffectInstance": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export declare function removeVisualEffectInstance(scene: RenderVisualScene, handle: VisualEffectInstance): boolean;"
+      },
+      "getVisualEffectInstanceFailure": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export declare function getVisualEffectInstanceFailure(error: unknown): VisualEffectInstanceFailure | undefined;"
+      },
+      "VisualEffectInstance": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export interface VisualEffectInstance {\n    readonly [effectInstanceBrand]: true;\n    readonly id: symbol;\n}"
+      },
+      "VisualEffectInstanceInput": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export interface VisualEffectInstanceInput {\n    readonly definition: VisualEffectDefinition;\n    readonly visualInstanceId: string;\n}"
+      },
+      "VisualEffectInstanceSnapshot": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export interface VisualEffectInstanceSnapshot {\n    readonly id: symbol;\n    readonly effectId: string;\n    readonly projectId: string;\n    readonly sceneId: symbol;\n    readonly sessionId: symbol;\n    readonly visualInstanceId: string;\n    readonly state: 'created' | 'removed';\n    readonly reason: null | 'removed' | 'membership-ended' | 'scene-disposed' | 'session-ended';\n    readonly cleanupFailed: boolean;\n}"
+      },
+      "VisualEffectInstanceFailure": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export interface VisualEffectInstanceFailure {\n    readonly code: 'INVALID_STRUCTURE' | 'INVALID_DEFINITION' | 'INVALID_ID' | 'DUPLICATE_ID' | 'FOREIGN_SCENE' | 'FOREIGN_SESSION' | 'FOREIGN_INSTANCE' | 'CONTEXT_MISMATCH' | 'SCENE_DISPOSED' | 'SESSION_UNAVAILABLE' | 'CLEANUP_FAILED';\n    readonly cleanupFailed: boolean;\n}"
+      },
+      "commandVisualEffectPlayback": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export declare function commandVisualEffectPlayback(handle: VisualEffectInstance, input: VisualEffectPlaybackCommand): VisualEffectPlaybackSnapshot;"
+      },
+      "getVisualEffectPlaybackSnapshot": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export declare function getVisualEffectPlaybackSnapshot(handle: VisualEffectInstance): VisualEffectPlaybackSnapshot;"
+      },
+      "getVisualEffectPlaybackFailure": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export declare function getVisualEffectPlaybackFailure(error: unknown): VisualEffectPlaybackFailure | undefined;"
+      },
+      "VisualEffectPlaybackCommand": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export type VisualEffectPlaybackCommand = {\n    readonly type: 'play' | 'restart';\n    readonly clipId?: string;\n} | {\n    readonly type: 'pause' | 'resume' | 'stop';\n};"
+      },
+      "VisualEffectPlaybackSnapshot": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export interface VisualEffectPlaybackSnapshot {\n    readonly instance: VisualEffectInstanceSnapshot;\n    readonly playback: SpriteSequencePlaybackSnapshot;\n    readonly active: boolean;\n    readonly resourceReadiness: 'NOT_CHECKED';\n}"
+      },
+      "VisualEffectPlaybackFailure": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export interface VisualEffectPlaybackFailure {\n    readonly code: 'INVALID_COMMAND' | 'INVALID_TRANSITION' | 'CLIP_NOT_DECLARED' | 'FOREIGN_INSTANCE' | 'INSTANCE_REMOVED' | 'SESSION_ENDED' | 'TRANSITION_IN_PROGRESS';\n}"
+      },
+      "createVisualEffectTimedInstance": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export declare function createVisualEffectTimedInstance(session: RenderFrameSession, scene: RenderVisualScene, input: VisualEffectTimedInstanceInput): VisualEffectInstance;"
+      },
+      "getVisualEffectLifetimeSnapshot": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export declare function getVisualEffectLifetimeSnapshot(handle: VisualEffectInstance): VisualEffectLifetimeSnapshot;"
+      },
+      "advanceVisualEffectInstance": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export declare function advanceVisualEffectInstance(handle: VisualEffectInstance, deltaMs: number): VisualEffectAdvanceResult;"
+      },
+      "getVisualEffectLifetimeFailure": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export declare function getVisualEffectLifetimeFailure(error: unknown): VisualEffectLifetimeFailure | undefined;"
+      },
+      "VisualEffectTimedInstanceInput": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export interface VisualEffectTimedInstanceInput extends VisualEffectInstanceInput {\n    readonly durationMs: number;\n}"
+      },
+      "VisualEffectCompletionReceipt": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export interface VisualEffectCompletionReceipt {\n    readonly instanceId: symbol;\n    readonly reason: 'clip-completed' | 'duration-elapsed';\n    readonly elapsedMs: number;\n    readonly playback: SpriteSequencePlaybackSnapshot;\n}"
+      },
+      "VisualEffectLifetimeSnapshot": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export interface VisualEffectLifetimeSnapshot {\n    readonly instance: VisualEffectInstanceSnapshot;\n    readonly mode: 'once' | 'repeat' | 'timed-repeat';\n    readonly state: 'stopped' | 'playing' | 'paused' | 'completed' | 'removed';\n    readonly durationMs: number | null;\n    readonly elapsedMs: number;\n    readonly playback: SpriteSequencePlaybackSnapshot;\n    readonly completion: VisualEffectCompletionReceipt | null;\n}"
+      },
+      "VisualEffectAdvanceResult": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export interface VisualEffectAdvanceResult {\n    readonly snapshot: VisualEffectLifetimeSnapshot;\n    readonly frameChanged: boolean;\n    readonly completedNow: boolean;\n}"
+      },
+      "VisualEffectLifetimeFailure": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export interface VisualEffectLifetimeFailure {\n    readonly code: 'INVALID_DURATION' | 'INVALID_MODE' | 'INVALID_DELTA';\n}"
+      },
+      "setVisualEffectWorldPlacement": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export declare function setVisualEffectWorldPlacement(handle: VisualEffectInstance, input: VisualEffectWorldPlacementInput): VisualEffectWorldPlacementSnapshot;"
+      },
+      "getVisualEffectWorldPlacementSnapshot": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export declare function getVisualEffectWorldPlacementSnapshot(handle: VisualEffectInstance): VisualEffectWorldPlacementSnapshot;"
+      },
+      "VisualEffectWorldPlacementInput": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export interface VisualEffectWorldPlacementInput {\n    readonly placement: PlaneProjectionPoint2D;\n    readonly anchor: VisualAnchor2D;\n    readonly projection: OrthographicPlaneProjection;\n}"
+      },
+      "VisualEffectWorldPlacementSnapshot": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export interface VisualEffectWorldPlacementSnapshot {\n    readonly instance: VisualEffectInstanceSnapshot;\n    readonly transform: RenderVisualInstanceTransformSnapshot | null;\n}"
+      },
+      "attachVisualEffectInstance": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export declare function attachVisualEffectInstance(handle: VisualEffectInstance, input: VisualEffectAttachmentInput): VisualEffectAttachmentSnapshot;"
+      },
+      "syncVisualEffectAttachment": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export declare function syncVisualEffectAttachment(handle: VisualEffectInstance): VisualEffectAttachmentSnapshot;"
+      },
+      "detachVisualEffectInstance": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export declare function detachVisualEffectInstance(handle: VisualEffectInstance): VisualEffectAttachmentSnapshot;"
+      },
+      "getVisualEffectAttachmentSnapshot": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export declare function getVisualEffectAttachmentSnapshot(handle: VisualEffectInstance): VisualEffectAttachmentSnapshot;"
+      },
+      "VisualEffectAttachmentInput": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export interface VisualEffectAttachmentInput {\n    readonly target: RenderVisualInstance;\n    readonly localOffset: PlanarPoint2D;\n    readonly inheritance: 'translation-only';\n}"
+      },
+      "VisualEffectAttachmentSnapshot": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export interface VisualEffectAttachmentSnapshot {\n    readonly instance: VisualEffectInstanceSnapshot;\n    readonly mode: 'world' | 'attached' | 'removed';\n    readonly target: RenderVisualInstance | null;\n    readonly localOffset: PlanarPoint2D | null;\n    readonly inheritance: 'translation-only' | null;\n    readonly visibility: 'inherit-effective' | null;\n    readonly transform: RenderVisualInstanceTransformSnapshot | null;\n}"
+      },
+      "syncVisualEffectFrame": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export declare function syncVisualEffectFrame(handle: VisualEffectInstance, input: VisualEffectFrameInput): VisualEffectFrameResult;"
+      },
+      "VisualEffectFrameInput": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export type VisualEffectFrameInput = SpriteAnimationVisualFrameInput;"
+      },
+      "VisualEffectFrameResult": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export type VisualEffectFrameResult = SpriteSequenceVisualFrameResult | {\n    readonly status: 'rejected';\n    readonly code: Extract<VisualEffectDefinitionBindingResult, {\n        status: 'rejected';\n    }>['code'];\n};"
+      },
+      "getVisualEffectDiagnosticsSnapshot": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export declare function getVisualEffectDiagnosticsSnapshot(handle: VisualEffectInstance): VisualEffectDiagnosticsSnapshot;"
+      },
+      "getVisualEffectWorkSnapshot": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export declare function getVisualEffectWorkSnapshot(scene: RenderVisualScene): VisualEffectWorkSnapshot;"
+      },
+      "getVisualEffectWorkFailure": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export declare function getVisualEffectWorkFailure(error: unknown): VisualEffectWorkFailure | undefined;"
+      },
+      "VisualEffectDiagnosticsSnapshot": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export interface VisualEffectDiagnosticsSnapshot {\n    readonly instance: VisualEffectInstanceSnapshot;\n    readonly resourceState: 'unbound' | 'usable' | 'unavailable' | 'retired';\n    readonly resource: VisualEffectResourceObservation | null;\n    readonly lastFrameSync: 'not-attempted' | 'bound' | 'rejected' | 'threw';\n    readonly sceneCleanupFailed: boolean | null;\n}"
+      },
+      "VisualEffectResourceObservation": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export interface VisualEffectResourceObservation {\n    readonly resourceId: symbol;\n    readonly sourceRevisionPrefix: string;\n    readonly frameKeyPrefix: string | null;\n    readonly atlasRevision: symbol | null;\n    readonly cleanupFailed: boolean;\n}"
+      },
+      "VisualEffectWorkSnapshot": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export interface VisualEffectWorkSnapshot {\n    readonly activeEffects: number;\n    readonly maxActiveEffects: number;\n    readonly inFlightOperations: number;\n}"
+      },
+      "VisualEffectWorkFailure": {
+        "source": "runtime-render/src/visual-effect-instance.ts",
+        "declaration": "export interface VisualEffectWorkFailure {\n    readonly code: 'ACTIVE_EFFECT_LIMIT';\n}"
+      }
+    }
+  },
+  "editor": {
+    "baselineCount": 138,
+    "currentCount": 138,
+    "removed": [],
+    "changed": [],
+    "added": [],
+    "addedDeclarations": {}
+  },
+  "game-client": {
+    "baselineCount": 0,
+    "currentCount": 0,
+    "removed": [],
+    "changed": [],
+    "added": [],
+    "addedDeclarations": {}
+  },
+  "runtime-engine": {
+    "baselineCount": 0,
+    "currentCount": 0,
+    "removed": [],
+    "changed": [],
+    "added": [],
+    "addedDeclarations": {}
+  },
+  "game-server": {
+    "baselineCount": 0,
+    "currentCount": 0,
+    "removed": [],
+    "changed": [],
+    "added": [],
+    "addedDeclarations": {}
+  }
+}

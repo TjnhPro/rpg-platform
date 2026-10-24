@@ -1,0 +1,69 @@
+### Result
+{
+  "before": {
+    "state": "active",
+    "instances": 1,
+    "boundUsages": 1,
+    "usableUsages": 1,
+    "unavailableUsages": 0,
+    "cleanupFailed": false,
+    "releaseAttempts": 5
+  },
+  "first": {
+    "instance": {
+      "effectId": "manual-effect",
+      "projectId": "ve09",
+      "visualInstanceId": "peer",
+      "state": "removed",
+      "reason": "membership-ended",
+      "cleanupFailed": false
+    },
+    "resourceState": "retired",
+    "resource": {
+      "sourceRevisionPrefix": "f31783508fe55cc39a421b9f3505503a831d7727605c1f2278e4a690585d3cd2",
+      "frameKeyPrefix": "0000",
+      "cleanupFailed": false
+    },
+    "lastFrameSync": "bound",
+    "sceneCleanupFailed": false
+  },
+  "after": {
+    "state": "active",
+    "instances": 0,
+    "boundUsages": 0,
+    "usableUsages": 0,
+    "unavailableUsages": 0,
+    "cleanupFailed": false,
+    "releaseAttempts": 6
+  },
+  "twice": {
+    "state": "active",
+    "instances": 0,
+    "boundUsages": 0,
+    "usableUsages": 0,
+    "unavailableUsages": 0,
+    "cleanupFailed": false,
+    "releaseAttempts": 6
+  },
+  "cache": {
+    "state": "disposed",
+    "cpuEntries": 0,
+    "gpuEntries": 0,
+    "leases": 0,
+    "sourceJobs": 1,
+    "uploadCalls": 2,
+    "cpuHits": 1,
+    "gpuHits": 0,
+    "cleanupFailed": false,
+    "revisionEntries": 0
+  },
+  "disposed": {
+    "domain": "effect-instance",
+    "code": "SESSION_UNAVAILABLE",
+    "cleanupFailed": false
+  }
+}
+### Ran Playwright code
+```js
+await page.evaluate('() => {const v=ve09,{R}=v;const before=R.getRenderVisualSceneDiagnostics(v.scenes[0]);v.scenes[0].clear();const first=R.getVisualEffectDiagnosticsSnapshot(v.peer);const after=R.getRenderVisualSceneDiagnostics(v.scenes[0]);v.scenes[0].clear();const twice=R.getRenderVisualSceneDiagnostics(v.scenes[0]);v.leases[0].release();v.leases[0].release();v.cache.dispose();v.cache.dispose();v.sessions[0].dispose();v.sessions[0].dispose();let disposed;try{R.createVisualEffectInstance(v.sessions[0],v.scenes[0],{definition:v.definition,visualInstanceId:"after"});}catch(e){disposed=R.getVisualEffectDiagnostic(e);}return v.show("final-cleanup",{before,first,after,twice,cache:v.cache.getSnapshot(),disposed});}');
+```

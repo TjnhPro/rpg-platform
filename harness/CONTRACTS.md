@@ -1145,3 +1145,10 @@ correlation and per-request leases; Render owns canonical state, playback and
 target-loss policy. Headless package roots unchanged; no Engine event bus or
 gameplay authority. Browser media observation remains unverified.
 [Runbook](../game-client/manual/vfx.md), [checkpoint](checkpoints/visual-effect-v0.11.10.md).
+
+Phase11 [v0.11.12 VE13 closure audit](checkpoints/visual-effect-v0.11.12.md)
+records 13 numbered checkpoints plus the approved U1 commit, 68 additive Render
+roots (271→339), unchanged prior emitted declarations and unchanged consumer
+roots. Closure is evidence-only. Combined VE12 and Client pixel/lifetime/isolation
+proof remains incomplete: BLOCKED_WITH_EVIDENCE, not MVP_PASS or phase acceptance.
+No compatibility migration, merge, release or next phase is authorized by this audit.
