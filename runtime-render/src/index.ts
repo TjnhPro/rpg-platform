@@ -384,3 +384,8 @@ export {
   createSpriteFrameSequence, createSpriteAnimationClip,
   type SpriteFrameSequence, type SpriteAnimationClip,
 } from './sprite-frame-sequence.js';
+export {
+  createSpriteAnimationTiming, createSpriteTimedClip, sampleSpriteAnimationTiming,
+  type SpriteAnimationTimingInput, type SpriteAnimationTiming, type SpriteAnimationRepeat,
+  type SpriteTimedClipInput, type SpriteTimedClip, type SpriteAnimationFrameSample,
+} from './sprite-animation-timing.js';

@@ -4,6 +4,11 @@
 
 Read root agent guidance first.
 
+- [v0.10.2 SA03](docs/sprite-animation-v0.10.2.md): pure exclusive FPS/interval
+  normalization, immutable timed clip and stateless once/repeat sampling. No
+  playhead/timer/direction/GPU. Binary64 half-open product boundaries, explicit
+  finite interval/duration/elapsed limits; preserve existing SA02 signatures.
+
 - [v0.10.1 SA02](docs/sprite-animation-v0.10.1.md): actual Render root sequence
   and basic clip metadata capture only. Ordered exact Phase7 addresses, deep
   detached/frozen, one project/resource, up to65,536 entries. Repeated holds

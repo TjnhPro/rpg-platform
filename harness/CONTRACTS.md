@@ -1,5 +1,10 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase10 [v0.10.2 SA03](../runtime-render/docs/sprite-animation-v0.10.2.md) adds
+normalized timing, timed metadata composition and stateless once/repeat sampling
+at Render root. No old signature/union change or live playhead. Half-open numeric
+policy and switch policy are explicit; no timer/render-FPS coupling.
+
 Phase10 [v0.10.1 SA02](../runtime-render/docs/sprite-animation-v0.10.1.md) adds
 SpriteFrameSequence/createSpriteFrameSequence and
 SpriteAnimationClip/createSpriteAnimationClip at Render root. Immutable ordered
