@@ -1081,3 +1081,8 @@ policies. [Current root inventory](visual-effect-api-inventory-v0.11.0.md) confi
 Render271/Editor138/Client0. Neutral SpriteTimedClip sampling exists; neutral live
 playback/binding does not. U1 requires Developer approval before the smallest
 additive Phase10 extension; this proposal grants no production/API expansion.
+
+Phase11 v0.11.1 VE02 adds nine Render public roots for immutable sprite-sequence
+definition capture, source revision pins and explicit Phase7 metadata binding.
+Prior271 Render declarations unchanged; metadata resolution is NOT_PERFORMED
+resource loading, never a live playback/texture capability. [Contract](../runtime-render/docs/visual-effect-v0.11.1.md), [checkpoint](checkpoints/visual-effect-v0.11.1.md).

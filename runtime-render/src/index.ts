@@ -404,3 +404,7 @@ export { resolveSpriteFrameAlignment, type SpriteFrameAlignmentData,
   type SpriteFrameAlignmentInput, type SpriteFrameAlignmentResult } from './sprite-frame-alignment.js';
 export { createSpriteAnimationVisualBinding, type SpriteAnimationVisualBinding,
   type SpriteAnimationVisualFrameInput, type SpriteAnimationVisualFrameResult } from './sprite-animation-visual-binding.js';
+export { createVisualEffectDefinition, resolveVisualEffectDefinition, getVisualEffectDefinitionFailure,
+  type VisualEffectDefinitionInput, type VisualEffectDefinition, type VisualEffectSourceRevision,
+  type VisualEffectDefinitionFailure, type VisualEffectDefinitionBindingInput,
+  type VisualEffectDefinitionBindingResult } from './visual-effect-definition.js';

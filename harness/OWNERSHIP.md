@@ -348,3 +348,8 @@ Editor/Client are read-only contract consumers. No source, dependency or public
 surface changes. Existing single-sequence timed metadata is real; single-sequence
 live playback/binding needs the explicit Phase10 U1 authorization gate. No VFX
 timer, repeated eight-way workaround, new manager or sixth production project.
+
+v0.11.1 VE02: **runtime-render** owns pure VFX definitions and Phase7 metadata
+binding through existing Phase10 single-track clip data. Editor retains authored
+catalog/reference ownership; no consumer adapter added without evidence. No IO,
+GPU, playback clock or foundation change. [Checkpoint](checkpoints/visual-effect-v0.11.1.md).
