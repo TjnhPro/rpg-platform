@@ -10,7 +10,7 @@ import { useAssetResourceGrant } from '../features/asset-browser/host.js';
 import type { ActiveEditorProject } from '../features/project-manager/ProjectManagerPanel.js';
 import type { ReactNode } from 'react';
 import { MapWorkspace } from '../features/map/MapWorkspace.js';
-import { VisualInspectorWorkspace } from '../features/visual-inspector/VisualInspectorWorkspace.js';
+import { VisualObjectPlacementWorkspace } from '../features/visual-object-placement/VisualObjectPlacementWorkspace.js';
 
 export function App() {
   const [showGuidance, setShowGuidance] = useState(true);
@@ -23,7 +23,7 @@ function AssetWorkspace({ active, projectPanel, showGuidance, setShowGuidance }:
   const grant = useAssetResourceGrant(active);
   const [tool, setTool] = useState<string | null>('map');
   return <AssetBrowserWorkspace active={active} resourcePort={grant?.existing}>
-    {(context, browser) => <VisualInspectorWorkspace active={active} context={context} grant={grant} showGuidance={showGuidance}>
+    {(context, browser) => <VisualObjectPlacementWorkspace active={active} context={context} grant={grant} showGuidance={showGuidance}>
       {(visualPanel, visualViewport) => <MapWorkspace active={active} context={context} grant={grant} showGuidance={showGuidance}>
       {(mapPanel, mapViewport) => <EditorShell
       header={<Group gap={editorTokens.spacing.standard}>
@@ -31,7 +31,7 @@ function AssetWorkspace({ active, projectPanel, showGuidance, setShowGuidance }:
         <Badge color={editorTokens.colors.neutral}>Scene Editor</Badge>
       </Group>}
       toolbar={<Group gap={editorTokens.spacing.standard}>
-        <Select label="Workspace" data={[{ value: 'map', label: 'Map Editor' }, { value: 'assets', label: 'Asset Browser' }, { value: 'visual', label: 'Visual Inspector' }]}
+        <Select label="Workspace" data={[{ value: 'map', label: 'Map Editor' }, { value: 'assets', label: 'Asset Browser' }, { value: 'visual', label: 'Visual Placement & Inspector' }]}
           value={tool} allowDeselect={false} onChange={setTool} />
         <Switch label="Show guidance" checked={showGuidance}
           onChange={event => setShowGuidance(event.currentTarget.checked)} />
@@ -44,6 +44,6 @@ function AssetWorkspace({ active, projectPanel, showGuidance, setShowGuidance }:
       {tool === 'map' ? mapViewport : tool === 'visual' ? visualViewport : <AssetViewport context={context} grant={grant} showGuidance={showGuidance} />}
     </EditorShell>}
     </MapWorkspace>}
-    </VisualInspectorWorkspace>}
+    </VisualObjectPlacementWorkspace>}
   </AssetBrowserWorkspace>;
 }

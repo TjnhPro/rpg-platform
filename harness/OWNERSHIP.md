@@ -1,5 +1,10 @@
 # Ownership decisions — do not classify by similar names
 
+Phase17 Visual Object Placement: Editor-only ordinary Scene authoring, consuming
+canonical Phase14–16/Scene/Document/Render APIs. Follow13 ordered capability commits
+v0.17.0→v0.17.12, one phase PR, genuine builds and exact-head audit; no routine
+review, generated tests or auto-merge. See [frozen design](../editor/docs/visual-object-placement-v0.17.0.md).
+
 Phase16 Visual Inspector: Editor owns only authored presentation extension and
 thin Inspector orchestration; Scene placement/layer/asset and existing Document,
 Project/Asset/Map/Render owners stay canonical. Follow13 ordered checkpoint commits
