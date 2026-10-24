@@ -1,5 +1,11 @@
 # Ownership decisions — do not classify by similar names
 
+v0.11.9 VE10: **editor** owns authored-reference translation, optional VFX preview
+UI, explicit host deltas/provider grant and mount teardown. **runtime-render**
+remains the unchanged canonical definition/playback/placement/attachment/frame,
+resource/scene/camera owner. No gameplay, authored-schema or public-root transfer.
+See [checkpoint](checkpoints/visual-effect-v0.11.9.md).
+
 v0.10.9 SA10: **editor** owns the optional authored-reference/browser preview
 adapter. **runtime-render** remains sole animation, resource and live instance
 owner, consumed through its public root without changes. Harness records finite

@@ -1131,3 +1131,10 @@ canonical camera submission. No transport advance or resource acquisition.
 [Contract](../runtime-render/docs/visual-effect-v0.11.7.md), [checkpoint](checkpoints/visual-effect-v0.11.7.md).
 
 Phase11 v0.11.8 VE09 adds nine Render roots330→339 for bounded resource/lifetime diagnostics, owner-brand error classification and per-scene256 active-effect admission. Prior root declarations unchanged. Explicit teardown preserves original exceptions after attempting cleanup; Phase7/8 resource rights stay owner-scoped. [Contract](../runtime-render/docs/visual-effect-v0.11.8.md), [checkpoint](checkpoints/visual-effect-v0.11.8.md).
+
+Phase11 v0.11.9 VE10 adds an optional Editor browser VFX consumer using authored
+Asset/Scene adapters and unchanged Render roots. Explicit host Step deltas,
+transport/placement/attachment controls and async teardown preserve Document
+content/revision/dirty. All root declarations unchanged (Render339/Editor138).
+No upstream delta, schema or dependency change.
+[Runbook](../editor/docs/visual-effect-preview-v0.11.9.md), [checkpoint](checkpoints/visual-effect-v0.11.9.md).

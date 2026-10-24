@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><title>Editor VFX preview — VE10</title>
+<style>body{font:16px system-ui;max-width:1000px;margin:24px auto;padding:0 16px;background:#f4f4f4;color:#222}canvas{display:block;width:320px;height:240px;border:0;padding:0;image-rendering:pixelated;background:#ddd}fieldset{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}label{display:flex;align-items:center;gap:5px}input{width:70px}pre{white-space:pre-wrap;font-size:12px}button,select,input{font:inherit}</style>
+<main data-vfx-preview>
+<h1>Editor VFX preview</h1>
+<p>Select an asset, Create, Play, then Step. Only Step supplies elapsed time. Hidden previews pause; returning requires Resume. Preview controls never save content.</p>
+<p>Original monster atlas used as an effect sample. Explicit inspected frame-local anchor (12,50); artist ground and untrimmed origin are unverified.</p>
+<label>Effect <select data-effect aria-label="Effect"></select></label>
+<canvas aria-label="VFX viewport"></canvas>
+<fieldset disabled><legend>Preview controls</legend>
+<button data-create>Create</button>
+<button data-command="play">Play</button><button data-command="pause">Pause</button><button data-command="resume">Resume</button><button data-command="stop">Stop</button><button data-command="restart">Restart</button>
+<label>Delta ms <input data-delta aria-label="Delta ms" type="number" value="125" min="0" step="any"></label><button data-step>Step</button>
+<label>World X <input data-world-x aria-label="World X" type="number" value="210" step="any"></label><label>World Y <input data-world-y aria-label="World Y" type="number" value="170" step="any"></label>
+<label>Offset X <input data-offset-x aria-label="Offset X" type="number" value="0" step="any"></label><label>Offset Y <input data-offset-y aria-label="Offset Y" type="number" value="0" step="any"></label>
+<button data-place>Apply position / offset (detach)</button><button data-attach>Attach / update target offset</button><button data-remove>Remove</button>
+</fieldset><button data-close>Close preview</button>
+<pre data-status aria-live="polite">Acquiring viewport…</pre>
+</main>
+<script type="importmap">{"imports":{"@rpg-platform/editor":"/editor/index.js","@rpg-platform/runtime-render":"/render/index.js","@rpg-platform/runtime-engine":"/engine/index.js","@rpg/core/kernel":"/foundation/core/kernel/index.js","@rpg/gameplay":"/foundation/gameplay/index.js","three":"/three/three.module.js"}}</script>
+<script type="module" src="/preview.mjs"></script></html>
