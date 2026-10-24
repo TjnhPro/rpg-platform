@@ -1,4 +1,4 @@
-import { Badge, Group, Switch, Text, Title } from '@mantine/core';
+import { Badge, Group, Select, Switch, Text, Title } from '@mantine/core';
 import { useState } from 'react';
 import { EditorPanel } from '../components/panel/EditorPanel.js';
 import { EditorShell } from '../layout/EditorShell.js';
@@ -9,6 +9,7 @@ import { AssetBrowserWorkspace } from '../features/asset-browser/AssetBrowserPan
 import { useAssetResourceGrant } from '../features/asset-browser/host.js';
 import type { ActiveEditorProject } from '../features/project-manager/ProjectManagerPanel.js';
 import type { ReactNode } from 'react';
+import { MapWorkspace } from '../features/map/MapWorkspace.js';
 
 export function App() {
   const [showGuidance, setShowGuidance] = useState(true);
@@ -19,20 +20,27 @@ function AssetWorkspace({ active, projectPanel, showGuidance, setShowGuidance }:
   readonly showGuidance: boolean; readonly setShowGuidance: (value: boolean) => void;
 }) {
   const grant = useAssetResourceGrant(active);
+  const [tool, setTool] = useState<string | null>('map');
   return <AssetBrowserWorkspace active={active} resourcePort={grant?.existing}>
-    {(context, browser) => <EditorShell
+    {(context, browser) => <MapWorkspace active={active} context={context} grant={grant} showGuidance={showGuidance}>
+      {(mapPanel, mapViewport) => <EditorShell
       header={<Group gap={editorTokens.spacing.standard}>
         <Title order={1} size="md">RPG Editor</Title>
-        <Badge color={editorTokens.colors.neutral}>Asset Manager</Badge>
+        <Badge color={editorTokens.colors.neutral}>Map & Scene Editor</Badge>
       </Group>}
-      toolbar={<Switch label="Show guidance" checked={showGuidance}
-        onChange={event => setShowGuidance(event.currentTarget.checked)} />}
+      toolbar={<Group gap={editorTokens.spacing.standard}>
+        <Select label="Workspace" data={[{ value: 'map', label: 'Map Editor' }, { value: 'assets', label: 'Asset Browser' }]}
+          value={tool} allowDeselect={false} onChange={setTool} />
+        <Switch label="Show guidance" checked={showGuidance}
+          onChange={event => setShowGuidance(event.currentTarget.checked)} />
+      </Group>}
       navigator={projectPanel}
-      inspector={browser}
+      inspector={tool === 'map' ? mapPanel : browser}
       status={<EditorPanel title="Status" variant="status">
-        <Text>Project and Asset operations report their own results. Browsing does not verify source files or displayed pixels.</Text>
+        <Text>Map, Project and Asset saves report separately. Preview outcomes do not verify displayed pixels.</Text>
       </EditorPanel>}>
-      <AssetViewport context={context} grant={grant} showGuidance={showGuidance} />
+      {tool === 'map' ? mapViewport : <AssetViewport context={context} grant={grant} showGuidance={showGuidance} />}
     </EditorShell>}
+    </MapWorkspace>}
   </AssetBrowserWorkspace>;
 }
