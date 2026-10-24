@@ -274,3 +274,4 @@ export { visualPlacementLabels, prepareVisualPlacementIdentity } from './visual-
 export { readVisualPlacementScene, createVisualPlacementContext } from './visual-placement-context.js';
 export type { VisualPlacementBinding, VisualPlacementIntent, VisualPlacementContext } from './visual-placement-context.js';
 export { resolveVisualPlacementPosition, type VisualPlacementPosition } from './visual-placement-position.js';
+export { placeVisualObject, type PlaceVisualObjectRequest } from './visual-placement-create.js';
