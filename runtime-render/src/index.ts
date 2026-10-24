@@ -425,3 +425,5 @@ export { commandVisualEffectPlayback, getVisualEffectPlaybackSnapshot, getVisual
 export { createVisualEffectTimedInstance, getVisualEffectLifetimeSnapshot, advanceVisualEffectInstance,
   getVisualEffectLifetimeFailure, type VisualEffectTimedInstanceInput, type VisualEffectCompletionReceipt,
   type VisualEffectLifetimeSnapshot, type VisualEffectAdvanceResult, type VisualEffectLifetimeFailure } from './visual-effect-instance.js';
+export { setVisualEffectWorldPlacement, getVisualEffectWorldPlacementSnapshot,
+  type VisualEffectWorldPlacementInput, type VisualEffectWorldPlacementSnapshot } from './visual-effect-instance.js';

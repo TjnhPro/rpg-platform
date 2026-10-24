@@ -5,7 +5,12 @@ import { createSpriteSequencePlayback, commandSpriteSequencePlayback, getSpriteS
   type SpriteSequencePlayback, type SpriteSequencePlaybackSnapshot } from './sprite-animation-playback.js';
 import { addRenderVisualInstance, getRenderVisualInstance, listRenderVisualInstances,
   removeRenderVisualInstance, readVisualInstanceFrameState, onVisualInstanceEnd, setRenderVisualInstanceVisible,
+  setRenderVisualInstanceTransform, getRenderVisualInstanceTransform,
   getRenderVisualInstanceFailure, type RenderVisualScene, type RenderVisualInstance } from './visual-scene.js';
+import { captureVisualInstanceTransform, type RenderVisualInstanceTransformSnapshot } from './visual-instance-transform.js';
+import { createOrthographicPlaneProjection, captureSourcePlanePoint2D,
+  type PlaneProjectionPoint2D, type OrthographicPlaneProjection } from './plane-projection.js';
+import type { VisualAnchor2D } from './visual-alignment.js';
 
 declare const effectInstanceBrand: unique symbol;
 /** Ephemeral issued identity, unrelated to authored/effect/drawable keys. */
@@ -62,6 +67,7 @@ interface Data {
   readonly mode: 'once' | 'repeat' | 'timed-repeat';
   readonly durationMs: number | null;
   completion: VisualEffectCompletionReceipt | null;
+  lastWorldTransform: RenderVisualInstanceTransformSnapshot | null;
 }
 // Issuance/correlation only. Phase8 alone stores/enumerates live scene membership.
 const instances = new WeakMap<VisualEffectInstance, Data>();
@@ -153,6 +159,7 @@ function createEffect(session: RenderFrameSession, scene: RenderVisualScene,
     const handle = Object.freeze({ id: Symbol('visual-effect-instance') }) as VisualEffectInstance;
     data = { handle, owner: new WeakRef(scene), active: { scene, visual, definition, playback, unsubscribe: () => {} },
       terminalPlayback: getSpriteSequencePlaybackSnapshot(playback), commanding: false,
+      lastWorldTransform: null,
       mode: durationMs !== null ? 'timed-repeat' : definition.clip.repeat,
       durationMs: durationMs ?? (definition.clip.repeat === 'once' ? definition.clip.durationMs : null), completion: null,
       snapshot: Object.freeze({ id: handle.id, effectId: definition.effectId,
@@ -387,5 +394,58 @@ export function advanceVisualEffectInstance(handle: VisualEffectInstance, deltaM
       if (data.snapshot.cleanupFailed) invalid('CLEANUP_FAILED', true);
     }
     return Object.freeze({ snapshot: getVisualEffectLifetimeSnapshot(handle), frameChanged: advanced.frameChanged, completedNow: complete });
+  } finally { data.commanding = false; }
+}
+
+/** Translation-only placement; all anchor coordinates/offsets use the explicit source plane unit/axes. */
+export interface VisualEffectWorldPlacementInput {
+  readonly placement: PlaneProjectionPoint2D;
+  readonly anchor: VisualAnchor2D;
+  /** Existing Phase8 legacy projection context; camera binding remains independently Phase9-owned. */
+  readonly projection: OrthographicPlaneProjection;
+}
+export interface VisualEffectWorldPlacementSnapshot {
+  readonly instance: VisualEffectInstanceSnapshot;
+  /** Live canonical Phase8 value, or last observed/committed value after removal. */
+  readonly transform: RenderVisualInstanceTransformSnapshot | null;
+}
+/** Detached history does not keep a scene/session/resource capability alive. */
+export function getVisualEffectWorldPlacementSnapshot(handle: VisualEffectInstance): VisualEffectWorldPlacementSnapshot {
+  const data = playbackData(handle), instance = getVisualEffectInstanceSnapshot(handle);
+  if (data.active) data.lastWorldTransform = getRenderVisualInstanceTransform(data.active.scene, data.active.visual);
+  return Object.freeze({ instance, transform: data.lastWorldTransform });
+}
+/** Capture/validate before a single Phase8 mutation; never changes time, identity or resource ownership. */
+export function setVisualEffectWorldPlacement(handle: VisualEffectInstance,
+  input: VisualEffectWorldPlacementInput): VisualEffectWorldPlacementSnapshot {
+  const data = playbackData(handle);
+  if (data.commanding) playbackInvalid('TRANSITION_IN_PROGRESS');
+  data.commanding = true;
+  try {
+    const active = livePlayback(data), before = readVisualInstanceFrameState(active.scene, active.visual);
+    if (typeof input !== 'object' || input === null || Array.isArray(input)
+      || (Object.getPrototypeOf(input) !== Object.prototype && Object.getPrototypeOf(input) !== null)
+      || Reflect.ownKeys(input).length !== 3) throw new TypeError('Effect world placement requires placement, anchor and projection');
+    const fields: Record<string, unknown> = {};
+    for (const key of ['placement', 'anchor', 'projection']) {
+      const field = Object.getOwnPropertyDescriptor(input, key);
+      if (!field?.enumerable || !('value' in field)) throw new TypeError('Effect world placement requires data fields');
+      fields[key] = field.value;
+    }
+    const projection = createOrthographicPlaneProjection(fields.projection as OrthographicPlaneProjection);
+    if (projection.source.projectId !== data.snapshot.projectId) throw new TypeError('Effect world placement project mismatch');
+    const candidate = captureVisualInstanceTransform({ placement: fields.placement as PlaneProjectionPoint2D,
+      anchor: fields.anchor as VisualAnchor2D, projection,
+      local: { translation: { x: 0, y: 0 }, rotationRadians: 0, scale: { x: 1, y: 1 } },
+      orientation: { axes: projection.source.axes, zeroAxis: 'positive-x', positiveRotation: 'toward-positive-y', angleRadians: 0 } });
+    // A move cannot silently reinterpret an already placed instance's numeric world coordinates.
+    if (before.transform) captureSourcePlanePoint2D(before.transform.placement.plane, candidate.placement);
+    livePlayback(data); // Host reflection may remove membership or terminate the session.
+    const current = readVisualInstanceFrameState(active.scene, active.visual);
+    if (current.revision !== before.revision) throw new TypeError('Effect world placement changed during capture');
+    data.lastWorldTransform = setRenderVisualInstanceTransform(active.scene, active.visual, {
+      placement: candidate.placement, anchor: candidate.anchor, local: candidate.local,
+      orientation: candidate.orientation, projection: candidate.projection });
+    return getVisualEffectWorldPlacementSnapshot(handle);
   } finally { data.commanding = false; }
 }

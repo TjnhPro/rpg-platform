@@ -1111,3 +1111,9 @@ finite repeat creation and detached completion history. Render308→317, all pri
 root declarations unchanged. Canonical Phase10 run elapsed drives both frame and
 presentation lifetime; completion retires Phase8 membership and retained usage.
 [Contract](../runtime-render/docs/visual-effect-v0.11.4.md), [checkpoint](checkpoints/visual-effect-v0.11.4.md).
+
+Phase11 v0.11.5 VE06 adds four Render roots for explicit effect world placement
+and frozen readback, Render317→321; all old root declarations unchanged. Uses
+Phase4/8 translation-only anchor/offset and canonical transform admission;
+preserves playback/resource/identity and separates camera/authored/gameplay state.
+[Contract](../runtime-render/docs/visual-effect-v0.11.5.md), [checkpoint](checkpoints/visual-effect-v0.11.5.md).

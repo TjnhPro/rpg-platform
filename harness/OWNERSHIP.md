@@ -375,3 +375,9 @@ using existing Phase10 explicit advance and VE03/Phase8 retirement. No separate
 clock, frame sampler, scene registry or gameplay timer. Editor/Client unchanged
 build consumers; Harness evidence only. No owner expansion or L1/L2 change.
 [Checkpoint](checkpoints/visual-effect-v0.11.4.md).
+
+v0.11.5 VE06: **runtime-render** owns effect world-placement admission through
+existing Phase4 numeric contracts and Phase8 transform/invalidation. No separate
+spatial math, clock, renderer, camera or authored/gameplay authority. Editor/Client
+unchanged build consumers; Harness evidence only. No upstream-owner expansion.
+[Checkpoint](checkpoints/visual-effect-v0.11.5.md).
