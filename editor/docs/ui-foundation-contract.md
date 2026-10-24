@@ -1,8 +1,12 @@
 # Editor UI foundation contract — v0.12.0
 
 Original v0.12.0 status: documentation contract only. The baseline below is historical.
-Current v0.12.2 implementation: internal bootstrap plus unified theme and minimal sample;
-browser/visual acceptance is not established. See the theme implementation section below.
+Current v0.12.10 review: internal React/Mantine application, unified theme/defaults,
+mandatory convention gate, shell, Panels and existing viewport-host integration.
+See [the closure review](ui-foundation-review.md) for current source and finite
+browser evidence. Implementation sections below retain their checkpoint context;
+the v0.12.2 ThemeSample was replaced by the catalog, now mounted in Inspector.
+Full browser/visual acceptance remains Developer-owned.
 Primary owner: Editor. Public contract delta: none.
 
 ## Baseline and ownership

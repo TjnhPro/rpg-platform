@@ -168,11 +168,12 @@ indication or replace its built-in keyboard behavior.
 ## Manual catalog and review recipe
 
 Run `npm run ui:dev --workspace @rpg-platform/editor` and open the printed URL.
-The root App mounts the shell/Panel demo described above. For the earlier catalog,
-`editor/ui/src/components/ComponentCatalog.tsx` remains the source reference for
-these v0.12.3 recipes; it is not mounted by the current entry. All catalog data and
-state are local examples, reset by reload; no Runtime/Render/Editor domain API,
-storage, timers or network is connected.
+The root App mounts the shell/Panel demo described above; Inspector's Controls
+mode embeds `editor/ui/src/components/ComponentCatalog.tsx` as of v0.12.9. On a
+narrow layout, use Open inspector. All catalog data and state are local examples,
+reset by reload or remount; no Runtime/Render/Editor domain API, storage, timers
+or network is connected to the catalog. See [the MVP recipe](ui-mvp.md) and
+[closure review](ui-foundation-review.md) for the current composition/evidence.
 
 1. Review primary, neutral, destructive and disabled Buttons. Compare inputs,
    numeric steppers, Select, Checkbox and Switch; all omit local size/style props.
@@ -196,8 +197,10 @@ storage, timers or network is connected.
 These are Developer manual observations to collect, not generated browser tests.
 No automated unit/integration/browser/visual suite is added or run. Build success
 does not establish interaction, accessibility, computed style or visual quality.
-See [checkpoint evidence](../../harness/checkpoints/editor-ui-v0.12.3.md) for actual
-gates and remaining FEATURE_NOT_VERIFIED / VISUAL_NOT_VERIFIED limitations.
+See [v0.12.3 checkpoint evidence](../../harness/checkpoints/editor-ui-v0.12.3.md)
+for the original gates and [v0.12.9 observations](../../harness/checkpoints/editor-ui-v0.12.9.md)
+for the integrated catalog. FEATURE_NOT_VERIFIED / VISUAL_NOT_VERIFIED remain
+for full Developer acceptance.
 
 API references: installed Mantine 9.7.3 public declarations, plus official
 [default props](https://mantine.dev/theming/default-props/),
