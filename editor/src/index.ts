@@ -235,3 +235,5 @@ export { registerManagedAsset, updateManagedAssetMetadata, unregisterManagedAsse
 export type { AssetRegistrationCandidate } from './asset-manager-registration.js';
 export { registerExistingAssetResource } from './asset-manager-import.js';
 export type { ExistingResourceRequest, ExistingResourceObservation, ExistingResourcePort, ExistingResourceResult } from './asset-manager-import.js';
+export { searchManagedAssets } from './asset-manager-search.js';
+export type { AssetSearchRequest, AssetSearchResult } from './asset-manager-search.js';
