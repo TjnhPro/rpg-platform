@@ -1,9 +1,10 @@
 import type { RenderFrameSession } from './frame-session.js';
 import { requireTextureSession, getRenderTextureFailure } from './render-texture.js';
 import { requireVisualEffectDefinition, getVisualEffectDefinitionFailure, type VisualEffectDefinition } from './visual-effect-definition.js';
-import { createSpriteSequencePlayback, commandSpriteSequencePlayback, type SpriteSequencePlayback } from './sprite-animation-playback.js';
+import { createSpriteSequencePlayback, commandSpriteSequencePlayback, getSpriteSequencePlaybackSnapshot,
+  type SpriteSequencePlayback, type SpriteSequencePlaybackSnapshot } from './sprite-animation-playback.js';
 import { addRenderVisualInstance, getRenderVisualInstance, listRenderVisualInstances,
-  removeRenderVisualInstance, readVisualInstanceFrameState, onVisualInstanceEnd,
+  removeRenderVisualInstance, readVisualInstanceFrameState, onVisualInstanceEnd, setRenderVisualInstanceVisible,
   getRenderVisualInstanceFailure, type RenderVisualScene, type RenderVisualInstance } from './visual-scene.js';
 
 declare const effectInstanceBrand: unique symbol;
@@ -56,6 +57,8 @@ interface Data {
   readonly handle: VisualEffectInstance;
   snapshot: VisualEffectInstanceSnapshot;
   active: Active | undefined;
+  terminalPlayback: SpriteSequencePlaybackSnapshot;
+  commanding: boolean;
 }
 // Issuance/correlation only. Phase8 alone stores/enumerates live scene membership.
 const instances = new WeakMap<VisualEffectInstance, Data>();
@@ -99,7 +102,10 @@ function end(data: Data, reason: NonNullable<VisualEffectInstanceSnapshot['reaso
   let failed = false;
   const attempt = (operation: () => void): void => { try { operation(); } catch { failed = true; } };
   attempt(active.unsubscribe);
-  attempt(() => { commandSpriteSequencePlayback(active.playback, { type: 'dispose' }); });
+  attempt(() => {
+    data.terminalPlayback = getSpriteSequencePlaybackSnapshot(active.playback);
+    data.terminalPlayback = commandSpriteSequencePlayback(active.playback, { type: 'dispose' });
+  });
   if (removeMembership) attempt(() => { removeRenderVisualInstance(active.scene, active.visual); });
   if (failed) data.snapshot = Object.freeze({ ...data.snapshot, cleanupFailed: true });
   return true;
@@ -138,6 +144,7 @@ export function createVisualEffectInstance(session: RenderFrameSession, scene: R
     visual = sceneOperation(() => addRenderVisualInstance(scene, { visualInstanceId: key }));
     const handle = Object.freeze({ id: Symbol('visual-effect-instance') }) as VisualEffectInstance;
     data = { handle, owner: new WeakRef(scene), active: { scene, visual, definition, playback, unsubscribe: () => {} },
+      terminalPlayback: getSpriteSequencePlaybackSnapshot(playback), commanding: false,
       snapshot: Object.freeze({ id: handle.id, effectId: definition.effectId,
         projectId: definition.resource.identity.projectId, sceneId: visual.sceneId, sessionId,
         visualInstanceId: visual.visualInstanceId, state: 'created', reason: null, cleanupFailed: false }) };
@@ -190,4 +197,92 @@ export function removeVisualEffectInstance(scene: RenderVisualScene, handle: Vis
   const removed = end(data, 'removed', true);
   if (data.snapshot.cleanupFailed) invalid('CLEANUP_FAILED', true);
   return removed;
+}
+
+export type VisualEffectPlaybackCommand =
+  | { readonly type: 'play' | 'restart'; readonly clipId?: string }
+  | { readonly type: 'pause' | 'resume' | 'stop' };
+export interface VisualEffectPlaybackSnapshot {
+  readonly instance: VisualEffectInstanceSnapshot;
+  /** Frozen canonical observation only; not a mutable playback capability. */
+  readonly playback: SpriteSequencePlaybackSnapshot;
+  /** Transport activity, independent of resource readiness or actual pixels. */
+  readonly active: boolean;
+  /** Commands select declared addresses; this observation never attests loaded pixels. */
+  readonly resourceReadiness: 'NOT_CHECKED';
+}
+export interface VisualEffectPlaybackFailure {
+  readonly code: 'INVALID_COMMAND' | 'INVALID_TRANSITION' | 'CLIP_NOT_DECLARED'
+    | 'FOREIGN_INSTANCE' | 'INSTANCE_REMOVED' | 'SESSION_ENDED' | 'TRANSITION_IN_PROGRESS';
+}
+const playbackFailures = new WeakMap<object, VisualEffectPlaybackFailure>();
+function playbackInvalid(code: VisualEffectPlaybackFailure['code']): never {
+  const error = new TypeError(`Visual effect playback: ${code}`);
+  playbackFailures.set(error, Object.freeze({ code }));
+  throw error;
+}
+export function getVisualEffectPlaybackFailure(error: unknown): VisualEffectPlaybackFailure | undefined {
+  return typeof error === 'object' && error !== null ? playbackFailures.get(error) : undefined;
+}
+function playbackData(handle: VisualEffectInstance): Data {
+  const data = instances.get(handle);
+  if (!data) playbackInvalid('FOREIGN_INSTANCE');
+  return data;
+}
+function livePlayback(data: Data): Active {
+  getVisualEffectInstanceSnapshot(data.handle); // Canonical edit/session health admission.
+  if (!data.active) playbackInvalid(data.snapshot.reason === 'session-ended' ? 'SESSION_ENDED' : 'INSTANCE_REMOVED');
+  return data.active;
+}
+/** Safe historical readback remains available after removal and session termination. */
+export function getVisualEffectPlaybackSnapshot(handle: VisualEffectInstance): VisualEffectPlaybackSnapshot {
+  const data = playbackData(handle), instance = getVisualEffectInstanceSnapshot(handle);
+  const playback = data.active ? getSpriteSequencePlaybackSnapshot(data.active.playback) : data.terminalPlayback;
+  return Object.freeze({ instance, playback, resourceReadiness: 'NOT_CHECKED', active: instance.state === 'created'
+    && playback.state !== 'stopped' && playback.state !== 'disposed' });
+}
+function capturePlaybackCommand(input: unknown): { type: string; clipId: unknown; explicitClip: boolean } {
+  if (typeof input !== 'object' || input === null || Array.isArray(input)
+    || (Object.getPrototypeOf(input) !== Object.prototype && Object.getPrototypeOf(input) !== null)) playbackInvalid('INVALID_COMMAND');
+  const typeField = Object.getOwnPropertyDescriptor(input, 'type');
+  if (!typeField?.enumerable || !('value' in typeField)) playbackInvalid('INVALID_COMMAND');
+  const type: unknown = typeField.value;
+  if (typeof type !== 'string' || !['play', 'pause', 'resume', 'stop', 'restart'].includes(type)) playbackInvalid('INVALID_COMMAND');
+  const keys = Reflect.ownKeys(input), explicitClip = keys.includes('clipId');
+  if (keys.length !== (explicitClip ? 2 : 1) || keys.some(key => key !== 'type' && key !== 'clipId')
+    || (explicitClip && type !== 'play' && type !== 'restart')) playbackInvalid('INVALID_COMMAND');
+  const clip = explicitClip ? Object.getOwnPropertyDescriptor(input, 'clipId') : undefined;
+  if (explicitClip && (!clip?.enumerable || !('value' in clip))) playbackInvalid('INVALID_COMMAND');
+  return { type, clipId: clip?.value, explicitClip };
+}
+/** Commands delegate to the owned Phase10 transport. No ticker, clock or advance. */
+export function commandVisualEffectPlayback(handle: VisualEffectInstance,
+  input: VisualEffectPlaybackCommand): VisualEffectPlaybackSnapshot {
+  const data = playbackData(handle);
+  if (data.commanding) playbackInvalid('TRANSITION_IN_PROGRESS');
+  data.commanding = true;
+  try {
+    livePlayback(data);
+    const command = capturePlaybackCommand(input);
+    const active = livePlayback(data); // Reflection may remove the effect or end its session.
+    const before = getSpriteSequencePlaybackSnapshot(active.playback), clipId = active.definition.clip.clip.clipId;
+    if (command.explicitClip && command.clipId !== clipId) playbackInvalid('CLIP_NOT_DECLARED');
+    if ((command.type === 'pause' || command.type === 'resume')
+      && before.state !== 'playing' && before.state !== 'paused') playbackInvalid('INVALID_TRANSITION');
+    // Validate everything before native visibility. Native failure must not advance transport.
+    // Pause/resume preserve independently host-selected visibility; play/restart activate.
+    if (command.type === 'play' || command.type === 'restart' || command.type === 'stop') {
+      sceneOperation(() => setRenderVisualInstanceVisible(active.scene, active.visual, command.type !== 'stop'));
+      livePlayback(data);
+    }
+    if (command.type === 'restart') {
+      commandSpriteSequencePlayback(active.playback, { type: 'stop' });
+      commandSpriteSequencePlayback(active.playback, { type: 'play', clipId });
+    } else if (command.type === 'play') {
+      commandSpriteSequencePlayback(active.playback, { type: 'play', clipId });
+    } else {
+      commandSpriteSequencePlayback(active.playback, { type: command.type as 'pause' | 'resume' | 'stop' });
+    }
+    return getVisualEffectPlaybackSnapshot(handle);
+  } finally { data.commanding = false; }
 }

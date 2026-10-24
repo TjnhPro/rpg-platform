@@ -364,3 +364,8 @@ Phase8 scene/session membership and owned Phase10 neutral playback. Phase8 alone
 enumerates scene entries and owns retained Phase7 usage; no parallel VFX registry
 or authored/gameplay mutation. Editor/Client unchanged build consumers, Harness
 evidence only. No boundary expansion. [Checkpoint](checkpoints/visual-effect-v0.11.2.md).
+
+v0.11.3 VE04: **runtime-render** owns effect command admission over the already
+owned Phase10 playback and Phase8 visibility. No ticker/resource/renderer or
+boundary expansion; Editor/Client unchanged build consumers, Harness evidence.
+No Engine/L1/L2/gameplay changes. [Checkpoint](checkpoints/visual-effect-v0.11.3.md).

@@ -419,3 +419,6 @@ export { createVisualEffectInstance, getVisualEffectInstanceSnapshot, listVisual
   getVisualEffectInstance, removeVisualEffectInstance, getVisualEffectInstanceFailure,
   type VisualEffectInstance, type VisualEffectInstanceInput, type VisualEffectInstanceSnapshot,
   type VisualEffectInstanceFailure } from './visual-effect-instance.js';
+export { commandVisualEffectPlayback, getVisualEffectPlaybackSnapshot, getVisualEffectPlaybackFailure,
+  type VisualEffectPlaybackCommand, type VisualEffectPlaybackSnapshot,
+  type VisualEffectPlaybackFailure } from './visual-effect-instance.js';
