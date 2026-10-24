@@ -1,5 +1,10 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase10 [v0.10.4 SA05](../runtime-render/docs/sprite-animation-v0.10.4.md) adds
+independent Render playback handles/snapshots and a single command path. Captured
+immutable clips, exact issued identity, atomic rejection and terminal disposal;
+no delta advance, Scene/resource binding, host clock or gameplay authority.
+
 Phase10 [v0.10.3 SA04](../runtime-render/docs/sprite-animation-v0.10.3.md) adds
 eight-slot capture, pure Phase4 angular selection and Phase7 frame resolution.
 Same logical elapsed applies to target modulo/clamp; this explicitly supersedes

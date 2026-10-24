@@ -4,6 +4,11 @@
 
 Read root agent guidance first.
 
+- [v0.10.4 SA05](docs/sprite-animation-v0.10.4.md): independent CPU playback
+  handles, frozen readback and one canonical command transition path. Start
+  stopped0; direction keeps logical time; dispose terminal/idempotent. No delta
+  advance, Scene binding or GPU. Nonzero/completed-handle observations await SA06.
+
 - [v0.10.3 SA04](docs/sprite-animation-v0.10.3.md): exactly eight authored slots,
   Phase4 orientation quantizer and Phase7 selected-frame resolution. No stateful
   playback/GPU. Latest task overrides earlier direction progress proposal: retain

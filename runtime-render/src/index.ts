@@ -394,3 +394,8 @@ export {
   type SpriteDirectionIndex, type SpriteDirectionSequences, type SpriteEightWayConvention,
   type EightWaySpriteClipInput, type EightWaySpriteClip, type EightWaySpriteFrameResolution,
 } from './sprite-eight-way.js';
+export {
+  createSpriteAnimationPlayback, getSpriteAnimationPlaybackSnapshot, commandSpriteAnimationPlayback,
+  type SpriteAnimationPlayback, type SpriteAnimationPlaybackInput, type SpriteAnimationPlaybackSnapshot,
+  type SpriteAnimationPlaybackState, type SpriteAnimationPlaybackCommand,
+} from './sprite-animation-playback.js';
