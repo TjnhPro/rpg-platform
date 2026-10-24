@@ -380,3 +380,7 @@ export { createOrthographicCameraConfiguration, type OrthographicCameraConfigura
   type OrthographicCameraConfiguration } from './camera-configuration.js';
 export { bindRenderCameraToVisualScene, getRenderCameraFrameSnapshot,
   type RenderCameraSceneBinding, type RenderCameraSceneBindingSnapshot, type RenderCameraFrameSnapshot } from './camera-scene.js';
+export {
+  createSpriteFrameSequence, createSpriteAnimationClip,
+  type SpriteFrameSequence, type SpriteAnimationClip,
+} from './sprite-frame-sequence.js';

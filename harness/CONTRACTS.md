@@ -1,5 +1,11 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase10 [v0.10.1 SA02](../runtime-render/docs/sprite-animation-v0.10.1.md) adds
+SpriteFrameSequence/createSpriteFrameSequence and
+SpriteAnimationClip/createSpriteAnimationClip at Render root. Immutable ordered
+metadata only; atlas/revision resolution remains Phase7. No prior signature or
+diagnostic union changes, no timing/direction/live resource surface yet.
+
 Phase10 v0.10.0 SA01 is [sprite animation design only](../runtime-render/docs/sprite-animation-v0.10.0.md).
 Existing Phase4/6/7/8/9 APIs and unions unchanged; no runtime animation export.
 Proposed ordered Phase7 references, explicit eight directions, normalized positive

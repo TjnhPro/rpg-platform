@@ -4,6 +4,12 @@
 
 Read root agent guidance first.
 
+- [v0.10.1 SA02](docs/sprite-animation-v0.10.1.md): actual Render root sequence
+  and basic clip metadata capture only. Ordered exact Phase7 addresses, deep
+  detached/frozen, one project/resource, up to65,536 entries. Repeated holds
+  allowed. No timing/direction/playback/IO/GPU; capture is not FRAME_RESOLVED.
+  Host must later resolve against canonical atlas plus exact revision token.
+
 - [v0.10.0 SA01](docs/sprite-animation-v0.10.0.md) is API_DESIGN_ONLY:
   Render owns proposed sequence/8-way mapping/explicit-delta playback and binding.
   Exactly eight slots; Phase4 +x/toward+y canonical orientation. Phase7 retains
