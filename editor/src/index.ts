@@ -233,3 +233,5 @@ export { assetBrowserCategories, describeAssetBrowserCategory } from './asset-ma
 export type { AssetBrowserCategoryResult } from './asset-manager-category.js';
 export { registerManagedAsset, updateManagedAssetMetadata, unregisterManagedAsset } from './asset-manager-registration.js';
 export type { AssetRegistrationCandidate } from './asset-manager-registration.js';
+export { registerExistingAssetResource } from './asset-manager-import.js';
+export type { ExistingResourceRequest, ExistingResourceObservation, ExistingResourcePort, ExistingResourceResult } from './asset-manager-import.js';
