@@ -1,4 +1,4 @@
-import { createEightWaySpriteClip, type EightWaySpriteClip, type SpriteDirectionIndex } from './sprite-eight-way.js';
+import { capturePlaybackSpriteClip, type EightWaySpriteClip, type SpriteDirectionIndex } from './sprite-eight-way.js';
 import { sampleSpriteAnimationTiming } from './sprite-animation-timing.js';
 import type { VisualFrameReference } from './atlas-frame.js';
 
@@ -112,7 +112,7 @@ export function createSpriteAnimationPlayback(input: SpriteAnimationPlaybackInpu
   for (let i = 0; i < entries.length; i++) {
     const item = Object.getOwnPropertyDescriptor(entries, String(i));
     if (!item?.enumerable || !('value' in item)) throw new TypeError('Playback clips require own data entries');
-    const clip = createEightWaySpriteClip(item.value as EightWaySpriteClip);
+    const clip = capturePlaybackSpriteClip(item.value as EightWaySpriteClip);
     totalFrames += clip.directions.reduce((sum, sequence) => sum + sequence.frames.length, 0);
     if (totalFrames > 524288) throw new TypeError('Playback exceeds its captured frame budget');
     if (clips.has(clip.clipId)) throw new TypeError('Playback clip keys must be unique');

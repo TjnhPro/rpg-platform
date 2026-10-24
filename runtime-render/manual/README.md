@@ -1,5 +1,12 @@
 # Manual Render consumers
 
+## Sprite playback isolation — v0.10.8
+
+[Actor lifetime walkthrough](sprite-instance-isolation.md) supplies an optional
+public-root host composition for separate playback/leases on existing instances.
+SA09 records finite actual-browser observations, including late readiness and
+native context loss. This is not an automated suite or Phase10 MVP acceptance.
+
 ## Resource lifetime — v0.8.10
 
 [Two-session walkthrough](visual-lifetime.md) uses actual selected PNG loads,

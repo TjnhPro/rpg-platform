@@ -4,6 +4,13 @@
 
 Read root agent guidance first.
 
+- [v0.10.8 SA09](docs/sprite-animation-v0.10.8.md): playback shares canonical
+  deeply frozen clip definitions via weak issuance provenance; structural input
+  still validates/detaches. Keep per-handle clip map/transport/snapshot independent.
+  Host owns playback/acquired leases; Phase8 owns separate retained usage. Hide
+  has no timing policy; removal/session end closes binding, never resurrects late
+  readiness or disposes another actor. Optional manual host has one close path.
+
 - [v0.10.7 SA08](docs/sprite-animation-v0.10.7.md): bind one borrowed playback
   to one existing instance through canonical Phase7 rights/geometry, SA07 origin
   and an owner-local Phase8 resource/transform/layout transaction. Identity local

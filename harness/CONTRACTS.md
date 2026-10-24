@@ -1,5 +1,12 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase10 [v0.10.8 SA09](../runtime-render/docs/sprite-animation-v0.10.8.md) reuses
+canonical immutable clip definitions while keeping playback state/collections
+per handle. Structural inputs still deep-capture. Zero public-root declaration
+delta; no new membership/cache/timing manager. Phase8 instance rights and host
+acquired leases have separate canonical cleanup owners. Manual host/evidence
+cover pause/hide/select/remove, late readiness and independent session loss.
+
 Phase10 [v0.10.7 SA08](../runtime-render/docs/sprite-animation-v0.10.7.md) adds
 createSpriteAnimationVisualBinding and three neutral types. Existing Phase7
 retained page rights/geometry and SA07 alignment feed a Phase8 atomic resource,

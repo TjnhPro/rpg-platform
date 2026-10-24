@@ -34,6 +34,16 @@ export interface EightWaySpriteClip {
   readonly directions: SpriteDirectionSequences;
 }
 
+// Issuance provenance only: weak, non-enumerable, no content lookup or playhead.
+// Canonical definitions are deeply frozen by the factory below.
+const issuedClips = new WeakSet<EightWaySpriteClip>();
+
+/** Owner-local playback capture: share canonical immutable definitions, but still
+ * validate/detach structural host data. Not part of the public root surface. */
+export function capturePlaybackSpriteClip(input: EightWaySpriteClip): EightWaySpriteClip {
+  return issuedClips.has(input) ? input : createEightWaySpriteClip(input);
+}
+
 /** Selection/sample remains observable when canonical Phase7 resolution rejects. */
 export interface EightWaySpriteFrameResolution {
   readonly direction: SpriteDirectionIndex;
@@ -113,8 +123,10 @@ export function createEightWaySpriteClip(input: EightWaySpriteClipInput): EightW
     clipId = timed.clip.clipId; projectId = frame.projectId;
     directions.push(timed.clip.sequence);
   }
-  return Object.freeze({ clipId, timing, repeat: data.repeat as SpriteAnimationRepeat,
+  const clip = Object.freeze({ clipId, timing, repeat: data.repeat as SpriteAnimationRepeat,
     convention: mapping, directions: Object.freeze(directions) as unknown as SpriteDirectionSequences });
+  issuedClips.add(clip);
+  return clip;
 }
 
 /**
