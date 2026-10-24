@@ -16,3 +16,18 @@
   flex-direction: column;
   min-block-size: 100%;
 }
+
+.panelDialog {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panelDialogBody {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-inline-size: 0;
+  min-block-size: 0;
+  overflow: hidden;
+}

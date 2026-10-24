@@ -82,9 +82,7 @@ export function EditorShell({ header, toolbar, navigator, inspector, status, chi
 
         <AppShell.Navbar className={classes.region} aria-label="Navigator" inert={!navigatorDocked}
           display={{ base: 'none', md: 'flex' }}>
-          <ScrollArea h="100%" type="auto" scrollbars="xy" viewportProps={{ tabIndex: 0, 'aria-label': 'Navigator content' }}>
-            {navigatorDocked && navigator}
-          </ScrollArea>
+          {navigatorDocked && navigator}
         </AppShell.Navbar>
 
         <AppShell.Main className={classes.region} ref={workspace} tabIndex={-1} aria-label="Main workspace">
@@ -96,9 +94,7 @@ export function EditorShell({ header, toolbar, navigator, inspector, status, chi
 
         <AppShell.Aside className={classes.region} aria-label="Inspector" inert={!inspectorDocked}
           display={{ base: 'none', lg: 'flex' }}>
-          <ScrollArea h="100%" type="auto" scrollbars="xy" viewportProps={{ tabIndex: 0, 'aria-label': 'Inspector content' }}>
-            {inspectorDocked && inspector}
-          </ScrollArea>
+          {inspectorDocked && inspector}
         </AppShell.Aside>
 
         <AppShell.Footer>
@@ -109,6 +105,7 @@ export function EditorShell({ header, toolbar, navigator, inspector, status, chi
 
         <Modal opened={dialogOpened} onClose={() => setPanelOpened(false)}
           title={activePanel === 'navigator' ? 'Navigator' : 'Inspector'} fullScreen
+          classNames={{ content: classes.panelDialog, body: classes.panelDialogBody }}
           trapFocus returnFocus closeOnEscape closeButtonProps={{ 'aria-label': 'Close panel' }}>
           {activePanel === 'navigator' ? !navigatorDocked && navigator : !inspectorDocked && inspector}
         </Modal>
