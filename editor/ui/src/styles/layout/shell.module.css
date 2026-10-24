@@ -1,0 +1,33 @@
+.shell {
+  position: fixed;
+  inset: 0;
+  min-inline-size: 0;
+  overflow: hidden;
+}
+
+.region {
+  min-inline-size: 0;
+  min-block-size: 0;
+  overflow: hidden;
+}
+
+.workspaceContent {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 100%;
+}
+
+.panelDialog {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panelDialogBody {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-inline-size: 0;
+  min-block-size: 0;
+  overflow: hidden;
+}
