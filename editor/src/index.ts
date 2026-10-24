@@ -226,3 +226,6 @@ export { openProject, projectDocumentContext } from './project-open.js';
 export type { OpenProjectOptions, ProjectOpenResult } from './project-open.js';
 export { saveProject } from './project-save.js';
 export type { ProjectSaveResult } from './project-save.js';
+export { createAssetManagerProject, getAssetManagerProjectSnapshot, adoptAssetManagerCatalog,
+  closeAssetManagerProject, admitAssetManagerIdentity, rebuildAssetManagerCatalog } from './asset-manager-project.js';
+export type { AssetManagerProject, AssetManagerProjectSnapshot } from './asset-manager-project.js';
