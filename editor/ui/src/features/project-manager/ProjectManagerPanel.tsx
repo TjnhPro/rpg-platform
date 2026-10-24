@@ -1,5 +1,5 @@
 import { Alert, Button, Group, Select, Stack, Text, TextInput } from '@mantine/core';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { createProject, openProject, saveProject, closeProjectSession,
   getProjectSessionSnapshot, type ProjectSession } from '@rpg-platform/editor';
 import { EditorPanel } from '../../components/panel/EditorPanel.js';
@@ -7,7 +7,10 @@ import { editorTokens } from '../../theme/index.js';
 import { connectProjectHost, type ProjectHostRoot } from './host.js';
 
 const locator = Object.freeze({ type: 'project-relative' as const, path: 'project.json' });
-export function ProjectManagerPanel() {
+export interface ActiveEditorProject { readonly session: ProjectSession; readonly root: ProjectHostRoot }
+export function ProjectManagerWorkspace({ children }: {
+  readonly children: (active: ActiveEditorProject | null, panel: ReactNode) => ReactNode;
+}) {
   const [roots, setRoots] = useState<readonly ProjectHostRoot[]>([]);
   const [projectId, setProjectId] = useState('game-a');
   const [names, setNames] = useState<Record<string, string>>({ 'game-a': 'Game A', 'game-b': 'Game B' });
@@ -40,6 +43,8 @@ export function ProjectManagerPanel() {
   const active = sessions.get(projectId);
   const snapshot = active ? getProjectSessionSnapshot(active) : undefined;
   const root = roots.find((item) => item.projectId === projectId);
+  const capability = useMemo(() => active && root ? { session: active, root } : null,
+    [active, root, snapshot?.currentRevision]);
   const publish = (session: ProjectSession) => {
     if (!alive.current) { closeProjectSession(session, 'discard'); return; }
     setSessions((current) => new Map(current).set(projectId, session));
@@ -72,7 +77,7 @@ export function ProjectManagerPanel() {
       if (alive.current) { setError(true); setMessage('Operation rejected. Check project name, host availability and unsaved project state; current project retained.'); }
     } finally { busy.current = false; if (alive.current) setPending(false); }
   }
-  return (
+  return children(capability, (
     <EditorPanel title="Project Manager" subtitle="Create, save and open independent project manifests.">
       <Stack gap={editorTokens.spacing.standard}>
         <Select label="Project root" value={projectId} allowDeselect={false}
@@ -94,5 +99,9 @@ export function ProjectManagerPanel() {
         <Text>Save affects only the manifest. Tracked files and Scene contents are not loaded. Existing-file updates are unsupported.</Text>
       </Stack>
     </EditorPanel>
-  );
+  ));
+}
+/** Compatibility view; composition hosts should keep Workspace above responsive slots. */
+export function ProjectManagerPanel() {
+  return <ProjectManagerWorkspace>{(_active, panel) => panel}</ProjectManagerWorkspace>;
 }
