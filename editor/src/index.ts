@@ -261,3 +261,5 @@ export type { VisualInspectorBinding, VisualInspectorSelection, VisualInspectorS
 export { readVisualPosition, setVisualPosition } from './visual-position.js';
 export type { VisualPositionRead } from './visual-position.js';
 export { readVisualDirection, setVisualDirection } from './visual-direction.js';
+export { readVisualLayer, setVisualLayer } from './visual-layer.js';
+export type { VisualLayerRead } from './visual-layer.js';
