@@ -253,3 +253,4 @@ export { setMapBackground, clearMapBackground, describeMapBackgroundLayout } fro
 export { setMapTile, removeMapTile } from './map-tiles.js';
 export { createMap, type CreateMapOptions, type CreateMapResult } from './map-create.js';
 export { openMap, type OpenMapOptions, type OpenMapResult } from './map-open.js';
+export { saveMap, type SaveMapOptions, type SaveMapResult } from './map-save.js';
