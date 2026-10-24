@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { EditorPanel, type EditorPanelState } from '../components/panel/EditorPanel.js';
 import { EditorShell } from '../layout/EditorShell.js';
 import { editorTokens } from '../theme/index.js';
+import { Viewport } from '../viewport/Viewport.js';
 
 export function App() {
   const [showGuidance, setShowGuidance] = useState(true);
@@ -21,7 +22,7 @@ export function App() {
       header={(
         <Group gap={editorTokens.spacing.standard}>
           <Title order={1} size="md">RPG Editor</Title>
-          <Badge color={editorTokens.colors.neutral}>Panel demonstration</Badge>
+          <Badge color={editorTokens.colors.neutral}>Viewport integration</Badge>
         </Group>
       )}
       toolbar={(
@@ -65,18 +66,7 @@ export function App() {
         </EditorPanel>
       )}
     >
-      <Stack component="section" aria-label="Viewport placeholder" flex={1}
-        p={editorTokens.spacing.section} gap={editorTokens.spacing.standard}
-        justify="center" align="center" bg={editorTokens.colors.viewportBackground}>
-        <Title order={2} size="lg">Viewport placeholder</Title>
-        <Text ta="center">No renderer is connected.</Text>
-        {showGuidance && (
-          <Text ta="center" c={editorTokens.colors.mutedText}>
-            Resize the window to explore the shell. On smaller screens, open Navigator or Inspector
-            from the toolbar. Use Tab and Enter or Space; Escape closes a panel and returns focus.
-          </Text>
-        )}
-      </Stack>
+      <Viewport showGuidance={showGuidance} />
     </EditorShell>
   );
 }
