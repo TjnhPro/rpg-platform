@@ -1,5 +1,11 @@
 # Ownership decisions — do not classify by similar names
 
+Phase16 Visual Inspector: Editor owns only authored presentation extension and
+thin Inspector orchestration; Scene placement/layer/asset and existing Document,
+Project/Asset/Map/Render owners stay canonical. Follow13 ordered checkpoint commits
+v0.16.0→v0.16.12, exact HEAD/source audit and genuine builds, no routine review or
+generated tests. [Design](../editor/docs/visual-inspector-v0.16.0.md). No auto-merge.
+
 Phase14 Asset Manager: **editor** owns browser/project adapters over the existing
 Phase2 catalog, Phase5 persistence and Phase13 project/root/tracking authority.
 Render remains the sole visual-resource/preview owner. See
