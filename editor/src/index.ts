@@ -256,3 +256,5 @@ export { openMap, type OpenMapOptions, type OpenMapResult } from './map-open.js'
 export { saveMap, type SaveMapOptions, type SaveMapResult } from './map-save.js';
 export { createVisualPropertiesProfile, readVisualPropertiesProfile } from './visual-properties-profile.js';
 export type { VisualPropertiesProfile, VisualProfileRead } from './visual-properties-profile.js';
+export { createVisualInspectorContext } from './visual-inspector-context.js';
+export type { VisualInspectorBinding, VisualInspectorSelection, VisualInspectorSnapshot, VisualInspectorContext } from './visual-inspector-context.js';
