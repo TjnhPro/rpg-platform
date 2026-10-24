@@ -270,3 +270,4 @@ export { readVisualBinding, setVisualBinding } from './visual-binding.js';
 export { validateVisualSceneDocument, createVisualDocumentEditor } from './visual-document-edit.js';
 export type { VisualPropertyEdit, VisualDocumentEditor } from './visual-document-edit.js';
 export { describeVisualPresentation } from './visual-preview.js';
+export { visualPlacementLabels, prepareVisualPlacementIdentity } from './visual-placement-identity.js';
