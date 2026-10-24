@@ -217,3 +217,6 @@ export type { ProjectRootBinding } from './project-root-binding.js';
 export { trackProjectDocument, listProjectDocuments, getProjectDocument, updateProjectDocument,
   removeProjectDocument, diagnoseProjectDocuments } from './project-document-tracking.js';
 export { setProjectActiveScene, clearProjectActiveScene, getProjectActiveScene } from './project-active-scene.js';
+export { createProjectSession, getProjectSessionSnapshot, openProjectSession,
+  replaceProjectManifest, closeProjectSession } from './project-session.js';
+export type { ProjectSession, ProjectSessionSnapshot } from './project-session.js';
