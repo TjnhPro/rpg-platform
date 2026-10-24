@@ -84,3 +84,10 @@ No Editor dependency, tests or sprite renderer. Browser NOT_EXECUTED.
   original PNG/atlas sources, independent Editor/Client hosts, canonical resource
   leases and instance controls. Strict compiled manual consumer only; browser
   NOT_EXECUTED, FEATURE_NOT_VERIFIED / VISUAL_NOT_VERIFIED.
+
+# Animation integration - v0.10.10
+
+[Client animation manual](animation.md): explicit selected-file content and intent,
+existing Phase6 continuous scheduling, canonical Render playback/binding/camera,
+terminal cleanup. Actual finite Chrome observations and limitations are recorded
+in the [SA11 checkpoint](../../harness/checkpoints/sprite-animation-v0.10.10.md).

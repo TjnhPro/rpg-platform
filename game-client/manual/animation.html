@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><title>Client animation — SA11</title>
+<style>body{font:16px system-ui;max-width:1000px;margin:24px auto;background:#f4f4f4;color:#222}canvas{width:320px;height:240px;image-rendering:pixelated;background:#ddd}fieldset{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}label{display:flex;align-items:center;gap:6px}input[type=number]{width:90px}pre{white-space:pre-wrap;font-size:12px}button,select,input{font:inherit}</style>
+<h1>Client animation</h1>
+<p>Select the 32 original NormalStand1_0..7 / NormalWalk_0..7 PNG and TPSheet files. Explicit authored slots and inspection top-left (0,0); source compass, FPS and anatomical ground remain unverified.</p>
+<label>Source files <input data-files type="file" multiple accept=".png,.tpsheet"></label>
+<label><input data-missing type="checkbox">Deny selected image capability (missing-source review)</label>
+<button data-load>Mount new scene</button>
+<canvas width="640" height="480" aria-label="Client animation viewport"></canvas>
+<fieldset><legend>Explicit presentation intent</legend>
+<label>Clip <select data-clip><option>idle</option><option selected>walk</option></select></label>
+<label>Angle radians <input data-angle type="number" step="any" value="0"></label>
+<label><input data-playing type="checkbox" checked>Playing intent</label><button data-intent>Apply intent</button>
+</fieldset>
+<button data-start>Start / Resume</button><button data-pause>Pause</button><button data-close>Stop / Close scene</button><button data-observe>Observe</button>
+<p>Hidden page pauses and cancels scheduling. Resume requires explicit Start; first resumed delta is zero. Stop closes this mount permanently. Mount new scene explicitly creates a separate session; no automatic reconnect.</p>
+<pre data-status aria-live="polite"></pre>
+<script type="importmap">{"imports":{"@rpg-platform/runtime-render":"/render/index.js","three":"/three/three.module.js"}}</script>
+<script type="module" src="/manual/animation.mjs"></script></html>

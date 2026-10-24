@@ -7,18 +7,21 @@ const digest = async (file: File) => {
     byte => byte.toString(16).padStart(2, '0')).join('');
 };
 // Host-only capability adapter, not a loader or cache. Each read captures its File.
-export async function createClientAtlasInput(png: File, sheet: File, missingImage: boolean) {
-  const descriptor = prepareVisualResource({ identity: { projectId: 'client-mvp', resourceId: 'atlas' },
+export async function createClientAtlasInput(png: File, sheet: File, missingImage: boolean,
+  identity = { projectId: 'client-mvp', resourceId: 'atlas' }) {
+  const descriptor = prepareVisualResource({ identity,
     mediaType: null, sources: [
       { role: 'atlas-metadata', locator: { type: 'project-relative', path: 'selected/page.tpsheet' } },
       { role: 'image', locator: { type: 'project-relative', path: 'selected/page.png' } },
     ] }).descriptor;
   if (sheet.size > maxBytes) throw new RangeError('Selected sheet exceeds 1 MiB');
   let page = png, revision = await digest(png);
+  let active = true;
   const scope = { projectId: descriptor.identity.projectId, providerId: Symbol(), authorizationGeneration: 'explicit-files' };
   const provider: VisualSourceProvider = { scope, async read(request) {
     const expected = descriptor.sources[request.sourceIndex];
-    if (!expected || request.scope.providerId !== scope.providerId
+    if (!active || !expected || request.scope.providerId !== scope.providerId
+      || request.scope.projectId !== scope.projectId
       || request.scope.authorizationGeneration !== scope.authorizationGeneration
       || request.identity.projectId !== scope.projectId || request.identity.resourceId !== descriptor.identity.resourceId
       || request.source.role !== expected.role || request.source.locator.type !== expected.locator.type
@@ -29,10 +32,14 @@ export async function createClientAtlasInput(png: File, sheet: File, missingImag
     const bytes = new Uint8Array(await file.arrayBuffer());
     const actualRevision = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)),
       byte => byte.toString(16).padStart(2, '0')).join('');
+    if (!active) return { status: 'failed', code: 'CANCELLED' };
     return { status: 'provided', bytes, contentLength: bytes.length,
       mediaType: request.sourceIndex === 1 ? 'image/png' : null, revision: actualRevision };
   } };
-  return { descriptor, provider, revision, async replacePng(file: File) {
-    const next = await digest(file); page = file; revision = next; return revision;
+  return { descriptor, provider, revision, close() { active = false; }, async replacePng(file: File) {
+    if (!active) throw new TypeError('Selected file grant closed');
+    const next = await digest(file);
+    if (!active) throw new TypeError('Selected file grant closed');
+    page = file; revision = next; return revision;
   } };
 }

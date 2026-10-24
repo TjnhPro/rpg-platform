@@ -328,3 +328,10 @@ v0.9.7 CM13: runtime-render owns constrained selected-plane camera inverse throu
 v0.9.8 CM14: runtime-render owns ground/elevation affine camera composition and constrained inverse. Editor/Client build consumers only; Harness evidence only. No Scene/depth/resource owner transfer, Engine/Server/L1/L2 change or native geometry application. [Checkpoint](checkpoints/camera-v0.9.8.md).
 
 v0.9.9 CM15: runtime-render owns optional bounds admission and atomic camera transitions; host supplies fresh scoped bounds/metrics/intent, Phase6 owns receipt freshness. Editor/Client build consumers only, Harness evidence; no map/gameplay/schema/dependency ownership change. [Checkpoint](checkpoints/camera-v0.9.9.md).
+
+v0.10.10 SA11: **game-client** owns the private presentation adapter/manual host,
+explicit intent and frame scheduling. Render retains canonical clip/mapping/
+playback/advance/frame-binding/resource/Scene/camera ownership; no Render changes.
+Existing selected-File capability gains optional scoped identity and revocation,
+not another loader/cache. No root API, dependency, gameplay authority or foundation
+change. See [checkpoint](checkpoints/sprite-animation-v0.10.10.md).

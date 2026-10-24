@@ -31,3 +31,11 @@ Read root agent guidance first.
   only, no production API or schema delta. See the
   [checkpoint](../harness/checkpoints/scene-rendering-v0.8.13.md).
   Source PNG/atlas bytes are original; browser/visual acceptance remains open.
+
+- v0.10.10 SA11: private animation-presentation and manual-animation-host consume
+  Render root playback/binding and existing Phase6 host/canonical camera. Client
+  owns explicit intent and RAF deltas only; recurring intent never restarts;
+  hidden/Pause cancels and requires explicit Start with first delta0. Stop/unmount/
+  scene switch is terminal. Package root remains unchanged/headless. No gameplay
+  rules, Editor imports, loader/cache implementation or new dependencies. See
+  [checkpoint](../harness/checkpoints/sprite-animation-v0.10.10.md).
