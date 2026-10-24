@@ -1,5 +1,18 @@
 # Ownership decisions — do not classify by similar names
 
+Phase14 Asset Manager: **editor** owns browser/project adapters over the existing
+Phase2 catalog, Phase5 persistence and Phase13 project/root/tracking authority.
+Render remains the sole visual-resource/preview owner. See
+[AM01 ledger](../editor/docs/asset-manager-v0.14.0.md) and
+[ordered tasks](../editor/docs/tasks/phase14-asset-manager/MANIFEST.md).
+Inspect exact HEAD/status, previous checkpoint and current task/source before each
+version v0.14.0 through v0.14.11; one capability/checkpoint per commit, in order,
+one phase branch/PR. Run genuine architecture/scope/build gates and audit the delta
+before continuing without routine review. Canonical Asset/Document/Project sources
+are read-only by default; real gaps require evidence and the smallest owner delta
+proposal, never a second catalog, persistence stack or active-project singleton.
+Final Developer acceptance/merge only; no automatic merge/release or generated tests.
+
 Phase13 Project Manager: **editor** is the sole production owner; trusted host
 owns physical root authorization/containment and actual storage guarantees.
 See [frozen design](../editor/docs/project-manager-v0.13.0.md) and
