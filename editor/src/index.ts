@@ -266,3 +266,4 @@ export type { VisualLayerRead } from './visual-layer.js';
 export { readVisualScale, setVisualScale } from './visual-scale.js';
 export { readVisualAnchor, setVisualAnchor, describeVisualAlignment } from './visual-anchor.js';
 export { readVisualVisibility, setVisualVisibility } from './visual-visibility.js';
+export { readVisualBinding, setVisualBinding } from './visual-binding.js';
