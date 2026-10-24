@@ -211,3 +211,6 @@ export type { ProjectManifest, ProjectManifestInput, ProjectMetadata, ProjectRes
 export { diagnoseProjectManifest } from './project-diagnostics.js';
 export type { ProjectDiagnostic, ProjectManifestDiagnosis } from './project-diagnostics.js';
 export { ProjectValidationError } from './project-validation.js';
+export { setProjectResourceRoots } from './project-resource-roots.js';
+export { createProjectRootBinding, resolveProjectLocator } from './project-root-binding.js';
+export type { ProjectRootBinding } from './project-root-binding.js';

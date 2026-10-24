@@ -1,6 +1,7 @@
 import type { DocumentIdentity } from './document-envelope.js';
 import type { ResourceLocator } from './asset-sources.js';
 import { projectData, projectFail, projectKey, projectRecord } from './project-validation.js';
+import { captureProjectRoots } from './project-resource-roots.js';
 
 export interface ProjectMetadata {
   readonly name: string;
@@ -52,7 +53,7 @@ export function createProjectManifest(input: ProjectManifestInput): ProjectManif
   const roots = value.resourceRoots ?? [];
   const documents = value.documents ?? [];
   const activeScene = value.activeScene ?? null;
-  if (!Array.isArray(roots) || roots.length !== 0) return projectFail('UNSUPPORTED_RESOURCE_ROOTS', 'project.resourceRoots');
+  const resourceRoots = captureProjectRoots(roots);
   if (!Array.isArray(documents) || documents.length !== 0) return projectFail('UNSUPPORTED_DOCUMENTS', 'project.documents');
   if (activeScene !== null) return projectFail('UNSUPPORTED_ACTIVE_SCENE', 'project.activeScene');
   // Explicit null is not an omitted array.
@@ -60,7 +61,7 @@ export function createProjectManifest(input: ProjectManifestInput): ProjectManif
   return Object.freeze({ schemaVersion: 1, projectId,
     metadata: Object.freeze({ name: metadata.name,
       ...(Object.hasOwn(metadata, 'description') ? { description: metadata.description as string } : {}) }),
-    resourceRoots: Object.freeze([]), documents: Object.freeze([]), activeScene: null });
+    resourceRoots, documents: Object.freeze([]), activeScene: null });
 }
 
 /** Strict stored-content reader: unlike authoring input, all fields are required. */
