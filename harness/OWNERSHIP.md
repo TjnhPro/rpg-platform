@@ -1,5 +1,13 @@
 # Ownership decisions — do not classify by similar names
 
+v0.10.0 SA01: **runtime-render** owns proposed sprite definition validation,
+eight-way mapping, explicit-delta playback and frame binding. Harness records
+design/evidence only. Editor authors references/config, Client owns scheduling,
+Engine owns gameplay intent/consequences; Server has no animation requirement.
+Phase7 keeps resources, Phase8 instances, Phase6 graphics/frame, Phase9 camera.
+[Design](../runtime-render/docs/sprite-animation-v0.10.0.md) changes no runtime,
+public contract, dependency graph or owner. No sixth project or extra subsystem.
+
 v0.9.14 CM20 closure: **runtime-render** remains the canonical camera owner.
 Harness audits only; no production/API/dependency/owner transfer. Editor owns
 authored placements/Document and preview UI; Client owns neutral inputs and host

@@ -1,5 +1,14 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase10 v0.10.0 SA01 is [sprite animation design only](../runtime-render/docs/sprite-animation-v0.10.0.md).
+Existing Phase4/6/7/8/9 APIs and unions unchanged; no runtime animation export.
+Proposed ordered Phase7 references, explicit eight directions, normalized positive
+interval, host delta-only independent playback and Phase8 resource binding use
+one canonical Render path. Explicit origin/layout, no trim/pivot inference.
+See [source/API audit](../runtime-render/docs/sprite-animation-api-inventory-v0.10.0.md)
+and [checkpoint](checkpoints/sprite-animation-v0.10.0.md). API_DESIGN_ONLY;
+FEATURE_NOT_VERIFIED / VISUAL_NOT_VERIFIED, no pre-implemented v0.10.1.
+
 Phase9 v0.9.14 CM20 closure is documentation/audit only. See the
 [15-checkpoint review packet](checkpoints/camera-v0.9.14.md) and
 [exact declaration/commit inventory](checkpoints/camera-v0.9.14-api.md).

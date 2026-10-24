@@ -4,6 +4,14 @@
 
 Read root agent guidance first.
 
+- [v0.10.0 SA01](docs/sprite-animation-v0.10.0.md) is API_DESIGN_ONLY:
+  Render owns proposed sequence/8-way mapping/explicit-delta playback and binding.
+  Exactly eight slots; Phase4 +x/toward+y canonical orientation. Phase7 retains
+  atlas/revision/lease authority, Phase8 instance/layout/depth, Phase6 frames,
+  Phase9 camera. No production exports yet. Explicit fixed local draw rectangle,
+  no inferred sourcePivot/trim or animation gameplay authority. Future native MVP
+  needs verified eight-way assets; build is not animation or pixel acceptance.
+
 - [v0.9.10 CM16/CM17](docs/camera-v0.9.10.md): optional live camera/Scene binding
   uses canonical Phase6 submission and private orthographic backend. Bound draws
   use localToScene once, preserve Phase8 snapshots/depth/resources. Camera edits
