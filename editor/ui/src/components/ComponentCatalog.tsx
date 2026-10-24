@@ -57,8 +57,8 @@ export function ComponentCatalog() {
   }
 
   return (
-    <Stack component="main" p={editorTokens.spacing.section} gap={editorTokens.spacing.section}>
-      <Title order={1}>Editor UI Foundation — component catalog</Title>
+    <Stack component="section" aria-label="Component catalog" gap={editorTokens.spacing.section}>
+      <Title order={3} size="sm">Component catalog</Title>
       <Text c={editorTokens.colors.mutedText}>
         Static demonstration data. No project, document, asset, runtime or persistence is connected.
       </Text>
@@ -69,7 +69,7 @@ export function ComponentCatalog() {
         </Tabs.List>
         <Tabs.Panel value="controls" pt={editorTokens.spacing.section}>
           <Stack gap={editorTokens.spacing.section}>
-            <Title order={2}>Controlled inputs</Title>
+            <Title order={4} size="sm">Controlled inputs</Title>
             <Box component="form" aria-label="Sample controls" noValidate onSubmit={startSample}>
               <Stack gap={editorTokens.spacing.standard}>
                 <Fieldset legend="Temporary sample values" disabled={pending}>
@@ -148,7 +148,7 @@ export function ComponentCatalog() {
             <Text id={`${id}-unavailable`} c={editorTokens.colors.mutedText}>
               Unavailable action is intentionally disabled to show its state. Finish is available only while pending.
             </Text>
-            <Title order={2}>Menu and destructive confirmation</Title>
+            <Title order={4} size="sm">Menu and destructive confirmation</Title>
             <Text>Temporary sample entry: {samplePresent ? 'present' : 'removed'}.</Text>
             <Group gap={editorTokens.spacing.standard}>
               <Menu opened={menuOpened} onChange={setMenuOpened}>
@@ -179,7 +179,7 @@ export function ComponentCatalog() {
         </Tabs.Panel>
         <Tabs.Panel value="feedback" pt={editorTokens.spacing.section}>
           <Stack gap={editorTokens.spacing.standard}>
-            <Title order={2}>Feedback examples</Title>
+            <Title order={4} size="sm">Feedback examples</Title>
             <Alert title="Empty example" color={editorTokens.colors.neutral}>
               No sample entries to display. Return to Controls and actions to explore the controls.
             </Alert>
@@ -214,6 +214,7 @@ export function ComponentCatalog() {
         </Notification>
       )}
       <Modal
+        stackId={`${id}-confirmation`}
         opened={modalOpened}
         onClose={() => setModalOpened(false)}
         title="Remove temporary sample entry?"

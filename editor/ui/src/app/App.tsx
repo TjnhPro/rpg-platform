@@ -1,28 +1,37 @@
 import { Badge, Button, Fieldset, Group, Stack, Switch, Text, TextInput, Title } from '@mantine/core';
 import { useState } from 'react';
+import { ComponentCatalog } from '../components/ComponentCatalog.js';
 import { EditorPanel, type EditorPanelState } from '../components/panel/EditorPanel.js';
 import { EditorShell } from '../layout/EditorShell.js';
 import { editorTokens } from '../theme/index.js';
 import { Viewport } from '../viewport/Viewport.js';
 
+/** UI presentation samples; these are never authored Scene or project records. */
+const panelExamples: readonly EditorPanelState[] = [
+  { kind: 'empty', message: 'No sample selected. Next example cycles through local presentation states.' },
+  { kind: 'loading', message: 'Illustrative pending state. Use Next example to finish; no background operation is running.' },
+  { kind: 'error', message: 'Illustrative error only. Use Next example to inspect the read-only sample.' },
+  { kind: 'ready' },
+];
+const navigatorSamples: readonly { readonly key: string; readonly text: string }[] =
+  Array.from({ length: 30 }, (_, index) => ({
+    key: `layout-${index + 1}`,
+    text: `Layout example ${index + 1}. This paragraph demonstrates scrolling without any authored data.`,
+  }));
+
 export function App() {
   const [showGuidance, setShowGuidance] = useState(true);
   const [longSample, setLongSample] = useState(false);
   const [inspectorExample, setInspectorExample] = useState(0);
+  const [inspectorTab, setInspectorTab] = useState<'controls' | 'panel'>('controls');
   const [statusError, setStatusError] = useState(true);
-  const inspectorStates: readonly EditorPanelState[] = [
-    { kind: 'empty', message: 'No sample selected. Next example cycles through local presentation states.' },
-    { kind: 'loading', message: 'Illustrative pending state. Use Next example to finish; no background operation is running.' },
-    { kind: 'error', message: 'Illustrative error only. Use Next example to inspect the read-only sample.' },
-    { kind: 'ready' },
-  ];
 
   return (
     <EditorShell
       header={(
         <Group gap={editorTokens.spacing.standard}>
           <Title order={1} size="md">RPG Editor</Title>
-          <Badge color={editorTokens.colors.neutral}>Viewport integration</Badge>
+          <Badge color={editorTokens.colors.neutral}>UI Foundation MVP</Badge>
         </Group>
       )}
       toolbar={(
@@ -37,23 +46,37 @@ export function App() {
           footer={<Text>Navigator footer · sample only</Text>}>
           <Stack gap={editorTokens.spacing.standard}>
             <Text>No project is open.</Text>
-            {longSample && Array.from({ length: 30 }, (_, index) => (
-              <Text key={index}>Layout example {index + 1}. This paragraph demonstrates scrolling without any authored data.</Text>
+            {longSample && navigatorSamples.map((sample) => (
+              <Text key={sample.key}>{sample.text}</Text>
             ))}
           </Stack>
         </EditorPanel>
       )}
       inspector={(
-        <EditorPanel title="Inspector" subtitle="Empty → loading → error → read-only."
-          actions={<Button variant="default" onClick={() => setInspectorExample((value) => (value + 1) % inspectorStates.length)}>
-            Next example
-          </Button>}
-          state={inspectorStates[inspectorExample]}
-          readOnlyReason={inspectorExample === 3 ? 'This illustrative property can be read and copied; editing is unavailable.' : undefined}
+        <EditorPanel title="Inspector" subtitle="Temporary controls and panel states; no authored data."
+          actions={(
+            <Stack gap={editorTokens.spacing.compact}>
+              <Group role="group" aria-label="Inspector examples" gap={editorTokens.spacing.compact}>
+                <Button variant={inspectorTab === 'controls' ? 'filled' : 'default'}
+                  aria-pressed={inspectorTab === 'controls'} onClick={() => setInspectorTab('controls')}>Controls</Button>
+                <Button variant={inspectorTab === 'panel' ? 'filled' : 'default'}
+                  aria-pressed={inspectorTab === 'panel'} onClick={() => setInspectorTab('panel')}>Panel states</Button>
+              </Group>
+              {inspectorTab === 'panel' && (
+                <Button variant="default" onClick={() => setInspectorExample((value) => (value + 1) % panelExamples.length)}>
+                  Next example
+                </Button>
+              )}
+            </Stack>
+          )}
+          state={inspectorTab === 'panel' ? panelExamples[inspectorExample] : { kind: 'ready' }}
+          readOnlyReason={inspectorTab === 'panel' && inspectorExample === 3 ? 'This illustrative property can be read and copied; editing is unavailable.' : undefined}
           footer={<Text>Inspector footer · sample only</Text>}>
-          <Fieldset legend="Properties">
-            <TextInput label="Sample property" value="Illustrative value" readOnly />
-          </Fieldset>
+          {inspectorTab === 'controls' ? <ComponentCatalog /> : (
+            <Fieldset legend="Properties">
+              <TextInput label="Sample property" value="Illustrative value" readOnly />
+            </Fieldset>
+          )}
         </EditorPanel>
       )}
       status={(
