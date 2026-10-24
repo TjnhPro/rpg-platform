@@ -43,8 +43,9 @@ document.replaceContent({ ...initial.content, metadata: { opaque: ['content', 1]
 const frozenSource = document.getSnapshot().envelope;
 const editor = E.createVisualPlacementEditor({ project, root: root.binding, document, assets });
 const cell = (column, row) => ({ kind: 'grid-cell', cell: { column, row }, alignment: 'center' });
-let selected = editor.place(editor.placement.capture('objects', 'npc'), {
-  objectId: 'npc-1', displayName: 'NPC', position: cell(1, 1), visual: { schemaVersion: 1, scale: { x: 2, y: 1 }, visible: false } });
+editor.place(editor.placement.capture('objects', 'player'), { objectId: 'player-001', displayName: 'Player', position: cell(0, 0) });
+let selected = editor.place(editor.placement.capture('objects', 'monster'), {
+  objectId: 'monster-001', displayName: 'Monster', position: cell(1, 1), visual: { schemaVersion: 1, scale: { x: 2, y: 1 }, visible: false } });
 const stale = selected.selection;
 function edit(command) {
   if (selected.status !== 'selected') throw new Error('Selection unavailable');
@@ -54,13 +55,13 @@ function edit(command) {
   console.log('AUTHORED', command.kind, before, '->', document.getSnapshot().currentRevision);
 }
 edit({ kind: 'move', position: cell(2, 1) });
-edit({ kind: 'duplicate', newObjectId: 'npc-2', position: cell(3, 1) });
+edit({ kind: 'duplicate', newObjectId: 'monster-002', position: cell(3, 1) });
 const beforeReject = document.getSnapshot();
 for (const [label, token, revision, command] of [
   ['stale token', stale, beforeReject.currentRevision, { kind: 'delete' }],
   ['stale revision', selected.selection, 1, { kind: 'delete' }],
   ['outside bounds', selected.selection, beforeReject.currentRevision, { kind: 'move', position: cell(-1, 0) }],
-  ['duplicate ID', selected.selection, beforeReject.currentRevision, { kind: 'duplicate', newObjectId: 'npc-1', position: cell(0, 0) }],
+  ['duplicate ID', selected.selection, beforeReject.currentRevision, { kind: 'duplicate', newObjectId: 'monster-001', position: cell(0, 0) }],
 ]) {
   try { editor.edit(token, revision, command); throw new Error('Unexpected invalid acceptance'); }
   catch (error) {
@@ -73,7 +74,7 @@ edit({ kind: 'delete' });
 if (editor.inspector.read().status !== 'none') throw new Error('Delete did not clear selection');
 const current = document.getSnapshot(), text = E.serializeDocument(current.envelope);
 const entries = current.envelope.content.objects;
-if (JSON.stringify(entries[0]) !== JSON.stringify(sentinel) || entries.length !== 2
+if (JSON.stringify(entries[0]) !== JSON.stringify(sentinel) || entries.length !== 3
   || JSON.stringify(current.envelope.content.scene) !== JSON.stringify(frozenSource.content.scene)
   || JSON.stringify(current.envelope.content.metadata) !== JSON.stringify(frozenSource.content.metadata)) throw new Error('Metadata changed');
 E.validateVisualSceneDocument(current.envelope, catalog);
