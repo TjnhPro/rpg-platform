@@ -1,5 +1,11 @@
 # Ownership decisions — do not classify by similar names
 
+v0.11.10 VE11: **game-client** owns neutral presentation intent/correlation,
+request lease lifetime and the optional browser host. Render remains sole effect,
+playback/resource/scene/camera owner; no Editor import or Engine/gameplay rule.
+Public roots and dependency graph unchanged. See
+[checkpoint](checkpoints/visual-effect-v0.11.10.md).
+
 v0.11.9 VE10: **editor** owns authored-reference translation, optional VFX preview
 UI, explicit host deltas/provider grant and mount teardown. **runtime-render**
 remains the unchanged canonical definition/playback/placement/attachment/frame,

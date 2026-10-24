@@ -1138,3 +1138,10 @@ transport/placement/attachment controls and async teardown preserve Document
 content/revision/dirty. All root declarations unchanged (Render339/Editor138).
 No upstream delta, schema or dependency change.
 [Runbook](../editor/docs/visual-effect-preview-v0.11.9.md), [checkpoint](checkpoints/visual-effect-v0.11.9.md).
+
+Phase11 v0.11.10 VE11 adds a private Client neutral VFX intent adapter and optional
+browser composition over unchanged Render roots. Client owns bounded pending/live
+correlation and per-request leases; Render owns canonical state, playback and
+target-loss policy. Headless package roots unchanged; no Engine event bus or
+gameplay authority. Browser media observation remains unverified.
+[Runbook](../game-client/manual/vfx.md), [checkpoint](checkpoints/visual-effect-v0.11.10.md).
