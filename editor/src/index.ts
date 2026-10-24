@@ -231,3 +231,5 @@ export { createAssetManagerProject, getAssetManagerProjectSnapshot, adoptAssetMa
 export type { AssetManagerProject, AssetManagerProjectSnapshot } from './asset-manager-project.js';
 export { assetBrowserCategories, describeAssetBrowserCategory } from './asset-manager-category.js';
 export type { AssetBrowserCategoryResult } from './asset-manager-category.js';
+export { registerManagedAsset, updateManagedAssetMetadata, unregisterManagedAsset } from './asset-manager-registration.js';
+export type { AssetRegistrationCandidate } from './asset-manager-registration.js';
