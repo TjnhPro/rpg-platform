@@ -4,20 +4,27 @@ import {
   bindRenderCameraToVisualScene, getRenderCameraViewSnapshot, panRenderCamera,
   zoomRenderCameraAtFocus, projectRenderCameraPoint, screenToRenderCameraSelectedPlane,
   screenPointToViewport2D, getRenderCameraFrameSnapshot, getRenderVisualDiagnostic,
+  addRenderVisualLayer, setRenderVisualLayerOrderingPolicy, listRenderVisualInstances,
+  listRenderVisualDrawCandidates, getRenderVisualInstanceTransform, getRenderVisualInstanceResource,
+  getRenderVisualSceneDiagnostics, getRenderViewportSnapshot, setRenderCameraZoom, setRenderCameraCenter,
+  transitionRenderCameraWithinBounds,
   type OrthographicCameraConfigurationInput, type RenderCameraZoomLimits,
   type RenderFrameSession, type RenderViewportResizeReceipt, type ViewportMetrics2D,
   type RenderCameraSceneBinding,
+  type RenderVisualLayerInput, type RenderVisualLayerOrderingPolicy, type PlaneProjectionPoint2D,
+  type RenderCameraBoundsPolicy,
 } from '@rpg-platform/runtime-render';
 import { createSceneMembership, type SceneMembership } from './scene-membership.js';
 import { createAssetCatalog, type AssetCatalog } from './asset-catalog.js';
-import { createScenePreviewBridge, type ScenePreviewPresentation } from './scene-preview.js';
+import { createScenePreviewBridge, type ScenePreviewBridge } from './scene-preview.js';
 import { mountEditorViewport } from './viewport-host.js';
 import type { VisualSourceProvider } from '@rpg-platform/runtime-render';
 
 /** Authored input and workspace intent are deliberately separate inputs. */
 export function mountEditorCamera(target: HTMLCanvasElement, input: {
   readonly authored: SceneMembership; readonly catalog: AssetCatalog;
-  readonly provider: VisualSourceProvider; readonly presentation: () => ScenePreviewPresentation;
+  readonly provider: VisualSourceProvider; readonly presentation: Parameters<ScenePreviewBridge['sync']>[2];
+  readonly layers?: readonly { readonly definition: RenderVisualLayerInput; readonly ordering: RenderVisualLayerOrderingPolicy }[];
   readonly camera: OrthographicCameraConfigurationInput; readonly zoomLimits: RenderCameraZoomLimits;
 }, report: (event: string, detail?: unknown) => void,
   pixelRatio: () => number = () => window.devicePixelRatio) {
@@ -64,7 +71,12 @@ export function mountEditorCamera(target: HTMLCanvasElement, input: {
       const ticket = ++generation;
       camera = createConfiguredRenderCamera(input.camera, input.zoomLimits);
       scene = createRenderVisualScene(session);
-      const ownedCache = cache = createVisualResourceCache(input.provider, { maxCpuEntries: 2, maxGpuEntries: 2 });
+      for (const layer of input.layers ?? []) {
+        addRenderVisualLayer(scene, layer.definition);
+        setRenderVisualLayerOrderingPolicy(scene, layer.definition.layerKey, layer.ordering);
+      }
+      const capacity = Math.max(1, catalog.definitions.length);
+      const ownedCache = cache = createVisualResourceCache(input.provider, { maxCpuEntries: capacity, maxGpuEntries: capacity });
       const ownedBridge = bridge = createScenePreviewBridge(scene, authored.scene.identity,
         (descriptor, plan) => ownedCache.acquire(session, descriptor, 0, plan.sourceRevision,
           { maxBytes: 1048576, maxDimension: 2048, maxPixels: 4194304 }, { sampling: 'nearest', colorSpace: 'srgb' }));
@@ -151,10 +163,35 @@ export function mountEditorCamera(target: HTMLCanvasElement, input: {
     window.addEventListener('pagehide', close);
   } catch (error) { close(); throw error; }
   return Object.freeze({ acquire: host.start, suspend: host.suspend, resume: host.resume, sync: host.sync, close,
+    center(point: PlaneProjectionPoint2D) { const live = ready(); setRenderCameraCenter(live.camera, point); host.requestFrame(); },
+    zoom(value: number) { const live = ready(); setRenderCameraZoom(live.camera, value); host.requestFrame(); },
+    project(point: PlaneProjectionPoint2D, width?: number) {
+      const live = pointer(target.getBoundingClientRect().left, target.getBoundingClientRect().top);
+      const logical = width === undefined ? live.logical : { ...live.logical, width };
+      const projected = projectRenderCameraPoint(live.camera, logical, point, { session: live.session, receipt: live.receipt });
+      const inverse = screenToRenderCameraSelectedPlane(live.camera, logical,
+        { cameraView: projected.camera, selectedPlane: point.plane, point: projected.screenPoint! },
+        { session: live.session, receipt: live.receipt });
+      const observation = { projected, inverse, residual: {
+        x: inverse.selectedPlanePoint.point.x - point.point.x, y: inverse.selectedPlanePoint.point.y - point.point.y } };
+      log('Editor world/viewport/screen inverse', observation); return observation;
+    },
+    bounds(targetPoint: PlaneProjectionPoint2D, bounds: RenderCameraBoundsPolicy) {
+      const live = ready();
+      const result = transitionRenderCameraWithinBounds(live.camera, live.logical,
+        { cameraView: getRenderCameraViewSnapshot(live.camera), zoom: getRenderCameraViewSnapshot(live.camera).configuration.zoom,
+          movement: { kind: 'center', target: targetPoint }, bounds }, { session: live.session, receipt: live.receipt });
+      log('Editor bounds result', result); host.requestFrame(); return result;
+    },
     pan(delta: { x: number; y: number }) {
       const live = ready(); panRenderCamera(live.camera, { plane: input.camera.source, delta }); host.requestFrame();
     },
     inspect: () => ({ host: host.getSnapshot(), loadState, camera: camera && getRenderCameraViewSnapshot(camera),
-      binding: binding?.getSnapshot(), authored, authoredInput: input.authored }),
+      binding: binding?.getSnapshot(), authored, authoredInput: input.authored,
+      viewport: context && getRenderViewportSnapshot(context.session), cache: cache?.getSnapshot(),
+      scene: scene && getRenderVisualSceneDiagnostics(scene),
+      visuals: scene?.getSnapshot().state === 'active' ? listRenderVisualInstances(scene).map(instance => ({
+        instance, transform: getRenderVisualInstanceTransform(scene!, instance), resource: getRenderVisualInstanceResource(scene!, instance) })) : [],
+      candidates: scene?.getSnapshot().state === 'active' ? listRenderVisualDrawCandidates(scene) : [] }),
   });
 }
