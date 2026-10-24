@@ -1,5 +1,10 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase10 [v0.10.5 SA06](../runtime-render/docs/sprite-animation-v0.10.5.md) adds
+advanceSpriteAnimationPlayback/SpriteAnimationAdvanceResult without changing old
+commands/snapshots. Explicit bounded host delta, shared transition and SA03 sampler;
+no timer, gameplay clock, invalidation, resource acquisition or instance binding.
+
 Phase10 [v0.10.4 SA05](../runtime-render/docs/sprite-animation-v0.10.4.md) adds
 independent Render playback handles/snapshots and a single command path. Captured
 immutable clips, exact issued identity, atomic rejection and terminal disposal;

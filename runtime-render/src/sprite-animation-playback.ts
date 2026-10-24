@@ -34,6 +34,17 @@ export type SpriteAnimationPlaybackCommand =
   | { readonly type: 'setDirection'; readonly directionIndex: SpriteDirectionIndex }
   | { readonly type: 'pause' | 'resume' | 'stop' | 'dispose' };
 
+/** Per-call change observation, never a queued event or automatic redraw. */
+export interface SpriteAnimationAdvanceResult {
+  readonly snapshot: SpriteAnimationPlaybackSnapshot;
+  /** Selected project/resource/subresource address differs from before this call. */
+  readonly frameChanged: boolean;
+  /** This advance first entered target-local once completion. */
+  readonly completedNow: boolean;
+}
+
+type Transition = SpriteAnimationPlaybackCommand | { readonly type: 'advance'; readonly deltaMs: number };
+
 type Transport = 'stopped' | 'playing' | 'paused';
 interface PlaybackData {
   clips: Map<string, EightWaySpriteClip> | null;
@@ -124,6 +135,26 @@ export function getSpriteAnimationPlaybackSnapshot(handle: SpriteAnimationPlayba
 /** One synchronous capture/validate/candidate/commit path for every control command. */
 export function commandSpriteAnimationPlayback(handle: SpriteAnimationPlayback,
   input: SpriteAnimationPlaybackCommand): SpriteAnimationPlaybackSnapshot {
+  return transition(handle, input, false).snapshot;
+}
+
+/** Explicit host delta only, through the same guarded control transition path. */
+export function advanceSpriteAnimationPlayback(handle: SpriteAnimationPlayback,
+  deltaMs: number): SpriteAnimationAdvanceResult {
+  return transition(handle, { type: 'advance', deltaMs }, true);
+}
+
+function observation(before: SpriteAnimationPlaybackSnapshot,
+  after: SpriteAnimationPlaybackSnapshot): SpriteAnimationAdvanceResult {
+  return Object.freeze({ snapshot: after,
+    frameChanged: before.frame.projectId !== after.frame.projectId
+      || before.frame.resourceId !== after.frame.resourceId
+      || before.frame.subresourceId !== after.frame.subresourceId,
+    completedNow: !before.completed && after.completed });
+}
+
+function transition(handle: SpriteAnimationPlayback, input: Transition,
+  allowAdvance: boolean): SpriteAnimationAdvanceResult {
   const data = issued(handle);
   data.busy = true;
   try {
@@ -131,25 +162,42 @@ export function commandSpriteAnimationPlayback(handle: SpriteAnimationPlayback,
       ? Object.getOwnPropertyDescriptor(input, 'type') : undefined;
     const type: unknown = typeField && 'value' in typeField ? typeField.value : undefined;
     const fields = type === 'play' || type === 'selectClip' ? ['type', 'clipId']
-      : type === 'setDirection' ? ['type', 'directionIndex'] : ['type'];
+      : type === 'setDirection' ? ['type', 'directionIndex']
+      : type === 'advance' && allowAdvance ? ['type', 'deltaMs'] : ['type'];
     const command = record(input, fields);
-    if (!['play', 'selectClip', 'setDirection', 'pause', 'resume', 'stop', 'dispose'].includes(type as string)) {
+    if (!['play', 'selectClip', 'setDirection', 'pause', 'resume', 'stop', 'dispose',
+      ...(allowAdvance ? ['advance'] : [])].includes(type as string)) {
       throw new TypeError('Playback command is unsupported');
     }
     // Proxies may change descriptors between reads; do not commit a mixed command.
     if (command.type !== type) throw new TypeError('Playback command changed during capture');
     const before = data.snapshot;
     if (type === 'dispose') {
-      if (before.state === 'disposed') return before;
+      if (before.state === 'disposed') return observation(before, before);
       const terminal = Object.freeze({ ...before, state: 'disposed' as const });
       data.snapshot = terminal;
       data.clips = null; // Release private definition collection; retain last address/readback only.
-      return terminal;
+      return observation(before, terminal);
     }
     if (data.clips === null) throw new TypeError('Playback has been disposed');
     let clip = clipFor(data.clips, before.clipId), index = before.directionIndex;
     let elapsed = before.elapsedMs, transport = data.transport;
     switch (type) {
+      case 'advance': {
+        const delta = command.deltaMs;
+        if (typeof delta !== 'number' || !Number.isFinite(delta) || delta < 0 || delta > Number.MAX_SAFE_INTEGER) {
+          throw new TypeError('Playback delta must be finite within 0..MAX_SAFE_INTEGER milliseconds');
+        }
+        if (before.state !== 'playing' || delta === 0) return observation(before, before);
+        const sum = elapsed + delta;
+        if (!Number.isFinite(sum) || sum > Number.MAX_SAFE_INTEGER || sum <= elapsed) {
+          throw new RangeError('Playback accumulated time exceeds bounds or absorbs a positive delta');
+        }
+        // Once advancement drops overshoot; direction changes still preserve logical elapsed.
+        elapsed = clip.repeat === 'once'
+          ? Math.min(sum, clip.directions[index].frames.length * clip.timing.frameIntervalMs) : sum;
+        break;
+      }
       case 'play': {
         const target = clipFor(data.clips, command.clipId);
         if (target !== clip || before.completed) elapsed = 0;
@@ -167,10 +215,11 @@ export function commandSpriteAnimationPlayback(handle: SpriteAnimationPlayback,
       case 'stop': elapsed = 0; transport = 'stopped'; break;
     }
     if (clip.clipId === before.clipId && index === before.directionIndex
-      && elapsed === before.elapsedMs && transport === data.transport) return before;
+      && elapsed === before.elapsedMs && transport === data.transport) return observation(before, before);
     const next = snapshot(before.id, clip, index, elapsed, transport);
+    const result = observation(before, next);
     data.snapshot = next;
     data.transport = transport;
-    return next;
+    return result;
   } finally { data.busy = false; }
 }

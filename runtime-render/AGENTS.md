@@ -4,6 +4,11 @@
 
 Read root agent guidance first.
 
+- [v0.10.5 SA06](docs/sprite-animation-v0.10.5.md): explicit advance on the same
+  playback transition path; only playing progresses. Keep bounded logical time
+  for repeat, clamp once, sample through SA03. Frozen per-call address-change/
+  completion observations; no clock, invalidation, Scene binding or GPU.
+
 - [v0.10.4 SA05](docs/sprite-animation-v0.10.4.md): independent CPU playback
   handles, frozen readback and one canonical command transition path. Start
   stopped0; direction keeps logical time; dispose terminal/idempotent. No delta

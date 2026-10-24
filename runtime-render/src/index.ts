@@ -399,3 +399,4 @@ export {
   type SpriteAnimationPlayback, type SpriteAnimationPlaybackInput, type SpriteAnimationPlaybackSnapshot,
   type SpriteAnimationPlaybackState, type SpriteAnimationPlaybackCommand,
 } from './sprite-animation-playback.js';
+export { advanceSpriteAnimationPlayback, type SpriteAnimationAdvanceResult } from './sprite-animation-playback.js';
