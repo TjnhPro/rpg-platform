@@ -17,10 +17,10 @@ export function useAssetResourceGrant(active: ActiveEditorProject | null): Asset
         if (!response.ok) return;
         const capability = await response.json() as { token: string; roots: { projectId: string; bindingId: string }[] };
         if (typeof capability.token !== 'string' || !capability.roots.some(item => item.projectId === root.projectId && item.bindingId === root.bindingId)) return;
-        async function read(locator: string) {
+        async function read(locator: string, role?: 'image' | 'atlas-metadata') {
           const response = await fetch('/__asset-host/resource', { method: 'POST', signal: abort.signal,
             headers: { 'Content-Type': 'application/json', 'X-Project-Capability': capability.token },
-            body: JSON.stringify({ projectId: root.projectId, bindingId: root.bindingId, locator }) });
+            body: JSON.stringify({ projectId: root.projectId, bindingId: root.bindingId, locator, role }) });
           if (!response.ok || !response.body) throw new Error('RESOURCE_UNAVAILABLE');
           const reader = response.body.getReader(), chunks: Uint8Array[] = []; let length = 0;
           try {
@@ -31,7 +31,7 @@ export function useAssetResourceGrant(active: ActiveEditorProject | null): Asset
           for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.length; }
           const result = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes)) as {
             status: 'available' | 'unverified'; reason?: 'unavailable' | 'not-found' | 'denied';
-            observation?: ExistingResourceObservation; bytes?: number[] };
+            observation?: ExistingResourceObservation; bytes?: number[]; role?: string; mediaType?: string };
           if (!live) throw new Error('GRANT_REVOKED');
           if (result.status !== 'available') return { status: 'unverified' as const,
             reason: result.reason === 'denied' || result.reason === 'not-found' ? result.reason : 'unavailable' as const };
@@ -40,7 +40,12 @@ export function useAssetResourceGrant(active: ActiveEditorProject | null): Asset
             || observation.locator !== locator || typeof observation.revision !== 'string' || !observation.revision
             || !Array.isArray(result.bytes) || result.bytes.length > 4_194_304 || observation.byteLength !== result.bytes.length
             || !result.bytes.every(value => Number.isInteger(value) && value >= 0 && value <= 255)) throw new Error('INVALID_RESPONSE');
-          return { status: 'available' as const, observation: Object.freeze({ ...observation }), bytes: new Uint8Array(result.bytes) };
+          // Legacy image hosts retain their PNG-only contract. Metadata requires explicit host evidence.
+          const mediaType = result.mediaType ?? (role === 'image' ? 'image/png' : null);
+          if (role === 'atlas-metadata' && (result.role !== role || !['text/plain', 'application/vnd.texturepacker.tpsheet'].includes(mediaType ?? '')))
+            throw new Error('HOST_METADATA_UNAVAILABLE');
+          if (role === 'image' && mediaType !== 'image/png') throw new Error('UNSUPPORTED_IMAGE_MEDIA');
+          return { status: 'available' as const, observation: Object.freeze({ ...observation }), bytes: new Uint8Array(result.bytes), mediaType };
         }
         // Probe endpoint availability without claiming a file observation.
         const probe = await read('not-authorized');
@@ -55,11 +60,12 @@ export function useAssetResourceGrant(active: ActiveEditorProject | null): Asset
           } },
           provider: { scope, async read(request) {
             if (!live || request.scope.providerId !== scope.providerId || request.scope.authorizationGeneration !== scope.authorizationGeneration
-              || request.identity.projectId !== root.projectId || request.source.role !== 'image') return { status: 'failed', code: 'SOURCE_DENIED' };
-            try { const result = await read(request.source.locator.path);
+              || request.scope.projectId !== root.projectId || request.identity.projectId !== root.projectId
+              || (request.source.role !== 'image' && request.source.role !== 'atlas-metadata')) return { status: 'failed', code: 'SOURCE_DENIED' };
+            try { const result = await read(request.source.locator.path, request.source.role);
               if (result.status !== 'available') return { status: 'failed', code: result.reason === 'not-found' ? 'SOURCE_NOT_FOUND' : 'SOURCE_DENIED' };
               if (result.bytes.length > request.maxBytes) return { status: 'failed', code: 'CONTENT_TOO_LARGE' };
-              return { status: 'provided', bytes: result.bytes, contentLength: result.bytes.length, mediaType: 'image/png', revision: result.observation.revision };
+              return { status: 'provided', bytes: result.bytes, contentLength: result.bytes.length, mediaType: result.mediaType, revision: result.observation.revision };
             } catch { return { status: 'failed', code: 'CANCELLED' }; }
           } },
         };
