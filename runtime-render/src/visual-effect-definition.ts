@@ -50,6 +50,11 @@ export function getVisualEffectDefinitionFailure(error: unknown): VisualEffectDe
 }
 
 const definitions = new WeakSet<VisualEffectDefinition>(); // Provenance, never an ID/content registry.
+/** Owner-local issuance check; never admits a copied/JSON definition as live data. */
+export function requireVisualEffectDefinition(definition: VisualEffectDefinition): VisualEffectDefinition {
+  if (!definitions.has(definition)) invalid('FOREIGN_DEFINITION');
+  return definition;
+}
 function record(input: unknown, keys: readonly string[]): Record<string, unknown> {
   if (typeof input !== 'object' || input === null || Array.isArray(input)
     || (Object.getPrototypeOf(input) !== Object.prototype && Object.getPrototypeOf(input) !== null)

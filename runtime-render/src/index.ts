@@ -415,3 +415,7 @@ export { createSpriteSequencePlayback, getSpriteSequencePlaybackSnapshot,
   type SpriteSequenceAdvanceResult } from './sprite-animation-playback.js';
 export { createSpriteSequenceVisualBinding, type SpriteSequenceVisualBinding,
   type SpriteSequenceVisualFrameResult } from './sprite-animation-visual-binding.js';
+export { createVisualEffectInstance, getVisualEffectInstanceSnapshot, listVisualEffectInstances,
+  getVisualEffectInstance, removeVisualEffectInstance, getVisualEffectInstanceFailure,
+  type VisualEffectInstance, type VisualEffectInstanceInput, type VisualEffectInstanceSnapshot,
+  type VisualEffectInstanceFailure } from './visual-effect-instance.js';

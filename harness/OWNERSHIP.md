@@ -358,3 +358,9 @@ Approved U1: **runtime-render**, Phase10 animation owner, supplies additive neut
 single-sequence playback and visual binding to Phase11. Existing directional and
 neutral APIs share one implementation; no Engine/L1/L2/gameplay boundary change.
 Editor/Client are unchanged build consumers. [Checkpoint](checkpoints/visual-effect-u1.md).
+
+v0.11.2 VE03: **runtime-render** owns ephemeral VFX orchestration over existing
+Phase8 scene/session membership and owned Phase10 neutral playback. Phase8 alone
+enumerates scene entries and owns retained Phase7 usage; no parallel VFX registry
+or authored/gameplay mutation. Editor/Client unchanged build consumers, Harness
+evidence only. No boundary expansion. [Checkpoint](checkpoints/visual-effect-v0.11.2.md).

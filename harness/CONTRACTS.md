@@ -1092,3 +1092,10 @@ Approved Phase10 upstream U1 adds twelve single-sequence playback/binding roots
 is null; both modes share one sampler/transport/admission/cleanup implementation.
 [Upstream delta](../runtime-render/docs/sprite-animation-u1.md), [checkpoint](checkpoints/visual-effect-u1.md).
 U1 is delivered; historical VE01/VE02 dependency reports remain baseline-specific.
+
+Phase11 v0.11.2 VE03 adds ten Render roots for issued effect instance admission,
+opaque identity, lookup/list, detached snapshots and idempotent removal.
+Render292→302, old root declarations unchanged. Canonical Phase8 membership
+stores live entries; existing internal end hooks dispose owned U1 playback on
+remove/clear/scene/session end. No pixels, resource lease or advancement.
+[Contract](../runtime-render/docs/visual-effect-v0.11.2.md), [checkpoint](checkpoints/visual-effect-v0.11.2.md).
