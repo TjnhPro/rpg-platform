@@ -277,3 +277,4 @@ export { resolveVisualPlacementPosition, type VisualPlacementPosition } from './
 export { placeVisualObject, type PlaceVisualObjectRequest } from './visual-placement-create.js';
 export { moveVisualObject } from './visual-placement-move.js';
 export { duplicateVisualObject } from './visual-placement-duplicate.js';
+export { deleteVisualObject } from './visual-placement-delete.js';
