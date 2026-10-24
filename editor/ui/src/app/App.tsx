@@ -10,6 +10,7 @@ import { useAssetResourceGrant } from '../features/asset-browser/host.js';
 import type { ActiveEditorProject } from '../features/project-manager/ProjectManagerPanel.js';
 import type { ReactNode } from 'react';
 import { MapWorkspace } from '../features/map/MapWorkspace.js';
+import { VisualInspectorWorkspace } from '../features/visual-inspector/VisualInspectorWorkspace.js';
 
 export function App() {
   const [showGuidance, setShowGuidance] = useState(true);
@@ -22,25 +23,27 @@ function AssetWorkspace({ active, projectPanel, showGuidance, setShowGuidance }:
   const grant = useAssetResourceGrant(active);
   const [tool, setTool] = useState<string | null>('map');
   return <AssetBrowserWorkspace active={active} resourcePort={grant?.existing}>
-    {(context, browser) => <MapWorkspace active={active} context={context} grant={grant} showGuidance={showGuidance}>
+    {(context, browser) => <VisualInspectorWorkspace active={active} context={context} grant={grant} showGuidance={showGuidance}>
+      {(visualPanel, visualViewport) => <MapWorkspace active={active} context={context} grant={grant} showGuidance={showGuidance}>
       {(mapPanel, mapViewport) => <EditorShell
       header={<Group gap={editorTokens.spacing.standard}>
         <Title order={1} size="md">RPG Editor</Title>
-        <Badge color={editorTokens.colors.neutral}>Map & Scene Editor</Badge>
+        <Badge color={editorTokens.colors.neutral}>Scene Editor</Badge>
       </Group>}
       toolbar={<Group gap={editorTokens.spacing.standard}>
-        <Select label="Workspace" data={[{ value: 'map', label: 'Map Editor' }, { value: 'assets', label: 'Asset Browser' }]}
+        <Select label="Workspace" data={[{ value: 'map', label: 'Map Editor' }, { value: 'assets', label: 'Asset Browser' }, { value: 'visual', label: 'Visual Inspector' }]}
           value={tool} allowDeselect={false} onChange={setTool} />
         <Switch label="Show guidance" checked={showGuidance}
           onChange={event => setShowGuidance(event.currentTarget.checked)} />
       </Group>}
       navigator={projectPanel}
-      inspector={tool === 'map' ? mapPanel : browser}
+      inspector={tool === 'map' ? mapPanel : tool === 'visual' ? visualPanel : browser}
       status={<EditorPanel title="Status" variant="status">
         <Text>Map, Project and Asset saves report separately. Preview outcomes do not verify displayed pixels.</Text>
       </EditorPanel>}>
-      {tool === 'map' ? mapViewport : <AssetViewport context={context} grant={grant} showGuidance={showGuidance} />}
+      {tool === 'map' ? mapViewport : tool === 'visual' ? visualViewport : <AssetViewport context={context} grant={grant} showGuidance={showGuidance} />}
     </EditorShell>}
     </MapWorkspace>}
+    </VisualInspectorWorkspace>}
   </AssetBrowserWorkspace>;
 }

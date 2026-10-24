@@ -14,7 +14,7 @@ export interface VisualInspectorBinding {
 /** Issued transient token. Identity/revision are diagnostic, never write authority. */
 export interface VisualInspectorSelection {
   readonly projectId: string; readonly sceneId: string; readonly documentId: string;
-  readonly objectId: string; readonly revision: number; readonly generation: number;
+  readonly objectId: string; readonly revision: number; readonly projectRevision: number; readonly generation: number;
 }
 export type VisualInspectorSnapshot =
   | Readonly<{ status: 'none' | 'stale' | 'missing' | 'unsupported' | 'read-only' | 'error'; reason: string }>
@@ -46,14 +46,14 @@ export function createVisualInspectorContext(binding: VisualInspectorBinding): V
       || tracked.sceneId !== read.snapshot.identity.sceneId) throw new TypeError('SCENE_NOT_TRACKED');
     if (current.manifest.activeScene?.documentId !== snapshot.envelope.identity.documentId
       || current.manifest.activeScene.sceneId !== read.snapshot.identity.sceneId) throw new TypeError('SCENE_NOT_ACTIVE');
-    return { snapshot, map: read.snapshot };
+    return { snapshot, map: read.snapshot, projectRevision: current.currentRevision };
   };
   const read = (selection = active ?? undefined): VisualInspectorSnapshot => {
     if (!selection) return Object.freeze({ status: 'none', reason: 'No selection' });
     if (selection !== active || selection.generation !== generation) return Object.freeze({ status: 'stale', reason: 'Selection replaced or invalidated' });
     try {
-      const { snapshot, map } = capture();
-      if (selection.revision !== snapshot.currentRevision || selection.sceneId !== map.identity.sceneId
+      const { snapshot, map, projectRevision } = capture();
+      if (selection.projectRevision !== projectRevision || selection.revision !== snapshot.currentRevision || selection.sceneId !== map.identity.sceneId
         || selection.documentId !== snapshot.envelope.identity.documentId) {
         clear(); return Object.freeze({ status: 'stale', reason: 'Scene generation changed' });
       }
@@ -72,10 +72,10 @@ export function createVisualInspectorContext(binding: VisualInspectorBinding): V
     select: (objectId: string): VisualInspectorSnapshot => {
       clear();
       try {
-        const { snapshot, map } = capture();
+        const { snapshot, map, projectRevision } = capture();
         if (!getSceneObject(map.membership, objectId)) return Object.freeze({ status: 'missing', reason: 'Object missing' });
         active = Object.freeze({ ...map.identity, documentId: snapshot.envelope.identity.documentId,
-          objectId, revision: snapshot.currentRevision, generation });
+          objectId, revision: snapshot.currentRevision, projectRevision, generation });
         return read(active);
       } catch (error) {
         if (!(error instanceof TypeError)) throw error;

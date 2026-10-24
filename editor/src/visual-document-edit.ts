@@ -56,7 +56,7 @@ export function createVisualDocumentEditor(input: VisualInspectorBinding): Visua
     if (current.status !== 'selected') throw new TypeError(`Visual edit unavailable:${current.status}`);
     const source = validateVisualSceneDocument(current.document.envelope, binding.catalog);
     // Bound data capture prevents accessors, nonfinite values and unknown graph shapes.
-    const decoded = deserializeDocument(serializeDocument(createDocumentEnvelope({ ...source.document, content: inputEdit })));
+    const decoded = deserializeDocument(serializeDocument({ ...source.document, content: inputEdit } as DocumentEnvelope));
     if (decoded.status !== 'decoded') throw new TypeError('Visual edit capture rejected');
     const edit = decoded.document.content as unknown as VisualPropertyEdit;
     const fields: Record<VisualPropertyEdit['kind'], string> = { position: 'point', direction: 'orientation', layer: 'layerKey',

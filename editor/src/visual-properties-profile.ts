@@ -19,8 +19,9 @@ export type VisualProfileRead =
 
 /** Codec bounds portable capture BEFORE Render factories can read any fields. */
 export function createVisualPropertiesProfile(input: unknown, space?: CoordinateSpaceDefinition): VisualPropertiesProfile {
-  const envelope = createDocumentEnvelope({ schemaVersion: 1,
-    identity: { projectId: 'visual', documentId: 'capture' }, documentKind: 'visual', contentSchemaVersion: 1, content: input });
+  // The codec must bound the raw graph before the recursive envelope detacher.
+  const envelope = { schemaVersion: 1,
+    identity: { projectId: 'visual', documentId: 'capture' }, documentKind: 'visual', contentSchemaVersion: 1, content: input } as DocumentEnvelope;
   const decoded = deserializeDocument(serializeDocument(envelope));
   if (decoded.status !== 'decoded') throw new TypeError('Visual profile capture failed');
   const value = decoded.document.content;
