@@ -258,3 +258,5 @@ export { createVisualPropertiesProfile, readVisualPropertiesProfile } from './vi
 export type { VisualPropertiesProfile, VisualProfileRead } from './visual-properties-profile.js';
 export { createVisualInspectorContext } from './visual-inspector-context.js';
 export type { VisualInspectorBinding, VisualInspectorSelection, VisualInspectorSnapshot, VisualInspectorContext } from './visual-inspector-context.js';
+export { readVisualPosition, setVisualPosition } from './visual-position.js';
+export type { VisualPositionRead } from './visual-position.js';
