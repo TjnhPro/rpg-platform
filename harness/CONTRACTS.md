@@ -1,5 +1,14 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase9 v0.9.14 CM20 closure is documentation/audit only. See the
+[15-checkpoint review packet](checkpoints/camera-v0.9.14.md) and
+[exact declaration/commit inventory](checkpoints/camera-v0.9.14-api.md).
+Render owns camera state, projection and native application; Phase4/6/7/8 remain
+canonical. Phase9 adds no breaking diagnostic union; accepted Phase6 migration
+remains separate. Private Editor/Client hosts share the Render public root.
+READY_FOR_DEVELOPER_REVIEW / FEATURE_NOT_VERIFIED / VISUAL_NOT_VERIFIED:
+CPU/build evidence does not establish native MVP acceptance. No v0.9.15.
+
 Phase9 v0.9.10 CM16/CM17 adds bindRenderCameraToVisualScene,
 getRenderCameraFrameSnapshot and three types. Canonical Phase6/8 path, optional
 private OrthographicCamera, localToScene once, exact issued resize/frame evidence.

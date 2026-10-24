@@ -1,5 +1,13 @@
 # Ownership decisions — do not classify by similar names
 
+v0.9.14 CM20 closure: **runtime-render** remains the canonical camera owner.
+Harness audits only; no production/API/dependency/owner transfer. Editor owns
+authored placements/Document and preview UI; Client owns neutral inputs and host
+scheduling; Phase6 owns graphics/resize/frame, Phase7 resource rights/cache, Phase8
+live instances/order. Engine alone owns game positions; Server needs no frames.
+[Closure review](checkpoints/camera-v0.9.14.md) preserves open native acceptance
+and unsupported/deferred modes. Developer alone accepts the phase or merge risk.
+
 v0.9.10 CM16/CM17: **runtime-render** owns optional camera/live Scene binding and
 private native application in the existing Phase6/8 frame path. Phase7 retains
 all resource lifetime ownership; host owns resize measurement/scheduling. Editor
