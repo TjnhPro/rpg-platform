@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><title>Real sprite animation MVP - SA12</title>
+<style>body{font:16px system-ui;max-width:1100px;margin:20px auto;background:#eee;color:#222;padding:0 12px}canvas{width:480px;height:300px;image-rendering:pixelated;background:#ddd}section{display:inline-block;position:relative}fieldset{display:flex;flex-wrap:wrap;gap:12px;margin:12px 0}button,input,select{font:inherit}input{width:100px}pre{white-space:pre-wrap;font-size:12px}.line{position:absolute;top:220px;left:0;width:480px;border-top:1px dashed #fff8;pointer-events:none}.label{display:block}p{max-width:1000px}</style>
+<h1>Real sprite animation - manual stepping</h1>
+<p>Player BODY idle/walk, Monster A/B share one eight-page atlas/cache; C has an independent graphics session. All clips are inspection-authored at 8 FPS. Each Step passes only its numeric delta to Render; Play alone does not advance time.</p>
+<section><span class="label">Main: Player (90,220), Monster A (235,160), B (350,160)</span><div style="position:relative;height:300px"><canvas data-main width="480" height="300"></canvas><span class="line"></span></div></section>
+<section><span class="label">Independent session: Monster C (240,160)</span><canvas data-other width="480" height="300"></canvas></section>
+<p>White line is a host HTML inspection overlay at Player ground Y220, not Render geometry. Player uses explicitly authored x12 / inspected sole-line points for all frames. This is not the original untrimmed pivot or anatomical center. Monsters use top-left inspection origins. Source compass remains unverified. Player head/hands/equipment composition is absent.</p>
+<fieldset disabled data-controls><legend>Explicit commands to selected actor</legend>
+<label>Actor <select data-actor><option>P</option><option>A</option><option>B</option><option>C</option></select></label>
+<label>Clip <select data-clip><option>idle</option><option>walk</option><option>walk-once</option></select></label><button data-select>Select clip</button>
+<label>Facing slot <select data-direction><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option></select></label><button data-facing>Set facing</button>
+<button data-command="play">Play same clip</button><button data-command="pause">Pause</button><button data-command="resume">Resume</button><button data-command="stop">Stop</button>
+<label>Delta ms <input data-delta type="number" step="any" value="125"></label><button data-step>Step selected</button><button data-step-main>Step main</button>
+<button data-missing-origin>Try missing origin</button><button data-missing-frame>Try missing frame</button><button data-release>Release selected</button>
+</fieldset>
+<button data-close-main>Close main session</button><button data-close>Close all</button><button data-observe>Observe</button>
+<pre data-status>Loading exact authorized original sources...</pre>
+<script type="importmap">{"imports":{"@rpg-platform/runtime-render":"/render/index.js","three":"/three/three.module.js"}}</script><script type="module" src="/mvp.mjs"></script></html>

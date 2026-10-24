@@ -396,3 +396,11 @@ hide/move/order/clear. Browser NOT_EXECUTED; build is not visual acceptance.
 consumers, residual evidence gaps and Developer review decisions. The
 [seven-instance procedure](scene-mvp.md) remains the manual MVP entry. Browser
 NOT_EXECUTED; no visual acceptance or automated browser suite at closure.
+
+## Sprite animation real MVP — v0.10.11
+
+[Runnable eight-direction Player/Monster demo](sprite-animation-mvp.md) composes
+the canonical Phase4/6/7/8/9/10 public APIs with original PNG/TPSheet sources,
+explicit manual deltas and independent playback/session lifetimes. See the
+[SA12 evidence report](../../harness/checkpoints/sprite-animation-v0.10.11.md)
+for actual finite Chrome observations, screenshots and unverified limitations.

@@ -1,0 +1,609 @@
+{
+  "projectId": "sa12-real-animation",
+  "resources": [
+    {
+      "resourceId": "player-idle",
+      "pages": [
+        {
+          "slot": 0,
+          "name": "FreeStand1_0",
+          "files": [
+            {
+              "path": "player/man/Body/body00/FreeStand1_0.tpsheet",
+              "sha256": "a49a2f26d25945f38de3737427ff7495546e68719f125a5b2f75e3f487af76ee",
+              "bytes": 1737
+            },
+            {
+              "path": "player/man/Body/body00/FreeStand1_0.png",
+              "sha256": "5dfe8440ac8dd7d1755c2573433d33ed7363b8ba927352100cc0c96806459227",
+              "bytes": 20152
+            }
+          ],
+          "frames": [
+            "BODY_0000",
+            "BODY_0002",
+            "BODY_0004",
+            "BODY_0006",
+            "BODY_0008",
+            "BODY_0010",
+            "BODY_0012",
+            "BODY_0014"
+          ]
+        },
+        {
+          "slot": 1,
+          "name": "FreeStand1_1",
+          "files": [
+            {
+              "path": "player/man/Body/body00/FreeStand1_1.tpsheet",
+              "sha256": "43e39d8fac3eba3455d9f6b3a0fbfc75910094966b7efc05640656dcef299609",
+              "bytes": 1535
+            },
+            {
+              "path": "player/man/Body/body00/FreeStand1_1.png",
+              "sha256": "7a3018a14e4980f83722fd03fcc83e9bcc8fbd9a4a71d70ae5eac7ef32ef2d26",
+              "bytes": 17238
+            }
+          ],
+          "frames": [
+            "BODY_0016",
+            "BODY_0018",
+            "BODY_0020",
+            "BODY_0022",
+            "BODY_0024",
+            "BODY_0026",
+            "BODY_0028"
+          ]
+        },
+        {
+          "slot": 2,
+          "name": "FreeStand1_2",
+          "files": [
+            {
+              "path": "player/man/Body/body00/FreeStand1_2.tpsheet",
+              "sha256": "09c47414487ca81186a3f8910435d69b969a06b0b9b6ad9545f9d8a36952a976",
+              "bytes": 1748
+            },
+            {
+              "path": "player/man/Body/body00/FreeStand1_2.png",
+              "sha256": "833a0253b87989db928bdf89a4df8b4a974784114b51f98aed840c4949e91b7a",
+              "bytes": 15855
+            }
+          ],
+          "frames": [
+            "BODY_0030",
+            "BODY_0032",
+            "BODY_0034",
+            "BODY_0036",
+            "BODY_0038",
+            "BODY_0040",
+            "BODY_0042",
+            "BODY_0044"
+          ]
+        },
+        {
+          "slot": 3,
+          "name": "FreeStand1_3",
+          "files": [
+            {
+              "path": "player/man/Body/body00/FreeStand1_3.tpsheet",
+              "sha256": "b8476428657babfd32bcc531d0d895d80c0faafb2f8dd7438326aebbae15ba10",
+              "bytes": 1551
+            },
+            {
+              "path": "player/man/Body/body00/FreeStand1_3.png",
+              "sha256": "f14d611a8dae9f4fe967e6478932ad1ea35c9b300e4a7fcfc24a81e084fc81fe",
+              "bytes": 16439
+            }
+          ],
+          "frames": [
+            "BODY_0046",
+            "BODY_0048",
+            "BODY_0050",
+            "BODY_0052",
+            "BODY_0054",
+            "BODY_0056",
+            "BODY_0058"
+          ]
+        },
+        {
+          "slot": 4,
+          "name": "FreeStand1_4",
+          "files": [
+            {
+              "path": "player/man/Body/body00/FreeStand1_4.tpsheet",
+              "sha256": "efa666da55e438158d74bdc8c308c09e3daf732ed620b63e4ab6ca579bd09e3c",
+              "bytes": 1660
+            },
+            {
+              "path": "player/man/Body/body00/FreeStand1_4.png",
+              "sha256": "9e590cf1879cff6f2be09b2e2a79d2888026c6b47ca290f322219d5e0a220ff6",
+              "bytes": 16777
+            }
+          ],
+          "frames": [
+            "BODY_0060",
+            "BODY_0062",
+            "BODY_0064",
+            "BODY_0066",
+            "BODY_0068",
+            "BODY_0070",
+            "BODY_0072",
+            "BODY_0074"
+          ]
+        },
+        {
+          "slot": 5,
+          "name": "FreeStand1_5",
+          "files": [
+            {
+              "path": "player/man/Body/body00/FreeStand1_5.tpsheet",
+              "sha256": "16ef37572ac5dad32a77f783cc6856fff6fbdc066c85505cc6ddef36ebf900ce",
+              "bytes": 1567
+            },
+            {
+              "path": "player/man/Body/body00/FreeStand1_5.png",
+              "sha256": "5709f9b791ffe933717d9c13a26a1423dc5b6d7d2ac238ee1ab0ce86c49185a1",
+              "bytes": 15935
+            }
+          ],
+          "frames": [
+            "BODY_0076",
+            "BODY_0078",
+            "BODY_0080",
+            "BODY_0082",
+            "BODY_0084",
+            "BODY_0086",
+            "BODY_0088"
+          ]
+        },
+        {
+          "slot": 6,
+          "name": "FreeStand1_6",
+          "files": [
+            {
+              "path": "player/man/Body/body00/FreeStand1_6.tpsheet",
+              "sha256": "cdb203cc1e1fa7004acc4a34f74dec96962529a5422be2c42296473136d4a01a",
+              "bytes": 1749
+            },
+            {
+              "path": "player/man/Body/body00/FreeStand1_6.png",
+              "sha256": "67639ab3494b08a3582aa26cbfc9433c3eee3b50f64199d0cfcc8dd2d782e5c6",
+              "bytes": 15764
+            }
+          ],
+          "frames": [
+            "BODY_0090",
+            "BODY_0092",
+            "BODY_0094",
+            "BODY_0096",
+            "BODY_0098",
+            "BODY_0100",
+            "BODY_0102",
+            "BODY_0104"
+          ]
+        },
+        {
+          "slot": 7,
+          "name": "FreeStand1_7",
+          "files": [
+            {
+              "path": "player/man/Body/body00/FreeStand1_7.tpsheet",
+              "sha256": "202b23cd74d75d47fc2fccf4c7d4dda17f6124e32eb34de2438f4de419c86fe3",
+              "bytes": 1589
+            },
+            {
+              "path": "player/man/Body/body00/FreeStand1_7.png",
+              "sha256": "96b8b424c01eec4f864f2b26a0e719d004095f871cba813e07a6116ae164c0e4",
+              "bytes": 18551
+            }
+          ],
+          "frames": [
+            "BODY_0106",
+            "BODY_0108",
+            "BODY_0110",
+            "BODY_0112",
+            "BODY_0114",
+            "BODY_0116",
+            "BODY_0118"
+          ]
+        }
+      ]
+    },
+    {
+      "resourceId": "player-walk",
+      "pages": [
+        {
+          "slot": 0,
+          "name": "FreeWalk_0",
+          "files": [
+            {
+              "path": "player/man/Body/body00/FreeWalk_0.tpsheet",
+              "sha256": "126d8b83862852eb60276aecc9f104e525c645d3f40198b1b0a359e51dc3075d",
+              "bytes": 1739
+            },
+            {
+              "path": "player/man/Body/body00/FreeWalk_0.png",
+              "sha256": "a6214d098a1e86a63179324383ae6d4fdd7a5ea451fcefde13c4d1750d988141",
+              "bytes": 25114
+            }
+          ],
+          "frames": [
+            "BODY_0000",
+            "BODY_0002",
+            "BODY_0004",
+            "BODY_0006",
+            "BODY_0008",
+            "BODY_0010",
+            "BODY_0012",
+            "BODY_0014"
+          ]
+        },
+        {
+          "slot": 1,
+          "name": "FreeWalk_1",
+          "files": [
+            {
+              "path": "player/man/Body/body00/FreeWalk_1.tpsheet",
+              "sha256": "c6272ef85ba637d69438b3e595eb61e4f8c5a5008df4a6bd363eb68ea827104f",
+              "bytes": 1574
+            },
+            {
+              "path": "player/man/Body/body00/FreeWalk_1.png",
+              "sha256": "17f909011282e6de5b705fdb65578e14ad7289b2fff591ec7f62c517ddbd0262",
+              "bytes": 20960
+            }
+          ],
+          "frames": [
+            "BODY_0016",
+            "BODY_0018",
+            "BODY_0020",
+            "BODY_0022",
+            "BODY_0024",
+            "BODY_0026",
+            "BODY_0028"
+          ]
+        },
+        {
+          "slot": 2,
+          "name": "FreeWalk_2",
+          "files": [
+            {
+              "path": "player/man/Body/body00/FreeWalk_2.tpsheet",
+              "sha256": "dd5a61d999586c2579e972021971815a20dc38ac3883a57fc6ca747a8e7e46a2",
+              "bytes": 1742
+            },
+            {
+              "path": "player/man/Body/body00/FreeWalk_2.png",
+              "sha256": "05051ca34f2cb6223794af6570e5d6b24a863cb972d5f78aea885faafb48e7da",
+              "bytes": 22081
+            }
+          ],
+          "frames": [
+            "BODY_0030",
+            "BODY_0032",
+            "BODY_0034",
+            "BODY_0036",
+            "BODY_0038",
+            "BODY_0040",
+            "BODY_0042",
+            "BODY_0044"
+          ]
+        },
+        {
+          "slot": 3,
+          "name": "FreeWalk_3",
+          "files": [
+            {
+              "path": "player/man/Body/body00/FreeWalk_3.tpsheet",
+              "sha256": "7bc35872dab2a995482932332993371d41ac64135c9be4be99191d1c0f7009bf",
+              "bytes": 1522
+            },
+            {
+              "path": "player/man/Body/body00/FreeWalk_3.png",
+              "sha256": "5207ce8f2e8afb79963a2f415d8814b7650aa78657d8b0c48200685e4f7bdca9",
+              "bytes": 19354
+            }
+          ],
+          "frames": [
+            "BODY_0046",
+            "BODY_0048",
+            "BODY_0050",
+            "BODY_0052",
+            "BODY_0054",
+            "BODY_0056",
+            "BODY_0058"
+          ]
+        },
+        {
+          "slot": 4,
+          "name": "FreeWalk_4",
+          "files": [
+            {
+              "path": "player/man/Body/body00/FreeWalk_4.tpsheet",
+              "sha256": "7b58efdc1a4fa466dd6ba90fe1f602d9a39d795607a755fa00a4d81857377434",
+              "bytes": 1752
+            },
+            {
+              "path": "player/man/Body/body00/FreeWalk_4.png",
+              "sha256": "0ca5718aa3ed6b31e70d640fbb31aa366b9522034de65e345c1592c2b11ae2c2",
+              "bytes": 22292
+            }
+          ],
+          "frames": [
+            "BODY_0060",
+            "BODY_0062",
+            "BODY_0064",
+            "BODY_0066",
+            "BODY_0068",
+            "BODY_0070",
+            "BODY_0072",
+            "BODY_0074"
+          ]
+        },
+        {
+          "slot": 5,
+          "name": "FreeWalk_5",
+          "files": [
+            {
+              "path": "player/man/Body/body00/FreeWalk_5.tpsheet",
+              "sha256": "ab8ed252e7141835d94ba22fbc8ce54a5893315a6f89faeb23f1cbeba44059ff",
+              "bytes": 1547
+            },
+            {
+              "path": "player/man/Body/body00/FreeWalk_5.png",
+              "sha256": "86e9553e2527c396c8bf2682f96ba850b950ec67558d49a433200b7dad5f8d7a",
+              "bytes": 20228
+            }
+          ],
+          "frames": [
+            "BODY_0076",
+            "BODY_0078",
+            "BODY_0080",
+            "BODY_0082",
+            "BODY_0084",
+            "BODY_0086",
+            "BODY_0088"
+          ]
+        },
+        {
+          "slot": 6,
+          "name": "FreeWalk_6",
+          "files": [
+            {
+              "path": "player/man/Body/body00/FreeWalk_6.tpsheet",
+              "sha256": "2462c8e8f535c534ac3a2c2364f84c975d3afcb066fdc36c09783a5612f73fb9",
+              "bytes": 1748
+            },
+            {
+              "path": "player/man/Body/body00/FreeWalk_6.png",
+              "sha256": "450ebe9f9919b4d76b1f01fa01f94ba4b1715650b5d99c892aa02a63ec0dff50",
+              "bytes": 22206
+            }
+          ],
+          "frames": [
+            "BODY_0090",
+            "BODY_0092",
+            "BODY_0094",
+            "BODY_0096",
+            "BODY_0098",
+            "BODY_0100",
+            "BODY_0102",
+            "BODY_0104"
+          ]
+        },
+        {
+          "slot": 7,
+          "name": "FreeWalk_7",
+          "files": [
+            {
+              "path": "player/man/Body/body00/FreeWalk_7.tpsheet",
+              "sha256": "1453635768a56255fb50470e5ea280444dd4a85e95624d5b1f3c2f71e1d8c8cf",
+              "bytes": 1524
+            },
+            {
+              "path": "player/man/Body/body00/FreeWalk_7.png",
+              "sha256": "711707ae796175ef2117deb57cb741ae44f47dfa519acf3f62fcaee36b589bfc",
+              "bytes": 20731
+            }
+          ],
+          "frames": [
+            "BODY_0106",
+            "BODY_0108",
+            "BODY_0110",
+            "BODY_0112",
+            "BODY_0114",
+            "BODY_0116",
+            "BODY_0118"
+          ]
+        }
+      ]
+    },
+    {
+      "resourceId": "monster",
+      "pages": [
+        {
+          "slot": 0,
+          "name": "NormalWalk_0",
+          "files": [
+            {
+              "path": "monster/ani063/NormalWalk_0.tpsheet",
+              "sha256": "9826ea62d3b848544b940c96881c1b6a67dafcfa780b45a465394dfdcddc386d",
+              "bytes": 620
+            },
+            {
+              "path": "monster/ani063/NormalWalk_0.png",
+              "sha256": "bc590932688beb56e63cd00c9f60b4cf25e6ea6069c2cc5013ed7dc1a99f5c4d",
+              "bytes": 4386
+            }
+          ],
+          "frames": [
+            "0000",
+            "0002",
+            "0004",
+            "0006"
+          ]
+        },
+        {
+          "slot": 1,
+          "name": "NormalWalk_1",
+          "files": [
+            {
+              "path": "monster/ani063/NormalWalk_1.tpsheet",
+              "sha256": "39e8ef01dc6b486740b2ae9fced0409eeb8de52462d174be639b1cd5535e3bfc",
+              "bytes": 662
+            },
+            {
+              "path": "monster/ani063/NormalWalk_1.png",
+              "sha256": "560d303ed932015be1f2960a68e5f4f908e8462b6c4f22bb12d7407a444e62f8",
+              "bytes": 5637
+            }
+          ],
+          "frames": [
+            "0008",
+            "0010",
+            "0012",
+            "0014"
+          ]
+        },
+        {
+          "slot": 2,
+          "name": "NormalWalk_2",
+          "files": [
+            {
+              "path": "monster/ani063/NormalWalk_2.tpsheet",
+              "sha256": "0f5ad9ffc43bb7575fedddd5211b4181f9c116dfd473f9df015945ca339269dd",
+              "bytes": 666
+            },
+            {
+              "path": "monster/ani063/NormalWalk_2.png",
+              "sha256": "a9a4e63c7b03f32755d55b490ca872575c24856d1aeeeaacb75ef8db9baf0efa",
+              "bytes": 10165
+            }
+          ],
+          "frames": [
+            "0016",
+            "0018",
+            "0020",
+            "0022"
+          ]
+        },
+        {
+          "slot": 3,
+          "name": "NormalWalk_3",
+          "files": [
+            {
+              "path": "monster/ani063/NormalWalk_3.tpsheet",
+              "sha256": "3ebbcf2b578dfcbeaa91d756fee2981d9af787593cd5b627f04f746c84744d48",
+              "bytes": 641
+            },
+            {
+              "path": "monster/ani063/NormalWalk_3.png",
+              "sha256": "6be7e81c404b9b9d85172bdaff4adb3c234f5159a24b5bd9d581eeb6e7bfdd16",
+              "bytes": 5505
+            }
+          ],
+          "frames": [
+            "0024",
+            "0026",
+            "0028",
+            "0030"
+          ]
+        },
+        {
+          "slot": 4,
+          "name": "NormalWalk_4",
+          "files": [
+            {
+              "path": "monster/ani063/NormalWalk_4.tpsheet",
+              "sha256": "64f5a4b40d9f4fe6b4fc2dccc64950ee1ffdee8bd8c8908b116c984bde8ab75b",
+              "bytes": 663
+            },
+            {
+              "path": "monster/ani063/NormalWalk_4.png",
+              "sha256": "62d6e3910f470088179e05f090575f5754752d4b6ebfb3a129198074add71aaf",
+              "bytes": 4397
+            }
+          ],
+          "frames": [
+            "0032",
+            "0034",
+            "0036",
+            "0038"
+          ]
+        },
+        {
+          "slot": 5,
+          "name": "NormalWalk_5",
+          "files": [
+            {
+              "path": "monster/ani063/NormalWalk_5.tpsheet",
+              "sha256": "dc3ca88ab2a8474cb8a4e425727967cd17668ff4db786c080690dbd4270defe2",
+              "bytes": 650
+            },
+            {
+              "path": "monster/ani063/NormalWalk_5.png",
+              "sha256": "a04d849a36b5e511713e454b35ec6cd9d1afb8ff43e7492522b608623afb961b",
+              "bytes": 5222
+            }
+          ],
+          "frames": [
+            "0040",
+            "0042",
+            "0044",
+            "0046"
+          ]
+        },
+        {
+          "slot": 6,
+          "name": "NormalWalk_6",
+          "files": [
+            {
+              "path": "monster/ani063/NormalWalk_6.tpsheet",
+              "sha256": "dfa3b9fe57b24f9fa7aa7077810e026fbe34799ba0a1719698a9695c97b1d9c0",
+              "bytes": 665
+            },
+            {
+              "path": "monster/ani063/NormalWalk_6.png",
+              "sha256": "844d3ecc67473069360e6031347e602befbfbd5ed097d83255fae38f073f28bd",
+              "bytes": 6086
+            }
+          ],
+          "frames": [
+            "0048",
+            "0050",
+            "0052",
+            "0054"
+          ]
+        },
+        {
+          "slot": 7,
+          "name": "NormalWalk_7",
+          "files": [
+            {
+              "path": "monster/ani063/NormalWalk_7.tpsheet",
+              "sha256": "9424f60bcf53d03d1cce75b63d287b9edc0752a9a62a4ac02b464b6e42c30e1a",
+              "bytes": 638
+            },
+            {
+              "path": "monster/ani063/NormalWalk_7.png",
+              "sha256": "5d0caa0b2308dd730725562676b8045eb05ea1db71c41d8d911d6a2c1522f4d2",
+              "bytes": 5633
+            }
+          ],
+          "frames": [
+            "0056",
+            "0058",
+            "0060",
+            "0062"
+          ]
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Player BODY only; no head/hand/equipment composition",
+    "Source compass and FPS unverified",
+    "Player has explicitly authored x12 and visually inspected per-frame sole Y; original untrimmed pivot and anatomical center unknown. Monster origin is inspection top-left only."
+  ]
+}
