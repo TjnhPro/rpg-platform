@@ -251,3 +251,4 @@ export { mapCellToPlacement, mapPlacementToCell, replaceMapGrid } from './map-gr
 export { addMapLayer, updateMapLayer, reorderMapLayers, removeMapLayer, describeMapLayers } from './map-layers.js';
 export { setMapBackground, clearMapBackground, describeMapBackgroundLayout } from './map-background.js';
 export { setMapTile, removeMapTile } from './map-tiles.js';
+export { createMap, type CreateMapOptions, type CreateMapResult } from './map-create.js';
