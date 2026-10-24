@@ -8,6 +8,7 @@ import { createOrthogonalGridDefinition, type OrthogonalGridDefinition } from '.
 import type { AssetCatalog } from './asset-catalog.js';
 import { resolveAssetReference } from './asset-catalog.js';
 import { describeResolvedVisualAsset } from './asset-visual.js';
+import { mapCanonicalCell } from './map-grid.js';
 
 export interface MapLayerDefinition {
   readonly layerKey: string; readonly role: 'background' | 'tiles' | 'objects'; readonly visible: boolean;
@@ -121,11 +122,20 @@ export function readMapProfile(document: DocumentEnvelope, catalog?: AssetCatalo
       reason: checked.diagnostics[0]?.code ?? 'SCENE_NOT_STRICT' });
     const membership = createSceneMembership(captured.document.content as unknown as SceneMembershipInput);
     validateMapLayerMembership(captured.profile, membership);
-    for (const entry of membership.objects) if (entry.definition.classification === 'editor-map:background') {
+    const snapshot = Object.freeze({ ...captured, membership });
+    const occupied = new Set<string>();
+    for (const entry of membership.objects) if (['editor-map:background', 'editor-map:tile'].includes(entry.definition.classification ?? '')) {
       if (!catalog || !entry.assetReference) throw new TypeError('MAP_IMAGE_REQUIRED');
       requireMapImage(catalog, entry.assetReference, captured.identity.projectId);
+      if (entry.definition.classification === 'editor-map:tile') {
+        if (!entry.placement || entry.attachment) throw new TypeError('MAP_TILE_PLACEMENT_REQUIRED');
+        const cell = mapCanonicalCell(snapshot, { space: { projectId: captured.identity.projectId,
+          coordinateSpaceId: entry.placement.coordinateSpaceId }, point: entry.placement.point });
+        const key = JSON.stringify([entry.layerKey, cell.row, cell.column]);
+        if (occupied.has(key)) throw new TypeError('AMBIGUOUS_MAP_TILE'); occupied.add(key);
+      }
     }
-    return Object.freeze({ status: 'supported', snapshot: Object.freeze({ ...captured, membership }) });
+    return Object.freeze({ status: 'supported', snapshot });
   } catch (error) {
     if (!(error instanceof TypeError)) throw error;
     return Object.freeze({ status: error.message === 'NOT_A_MAP' ? 'not-a-map' : error.message === 'UNSUPPORTED_MAP_VERSION' ? 'unsupported' : 'invalid',

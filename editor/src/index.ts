@@ -250,3 +250,4 @@ export type { MapExtentCells, MapCell } from './map-bounds.js';
 export { mapCellToPlacement, mapPlacementToCell, replaceMapGrid } from './map-grid.js';
 export { addMapLayer, updateMapLayer, reorderMapLayers, removeMapLayer, describeMapLayers } from './map-layers.js';
 export { setMapBackground, clearMapBackground, describeMapBackgroundLayout } from './map-background.js';
+export { setMapTile, removeMapTile } from './map-tiles.js';
