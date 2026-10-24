@@ -1,6 +1,6 @@
 import { Alert, Box, Button, Group, Stack, Text, Title } from '@mantine/core';
 import { useEffect, useRef, useState } from 'react';
-import { mountEditorViewport } from '../../../src/viewport-host.js';
+import { mountEditorViewport, type EditorViewportContent } from '../../../src/viewport-host.js';
 import { editorTokens } from '../theme/index.js';
 import classes from '../styles/viewport/viewport.module.css';
 
@@ -20,7 +20,8 @@ function failureCode(failure: unknown): string | undefined {
 }
 
 /** React owns the target lifetime; the existing Editor host owns everything else. */
-export function Viewport({ showGuidance }: { readonly showGuidance: boolean }) {
+export function Viewport({ showGuidance, contentFactory }: { readonly showGuidance: boolean;
+  readonly contentFactory?: (requestFrame: () => void) => EditorViewportContent }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const host = useRef<ViewportHost | undefined>(undefined);
   const [mounted, setMounted] = useState(true);
@@ -45,7 +46,7 @@ export function Viewport({ showGuidance }: { readonly showGuidance: boolean }) {
           clearTimeout(lossObservation);
           lossObservation = setTimeout(() => observe(event), 0);
         } else observe(event);
-      });
+      }, undefined, contentFactory?.(() => instance?.requestFrame()));
       host.current = instance;
       observe('mounted-not-acquired');
     } catch {
@@ -59,7 +60,7 @@ export function Viewport({ showGuidance }: { readonly showGuidance: boolean }) {
       // drained by the host; retired effects cannot publish into a fresh mount.
       if (instance?.getSnapshot().host !== 'unmounted') instance?.unmount();
     };
-  }, [mounted]);
+  }, [mounted, contentFactory]);
 
   const snapshot = observation?.snapshot;
   const graphics = snapshot?.viewport?.graphics;
@@ -116,7 +117,7 @@ export function Viewport({ showGuidance }: { readonly showGuidance: boolean }) {
           Mounting does not acquire graphics. Acquire once per mount; Frame requests redraw.
           The host also submits on acquisition/resize demand.
           After hidden/zero-size suspension, use Resume when available; otherwise unmount/mount to acquire again.
-          No Scene, Camera, Animation or VFX content is connected; submitted frames do not prove display.
+          Optional feature content uses this same session. Submitted frames do not prove display.
         </Text>
       )}
       <Box className={classes.surface} bg={editorTokens.colors.viewportBackground}>
