@@ -260,3 +260,4 @@ export { createVisualInspectorContext } from './visual-inspector-context.js';
 export type { VisualInspectorBinding, VisualInspectorSelection, VisualInspectorSnapshot, VisualInspectorContext } from './visual-inspector-context.js';
 export { readVisualPosition, setVisualPosition } from './visual-position.js';
 export type { VisualPositionRead } from './visual-position.js';
+export { readVisualDirection, setVisualDirection } from './visual-direction.js';
