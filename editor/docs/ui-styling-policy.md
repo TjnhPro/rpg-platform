@@ -1,6 +1,6 @@
-# Editor UI styling policy — v0.12.4
+# Editor UI styling policy — v0.12.5
 
-Status: policy implemented; automated enforcement is NOT_CONFIGURED until v0.12.5.
+Status: policy implemented; Editor-local automated enforcement installed in v0.12.5.
 Canonical owner: Editor. This refines the existing ST/EC rules and UI-05/06/10/12
 from the [foundation decisions](ui-foundation-contract.md), retaining the
 [component usage contract](ui-components.md). It grants no cross-project scope.
@@ -8,7 +8,8 @@ from the [foundation decisions](ui-foundation-contract.md), retaining the
 At v0.12.3 HEAD `0546354`, the application already uses the single theme and
 direct Mantine controls. Its only stylesheet import is `@mantine/core/styles.css`
 in `editor/ui/src/main.tsx`; there are no authored CSS/SCSS files or component
-inline style overrides to migrate. This checkpoint adds documentation only.
+inline style overrides to migrate. v0.12.4 added documentation only; v0.12.5 adds
+the build gate below without changing the ST/EC decisions or granting exceptions.
 
 ## Stable styling decisions
 
@@ -270,9 +271,9 @@ checker-disable directive or moved legacy file is not approval. Do not weaken
 policy/checker rules to make a violation pass. No exception is requested or
 granted in v0.12.4; its supplied scope only makes the existing policy concrete.
 
-## Build enforcement specification (not yet installed)
+## Build enforcement contract
 
-v0.12.5 must provide editor-local ui:check; no checker is implemented here. Scan
+The editor-local ui:check implements the following contract. Scan
 every application TS/TSX/JS/JSX, CSS and entrypoint beneath `editor/ui/**`,
 including nested files and the actual import targets; do not silently
 skip new extensions or pretend regex coverage proves semantic correctness. Report
@@ -302,6 +303,83 @@ inspection may use existing TypeScript tooling; no new testing infrastructure.
 Manual review still owns whether a control fits its task, semantic token choices,
 accessibility, focus behavior, overflow, visual quality and WebGL correctness.
 The checker is a build gate, not a behavioral acceptance suite.
+
+## Installed enforcement and static limits — v0.12.5
+
+Run `npm run ui:check --workspace @rpg-platform/editor` from the repository, or
+`npm run ui:check` from Editor. `editor/scripts/check-ui-contract.mjs` resolves
+its paths from its own URL, not the caller's current directory. No flags, custom
+scan roots, suppression directives or feature-owned allowlist are supported.
+The exception list is locked empty; the single Mantine CSS import is an existing
+policy requirement, not a new exception.
+
+Editor `build` now runs this mandatory sequence, stopping at the first failure:
+
+```text
+npm run ui:check
+  && tsc -b --force
+  && npm run ui:build
+```
+
+`ui:build` retains the genuine UI `tsc --noEmit` and Vite production build.
+EC-07 also checks the exact configured commands; no optional/fallback checker
+chain is accepted. Changing/removing the checker or build scripts is a reviewed
+policy change, not something this editable source gate can make tamper-proof.
+Root Harness/CI and all legacy manual hosts remain unchanged.
+
+Inspection is confined to the new Editor application. It recursively inventories
+`editor/ui`, parses all TS/TSX/JS/JSX and their mjs/cjs/mts/cts forms (including
+unimported/nested app files), inventories authored styles, and inspects HTML
+entrypoints. The existing Vite config is inspected with its exact tooling-import
+boundary; JSON compiler configuration is not linted as application code. Exact
+`editor/ui/dist/**` and installed `editor/ui/node_modules/**` are excluded, and
+dependency declarations are used for symbol resolution only. A nested source
+directory named dist is still inspected; a nested dependency-named source
+directory is diagnosed rather than silently skipped. Symlinked inputs fail
+ownership inspection. Unsupported inputs in src fail with a source-form
+diagnostic; do not disguise source as another extension. No scanning of
+`editor/manual`, documentation fences, other projects or old domain styles.
+
+| Rule | Installed machine inspection | Still requires manual review |
+| --- | --- | --- |
+| EC-01 | TypeScript AST native button/input/select/textarea; resolvable intrinsic aliases and React/DOM factories; interactive role/event substitutions on native and recognized Mantine structural elements; polymorphic raw-control substitution | Control choice, dynamic component identity, custom wrapper behavior, accessible naming, keyboard/focus semantics and canvas input |
+| EC-02 | Alias-aware single createTheme/provider at exact paths; local Mantine component extension/default configuration; literal design props including simple helper values and named responsive maps; source provenance of semantic tokens | Correct semantic meaning, unchanged central defaults/token mappings, arbitrary computed values, gameplay values versus legitimate geometry |
+| EC-03 | Exact Module globs/global import; authored style/styles props including resolvable spreads and forwarded *Props objects; raw class strings; default Module class bindings/classNames slots; stylesheet links and common markup/style injection APIs; flat structural CSS, imports/private/global selectors, !important, decorative declarations, literal units/colors and variable redefinition | Whether CSS is necessary, task/category justification, public structural slot choice, unknown property classifications and dynamic class/props mappings |
+| EC-04 | Static ESM/import-type/dynamic-literal imports resolve to approved UI files, existing Editor root/viewport-host or approved package roots; no private/extra UI stack/generated/manual imports, require/glob/eval or uninspectable local import targets | Computed import destinations, runtime reflection, ownership of business behavior; portable root is unchanged and reviewed through scope/build, not retroactively style-scanned |
+| EC-05 | Canvas JSX sizing and typed buffer writes; DOM-proven allocation/getContext/observer/DPR/scheduling APIs and simple aliases; imperative sizing | Existing host lifecycle use, data flow through arbitrary callbacks/any/dynamic properties, resource cleanup and real frame/native behavior |
+| EC-06 | Browser storage/cookie APIs, persisted Mantine manager, missing explicit entry manager/fixed dark scheme and recognized suppression directives | Arbitrary callbacks/host/server persistence, manager implementation semantics, absence of business-state writes |
+| EC-07 | Exact nonoptional Editor checker/library/UI build commands | Review of future changes to the checker/build configuration itself |
+
+The TypeScript compiler API parses executable source; arbitrary user strings,
+labels, comments and ordinary numeric demo data are not searched as JSX/CSS.
+Simple local/import aliases, object members, conditional style values and
+resolvable spreads are inspected. Unresolved spreads, computed imports/props,
+dynamic token/class values and unknown viewport-like calls emit path/line/rule
+**WARNING** diagnostics for manual review, rather than speculative hard failures.
+Warnings do not grant an exception or prove compliance of the unresolved value.
+
+CSS inspection deliberately supports a small flat structural grammar: named
+local classes connected only to local classes, declaration lists, existing
+Mantine var() tokens, zero/full-parent sizing, flex ratios and grid mechanics.
+Recognized properties cover display/box sizing, logical/physical min/max sizing,
+flex/grid placement, alignment, overflow/overscroll, scroll padding, positioning
+and logical inset. Prefer logical geometry. Clear control decoration/token
+redefinitions are errors; an unclassified property produces a manual-review
+warning. Nested/preprocessor/escaped rules, at-rules and unsupported selector
+grammar fail inspection; this is not a general CSS parser or permission to add
+another category. New grammar or missing structural capability must follow the
+existing exception workflow, not a feature-owned checker edit.
+
+Each diagnostic is `repository-relative-file:line:EC-rule: ERROR/WARNING reason`
+with a Mantine/theme/owner alternative. Proven violations, parse failures,
+unreadable/uninspectable configured inputs and build-command drift exit nonzero.
+`UI_CONTRACT_PASS` means no recognized hard violations in inspected inputs; it
+does not certify arbitrary data flow, runtime-generated styles, accessibility,
+visual quality, overflow, layout or WebGL correctness. FEATURE_NOT_VERIFIED and
+VISUAL_NOT_VERIFIED remain explicit until independent Developer review.
+
+The checkpoint records ad hoc RED→GREEN observations using temporary untracked
+source, including a build stopped by EC-01. No test/fixture/runner is retained.
 
 ## Practical additions
 

@@ -15,7 +15,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc -b --force && npm run ui:build",
+    "build": "npm run ui:check && tsc -b --force && npm run ui:build",
+    "ui:check": "node scripts/check-ui-contract.mjs",
     "ui:build": "tsc --project ui/tsconfig.json --noEmit && vite build --config ui/vite.config.ts",
     "ui:dev": "vite --config ui/vite.config.ts",
     "ui:preview": "vite preview --config ui/vite.config.ts"
