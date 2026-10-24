@@ -264,3 +264,4 @@ export { readVisualDirection, setVisualDirection } from './visual-direction.js';
 export { readVisualLayer, setVisualLayer } from './visual-layer.js';
 export type { VisualLayerRead } from './visual-layer.js';
 export { readVisualScale, setVisualScale } from './visual-scale.js';
+export { readVisualAnchor, setVisualAnchor, describeVisualAlignment } from './visual-anchor.js';
