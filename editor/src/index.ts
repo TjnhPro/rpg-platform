@@ -224,3 +224,5 @@ export { createProject } from './project-create.js';
 export type { CreateProjectOptions } from './project-create.js';
 export { openProject, projectDocumentContext } from './project-open.js';
 export type { OpenProjectOptions, ProjectOpenResult } from './project-open.js';
+export { saveProject } from './project-save.js';
+export type { ProjectSaveResult } from './project-save.js';
