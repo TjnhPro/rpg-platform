@@ -1086,3 +1086,9 @@ Phase11 v0.11.1 VE02 adds nine Render public roots for immutable sprite-sequence
 definition capture, source revision pins and explicit Phase7 metadata binding.
 Prior271 Render declarations unchanged; metadata resolution is NOT_PERFORMED
 resource loading, never a live playback/texture capability. [Contract](../runtime-render/docs/visual-effect-v0.11.1.md), [checkpoint](checkpoints/visual-effect-v0.11.1.md).
+
+Approved Phase10 upstream U1 adds twelve single-sequence playback/binding roots
+(Render280→292), with all old public declarations unchanged. Neutral direction
+is null; both modes share one sampler/transport/admission/cleanup implementation.
+[Upstream delta](../runtime-render/docs/sprite-animation-u1.md), [checkpoint](checkpoints/visual-effect-u1.md).
+U1 is delivered; historical VE01/VE02 dependency reports remain baseline-specific.

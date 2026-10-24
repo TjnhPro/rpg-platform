@@ -408,3 +408,10 @@ export { createVisualEffectDefinition, resolveVisualEffectDefinition, getVisualE
   type VisualEffectDefinitionInput, type VisualEffectDefinition, type VisualEffectSourceRevision,
   type VisualEffectDefinitionFailure, type VisualEffectDefinitionBindingInput,
   type VisualEffectDefinitionBindingResult } from './visual-effect-definition.js';
+export { createSpriteSequencePlayback, getSpriteSequencePlaybackSnapshot,
+  commandSpriteSequencePlayback, advanceSpriteSequencePlayback,
+  type SpriteSequencePlayback, type SpriteSequencePlaybackInput,
+  type SpriteSequencePlaybackSnapshot, type SpriteSequencePlaybackCommand,
+  type SpriteSequenceAdvanceResult } from './sprite-animation-playback.js';
+export { createSpriteSequenceVisualBinding, type SpriteSequenceVisualBinding,
+  type SpriteSequenceVisualFrameResult } from './sprite-animation-visual-binding.js';

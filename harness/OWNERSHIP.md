@@ -353,3 +353,8 @@ v0.11.1 VE02: **runtime-render** owns pure VFX definitions and Phase7 metadata
 binding through existing Phase10 single-track clip data. Editor retains authored
 catalog/reference ownership; no consumer adapter added without evidence. No IO,
 GPU, playback clock or foundation change. [Checkpoint](checkpoints/visual-effect-v0.11.1.md).
+
+Approved U1: **runtime-render**, Phase10 animation owner, supplies additive neutral
+single-sequence playback and visual binding to Phase11. Existing directional and
+neutral APIs share one implementation; no Engine/L1/L2/gameplay boundary change.
+Editor/Client are unchanged build consumers. [Checkpoint](checkpoints/visual-effect-u1.md).

@@ -4,7 +4,8 @@ import { resolveAtlasFrameGeometry, type AtlasPagePixels, type AtlasFrameGeometr
 import type { AtlasMetadata } from './atlas-metadata.js';
 import type { VisualResourceLease } from './visual-resource-cache.js';
 import { resolveSpriteFrameAlignment, type SpriteFrameAlignmentData, type SpriteFrameAlignmentResult } from './sprite-frame-alignment.js';
-import { getSpriteAnimationPlaybackSnapshot, type SpriteAnimationPlayback, type SpriteAnimationPlaybackSnapshot } from './sprite-animation-playback.js';
+import { getSpriteAnimationPlaybackSnapshot, getSpriteSequencePlaybackSnapshot, type SpriteSequencePlayback,
+  type SpriteSequencePlaybackSnapshot, type SpriteAnimationPlayback, type SpriteAnimationPlaybackSnapshot } from './sprite-animation-playback.js';
 import { readVisualInstanceFrameState, commitVisualInstanceFrame, onVisualInstanceEnd, bindRenderVisualInstanceResource,
   getRenderVisualInstanceResource, getRenderVisualBindingFailure, getRenderVisualInstanceFailure,
   type RenderVisualScene, type RenderVisualInstance, type RenderVisualResourceBindingSnapshot } from './visual-scene.js';
@@ -44,8 +45,35 @@ export interface SpriteAnimationVisualBinding {
   readonly unbind: () => void;
 }
 
+export type SpriteSequenceVisualFrameResult =
+  | { readonly status: 'bound'; readonly playback: SpriteSequencePlaybackSnapshot;
+    readonly resource: RenderVisualResourceBindingSnapshot;
+    readonly alignment: Extract<SpriteFrameAlignmentResult, { status: 'resolved' }> }
+  | Extract<SpriteAnimationVisualFrameResult, { status: 'rejected' }>;
+
+/** Same admission/ownership lifecycle as directional binding, without direction selection. */
+export interface SpriteSequenceVisualBinding {
+  readonly sync: (input: SpriteAnimationVisualFrameInput) => SpriteSequenceVisualFrameResult;
+  readonly replacePlayback: (playback: SpriteSequencePlayback) => void;
+  readonly unbind: () => void;
+}
+
+type Playback = SpriteAnimationPlayback | SpriteSequencePlayback;
+type Snapshot = SpriteAnimationPlaybackSnapshot | SpriteSequencePlaybackSnapshot;
+type Rejected = Extract<SpriteAnimationVisualFrameResult, { status: 'rejected' }>;
+type BindingResult<S extends Snapshot> =
+  | { readonly status: 'bound'; readonly playback: S;
+    readonly resource: RenderVisualResourceBindingSnapshot;
+    readonly alignment: Extract<SpriteFrameAlignmentResult, { status: 'resolved' }> }
+  | Rejected;
+interface Binding<P extends Playback, S extends Snapshot> {
+  readonly sync: (input: SpriteAnimationVisualFrameInput) => BindingResult<S>;
+  readonly replacePlayback: (playback: P) => void;
+  readonly unbind: () => void;
+}
+
 // Weak occupancy guards only, no active list, ID lookup or animation/content registry.
-const occupiedPlaybacks = new WeakSet<SpriteAnimationPlayback>();
+const occupiedPlaybacks = new WeakSet<Playback>();
 const occupiedInstances = new WeakSet<RenderVisualInstance>();
 
 function capture(input: unknown, keys: readonly string[]): Record<string, unknown> {
@@ -61,16 +89,16 @@ function capture(input: unknown, keys: readonly string[]): Record<string, unknow
   return result;
 }
 
-interface Context {
+interface Context<P extends Playback> {
   readonly scene: RenderVisualScene;
   readonly instance: RenderVisualInstance;
-  playback: SpriteAnimationPlayback;
+  playback: P;
   lastFrame: RenderVisualResourceBindingSnapshot | undefined;
   unsubscribe: () => void;
 }
 
-function lifecycle() {
-  let context: Context | undefined, busy = false;
+function lifecycle<P extends Playback, S extends Snapshot>(readPlayback: (playback: P) => S) {
+  let context: Context<P> | undefined, busy = false;
   const close = (): void => {
     const previous = context; context = undefined;
     if (previous) {
@@ -78,20 +106,20 @@ function lifecycle() {
       previous.unsubscribe();
     }
   };
-  const guard = (): Context => {
+  const guard = (): Context<P> => {
     if (busy) throw new TypeError('Animation visual binding operation already in progress');
     if (!context) throw new TypeError('Animation visual binding is closed');
     return context;
   };
   type Code = Extract<SpriteAnimationVisualFrameResult, { status: 'rejected' }>['code'];
-  const reject = (code: Code): SpriteAnimationVisualFrameResult => Object.freeze({ status: 'rejected', code });
-  const handle: SpriteAnimationVisualBinding = Object.freeze({
-    sync: (input: SpriteAnimationVisualFrameInput): SpriteAnimationVisualFrameResult => {
+  const reject = (code: Code): BindingResult<S> => Object.freeze({ status: 'rejected', code });
+  const handle: Binding<P, S> = Object.freeze({
+    sync: (input: SpriteAnimationVisualFrameInput): BindingResult<S> => {
       if (!context) return reject('BINDING_DISPOSED');
       const active = guard(); busy = true;
       try {
         const before = readVisualInstanceFrameState(active.scene, active.instance);
-        const playback = getSpriteAnimationPlaybackSnapshot(active.playback);
+        const playback = readPlayback(active.playback);
         if (playback.state === 'disposed') return reject('PLAYBACK_DISPOSED');
         const transform = before.transform;
         if (transform === null || transform.local.translation.x !== 0 || transform.local.translation.y !== 0
@@ -122,7 +150,7 @@ function lifecycle() {
           layout: { unit: alignment.plane.unit, x: 0, y: 0,
             width: geometry.geometry.rectangle.width * ratios.x, height: geometry.geometry.rectangle.height * ratios.y },
           validate: () => {
-            if (context !== active || getSpriteAnimationPlaybackSnapshot(active.playback) !== playback) {
+            if (context !== active || readPlayback(active.playback) !== playback) {
               throw new TypeError('Playback changed during frame admission');
             }
           },
@@ -137,11 +165,11 @@ function lifecycle() {
         throw error;
       } finally { busy = false; }
     },
-    replacePlayback: (playback: SpriteAnimationPlayback): void => {
+    replacePlayback: (playback: P): void => {
       const active = guard(); busy = true;
       try {
         readVisualInstanceFrameState(active.scene, active.instance);
-        const next = getSpriteAnimationPlaybackSnapshot(playback);
+        const next = readPlayback(playback);
         if (next.state === 'disposed') throw new TypeError('Cannot bind disposed playback');
         if (playback === active.playback) return;
         if (occupiedPlaybacks.has(playback)) throw new TypeError('Playback already bound to an instance');
@@ -162,7 +190,7 @@ function lifecycle() {
       } finally { close(); busy = false; }
     },
   });
-  return { handle, close, initialize: (initial: Context): void => { context = initial; } };
+  return { handle, close, initialize: (initial: Context<P>): void => { context = initial; } };
 }
 
 /** Claim compatible live membership without changing its committed presentation.
@@ -171,12 +199,22 @@ function lifecycle() {
  */
 export function createSpriteAnimationVisualBinding(session: RenderFrameSession, scene: RenderVisualScene,
   instance: RenderVisualInstance, playback: SpriteAnimationPlayback): SpriteAnimationVisualBinding {
+  return createBinding(session, scene, instance, playback, getSpriteAnimationPlaybackSnapshot);
+}
+
+export function createSpriteSequenceVisualBinding(session: RenderFrameSession, scene: RenderVisualScene,
+  instance: RenderVisualInstance, playback: SpriteSequencePlayback): SpriteSequenceVisualBinding {
+  return createBinding(session, scene, instance, playback, getSpriteSequencePlaybackSnapshot);
+}
+
+function createBinding<P extends Playback, S extends Snapshot>(session: RenderFrameSession, scene: RenderVisualScene,
+  instance: RenderVisualInstance, playback: P, readPlayback: (playback: P) => S): Binding<P, S> {
   const sessionId = requireTextureSession(session);
   readVisualInstanceFrameState(scene, instance);
   if (instance.sessionId !== sessionId) throw new TypeError('Animation binding session mismatch');
-  if (getSpriteAnimationPlaybackSnapshot(playback).state === 'disposed') throw new TypeError('Cannot bind disposed playback');
+  if (readPlayback(playback).state === 'disposed') throw new TypeError('Cannot bind disposed playback');
   if (occupiedPlaybacks.has(playback) || occupiedInstances.has(instance)) throw new TypeError('Playback or instance already bound');
-  const scope = lifecycle();
+  const scope = lifecycle(readPlayback);
   const unsubscribeSession = onTextureSessionEnd(session, scope.close);
   const unsubscribeInstance = onVisualInstanceEnd(scene, instance, scope.close);
   scope.initialize({ scene, instance, playback,

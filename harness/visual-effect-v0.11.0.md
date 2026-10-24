@@ -1,5 +1,9 @@
 # VE01 — VFX architecture and contract foundation
 
+Current availability: Developer approved U1 after VE02; the additive neutral live
+seam is delivered in the [U1 checkpoint](checkpoints/visual-effect-u1.md).
+The audit and BLOCKED_DEPENDENCY statements below describe the VE01 baseline.
+
 **ARCHITECTURE_PROPOSAL_ONLY.** No VFX API or runtime is implemented here.
 Baseline: merged main `aceea67f95cb309bdd06f1d6193767bfa06f42ce`, including
 Phase10 [PR10](https://github.com/TjnhPro/rpg-platform/pull/10).
