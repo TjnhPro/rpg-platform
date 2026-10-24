@@ -381,3 +381,9 @@ existing Phase4 numeric contracts and Phase8 transform/invalidation. No separate
 spatial math, clock, renderer, camera or authored/gameplay authority. Editor/Client
 unchanged build consumers; Harness evidence only. No upstream-owner expansion.
 [Checkpoint](checkpoints/visual-effect-v0.11.5.md).
+
+v0.11.6 VE07: **runtime-render** owns one-level effect attachment orchestration
+over Phase4/8 transform, effective visibility and lifecycle. Host explicitly
+syncs before submission; no gameplay target lookup, hierarchy, second clock or
+renderer. Editor/Client unchanged build consumers; Harness evidence only.
+No upstream-owner expansion. [Checkpoint](checkpoints/visual-effect-v0.11.6.md).

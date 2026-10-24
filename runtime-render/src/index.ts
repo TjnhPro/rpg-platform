@@ -427,3 +427,6 @@ export { createVisualEffectTimedInstance, getVisualEffectLifetimeSnapshot, advan
   type VisualEffectLifetimeSnapshot, type VisualEffectAdvanceResult, type VisualEffectLifetimeFailure } from './visual-effect-instance.js';
 export { setVisualEffectWorldPlacement, getVisualEffectWorldPlacementSnapshot,
   type VisualEffectWorldPlacementInput, type VisualEffectWorldPlacementSnapshot } from './visual-effect-instance.js';
+export { attachVisualEffectInstance, syncVisualEffectAttachment, detachVisualEffectInstance,
+  getVisualEffectAttachmentSnapshot, type VisualEffectAttachmentInput,
+  type VisualEffectAttachmentSnapshot } from './visual-effect-instance.js';

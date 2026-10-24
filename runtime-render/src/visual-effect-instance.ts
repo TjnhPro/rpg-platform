@@ -5,12 +5,13 @@ import { createSpriteSequencePlayback, commandSpriteSequencePlayback, getSpriteS
   type SpriteSequencePlayback, type SpriteSequencePlaybackSnapshot } from './sprite-animation-playback.js';
 import { addRenderVisualInstance, getRenderVisualInstance, listRenderVisualInstances,
   removeRenderVisualInstance, readVisualInstanceFrameState, onVisualInstanceEnd, setRenderVisualInstanceVisible,
-  setRenderVisualInstanceTransform, getRenderVisualInstanceTransform,
+  setRenderVisualInstanceTransform, getRenderVisualInstanceTransform, getRenderVisualInstanceVisibility,
   getRenderVisualInstanceFailure, type RenderVisualScene, type RenderVisualInstance } from './visual-scene.js';
 import { captureVisualInstanceTransform, type RenderVisualInstanceTransformSnapshot } from './visual-instance-transform.js';
-import { createOrthographicPlaneProjection, captureSourcePlanePoint2D,
+import { createOrthographicPlaneProjection, captureSourcePlanePoint2D, captureProjectionPoint2D,
   type PlaneProjectionPoint2D, type OrthographicPlaneProjection } from './plane-projection.js';
 import type { VisualAnchor2D } from './visual-alignment.js';
+import type { PlanarPoint2D } from './planar-affine.js';
 
 declare const effectInstanceBrand: unique symbol;
 /** Ephemeral issued identity, unrelated to authored/effect/drawable keys. */
@@ -68,6 +69,13 @@ interface Data {
   readonly durationMs: number | null;
   completion: VisualEffectCompletionReceipt | null;
   lastWorldTransform: RenderVisualInstanceTransformSnapshot | null;
+  attachment: EffectAttachment | undefined;
+}
+interface EffectAttachment {
+  readonly target: RenderVisualInstance;
+  readonly offset: PlanarPoint2D;
+  readonly unsubscribe: () => void;
+  ownVisible: boolean;
 }
 // Issuance/correlation only. Phase8 alone stores/enumerates live scene membership.
 const instances = new WeakMap<VisualEffectInstance, Data>();
@@ -106,10 +114,13 @@ function end(data: Data, reason: NonNullable<VisualEffectInstanceSnapshot['reaso
   const active = data.active;
   if (!active) return false;
   data.active = undefined;
+  const attachment = data.attachment;
+  data.attachment = undefined;
   data.snapshot = Object.freeze({ ...data.snapshot, state: 'removed', reason });
   effects.delete(active.visual);
   let failed = false;
   const attempt = (operation: () => void): void => { try { operation(); } catch { failed = true; } };
+  if (attachment) attempt(attachment.unsubscribe);
   attempt(active.unsubscribe);
   attempt(() => {
     data.terminalPlayback = getSpriteSequencePlaybackSnapshot(active.playback);
@@ -159,7 +170,7 @@ function createEffect(session: RenderFrameSession, scene: RenderVisualScene,
     const handle = Object.freeze({ id: Symbol('visual-effect-instance') }) as VisualEffectInstance;
     data = { handle, owner: new WeakRef(scene), active: { scene, visual, definition, playback, unsubscribe: () => {} },
       terminalPlayback: getSpriteSequencePlaybackSnapshot(playback), commanding: false,
-      lastWorldTransform: null,
+      lastWorldTransform: null, attachment: undefined,
       mode: durationMs !== null ? 'timed-repeat' : definition.clip.repeat,
       durationMs: durationMs ?? (definition.clip.repeat === 'once' ? definition.clip.durationMs : null), completion: null,
       snapshot: Object.freeze({ id: handle.id, effectId: definition.effectId,
@@ -289,8 +300,12 @@ export function commandVisualEffectPlayback(handle: VisualEffectInstance,
     // Validate everything before native visibility. Native failure must not advance transport.
     // Pause/resume preserve independently host-selected visibility; play/restart activate.
     if (command.type === 'play' || command.type === 'restart' || command.type === 'stop') {
-      sceneOperation(() => setRenderVisualInstanceVisible(active.scene, active.visual, command.type !== 'stop'));
+      const ownVisible = command.type !== 'stop';
+      const visible = ownVisible && (!data.attachment
+        || getRenderVisualInstanceVisibility(active.scene, data.attachment.target).effectiveVisible);
+      sceneOperation(() => setRenderVisualInstanceVisible(active.scene, active.visual, visible));
       livePlayback(data);
+      if (data.attachment) data.attachment.ownVisible = ownVisible;
     }
     if (command.type === 'restart') {
       commandSpriteSequencePlayback(active.playback, { type: 'stop' });
@@ -423,6 +438,7 @@ export function setVisualEffectWorldPlacement(handle: VisualEffectInstance,
   data.commanding = true;
   try {
     const active = livePlayback(data), before = readVisualInstanceFrameState(active.scene, active.visual);
+    if (data.attachment) throw new TypeError('Detach effect before setting world placement');
     if (typeof input !== 'object' || input === null || Array.isArray(input)
       || (Object.getPrototypeOf(input) !== Object.prototype && Object.getPrototypeOf(input) !== null)
       || Reflect.ownKeys(input).length !== 3) throw new TypeError('Effect world placement requires placement, anchor and projection');
@@ -447,5 +463,123 @@ export function setVisualEffectWorldPlacement(handle: VisualEffectInstance,
       placement: candidate.placement, anchor: candidate.anchor, local: candidate.local,
       orientation: candidate.orientation, projection: candidate.projection });
     return getVisualEffectWorldPlacementSnapshot(handle);
+  } finally { data.commanding = false; }
+}
+
+export interface VisualEffectAttachmentInput {
+  readonly target: RenderVisualInstance;
+  /** Replaces the effect anchor localOffset, in the existing effect/target plane unit/axes. */
+  readonly localOffset: PlanarPoint2D;
+  readonly inheritance: 'translation-only';
+}
+export interface VisualEffectAttachmentSnapshot {
+  readonly instance: VisualEffectInstanceSnapshot;
+  readonly mode: 'world' | 'attached' | 'removed';
+  readonly target: RenderVisualInstance | null;
+  readonly localOffset: PlanarPoint2D | null;
+  readonly inheritance: 'translation-only' | null;
+  readonly visibility: 'inherit-effective' | null;
+  readonly transform: RenderVisualInstanceTransformSnapshot | null;
+}
+export function getVisualEffectAttachmentSnapshot(handle: VisualEffectInstance): VisualEffectAttachmentSnapshot {
+  const data = playbackData(handle), placement = getVisualEffectWorldPlacementSnapshot(handle), attachment = data.attachment;
+  return Object.freeze({ ...placement, mode: placement.instance.state === 'removed' ? 'removed' : attachment ? 'attached' : 'world',
+    target: attachment?.target ?? null, localOffset: attachment?.offset ?? null,
+    inheritance: attachment ? 'translation-only' : null, visibility: attachment ? 'inherit-effective' : null });
+}
+function attachmentCandidate(active: Active, target: RenderVisualInstance, offset: PlanarPoint2D) {
+  // Canonical exact-handle admission enforces live same-scene/session before any mutation.
+  const targetState = readVisualInstanceFrameState(active.scene, target);
+  if (target === active.visual || effects.has(target)) throw new TypeError('Effect self/chain attachment is unsupported');
+  const current = readVisualInstanceFrameState(active.scene, active.visual).transform;
+  const targetTransform = targetState.transform;
+  if (!current || !targetTransform) throw new TypeError('Attachment requires explicit effect and target transforms');
+  captureSourcePlanePoint2D(current.placement.plane, targetTransform.placement);
+  if (current.local.translation.x !== 0 || current.local.translation.y !== 0 || current.local.rotationRadians !== 0
+    || current.local.scale.x !== 1 || current.local.scale.y !== 1) throw new TypeError('Effect attachment requires identity local TRS');
+  const input = { placement: { plane: current.placement.plane, point: targetTransform.attachment },
+    anchor: { ...current.anchor, localOffset: offset }, local: current.local,
+    orientation: current.orientation, projection: current.projection };
+  // All Phase4 arithmetic/overflow admission completes before Phase8 writes.
+  captureVisualInstanceTransform(input);
+  return { input, targetVisible: getRenderVisualInstanceVisibility(active.scene, target).effectiveVisible, current };
+}
+function attachmentTargetEnded(data: Data): void {
+  const active = data.active;
+  if (!active) return;
+  const scene = active.scene.getSnapshot();
+  if (scene.state === 'disposed') { end(data, scene.reason, false); return; }
+  // Phase8 clear drains membership before broadcasting. Never attempt a second
+  // remove while that owner already holds the effect's resource cleanup receipt.
+  const member = getRenderVisualInstance(active.scene, active.visual.visualInstanceId);
+  end(data, member === active.visual ? 'removed' : 'membership-ended', member === active.visual);
+}
+/** Attach only after explicit VE06 world placement; replacing a valid target is transactional for input rejection. */
+export function attachVisualEffectInstance(handle: VisualEffectInstance,
+  input: VisualEffectAttachmentInput): VisualEffectAttachmentSnapshot {
+  const data = playbackData(handle);
+  if (data.commanding) playbackInvalid('TRANSITION_IN_PROGRESS');
+  data.commanding = true;
+  try {
+    const active = livePlayback(data), before = readVisualInstanceFrameState(active.scene, active.visual);
+    if (typeof input !== 'object' || input === null || Array.isArray(input)
+      || (Object.getPrototypeOf(input) !== Object.prototype && Object.getPrototypeOf(input) !== null)
+      || Reflect.ownKeys(input).length !== 3) throw new TypeError('Attachment requires target, localOffset and inheritance');
+    const fields: Record<string, unknown> = {};
+    for (const key of ['target', 'localOffset', 'inheritance']) {
+      const field = Object.getOwnPropertyDescriptor(input, key);
+      if (!field?.enumerable || !('value' in field)) throw new TypeError('Attachment requires data fields');
+      fields[key] = field.value;
+    }
+    if (fields.inheritance !== 'translation-only') throw new TypeError('Unsupported effect attachment inheritance');
+    const target = fields.target as RenderVisualInstance, offset = captureProjectionPoint2D(fields.localOffset as PlanarPoint2D);
+    const candidate = attachmentCandidate(active, target, offset);
+    livePlayback(data);
+    if (readVisualInstanceFrameState(active.scene, active.visual).revision !== before.revision) {
+      throw new TypeError('Scene changed during attachment capture');
+    }
+    const ownVisible = data.attachment?.ownVisible ?? getRenderVisualInstanceVisibility(active.scene, active.visual).visible;
+    data.lastWorldTransform = setRenderVisualInstanceTransform(active.scene, active.visual, candidate.input);
+    setRenderVisualInstanceVisible(active.scene, active.visual, ownVisible && candidate.targetVisible);
+    const unsubscribe = onVisualInstanceEnd(active.scene, target, () => { attachmentTargetEnded(data); });
+    data.attachment?.unsubscribe();
+    data.attachment = { target, offset, ownVisible, unsubscribe };
+    return getVisualEffectAttachmentSnapshot(handle);
+  } finally { data.commanding = false; }
+}
+function syncAttachment(data: Data): void {
+  const active = livePlayback(data), attachment = data.attachment;
+  if (!attachment) return;
+  const candidate = attachmentCandidate(active, attachment.target, attachment.offset);
+  const before = candidate.current;
+  // Target rotation/scale are not inherited; only its applied attachment point is followed.
+  if (before.placement.point.x !== candidate.input.placement.point.x || before.placement.point.y !== candidate.input.placement.point.y
+    || before.anchor.localOffset.x !== attachment.offset.x || before.anchor.localOffset.y !== attachment.offset.y) {
+    data.lastWorldTransform = setRenderVisualInstanceTransform(active.scene, active.visual, candidate.input);
+  }
+  setRenderVisualInstanceVisible(active.scene, active.visual, attachment.ownVisible && candidate.targetVisible);
+}
+/** Host calls after target/visibility edits and before submission, like Phase10 binding sync; never a ticker. */
+export function syncVisualEffectAttachment(handle: VisualEffectInstance): VisualEffectAttachmentSnapshot {
+  const data = playbackData(handle);
+  if (data.commanding) playbackInvalid('TRANSITION_IN_PROGRESS');
+  data.commanding = true;
+  try { syncAttachment(data); return getVisualEffectAttachmentSnapshot(handle); }
+  finally { data.commanding = false; }
+}
+/** Sync first, freeze current effective world placement, restore independent effect visibility, then unlink. */
+export function detachVisualEffectInstance(handle: VisualEffectInstance): VisualEffectAttachmentSnapshot {
+  const data = playbackData(handle);
+  if (data.commanding) playbackInvalid('TRANSITION_IN_PROGRESS');
+  data.commanding = true;
+  try {
+    syncAttachment(data);
+    const active = livePlayback(data), attachment = data.attachment;
+    if (attachment) {
+      setRenderVisualInstanceVisible(active.scene, active.visual, attachment.ownVisible);
+      attachment.unsubscribe();
+      data.attachment = undefined;
+    }
+    return getVisualEffectAttachmentSnapshot(handle);
   } finally { data.commanding = false; }
 }

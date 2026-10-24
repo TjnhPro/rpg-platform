@@ -1117,3 +1117,9 @@ and frozen readback, Render317→321; all old root declarations unchanged. Uses
 Phase4/8 translation-only anchor/offset and canonical transform admission;
 preserves playback/resource/identity and separates camera/authored/gameplay state.
 [Contract](../runtime-render/docs/visual-effect-v0.11.5.md), [checkpoint](checkpoints/visual-effect-v0.11.5.md).
+
+Phase11 v0.11.6 VE07 adds six Render roots for same-scene ordinary visual target
+attachment, explicit sync, freeze detach and readback; Render321→327, old root
+declarations unchanged. Phase4/8 applied attachment/visibility and lifecycle are
+canonical; target loss removes the effect, with no transport coupling or ticker.
+[Contract](../runtime-render/docs/visual-effect-v0.11.6.md), [checkpoint](checkpoints/visual-effect-v0.11.6.md).
