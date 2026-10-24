@@ -267,3 +267,6 @@ export { readVisualScale, setVisualScale } from './visual-scale.js';
 export { readVisualAnchor, setVisualAnchor, describeVisualAlignment } from './visual-anchor.js';
 export { readVisualVisibility, setVisualVisibility } from './visual-visibility.js';
 export { readVisualBinding, setVisualBinding } from './visual-binding.js';
+export { validateVisualSceneDocument, createVisualDocumentEditor } from './visual-document-edit.js';
+export type { VisualPropertyEdit, VisualDocumentEditor } from './visual-document-edit.js';
+export { describeVisualPresentation } from './visual-preview.js';

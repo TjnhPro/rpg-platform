@@ -44,6 +44,8 @@ export function createVisualInspectorContext(binding: VisualInspectorBinding): V
     if (read.status !== 'supported') throw new TypeError(`UNSUPPORTED_SCENE:${read.reason}`);
     if (!tracked || tracked.documentKind !== 'scene' || tracked.contentSchemaVersion !== 1
       || tracked.sceneId !== read.snapshot.identity.sceneId) throw new TypeError('SCENE_NOT_TRACKED');
+    if (current.manifest.activeScene?.documentId !== snapshot.envelope.identity.documentId
+      || current.manifest.activeScene.sceneId !== read.snapshot.identity.sceneId) throw new TypeError('SCENE_NOT_ACTIVE');
     return { snapshot, map: read.snapshot };
   };
   const read = (selection = active ?? undefined): VisualInspectorSnapshot => {
