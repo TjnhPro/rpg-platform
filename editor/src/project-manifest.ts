@@ -2,6 +2,7 @@ import type { DocumentIdentity } from './document-envelope.js';
 import type { ResourceLocator } from './asset-sources.js';
 import { projectData, projectFail, projectKey, projectRecord } from './project-validation.js';
 import { captureProjectRoots } from './project-resource-roots.js';
+import { captureProjectDocuments } from './project-document-tracking.js';
 
 export interface ProjectMetadata {
   readonly name: string;
@@ -54,14 +55,14 @@ export function createProjectManifest(input: ProjectManifestInput): ProjectManif
   const documents = value.documents ?? [];
   const activeScene = value.activeScene ?? null;
   const resourceRoots = captureProjectRoots(roots);
-  if (!Array.isArray(documents) || documents.length !== 0) return projectFail('UNSUPPORTED_DOCUMENTS', 'project.documents');
+  const documentReferences = captureProjectDocuments(documents, projectId);
   if (activeScene !== null) return projectFail('UNSUPPORTED_ACTIVE_SCENE', 'project.activeScene');
   // Explicit null is not an omitted array.
   if (value.resourceRoots === null || value.documents === null) return projectFail('INVALID_COLLECTION', 'project');
   return Object.freeze({ schemaVersion: 1, projectId,
     metadata: Object.freeze({ name: metadata.name,
       ...(Object.hasOwn(metadata, 'description') ? { description: metadata.description as string } : {}) }),
-    resourceRoots, documents: Object.freeze([]), activeScene: null });
+    resourceRoots, documents: documentReferences, activeScene: null });
 }
 
 /** Strict stored-content reader: unlike authoring input, all fields are required. */

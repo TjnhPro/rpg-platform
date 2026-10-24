@@ -214,3 +214,5 @@ export { ProjectValidationError } from './project-validation.js';
 export { setProjectResourceRoots } from './project-resource-roots.js';
 export { createProjectRootBinding, resolveProjectLocator } from './project-root-binding.js';
 export type { ProjectRootBinding } from './project-root-binding.js';
+export { trackProjectDocument, listProjectDocuments, getProjectDocument, updateProjectDocument,
+  removeProjectDocument, diagnoseProjectDocuments } from './project-document-tracking.js';
