@@ -6,6 +6,12 @@ import { getRenderFrameFailure as frameFailure, type RenderFrameFailure } from '
 import { getRenderTextureFailure as textureFailure, type RenderTextureFailure } from './render-texture.js';
 import { getVisualResourceCacheFailure as cacheFailure, type VisualResourceCacheFailure } from './visual-resource-cache.js';
 import { VisualPresentationError } from './visual-presentation-error.js';
+import { getVisualEffectInstanceFailure as effectInstanceFailure,
+  getVisualEffectPlaybackFailure as effectPlaybackFailure,
+  getVisualEffectLifetimeFailure as effectLifetimeFailure,
+  getVisualEffectWorkFailure as effectWorkFailure,
+  isVisualEffectCoordinateFailure } from './visual-effect-instance.js';
+import { getVisualEffectDefinitionFailure as effectDefinitionFailure } from './visual-effect-definition.js';
 export { getRenderCameraViewportSnapshot, type RenderCameraViewportSnapshot } from './camera-viewport.js';
 export { projectRenderCameraPoint, type RenderCameraProjectionResult } from './camera-projection.js';
 export { viewportToRenderCameraSelectedPlane, screenToRenderCameraSelectedPlane,
@@ -54,6 +60,33 @@ export function getRenderVisualDiagnostic(error: unknown): RenderVisualDiagnosti
   const session = getRenderFailure(error);
   if (session) return Object.freeze({ domain: 'session', code: session.code, cleanupFailed: null });
   return Object.freeze({ domain: 'unknown', code: 'UNKNOWN_FAILURE', cleanupFailed: null });
+}
+
+export type VisualEffectDiagnostic = RenderVisualDiagnostic
+  | { readonly domain: 'effect-coordinate'; readonly code: 'INVALID_COORDINATE'; readonly cleanupFailed: null }
+  | { readonly domain: 'effect-definition'; readonly code: NonNullable<ReturnType<typeof effectDefinitionFailure>>['code']; readonly cleanupFailed: null }
+  | { readonly domain: 'effect-instance'; readonly code: NonNullable<ReturnType<typeof effectInstanceFailure>>['code']; readonly cleanupFailed: boolean }
+  | { readonly domain: 'effect-playback'; readonly code: NonNullable<ReturnType<typeof effectPlaybackFailure>>['code']; readonly cleanupFailed: null }
+  | { readonly domain: 'effect-lifetime'; readonly code: NonNullable<ReturnType<typeof effectLifetimeFailure>>['code']; readonly cleanupFailed: null }
+  | { readonly domain: 'effect-work'; readonly code: NonNullable<ReturnType<typeof effectWorkFailure>>['code']; readonly cleanupFailed: null };
+
+/** Classify caught exceptions only. Canonical owner records take precedence.
+ * Result codes from frame sync and load snapshots remain their own explicit records. */
+export function getVisualEffectDiagnostic(error: unknown): VisualEffectDiagnostic {
+  const owner = getRenderVisualDiagnostic(error);
+  if (owner.domain !== 'unknown') return owner;
+  const definition = effectDefinitionFailure(error);
+  if (definition) return Object.freeze({ domain: 'effect-definition', code: definition.code, cleanupFailed: null });
+  const instance = effectInstanceFailure(error);
+  if (instance) return Object.freeze({ domain: 'effect-instance', code: instance.code, cleanupFailed: instance.cleanupFailed });
+  const playback = effectPlaybackFailure(error);
+  if (playback) return Object.freeze({ domain: 'effect-playback', code: playback.code, cleanupFailed: null });
+  const lifetime = effectLifetimeFailure(error);
+  if (lifetime) return Object.freeze({ domain: 'effect-lifetime', code: lifetime.code, cleanupFailed: null });
+  const work = effectWorkFailure(error);
+  if (work) return Object.freeze({ domain: 'effect-work', code: work.code, cleanupFailed: null });
+  if (isVisualEffectCoordinateFailure(error)) return Object.freeze({ domain: 'effect-coordinate', code: 'INVALID_COORDINATE', cleanupFailed: null });
+  return owner;
 }
 
 export {
@@ -404,3 +437,33 @@ export { resolveSpriteFrameAlignment, type SpriteFrameAlignmentData,
   type SpriteFrameAlignmentInput, type SpriteFrameAlignmentResult } from './sprite-frame-alignment.js';
 export { createSpriteAnimationVisualBinding, type SpriteAnimationVisualBinding,
   type SpriteAnimationVisualFrameInput, type SpriteAnimationVisualFrameResult } from './sprite-animation-visual-binding.js';
+export { createVisualEffectDefinition, resolveVisualEffectDefinition, getVisualEffectDefinitionFailure,
+  type VisualEffectDefinitionInput, type VisualEffectDefinition, type VisualEffectSourceRevision,
+  type VisualEffectDefinitionFailure, type VisualEffectDefinitionBindingInput,
+  type VisualEffectDefinitionBindingResult } from './visual-effect-definition.js';
+export { createSpriteSequencePlayback, getSpriteSequencePlaybackSnapshot,
+  commandSpriteSequencePlayback, advanceSpriteSequencePlayback,
+  type SpriteSequencePlayback, type SpriteSequencePlaybackInput,
+  type SpriteSequencePlaybackSnapshot, type SpriteSequencePlaybackCommand,
+  type SpriteSequenceAdvanceResult } from './sprite-animation-playback.js';
+export { createSpriteSequenceVisualBinding, type SpriteSequenceVisualBinding,
+  type SpriteSequenceVisualFrameResult } from './sprite-animation-visual-binding.js';
+export { createVisualEffectInstance, getVisualEffectInstanceSnapshot, listVisualEffectInstances,
+  getVisualEffectInstance, removeVisualEffectInstance, getVisualEffectInstanceFailure,
+  type VisualEffectInstance, type VisualEffectInstanceInput, type VisualEffectInstanceSnapshot,
+  type VisualEffectInstanceFailure } from './visual-effect-instance.js';
+export { commandVisualEffectPlayback, getVisualEffectPlaybackSnapshot, getVisualEffectPlaybackFailure,
+  type VisualEffectPlaybackCommand, type VisualEffectPlaybackSnapshot,
+  type VisualEffectPlaybackFailure } from './visual-effect-instance.js';
+export { createVisualEffectTimedInstance, getVisualEffectLifetimeSnapshot, advanceVisualEffectInstance,
+  getVisualEffectLifetimeFailure, type VisualEffectTimedInstanceInput, type VisualEffectCompletionReceipt,
+  type VisualEffectLifetimeSnapshot, type VisualEffectAdvanceResult, type VisualEffectLifetimeFailure } from './visual-effect-instance.js';
+export { setVisualEffectWorldPlacement, getVisualEffectWorldPlacementSnapshot,
+  type VisualEffectWorldPlacementInput, type VisualEffectWorldPlacementSnapshot } from './visual-effect-instance.js';
+export { attachVisualEffectInstance, syncVisualEffectAttachment, detachVisualEffectInstance,
+  getVisualEffectAttachmentSnapshot, type VisualEffectAttachmentInput,
+  type VisualEffectAttachmentSnapshot } from './visual-effect-instance.js';
+export { syncVisualEffectFrame, type VisualEffectFrameInput, type VisualEffectFrameResult } from './visual-effect-instance.js';
+export { getVisualEffectDiagnosticsSnapshot, getVisualEffectWorkSnapshot, getVisualEffectWorkFailure,
+  type VisualEffectDiagnosticsSnapshot, type VisualEffectResourceObservation,
+  type VisualEffectWorkSnapshot, type VisualEffectWorkFailure } from './visual-effect-instance.js';

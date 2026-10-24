@@ -1,5 +1,17 @@
 # Ownership decisions — do not classify by similar names
 
+v0.11.10 VE11: **game-client** owns neutral presentation intent/correlation,
+request lease lifetime and the optional browser host. Render remains sole effect,
+playback/resource/scene/camera owner; no Editor import or Engine/gameplay rule.
+Public roots and dependency graph unchanged. See
+[checkpoint](checkpoints/visual-effect-v0.11.10.md).
+
+v0.11.9 VE10: **editor** owns authored-reference translation, optional VFX preview
+UI, explicit host deltas/provider grant and mount teardown. **runtime-render**
+remains the unchanged canonical definition/playback/placement/attachment/frame,
+resource/scene/camera owner. No gameplay, authored-schema or public-root transfer.
+See [checkpoint](checkpoints/visual-effect-v0.11.9.md).
+
 v0.10.9 SA10: **editor** owns the optional authored-reference/browser preview
 adapter. **runtime-render** remains sole animation, resource and live instance
 owner, consumed through its public root without changes. Harness records finite
@@ -341,3 +353,63 @@ Harness records evidence and Editor/Client are reviewed consumers. Documentation
 only, no dependency or ownership move, Engine/Server/foundation change or new
 subsystem. [Closure report](checkpoints/sprite-animation-v0.10.12.md).
 Developer review pending; no automatic Phase11, merge or release.
+
+v0.11.0 VE01: **runtime-render** remains the canonical VFX presentation owner;
+Harness records an architecture-only [decision ledger](visual-effect-v0.11.0.md).
+Editor/Client are read-only contract consumers. No source, dependency or public
+surface changes. Existing single-sequence timed metadata is real; single-sequence
+live playback/binding needs the explicit Phase10 U1 authorization gate. No VFX
+timer, repeated eight-way workaround, new manager or sixth production project.
+
+v0.11.1 VE02: **runtime-render** owns pure VFX definitions and Phase7 metadata
+binding through existing Phase10 single-track clip data. Editor retains authored
+catalog/reference ownership; no consumer adapter added without evidence. No IO,
+GPU, playback clock or foundation change. [Checkpoint](checkpoints/visual-effect-v0.11.1.md).
+
+Approved U1: **runtime-render**, Phase10 animation owner, supplies additive neutral
+single-sequence playback and visual binding to Phase11. Existing directional and
+neutral APIs share one implementation; no Engine/L1/L2/gameplay boundary change.
+Editor/Client are unchanged build consumers. [Checkpoint](checkpoints/visual-effect-u1.md).
+
+v0.11.2 VE03: **runtime-render** owns ephemeral VFX orchestration over existing
+Phase8 scene/session membership and owned Phase10 neutral playback. Phase8 alone
+enumerates scene entries and owns retained Phase7 usage; no parallel VFX registry
+or authored/gameplay mutation. Editor/Client unchanged build consumers, Harness
+evidence only. No boundary expansion. [Checkpoint](checkpoints/visual-effect-v0.11.2.md).
+
+v0.11.3 VE04: **runtime-render** owns effect command admission over the already
+owned Phase10 playback and Phase8 visibility. No ticker/resource/renderer or
+boundary expansion; Editor/Client unchanged build consumers, Harness evidence.
+No Engine/L1/L2/gameplay changes. [Checkpoint](checkpoints/visual-effect-v0.11.3.md).
+
+v0.11.4 VE05: **runtime-render** owns presentation completion/lifetime admission,
+using existing Phase10 explicit advance and VE03/Phase8 retirement. No separate
+clock, frame sampler, scene registry or gameplay timer. Editor/Client unchanged
+build consumers; Harness evidence only. No owner expansion or L1/L2 change.
+[Checkpoint](checkpoints/visual-effect-v0.11.4.md).
+
+v0.11.5 VE06: **runtime-render** owns effect world-placement admission through
+existing Phase4 numeric contracts and Phase8 transform/invalidation. No separate
+spatial math, clock, renderer, camera or authored/gameplay authority. Editor/Client
+unchanged build consumers; Harness evidence only. No upstream-owner expansion.
+[Checkpoint](checkpoints/visual-effect-v0.11.5.md).
+
+v0.11.6 VE07: **runtime-render** owns one-level effect attachment orchestration
+over Phase4/8 transform, effective visibility and lifecycle. Host explicitly
+syncs before submission; no gameplay target lookup, hierarchy, second clock or
+renderer. Editor/Client unchanged build consumers; Harness evidence only.
+No upstream-owner expansion. [Checkpoint](checkpoints/visual-effect-v0.11.6.md).
+
+v0.11.7 VE08: **runtime-render** owns selected VFX frame orchestration through
+existing Phase7/U1/Phase8 resource/geometry transactions and Phase9 scene camera.
+No alternate renderer, timer, shader or GPU cache. Editor/Client unchanged build
+consumers; Harness evidence only, no foundation/boundary expansion.
+[Checkpoint](checkpoints/visual-effect-v0.11.7.md).
+
+v0.11.8 VE09: **runtime-render** owns bounded effect diagnostics/admission and owned cleanup orchestration over existing Phase7/8/U1 rights. Host owns acquired leases and async IO; no new cache/pool/clock or gameplay authority. Editor/Client unchanged build consumers; Harness evidence only. [Checkpoint](checkpoints/visual-effect-v0.11.8.md).
+
+v0.11.12 VE13: **runtime-render** remains the canonical VFX behavior owner;
+Harness owns evidence-only phase closure, Editor/Client are build consumers.
+Zero production/API/dependency change. Architecture/build audit does not accept
+the incomplete VE12 visual MVP; Developer owns acceptance or explicit deferral.
+[Closure audit](checkpoints/visual-effect-v0.11.12.md).

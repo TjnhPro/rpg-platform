@@ -1,0 +1,463 @@
+{
+  "baseline": "aceea67f95cb309bdd06f1d6193767bfa06f42ce",
+  "auditedHead": "7a5493081d7c73b2aa28662f3828afb5e4dbb5e3",
+  "mergeBase": "aceea67f95cb309bdd06f1d6193767bfa06f42ce",
+  "commits": [
+    {
+      "sha": "fde851791a681e8a1eadd3748bb20f5c1f641293",
+      "subject": "docs(render): establish VFX contract foundation (VE01)",
+      "checkpoint": "harness/checkpoints/visual-effect-v0.11.0.md",
+      "addedExports": [],
+      "removedExports": [],
+      "changedPaths": [
+        "harness/CONTRACTS.md",
+        "harness/OWNERSHIP.md",
+        "harness/checkpoints/visual-effect-v0.11.0.md",
+        "harness/visual-effect-api-inventory-v0.11.0.md",
+        "harness/visual-effect-task-v0.11.0.md",
+        "harness/visual-effect-v0.11.0.md"
+      ]
+    },
+    {
+      "sha": "77b0191f4d0e574d8eb430a0663bfb281e536ba2",
+      "subject": "feat(render): capture VFX definitions and bind asset metadata (VE02)",
+      "checkpoint": "harness/checkpoints/visual-effect-v0.11.1.md",
+      "addedExports": [
+        "createVisualEffectDefinition",
+        "resolveVisualEffectDefinition",
+        "getVisualEffectDefinitionFailure",
+        "VisualEffectDefinitionInput",
+        "VisualEffectDefinition",
+        "VisualEffectSourceRevision",
+        "VisualEffectDefinitionFailure",
+        "VisualEffectDefinitionBindingInput",
+        "VisualEffectDefinitionBindingResult"
+      ],
+      "removedExports": [],
+      "changedPaths": [
+        "harness/CONTRACTS.md",
+        "harness/OWNERSHIP.md",
+        "harness/checkpoints/visual-effect-v0.11.1.md",
+        "harness/visual-effect-task-v0.11.1.md",
+        "runtime-render/docs/visual-effect-v0.11.1.md",
+        "runtime-render/src/index.ts",
+        "runtime-render/src/visual-effect-definition.ts"
+      ]
+    },
+    {
+      "sha": "df28c2a059121b77eab01e59c710c4d0c7a4290c",
+      "subject": "feat(render): share playback and binding with single sequences (U1)",
+      "checkpoint": "harness/checkpoints/visual-effect-u1.md",
+      "addedExports": [
+        "createSpriteSequencePlayback",
+        "getSpriteSequencePlaybackSnapshot",
+        "commandSpriteSequencePlayback",
+        "advanceSpriteSequencePlayback",
+        "SpriteSequencePlayback",
+        "SpriteSequencePlaybackInput",
+        "SpriteSequencePlaybackSnapshot",
+        "SpriteSequencePlaybackCommand",
+        "SpriteSequenceAdvanceResult",
+        "createSpriteSequenceVisualBinding",
+        "SpriteSequenceVisualBinding",
+        "SpriteSequenceVisualFrameResult"
+      ],
+      "removedExports": [],
+      "changedPaths": [
+        "harness/CONTRACTS.md",
+        "harness/OWNERSHIP.md",
+        "harness/checkpoints/visual-effect-u1.md",
+        "harness/visual-effect-v0.11.0.md",
+        "runtime-render/docs/sprite-animation-u1.md",
+        "runtime-render/src/index.ts",
+        "runtime-render/src/sprite-animation-playback.ts",
+        "runtime-render/src/sprite-animation-timing.ts",
+        "runtime-render/src/sprite-animation-visual-binding.ts"
+      ]
+    },
+    {
+      "sha": "ce5833ef1261c9d0eb00d1f391e24f911a0e575e",
+      "subject": "feat(render): own effect instance lifecycle in visual scenes (VE03)",
+      "checkpoint": "harness/checkpoints/visual-effect-v0.11.2.md",
+      "addedExports": [
+        "createVisualEffectInstance",
+        "getVisualEffectInstanceSnapshot",
+        "listVisualEffectInstances",
+        "getVisualEffectInstance",
+        "removeVisualEffectInstance",
+        "getVisualEffectInstanceFailure",
+        "VisualEffectInstance",
+        "VisualEffectInstanceInput",
+        "VisualEffectInstanceSnapshot",
+        "VisualEffectInstanceFailure"
+      ],
+      "removedExports": [],
+      "changedPaths": [
+        "harness/CONTRACTS.md",
+        "harness/OWNERSHIP.md",
+        "harness/checkpoints/visual-effect-v0.11.2.md",
+        "harness/visual-effect-task-v0.11.2.md",
+        "runtime-render/docs/visual-effect-v0.11.2.md",
+        "runtime-render/src/index.ts",
+        "runtime-render/src/visual-effect-definition.ts",
+        "runtime-render/src/visual-effect-instance.ts"
+      ]
+    },
+    {
+      "sha": "05a52814d5c71e0124bc6bfc93787707f4fe7cba",
+      "subject": "feat(render): control owned effect playback through canonical transport (VE04)",
+      "checkpoint": "harness/checkpoints/visual-effect-v0.11.3.md",
+      "addedExports": [
+        "commandVisualEffectPlayback",
+        "getVisualEffectPlaybackSnapshot",
+        "getVisualEffectPlaybackFailure",
+        "VisualEffectPlaybackCommand",
+        "VisualEffectPlaybackSnapshot",
+        "VisualEffectPlaybackFailure"
+      ],
+      "removedExports": [],
+      "changedPaths": [
+        "harness/CONTRACTS.md",
+        "harness/OWNERSHIP.md",
+        "harness/checkpoints/visual-effect-v0.11.3.md",
+        "harness/visual-effect-task-v0.11.3.md",
+        "runtime-render/docs/visual-effect-v0.11.3.md",
+        "runtime-render/src/index.ts",
+        "runtime-render/src/visual-effect-instance.ts"
+      ]
+    },
+    {
+      "sha": "2046a4abe3a145e8c31179807ec585a2f061abbf",
+      "subject": "feat(render): advance effect lifetime and retire completed instances (VE05)",
+      "checkpoint": "harness/checkpoints/visual-effect-v0.11.4.md",
+      "addedExports": [
+        "createVisualEffectTimedInstance",
+        "getVisualEffectLifetimeSnapshot",
+        "advanceVisualEffectInstance",
+        "getVisualEffectLifetimeFailure",
+        "VisualEffectTimedInstanceInput",
+        "VisualEffectCompletionReceipt",
+        "VisualEffectLifetimeSnapshot",
+        "VisualEffectAdvanceResult",
+        "VisualEffectLifetimeFailure"
+      ],
+      "removedExports": [],
+      "changedPaths": [
+        "harness/CONTRACTS.md",
+        "harness/OWNERSHIP.md",
+        "harness/checkpoints/visual-effect-v0.11.4.md",
+        "harness/visual-effect-task-v0.11.4.md",
+        "runtime-render/docs/visual-effect-v0.11.4.md",
+        "runtime-render/src/index.ts",
+        "runtime-render/src/visual-effect-instance.ts"
+      ]
+    },
+    {
+      "sha": "1c38808cc74ed83a811c3e41a9cc21d8b8b8cd1f",
+      "subject": "feat(render): place effects in explicit world planes with anchor offsets (VE06)",
+      "checkpoint": "harness/checkpoints/visual-effect-v0.11.5.md",
+      "addedExports": [
+        "setVisualEffectWorldPlacement",
+        "getVisualEffectWorldPlacementSnapshot",
+        "VisualEffectWorldPlacementInput",
+        "VisualEffectWorldPlacementSnapshot"
+      ],
+      "removedExports": [],
+      "changedPaths": [
+        "harness/CONTRACTS.md",
+        "harness/OWNERSHIP.md",
+        "harness/checkpoints/visual-effect-v0.11.5.md",
+        "harness/visual-effect-task-v0.11.5.md",
+        "runtime-render/docs/visual-effect-v0.11.5.md",
+        "runtime-render/src/index.ts",
+        "runtime-render/src/visual-effect-instance.ts"
+      ]
+    },
+    {
+      "sha": "a1936223c8b92e735e52b98b07fa34d62758c8a8",
+      "subject": "feat(render): attach effects to live visual targets with canonical cleanup (VE07)",
+      "checkpoint": "harness/checkpoints/visual-effect-v0.11.6.md",
+      "addedExports": [
+        "attachVisualEffectInstance",
+        "syncVisualEffectAttachment",
+        "detachVisualEffectInstance",
+        "getVisualEffectAttachmentSnapshot",
+        "VisualEffectAttachmentInput",
+        "VisualEffectAttachmentSnapshot"
+      ],
+      "removedExports": [],
+      "changedPaths": [
+        "harness/CONTRACTS.md",
+        "harness/OWNERSHIP.md",
+        "harness/checkpoints/visual-effect-v0.11.6.md",
+        "harness/visual-effect-task-v0.11.6.md",
+        "runtime-render/docs/visual-effect-v0.11.6.md",
+        "runtime-render/src/index.ts",
+        "runtime-render/src/visual-effect-instance.ts"
+      ]
+    },
+    {
+      "sha": "296d639621c8f087859ed867c563ca07aaf5a06d",
+      "subject": "feat(render): bind effect frames through canonical visual scene (VE08)",
+      "checkpoint": "harness/checkpoints/visual-effect-v0.11.7.md",
+      "addedExports": [
+        "syncVisualEffectFrame",
+        "VisualEffectFrameInput",
+        "VisualEffectFrameResult"
+      ],
+      "removedExports": [],
+      "changedPaths": [
+        "harness/CONTRACTS.md",
+        "harness/OWNERSHIP.md",
+        "harness/checkpoints/visual-effect-v0.11.7.md",
+        "harness/visual-effect-task-v0.11.7.md",
+        "runtime-render/docs/visual-effect-v0.11.7.md",
+        "runtime-render/src/index.ts",
+        "runtime-render/src/visual-effect-definition.ts",
+        "runtime-render/src/visual-effect-instance.ts"
+      ]
+    },
+    {
+      "sha": "d020b98c5ad1827284cd00ec4c4d39d1e9cfc7a5",
+      "subject": "feat(runtime-render): bound VFX lifetime diagnostics (v0.11.8)",
+      "checkpoint": "harness/checkpoints/visual-effect-v0.11.8.md",
+      "addedExports": [
+        "VisualEffectDiagnostic",
+        "getVisualEffectDiagnostic",
+        "getVisualEffectDiagnosticsSnapshot",
+        "getVisualEffectWorkSnapshot",
+        "getVisualEffectWorkFailure",
+        "VisualEffectDiagnosticsSnapshot",
+        "VisualEffectResourceObservation",
+        "VisualEffectWorkSnapshot",
+        "VisualEffectWorkFailure"
+      ],
+      "removedExports": [],
+      "changedPaths": [
+        "harness/CONTRACTS.md",
+        "harness/OWNERSHIP.md",
+        "harness/checkpoints/visual-effect-v0.11.8.md",
+        "harness/visual-effect-task-v0.11.8.md",
+        "runtime-render/docs/visual-effect-v0.11.8.md",
+        "runtime-render/src/index.ts",
+        "runtime-render/src/visual-effect-instance.ts"
+      ]
+    },
+    {
+      "sha": "d057e3620e87dd98a2374a6c5a23ac6a03e35d58",
+      "subject": "feat(editor): integrate VFX preview controls (v0.11.9)",
+      "checkpoint": "harness/checkpoints/visual-effect-v0.11.9.md",
+      "addedExports": [],
+      "removedExports": [],
+      "changedPaths": [
+        "editor/docs/visual-effect-preview-v0.11.9.md",
+        "editor/manual/vfx-preview-host.mjs",
+        "editor/manual/vfx-preview.html",
+        "editor/manual/vfx-preview.mts",
+        "editor/manual/vfx-preview.tsconfig.json",
+        "editor/src/manual-vfx-preview.ts",
+        "harness/CONTRACTS.md",
+        "harness/OWNERSHIP.md",
+        "harness/checkpoints/visual-effect-v0.11.9.md",
+        "harness/visual-effect-task-v0.11.9.md"
+      ]
+    },
+    {
+      "sha": "a3892113647ba123670c53350840b72ae376583b",
+      "subject": "feat(game-client): integrate neutral VFX intents (v0.11.10)",
+      "checkpoint": "harness/checkpoints/visual-effect-v0.11.10.md",
+      "addedExports": [],
+      "removedExports": [],
+      "changedPaths": [
+        "game-client/manual/vfx-host.mjs",
+        "game-client/manual/vfx.html",
+        "game-client/manual/vfx.md",
+        "game-client/manual/vfx.mts",
+        "game-client/manual/vfx.tsconfig.json",
+        "game-client/src/manual-vfx-host.ts",
+        "game-client/src/vfx-presentation.ts",
+        "harness/CONTRACTS.md",
+        "harness/OWNERSHIP.md",
+        "harness/checkpoints/visual-effect-v0.11.10.md",
+        "harness/visual-effect-task-v0.11.10.md"
+      ]
+    },
+    {
+      "sha": "7a5493081d7c73b2aa28662f3828afb5e4dbb5e3",
+      "subject": "docs(harness): audit VE12 MVP evidence and asset blocker (v0.11.11)",
+      "checkpoint": "harness/checkpoints/visual-effect-v0.11.11.md",
+      "addedExports": [],
+      "removedExports": [],
+      "changedPaths": [
+        "harness/checkpoints/evidence/visual-effect-v0.11.11/cpu-observed.json",
+        "harness/checkpoints/visual-effect-v0.11.11.md",
+        "harness/visual-effect-task-v0.11.11.md"
+      ]
+    }
+  ],
+  "closure": {
+    "version": "v0.11.12",
+    "commit": "Containing commit of this inventory; verify with git log --diff-filter=A -- harness/checkpoints/visual-effect-v0.11.12.md",
+    "productionDelta": 0,
+    "changedPaths": [
+      "harness/CONTRACTS.md",
+      "harness/OWNERSHIP.md",
+      "harness/checkpoints/evidence/visual-effect-v0.11.12/inventory.json",
+      "harness/checkpoints/evidence/visual-effect-v0.11.12/public-declarations.json",
+      "harness/checkpoints/evidence/visual-effect-v0.11.12/ve05-timing.txt",
+      "harness/checkpoints/evidence/visual-effect-v0.11.12/ve08-follow-camera.png",
+      "harness/checkpoints/evidence/visual-effect-v0.11.12/ve08-frame-0000.png",
+      "harness/checkpoints/evidence/visual-effect-v0.11.12/ve08-frame-0002.png",
+      "harness/checkpoints/evidence/visual-effect-v0.11.12/ve09-cleanup.txt",
+      "harness/checkpoints/evidence/visual-effect-v0.11.12/ve10-context-loss.txt",
+      "harness/checkpoints/visual-effect-v0.11.12.md",
+      "harness/visual-effect-task-v0.11.12.md"
+    ]
+  },
+  "phaseChangedPathsBeforeClosure": [
+    "editor/docs/visual-effect-preview-v0.11.9.md",
+    "editor/manual/vfx-preview-host.mjs",
+    "editor/manual/vfx-preview.html",
+    "editor/manual/vfx-preview.mts",
+    "editor/manual/vfx-preview.tsconfig.json",
+    "editor/src/manual-vfx-preview.ts",
+    "game-client/manual/vfx-host.mjs",
+    "game-client/manual/vfx.html",
+    "game-client/manual/vfx.md",
+    "game-client/manual/vfx.mts",
+    "game-client/manual/vfx.tsconfig.json",
+    "game-client/src/manual-vfx-host.ts",
+    "game-client/src/vfx-presentation.ts",
+    "harness/CONTRACTS.md",
+    "harness/OWNERSHIP.md",
+    "harness/checkpoints/evidence/visual-effect-v0.11.11/cpu-observed.json",
+    "harness/checkpoints/visual-effect-u1.md",
+    "harness/checkpoints/visual-effect-v0.11.0.md",
+    "harness/checkpoints/visual-effect-v0.11.1.md",
+    "harness/checkpoints/visual-effect-v0.11.10.md",
+    "harness/checkpoints/visual-effect-v0.11.11.md",
+    "harness/checkpoints/visual-effect-v0.11.2.md",
+    "harness/checkpoints/visual-effect-v0.11.3.md",
+    "harness/checkpoints/visual-effect-v0.11.4.md",
+    "harness/checkpoints/visual-effect-v0.11.5.md",
+    "harness/checkpoints/visual-effect-v0.11.6.md",
+    "harness/checkpoints/visual-effect-v0.11.7.md",
+    "harness/checkpoints/visual-effect-v0.11.8.md",
+    "harness/checkpoints/visual-effect-v0.11.9.md",
+    "harness/visual-effect-api-inventory-v0.11.0.md",
+    "harness/visual-effect-task-v0.11.0.md",
+    "harness/visual-effect-task-v0.11.1.md",
+    "harness/visual-effect-task-v0.11.10.md",
+    "harness/visual-effect-task-v0.11.11.md",
+    "harness/visual-effect-task-v0.11.2.md",
+    "harness/visual-effect-task-v0.11.3.md",
+    "harness/visual-effect-task-v0.11.4.md",
+    "harness/visual-effect-task-v0.11.5.md",
+    "harness/visual-effect-task-v0.11.6.md",
+    "harness/visual-effect-task-v0.11.7.md",
+    "harness/visual-effect-task-v0.11.8.md",
+    "harness/visual-effect-task-v0.11.9.md",
+    "harness/visual-effect-v0.11.0.md",
+    "runtime-render/docs/sprite-animation-u1.md",
+    "runtime-render/docs/visual-effect-v0.11.1.md",
+    "runtime-render/docs/visual-effect-v0.11.2.md",
+    "runtime-render/docs/visual-effect-v0.11.3.md",
+    "runtime-render/docs/visual-effect-v0.11.4.md",
+    "runtime-render/docs/visual-effect-v0.11.5.md",
+    "runtime-render/docs/visual-effect-v0.11.6.md",
+    "runtime-render/docs/visual-effect-v0.11.7.md",
+    "runtime-render/docs/visual-effect-v0.11.8.md",
+    "runtime-render/src/index.ts",
+    "runtime-render/src/sprite-animation-playback.ts",
+    "runtime-render/src/sprite-animation-timing.ts",
+    "runtime-render/src/sprite-animation-visual-binding.ts",
+    "runtime-render/src/visual-effect-definition.ts",
+    "runtime-render/src/visual-effect-instance.ts"
+  ],
+  "protectedPathChanges": [],
+  "workspaces": [
+    "runtime-engine",
+    "runtime-render",
+    "editor",
+    "game-client",
+    "game-server"
+  ],
+  "foundationArtifacts": [
+    {
+      "name": "@rpg/core",
+      "revision": "04b7239f998c3c688a0dfa3202f11811a9acd775",
+      "expectedIntegrity": "sha512-Iys3TTgb8tynmRgwYKAk/3suJVf/PtOi9TJyqXc3N3K2MJjRa++lWNZAWm60vmHyP8i4bKt5cbccnx78F0KkQQ==",
+      "observedIntegrity": "sha512-Iys3TTgb8tynmRgwYKAk/3suJVf/PtOi9TJyqXc3N3K2MJjRa++lWNZAWm60vmHyP8i4bKt5cbccnx78F0KkQQ==",
+      "matches": true
+    },
+    {
+      "name": "@rpg/gameplay",
+      "revision": "acea332aa80f67552192a72b30f81c0bbbfc56bd",
+      "expectedIntegrity": "sha512-8QeN9B3MLVzdfKyMW0hvcOwJJjb31+dlTxfk+6V/rgsYJnimMO/HjQcHmg064CzPs2qu0I1nVV9lp9vjUMS3xg==",
+      "observedIntegrity": "sha512-8QeN9B3MLVzdfKyMW0hvcOwJJjb31+dlTxfk+6V/rgsYJnimMO/HjQcHmg064CzPs2qu0I1nVV9lp9vjUMS3xg==",
+      "matches": true
+    }
+  ],
+  "historicalEvidence": [
+    {
+      "source": ".artifacts/ve08/final-frame-0000.png",
+      "archivedAs": "ve08-frame-0000.png",
+      "originalBytes": 25822,
+      "originalSha256": "8519b618fb7aa426b5de15381caebdc632f7a9a4a9d90347c43279e7381925a7",
+      "archivedBytes": 25822,
+      "archivedSha256": "8519b618fb7aa426b5de15381caebdc632f7a9a4a9d90347c43279e7381925a7",
+      "normalization": "none",
+      "status": "HISTORICAL_CAPTURE_NOT_NEW_EXECUTION"
+    },
+    {
+      "source": ".artifacts/ve08/final-frame-0002.png",
+      "archivedAs": "ve08-frame-0002.png",
+      "originalBytes": 25676,
+      "originalSha256": "e8cdc95e34796d5c361d7d80c3e3ca7b912f7d76369fcb0df554695f6ac50f5d",
+      "archivedBytes": 25676,
+      "archivedSha256": "e8cdc95e34796d5c361d7d80c3e3ca7b912f7d76369fcb0df554695f6ac50f5d",
+      "normalization": "none",
+      "status": "HISTORICAL_CAPTURE_NOT_NEW_EXECUTION"
+    },
+    {
+      "source": ".artifacts/ve08/final-follow-camera.png",
+      "archivedAs": "ve08-follow-camera.png",
+      "originalBytes": 26249,
+      "originalSha256": "74a8970ad85c660d1091015105fa6a9906a83885286356e19de6e0d80904fa99",
+      "archivedBytes": 26249,
+      "archivedSha256": "74a8970ad85c660d1091015105fa6a9906a83885286356e19de6e0d80904fa99",
+      "normalization": "none",
+      "status": "HISTORICAL_CAPTURE_NOT_NEW_EXECUTION"
+    },
+    {
+      "source": ".artifacts/ve05/observations-cli.txt",
+      "archivedAs": "ve05-timing.txt",
+      "originalBytes": 35193,
+      "originalSha256": "3eeafcd5d160b29023c03961bd894c9b9a9cbbd0d592ac2526d38b6b3cb5ea4e",
+      "archivedBytes": 35187,
+      "archivedSha256": "d27152b9a39accbcc4a9e247890093da77cc617d66f3fa13f8c30dc2eb3874ac",
+      "normalization": "CRLF to LF only",
+      "status": "HISTORICAL_CAPTURE_NOT_NEW_EXECUTION"
+    },
+    {
+      "source": ".artifacts/ve09/final-cleanup.txt",
+      "archivedAs": "ve09-cleanup.txt",
+      "originalBytes": 2262,
+      "originalSha256": "d3bf2331dc022b94fac52a378e08f727a55f3c73a1a54ec2b3a1b164760f1a13",
+      "archivedBytes": 2193,
+      "archivedSha256": "281f499e3e14efb843dbc432b1ee736660bed5d731862dee540c3dfd57cadfb8",
+      "normalization": "CRLF to LF only",
+      "status": "HISTORICAL_CAPTURE_NOT_NEW_EXECUTION"
+    },
+    {
+      "source": ".artifacts/ve10/context-loss-fixed.txt",
+      "archivedAs": "ve10-context-loss.txt",
+      "originalBytes": 7928,
+      "originalSha256": "1a1f1d376cb687f2d32da4a074de5302885cf56a384cf6d110da4c81e1318fea",
+      "archivedBytes": 7601,
+      "archivedSha256": "5322044383be1cc9237be6e95e274e23a62d8bd6293834f752f6f5876f27d361",
+      "normalization": "CRLF to LF only",
+      "status": "HISTORICAL_CAPTURE_NOT_NEW_EXECUTION"
+    }
+  ]
+}

@@ -1,0 +1,327 @@
+### Result
+{
+  "closed": true,
+  "loading": false,
+  "loadState": "closed",
+  "failure": {
+    "state": "failed",
+    "failure": {
+      "code": "CONTEXT_LOST",
+      "stage": "renderFrame",
+      "cleanupFailed": false
+    },
+    "cleanupFailed": false
+  },
+  "lastFrameResult": {
+    "status": "bound",
+    "playback": {
+      "projectId": "editor-vfx-manual",
+      "clipId": "attack-repeat",
+      "directionIndex": null,
+      "state": "playing",
+      "elapsedMs": 0,
+      "sampledElapsedMs": 0,
+      "frameIndex": 0,
+      "frame": {
+        "projectId": "editor-vfx-manual",
+        "resourceId": "Attack1_0",
+        "subresourceId": "0000"
+      },
+      "completed": false
+    },
+    "resource": {
+      "state": "usable",
+      "sourceRevision": "f31783508fe55cc39a421b9f3505503a831d7727605c1f2278e4a690585d3cd2",
+      "frame": {
+        "reference": {
+          "projectId": "editor-vfx-manual",
+          "resourceId": "Attack1_0",
+          "subresourceId": "0000"
+        },
+        "pageId": "page",
+        "imageSourceId": "image",
+        "pagePixels": {
+          "unit": "image-pixel",
+          "width": 128,
+          "height": 256
+        },
+        "rectangle": {
+          "unit": "image-pixel",
+          "origin": "top-left",
+          "bounds": "half-open",
+          "x": 78,
+          "y": 1,
+          "width": 32,
+          "height": 56
+        },
+        "uv": {
+          "unit": "normalized-texture",
+          "origin": "first-uploaded-row",
+          "left": 0.609375,
+          "top": 0.00390625,
+          "right": 0.859375,
+          "bottom": 0.22265625
+        },
+        "rotation": "none",
+        "trim": null,
+        "sourceSize": null
+      },
+      "cleanupFailed": false
+    },
+    "alignment": {
+      "status": "resolved",
+      "geometry": {
+        "reference": {
+          "projectId": "editor-vfx-manual",
+          "resourceId": "Attack1_0",
+          "subresourceId": "0000"
+        },
+        "pageId": "page",
+        "imageSourceId": "image",
+        "pagePixels": {
+          "unit": "image-pixel",
+          "width": 128,
+          "height": 256
+        },
+        "rectangle": {
+          "unit": "image-pixel",
+          "origin": "top-left",
+          "bounds": "half-open",
+          "x": 78,
+          "y": 1,
+          "width": 32,
+          "height": 56
+        },
+        "uv": {
+          "unit": "normalized-texture",
+          "origin": "first-uploaded-row",
+          "left": 0.609375,
+          "top": 0.00390625,
+          "right": 0.859375,
+          "bottom": 0.22265625
+        },
+        "rotation": "none",
+        "trim": null,
+        "sourceSize": null
+      },
+      "provenance": "VE10 explicit inspected frame-local anchor12,50; no anatomical or untrimmed guarantee",
+      "plane": {
+        "projectId": "editor-vfx-manual",
+        "coordinateSpaceId": "ground",
+        "unit": "world-unit",
+        "axes": {
+          "x": "right",
+          "y": "down"
+        }
+      },
+      "sourcePivot": {
+        "unit": "normalized-frame",
+        "origin": "bottom-left",
+        "x": -4.65625,
+        "y": -2
+      },
+      "anchor": {
+        "unit": "world-unit",
+        "anchor": {
+          "x": 12,
+          "y": 50
+        },
+        "pivot": {
+          "x": 12,
+          "y": 50
+        },
+        "localOffset": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "alignment": {
+        "unit": "world-unit",
+        "origin": {
+          "x": 198,
+          "y": 120
+        },
+        "pivot": {
+          "x": 210,
+          "y": 170
+        },
+        "orientation": {
+          "axes": {
+            "x": "right",
+            "y": "down"
+          },
+          "zeroAxis": "positive-x",
+          "positiveRotation": "toward-positive-y",
+          "angleRadians": 0
+        }
+      },
+      "pixelToPlane": {
+        "a": 1,
+        "b": 0,
+        "c": 0,
+        "d": 1,
+        "tx": 198,
+        "ty": 120
+      },
+      "ground": {
+        "plane": {
+          "projectId": "editor-vfx-manual",
+          "coordinateSpaceId": "ground",
+          "unit": "world-unit",
+          "axes": {
+            "x": "right",
+            "y": "down"
+          }
+        },
+        "point": {
+          "x": 210,
+          "y": 170
+        }
+      }
+    }
+  },
+  "lastFrameReceipt": {
+    "status": "submitted",
+    "viewport": {
+      "scope": "full-canvas",
+      "graphics": {
+        "state": "ready",
+        "failure": null
+      },
+      "state": "active",
+      "size": {
+        "width": 320,
+        "height": 240,
+        "unit": "drawing-buffer-px"
+      }
+    }
+  },
+  "pixels": "NOT_VERIFIED",
+  "effect": {
+    "instance": {
+      "effectId": "attack-repeat",
+      "projectId": "editor-vfx-manual",
+      "visualInstanceId": "preview-effect",
+      "state": "removed",
+      "reason": "session-ended",
+      "cleanupFailed": false
+    },
+    "resourceState": "retired",
+    "resource": {
+      "sourceRevisionPrefix": "f31783508fe55cc39a421b9f3505503a831d7727605c1f2278e4a690585d3cd2",
+      "frameKeyPrefix": "0000",
+      "cleanupFailed": false
+    },
+    "lastFrameSync": "bound",
+    "sceneCleanupFailed": false
+  },
+  "playback": {
+    "instance": {
+      "effectId": "attack-repeat",
+      "projectId": "editor-vfx-manual",
+      "visualInstanceId": "preview-effect",
+      "state": "removed",
+      "reason": "session-ended",
+      "cleanupFailed": false
+    },
+    "mode": "repeat",
+    "durationMs": null,
+    "state": "removed",
+    "elapsedMs": 0,
+    "playback": {
+      "projectId": "editor-vfx-manual",
+      "clipId": "attack-repeat",
+      "directionIndex": null,
+      "state": "disposed",
+      "elapsedMs": 0,
+      "sampledElapsedMs": 0,
+      "frameIndex": 0,
+      "frame": {
+        "projectId": "editor-vfx-manual",
+        "resourceId": "Attack1_0",
+        "subresourceId": "0000"
+      },
+      "completed": false
+    },
+    "completion": null
+  },
+  "targetAvailable": false,
+  "authored": {
+    "revision": 1,
+    "dirty": true,
+    "sameEnvelope": true,
+    "sameRevision": true,
+    "sameDirty": true
+  },
+  "cache": {
+    "state": "disposed",
+    "cpuEntries": 0,
+    "gpuEntries": 0,
+    "leases": 0,
+    "sourceJobs": 1,
+    "uploadCalls": 1,
+    "cpuHits": 0,
+    "gpuHits": 0,
+    "cleanupFailed": false,
+    "revisionEntries": 0
+  },
+  "scene": {
+    "state": "disposed",
+    "instances": 0,
+    "boundUsages": 0,
+    "usableUsages": 0,
+    "unavailableUsages": 0,
+    "cleanupFailed": false,
+    "releaseAttempts": 3
+  },
+  "host": {
+    "host": "unmounted",
+    "pending": false,
+    "paused": true,
+    "requests": 4,
+    "submissions": 4,
+    "callbackPending": false,
+    "metrics": {
+      "logicalWidthCssPx": 320,
+      "logicalHeightCssPx": 240,
+      "requestedPixelRatio": 1
+    },
+    "lastConfiguration": {
+      "status": "resized",
+      "requested": {
+        "logicalWidthCssPx": 320,
+        "logicalHeightCssPx": 240,
+        "requestedPixelRatio": 1
+      },
+      "size": {
+        "width": 320,
+        "height": 240,
+        "unit": "drawing-buffer-px"
+      },
+      "effectivePixelRatio": {
+        "x": 1,
+        "y": 1
+      }
+    },
+    "lastFailure": null,
+    "viewport": {
+      "scope": "full-canvas",
+      "graphics": {
+        "state": "failed",
+        "failure": {
+          "code": "CONTEXT_LOST",
+          "stage": "renderFrame",
+          "cleanupFailed": false
+        },
+        "cleanupFailed": false
+      },
+      "state": "terminal",
+      "size": null
+    },
+    "display": "NOT_VERIFIED"
+  }
+}
+### Ran Playwright code
+```js
+await page.evaluate('() => editorVfxPreview.inspect()');
+```

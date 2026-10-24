@@ -1,0 +1,304 @@
+{
+  "status": "CPU_OBSERVATION_ONLY",
+  "source": {
+    "metadata": "fe5c87c2e5cba46b43482080f15f5ed607450bb7e15cc72dff3f515c8969efc7",
+    "image": "f31783508fe55cc39a421b9f3505503a831d7727605c1f2278e4a690585d3cd2",
+    "width": 128,
+    "height": 256
+  },
+  "geometry": {
+    "status": "resolved",
+    "resourceLoading": "NOT_PERFORMED",
+    "effectId": "once",
+    "atlasRevision": "Symbol(atlas-metadata-snapshot)",
+    "frames": [
+      {
+        "reference": {
+          "projectId": "ve12",
+          "resourceId": "attack",
+          "subresourceId": "0000"
+        },
+        "revision": "Symbol(atlas-metadata-snapshot)",
+        "pageId": "p0",
+        "imageSourceId": "image",
+        "pagePixels": {
+          "unit": "image-pixel",
+          "width": 128,
+          "height": 256
+        },
+        "rectangle": {
+          "unit": "image-pixel",
+          "origin": "top-left",
+          "bounds": "half-open",
+          "x": 78,
+          "y": 1,
+          "width": 32,
+          "height": 56
+        },
+        "uv": {
+          "unit": "normalized-texture",
+          "origin": "first-uploaded-row",
+          "left": 0.609375,
+          "top": 0.00390625,
+          "right": 0.859375,
+          "bottom": 0.22265625
+        },
+        "rotation": "none",
+        "trim": null,
+        "sourceSize": null
+      },
+      {
+        "reference": {
+          "projectId": "ve12",
+          "resourceId": "attack",
+          "subresourceId": "0002"
+        },
+        "revision": "Symbol(atlas-metadata-snapshot)",
+        "pageId": "p0",
+        "imageSourceId": "image",
+        "pagePixels": {
+          "unit": "image-pixel",
+          "width": 128,
+          "height": 256
+        },
+        "rectangle": {
+          "unit": "image-pixel",
+          "origin": "top-left",
+          "bounds": "half-open",
+          "x": 71,
+          "y": 59,
+          "width": 31,
+          "height": 55
+        },
+        "uv": {
+          "unit": "normalized-texture",
+          "origin": "first-uploaded-row",
+          "left": 0.5546875,
+          "top": 0.23046875,
+          "right": 0.796875,
+          "bottom": 0.4453125
+        },
+        "rotation": "none",
+        "trim": null,
+        "sourceSize": null
+      }
+    ]
+  },
+  "rows": [
+    {
+      "label": "play",
+      "once": {
+        "id": "Symbol(sprite-animation-playback)",
+        "projectId": "ve12",
+        "clipId": "once",
+        "directionIndex": null,
+        "state": "playing",
+        "elapsedMs": 0,
+        "sampledElapsedMs": 0,
+        "frameIndex": 0,
+        "frame": {
+          "projectId": "ve12",
+          "resourceId": "attack",
+          "subresourceId": "0000"
+        },
+        "completed": false
+      },
+      "repeat": {
+        "id": "Symbol(sprite-animation-playback)",
+        "projectId": "ve12",
+        "clipId": "repeat",
+        "directionIndex": null,
+        "state": "playing",
+        "elapsedMs": 0,
+        "sampledElapsedMs": 0,
+        "frameIndex": 0,
+        "frame": {
+          "projectId": "ve12",
+          "resourceId": "attack",
+          "subresourceId": "0000"
+        },
+        "completed": false
+      }
+    },
+    {
+      "label": "125ms",
+      "once": {
+        "id": "Symbol(sprite-animation-playback)",
+        "projectId": "ve12",
+        "clipId": "once",
+        "directionIndex": null,
+        "state": "playing",
+        "elapsedMs": 125,
+        "sampledElapsedMs": 125,
+        "frameIndex": 1,
+        "frame": {
+          "projectId": "ve12",
+          "resourceId": "attack",
+          "subresourceId": "0002"
+        },
+        "completed": false
+      },
+      "repeat": {
+        "id": "Symbol(sprite-animation-playback)",
+        "projectId": "ve12",
+        "clipId": "repeat",
+        "directionIndex": null,
+        "state": "playing",
+        "elapsedMs": 125,
+        "sampledElapsedMs": 125,
+        "frameIndex": 1,
+        "frame": {
+          "projectId": "ve12",
+          "resourceId": "attack",
+          "subresourceId": "0002"
+        },
+        "completed": false
+      }
+    },
+    {
+      "label": "once completed; repeat paused for1000ms",
+      "once": {
+        "id": "Symbol(sprite-animation-playback)",
+        "projectId": "ve12",
+        "clipId": "once",
+        "directionIndex": null,
+        "state": "completed",
+        "elapsedMs": 250,
+        "sampledElapsedMs": 250,
+        "frameIndex": 1,
+        "frame": {
+          "projectId": "ve12",
+          "resourceId": "attack",
+          "subresourceId": "0002"
+        },
+        "completed": true
+      },
+      "repeat": {
+        "id": "Symbol(sprite-animation-playback)",
+        "projectId": "ve12",
+        "clipId": "repeat",
+        "directionIndex": null,
+        "state": "paused",
+        "elapsedMs": 125,
+        "sampledElapsedMs": 125,
+        "frameIndex": 1,
+        "frame": {
+          "projectId": "ve12",
+          "resourceId": "attack",
+          "subresourceId": "0002"
+        },
+        "completed": false
+      }
+    },
+    {
+      "label": "resume+125ms",
+      "once": {
+        "id": "Symbol(sprite-animation-playback)",
+        "projectId": "ve12",
+        "clipId": "once",
+        "directionIndex": null,
+        "state": "completed",
+        "elapsedMs": 250,
+        "sampledElapsedMs": 250,
+        "frameIndex": 1,
+        "frame": {
+          "projectId": "ve12",
+          "resourceId": "attack",
+          "subresourceId": "0002"
+        },
+        "completed": true
+      },
+      "repeat": {
+        "id": "Symbol(sprite-animation-playback)",
+        "projectId": "ve12",
+        "clipId": "repeat",
+        "directionIndex": null,
+        "state": "playing",
+        "elapsedMs": 250,
+        "sampledElapsedMs": 0,
+        "frameIndex": 0,
+        "frame": {
+          "projectId": "ve12",
+          "resourceId": "attack",
+          "subresourceId": "0000"
+        },
+        "completed": false
+      }
+    },
+    {
+      "label": "stop",
+      "once": {
+        "id": "Symbol(sprite-animation-playback)",
+        "projectId": "ve12",
+        "clipId": "once",
+        "directionIndex": null,
+        "state": "completed",
+        "elapsedMs": 250,
+        "sampledElapsedMs": 250,
+        "frameIndex": 1,
+        "frame": {
+          "projectId": "ve12",
+          "resourceId": "attack",
+          "subresourceId": "0002"
+        },
+        "completed": true
+      },
+      "repeat": {
+        "id": "Symbol(sprite-animation-playback)",
+        "projectId": "ve12",
+        "clipId": "repeat",
+        "directionIndex": null,
+        "state": "stopped",
+        "elapsedMs": 0,
+        "sampledElapsedMs": 0,
+        "frameIndex": 0,
+        "frame": {
+          "projectId": "ve12",
+          "resourceId": "attack",
+          "subresourceId": "0000"
+        },
+        "completed": false
+      }
+    },
+    {
+      "label": "restart",
+      "once": {
+        "id": "Symbol(sprite-animation-playback)",
+        "projectId": "ve12",
+        "clipId": "once",
+        "directionIndex": null,
+        "state": "completed",
+        "elapsedMs": 250,
+        "sampledElapsedMs": 250,
+        "frameIndex": 1,
+        "frame": {
+          "projectId": "ve12",
+          "resourceId": "attack",
+          "subresourceId": "0002"
+        },
+        "completed": true
+      },
+      "repeat": {
+        "id": "Symbol(sprite-animation-playback)",
+        "projectId": "ve12",
+        "clipId": "repeat",
+        "directionIndex": null,
+        "state": "playing",
+        "elapsedMs": 0,
+        "sampledElapsedMs": 0,
+        "frameIndex": 0,
+        "frame": {
+          "projectId": "ve12",
+          "resourceId": "attack",
+          "subresourceId": "0000"
+        },
+        "completed": false
+      }
+    }
+  ],
+  "limitations": [
+    "No browser image read or GPU session",
+    "No effect-instance lifetime/attachment/cleanup observation",
+    "Monster track is not verified VFX artwork"
+  ]
+}

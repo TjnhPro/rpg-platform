@@ -1,0 +1,1 @@
+{"compilerOptions":{"target":"ES2022","module":"NodeNext","strict":true,"noUncheckedIndexedAccess":true,"exactOptionalPropertyTypes":true,"types":[],"lib":["ES2022","DOM","DOM.Iterable"],"skipLibCheck":false,"rootDir":".","outDir":"../../.artifacts/ve11-manual"},"files":["vfx.mts","atlas-mvp.mts"]}

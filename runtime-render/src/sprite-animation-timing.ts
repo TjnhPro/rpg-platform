@@ -78,6 +78,8 @@ function duration(timing: SpriteAnimationTiming, frameCount: number, repeat: Spr
   return durationMs;
 }
 
+const timedClips = new WeakSet<SpriteTimedClip>();
+
 /** Recapture SA02 metadata; retain exact clip identity/order and one normalized timing. */
 export function createSpriteTimedClip(input: SpriteTimedClipInput): SpriteTimedClip {
   const data = record(input, ['clip', 'timing', 'repeat']);
@@ -88,7 +90,9 @@ export function createSpriteTimedClip(input: SpriteTimedClipInput): SpriteTimedC
   const clip = createSpriteAnimationClip(data.clip as SpriteAnimationClip);
   const frameCount = clip.sequence.frames.length;
   const durationMs = duration(timing, frameCount, repeat);
-  return Object.freeze({ clip, timing, repeat, frameCount, durationMs });
+  const result = Object.freeze({ clip, timing, repeat, frameCount, durationMs });
+  timedClips.add(result);
+  return result;
 }
 
 /**
@@ -116,4 +120,16 @@ export function sampleSpriteAnimationTiming(
     else upper = middle;
   }
   return Object.freeze({ elapsedMs: elapsed === 0 ? 0 : elapsed, frameIndex: lower - 1, completed: false });
+}
+
+/** Package-private playback admission: share issued immutable data, recapture other input. */
+export function capturePlaybackTimedClip(input: SpriteTimedClip): SpriteTimedClip {
+  if (timedClips.has(input)) return input;
+  const data = record(input, ['clip', 'timing', 'repeat', 'frameCount', 'durationMs']);
+  const clip = createSpriteTimedClip({ clip: data.clip as SpriteAnimationClip,
+    timing: data.timing as SpriteAnimationTimingInput, repeat: data.repeat as SpriteAnimationRepeat });
+  if (data.frameCount !== clip.frameCount || data.durationMs !== clip.durationMs) {
+    throw new TypeError('Timed clip derived metadata mismatch');
+  }
+  return clip;
 }

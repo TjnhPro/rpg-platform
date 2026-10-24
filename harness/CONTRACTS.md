@@ -1073,3 +1073,82 @@ root names, zero removed or changed old declarations, including old unions.
 [Exact inventory](../runtime-render/docs/sprite-animation-api-inventory-v0.10.12.md)
 and [closure report](checkpoints/sprite-animation-v0.10.12.md) distinguish
 compile compatibility from finite API/pixel evidence and Developer acceptance.
+
+Phase11 v0.11.0 VE01 is architecture-only; zero exported-symbol/declaration delta.
+[VFX ledger](visual-effect-v0.11.0.md) separates definition, effect instance,
+Phase10 playback and Phase8 drawable, with explicit lifetime/attachment/release
+policies. [Current root inventory](visual-effect-api-inventory-v0.11.0.md) confirms
+Render271/Editor138/Client0. Neutral SpriteTimedClip sampling exists; neutral live
+playback/binding does not. U1 requires Developer approval before the smallest
+additive Phase10 extension; this proposal grants no production/API expansion.
+
+Phase11 v0.11.1 VE02 adds nine Render public roots for immutable sprite-sequence
+definition capture, source revision pins and explicit Phase7 metadata binding.
+Prior271 Render declarations unchanged; metadata resolution is NOT_PERFORMED
+resource loading, never a live playback/texture capability. [Contract](../runtime-render/docs/visual-effect-v0.11.1.md), [checkpoint](checkpoints/visual-effect-v0.11.1.md).
+
+Approved Phase10 upstream U1 adds twelve single-sequence playback/binding roots
+(Render280→292), with all old public declarations unchanged. Neutral direction
+is null; both modes share one sampler/transport/admission/cleanup implementation.
+[Upstream delta](../runtime-render/docs/sprite-animation-u1.md), [checkpoint](checkpoints/visual-effect-u1.md).
+U1 is delivered; historical VE01/VE02 dependency reports remain baseline-specific.
+
+Phase11 v0.11.2 VE03 adds ten Render roots for issued effect instance admission,
+opaque identity, lookup/list, detached snapshots and idempotent removal.
+Render292→302, old root declarations unchanged. Canonical Phase8 membership
+stores live entries; existing internal end hooks dispose owned U1 playback on
+remove/clear/scene/session end. No pixels, resource lease or advancement.
+[Contract](../runtime-render/docs/visual-effect-v0.11.2.md), [checkpoint](checkpoints/visual-effect-v0.11.2.md).
+
+Phase11 v0.11.3 VE04 adds six Render roots for effect playback controls and frozen
+canonical readback, Render302→308; no old root declarations change. Commands use
+owned U1 transport; stop hides retained Phase8 membership, restart delegates to
+stop/play. Readiness is NOT_CHECKED; no effect advance/duration/binding yet.
+[Contract](../runtime-render/docs/visual-effect-v0.11.3.md), [checkpoint](checkpoints/visual-effect-v0.11.3.md).
+
+Phase11 v0.11.4 VE05 adds nine Render roots for explicit-delta effect advance,
+finite repeat creation and detached completion history. Render308→317, all prior
+root declarations unchanged. Canonical Phase10 run elapsed drives both frame and
+presentation lifetime; completion retires Phase8 membership and retained usage.
+[Contract](../runtime-render/docs/visual-effect-v0.11.4.md), [checkpoint](checkpoints/visual-effect-v0.11.4.md).
+
+Phase11 v0.11.5 VE06 adds four Render roots for explicit effect world placement
+and frozen readback, Render317→321; all old root declarations unchanged. Uses
+Phase4/8 translation-only anchor/offset and canonical transform admission;
+preserves playback/resource/identity and separates camera/authored/gameplay state.
+[Contract](../runtime-render/docs/visual-effect-v0.11.5.md), [checkpoint](checkpoints/visual-effect-v0.11.5.md).
+
+Phase11 v0.11.6 VE07 adds six Render roots for same-scene ordinary visual target
+attachment, explicit sync, freeze detach and readback; Render321→327, old root
+declarations unchanged. Phase4/8 applied attachment/visibility and lifecycle are
+canonical; target loss removes the effect, with no transport coupling or ticker.
+[Contract](../runtime-render/docs/visual-effect-v0.11.6.md), [checkpoint](checkpoints/visual-effect-v0.11.6.md).
+
+Phase11 v0.11.7 VE08 adds syncVisualEffectFrame and two types, Render327→330;
+old public declarations unchanged. Reuses definition source validation and U1
+selected-frame/Phase8 atomic binding; explicit host attachment/frame sync and
+canonical camera submission. No transport advance or resource acquisition.
+[Contract](../runtime-render/docs/visual-effect-v0.11.7.md), [checkpoint](checkpoints/visual-effect-v0.11.7.md).
+
+Phase11 v0.11.8 VE09 adds nine Render roots330→339 for bounded resource/lifetime diagnostics, owner-brand error classification and per-scene256 active-effect admission. Prior root declarations unchanged. Explicit teardown preserves original exceptions after attempting cleanup; Phase7/8 resource rights stay owner-scoped. [Contract](../runtime-render/docs/visual-effect-v0.11.8.md), [checkpoint](checkpoints/visual-effect-v0.11.8.md).
+
+Phase11 v0.11.9 VE10 adds an optional Editor browser VFX consumer using authored
+Asset/Scene adapters and unchanged Render roots. Explicit host Step deltas,
+transport/placement/attachment controls and async teardown preserve Document
+content/revision/dirty. All root declarations unchanged (Render339/Editor138).
+No upstream delta, schema or dependency change.
+[Runbook](../editor/docs/visual-effect-preview-v0.11.9.md), [checkpoint](checkpoints/visual-effect-v0.11.9.md).
+
+Phase11 v0.11.10 VE11 adds a private Client neutral VFX intent adapter and optional
+browser composition over unchanged Render roots. Client owns bounded pending/live
+correlation and per-request leases; Render owns canonical state, playback and
+target-loss policy. Headless package roots unchanged; no Engine event bus or
+gameplay authority. Browser media observation remains unverified.
+[Runbook](../game-client/manual/vfx.md), [checkpoint](checkpoints/visual-effect-v0.11.10.md).
+
+Phase11 [v0.11.12 VE13 closure audit](checkpoints/visual-effect-v0.11.12.md)
+records 13 numbered checkpoints plus the approved U1 commit, 68 additive Render
+roots (271→339), unchanged prior emitted declarations and unchanged consumer
+roots. Closure is evidence-only. Combined VE12 and Client pixel/lifetime/isolation
+proof remains incomplete: BLOCKED_WITH_EVIDENCE, not MVP_PASS or phase acceptance.
+No compatibility migration, merge, release or next phase is authorized by this audit.
