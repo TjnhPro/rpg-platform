@@ -23,7 +23,7 @@ const numeric = (value: Numeric) => typeof value === 'number' ? value : NaN;
 export function VisualObjectPlacementWorkspace({ active, context, grant, showGuidance, children }: {
   readonly active: ActiveEditorProject | null; readonly context: AssetManagerProject | null;
   readonly grant: AssetResourceGrant | null; readonly showGuidance: boolean;
-  readonly children: (panel: ReactNode, viewport: ReactNode) => ReactNode;
+  readonly children: (panel: ReactNode, viewport: ReactNode, previewDocument: DocumentSession | null) => ReactNode;
 }) {
   const [held, setHeld] = useState<Held | null>(null), [controller, setController] = useState<Controller | null>(null);
   const [selection, setSelection] = useState<VisualInspectorSelection>();
@@ -205,5 +205,6 @@ export function VisualObjectPlacementWorkspace({ active, context, grant, showGui
       <Text>Save Scene, Assets and Project separately. Existing-file updates require host CAS. After edits acquire preview again. VFX is an authoring label; playback and canvas picking are unavailable.</Text>
     </Stack>
   </EditorPanel>;
-  return children(panel, <VisualViewport document={map?.document ?? null} catalog={catalog} grant={grant} showGuidance={showGuidance} />);
+  return children(panel, <VisualViewport document={map?.document ?? null} catalog={catalog} grant={grant} showGuidance={showGuidance} />,
+    map ? current?.session ?? null : null);
 }
