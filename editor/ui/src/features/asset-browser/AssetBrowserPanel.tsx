@@ -1,10 +1,11 @@
 import { Alert, Button, Group, Select, Stack, Text, TextInput, Title } from '@mantine/core';
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   createAssetManagerProject, closeAssetManagerProject, getAssetManagerProjectSnapshot,
   rebuildAssetManagerCatalog, searchManagedAssets, selectManagedAsset, getManagedAssetSelection,
   inspectManagedAsset, assetBrowserCategories, loadDocument, getProjectSessionSnapshot,
-  registerExistingAssetResource, adoptAssetManagerCatalog,
+  registerExistingAssetResource, registerManagedAsset, adoptAssetManagerCatalog, createDocumentSession,
+  saveDocument, trackProjectDocument, replaceProjectManifest,
   type AssetManagerProject, type ExistingResourcePort, type AssetRegistrationCandidate,
 } from '@rpg-platform/editor';
 import type { ActiveEditorProject } from '../project-manager/ProjectManagerPanel.js';
@@ -25,6 +26,12 @@ export function AssetBrowserWorkspace({ active, resourcePort = null, onRegistere
   const [sourcePath, setSourcePath] = useState('');
   const [message, setMessage] = useState('No active project.');
   const [pending, setPending] = useState(false);
+  const [drafts, setDrafts] = useState<readonly AssetRegistrationCandidate[]>([]);
+  const [receipts, setReceipts] = useState('No asset write attempted.');
+  const currentActive = useRef(active);
+  currentActive.current = active;
+  useEffect(() => () => { currentActive.current = null; }, []);
+  useEffect(() => { setDrafts([]); setReceipts('No asset write attempted.'); }, [active?.session]);
   const [, refresh] = useState(0);
   useEffect(() => {
     let cancelled = false;
@@ -69,12 +76,57 @@ export function AssetBrowserWorkspace({ active, resourcePort = null, onRegistere
           metadata: category && category !== 'uncategorized' ? { editorBrowserCategory: category } : {}, sources: [source] },
         source, documentIdentity: { projectId: snapshot.projectId, documentId: assetId },
         documentLocator: { type: 'project-relative', path: `${assetId}.asset.json` } }, resourcePort);
+      if (currentActive.current !== active) return;
       if (result.status !== 'admitted') { setMessage(`Register: ${result.status} · ${result.reason}`); return; }
       adoptAssetManagerCatalog(context, result.candidate.catalog, result.candidate.generation);
+      setDrafts(current => [...current, result.candidate]);
       onRegistered?.(result.candidate); refresh(value => value + 1);
       setMessage('Registered in memory · Asset Document and manifest are NOT_COMMITTED.');
-    } catch { setMessage('Registration rejected; inspect explicit ID/path and active project.'); }
-    finally { setPending(false); }
+    } catch { if (currentActive.current === active) setMessage('Registration rejected; inspect explicit ID/path and active project.'); }
+    finally { if (currentActive.current === active) setPending(false); }
+  }
+  function registerItem() {
+    if (!active || !context || !snapshot || pending) return;
+    try {
+      const candidate = registerManagedAsset(context, { identity: { projectId: snapshot.projectId, assetId }, kind: 'text',
+        metadata: { editorBrowserCategory: 'item', editorDisplayName: 'Metadata Item', vendor: { retained: true } } },
+        { projectId: snapshot.projectId, documentId: assetId }, { type: 'project-relative', path: `${assetId}.asset.json` });
+      adoptAssetManagerCatalog(context, candidate.catalog, candidate.generation);
+      setDrafts(current => [...current, candidate]); refresh(value => value + 1);
+      setMessage('Metadata Item registered in memory · NOT_COMMITTED.');
+    } catch { setMessage('Item registration rejected. Use an explicit unique project-local ID.'); }
+  }
+  async function saveAssets() {
+    if (!active || !context || !drafts.length || pending || !active.root.binding.writePort) return;
+    const project = getProjectSessionSnapshot(active.session);
+    if (project.savedRevision !== null) { setMessage('This host cannot replace an existing project manifest. Asset writes were not started.'); return; }
+    setPending(true); const outcomes: string[] = [];
+    try {
+      for (const draft of drafts) {
+        getAssetManagerProjectSnapshot(context);
+        const document = createDocumentSession(draft.document, null); document.open();
+        try {
+          const result = await saveDocument(document, active.root.binding.writePort, draft.reference.locator.path,
+            { kind: 'absent' }, { owner: 'asset', documentKind: 'asset', contentSchemaVersion: 1 });
+          if (currentActive.current !== active) return;
+          outcomes.push(`${draft.reference.locator.path}: ${result.status}`);
+          setReceipts(outcomes.join(' · '));
+          if (result.status !== 'committed' || result.acknowledgement !== 'applied') {
+            setMessage('Partial asset save. Manifest tracking unchanged; inspect actual receipts. No automatic retry.'); return;
+          }
+        } finally { document.close('discard'); }
+      }
+      getAssetManagerProjectSnapshot(context);
+      const current = getProjectSessionSnapshot(active.session);
+      if (current.savedRevision !== null) {
+        setMessage('Asset Documents committed, but the manifest was saved during this operation. Tracking remains unchanged; inspect files before continuing.'); return;
+      }
+      const manifest = drafts.reduce((candidate, draft) => trackProjectDocument(candidate, draft.reference), current.manifest);
+      replaceProjectManifest(active.session, manifest, current.currentRevision);
+      setDrafts([]); active.notifyManifestChange();
+      setMessage('Asset Documents committed. Manifest is modified in memory; use Project Manager Save separately.');
+    } catch { if (currentActive.current === active) setMessage('Asset operation interrupted or context changed. Check per-file receipts; no atomic rollback is promised.'); }
+    finally { if (currentActive.current === active) setPending(false); }
   }
   return children(context, <EditorPanel title="Asset Browser" subtitle="Project assets · resource kind and browser category are independent.">
     <Stack gap={editorTokens.spacing.standard}>
@@ -104,7 +156,13 @@ export function AssetBrowserWorkspace({ active, resourcePort = null, onRegistere
       <Group gap={editorTokens.spacing.compact}>
         <Button disabled={!context || pending || !resourcePort || !assetId || !sourcePath}
           onClick={() => void register()}>Register existing resource</Button>
+        <Button variant="default" disabled={!context || pending || !assetId} onClick={registerItem}>Register metadata Item</Button>
+        <Button disabled={!drafts.length || pending || !active?.root.binding.writePort}
+          onClick={() => void saveAssets()}>Save asset documents</Button>
       </Group>
+      <Text>{drafts.length} unsaved asset Documents · {receipts}</Text>
+      <Text>Save asset Documents before the first Project Save. Existing-file updates are unsupported by this finite host.</Text>
+      <Text>Switching project discards unsaved asset registrations. Save asset Documents and then the Project manifest first.</Text>
       {!resourcePort && <Text>Resource authorization host unavailable. Registration and image preview are unavailable.</Text>}
       <Alert title="Asset status" color={editorTokens.colors.neutral} role="status">{message}</Alert>
     </Stack>

@@ -117,7 +117,7 @@ export function Viewport({ showGuidance, contentFactory }: { readonly showGuidan
           Mounting does not acquire graphics. Acquire once per mount; Frame requests redraw.
           The host also submits on acquisition/resize demand.
           After hidden/zero-size suspension, use Resume when available; otherwise unmount/mount to acquire again.
-          No Scene, Camera, Animation or VFX content is connected; submitted frames do not prove display.
+          Optional feature content uses this same session. Submitted frames do not prove display.
         </Text>
       )}
       <Box className={classes.surface} bg={editorTokens.colors.viewportBackground}>

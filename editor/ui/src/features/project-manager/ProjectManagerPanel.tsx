@@ -1,5 +1,5 @@
 import { Alert, Button, Group, Select, Stack, Text, TextInput } from '@mantine/core';
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { createProject, openProject, saveProject, closeProjectSession,
   getProjectSessionSnapshot, type ProjectSession } from '@rpg-platform/editor';
 import { EditorPanel } from '../../components/panel/EditorPanel.js';
@@ -7,7 +7,8 @@ import { editorTokens } from '../../theme/index.js';
 import { connectProjectHost, type ProjectHostRoot } from './host.js';
 
 const locator = Object.freeze({ type: 'project-relative' as const, path: 'project.json' });
-export interface ActiveEditorProject { readonly session: ProjectSession; readonly root: ProjectHostRoot }
+export interface ActiveEditorProject { readonly session: ProjectSession; readonly root: ProjectHostRoot;
+  readonly notifyManifestChange: () => void }
 export function ProjectManagerWorkspace({ children }: {
   readonly children: (active: ActiveEditorProject | null, panel: ReactNode) => ReactNode;
 }) {
@@ -43,8 +44,9 @@ export function ProjectManagerWorkspace({ children }: {
   const active = sessions.get(projectId);
   const snapshot = active ? getProjectSessionSnapshot(active) : undefined;
   const root = roots.find((item) => item.projectId === projectId);
-  const capability = useMemo(() => active && root ? { session: active, root } : null,
-    [active, root, snapshot?.currentRevision]);
+  const notifyManifestChange = useCallback(() => setSessions(current => new Map(current)), []);
+  const capability = useMemo(() => active && root ? { session: active, root, notifyManifestChange } : null,
+    [active, root, snapshot?.currentRevision, notifyManifestChange]);
   const publish = (session: ProjectSession) => {
     if (!alive.current) { closeProjectSession(session, 'discard'); return; }
     setSessions((current) => new Map(current).set(projectId, session));
