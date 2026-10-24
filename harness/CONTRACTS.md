@@ -1129,3 +1129,5 @@ old public declarations unchanged. Reuses definition source validation and U1
 selected-frame/Phase8 atomic binding; explicit host attachment/frame sync and
 canonical camera submission. No transport advance or resource acquisition.
 [Contract](../runtime-render/docs/visual-effect-v0.11.7.md), [checkpoint](checkpoints/visual-effect-v0.11.7.md).
+
+Phase11 v0.11.8 VE09 adds nine Render roots330→339 for bounded resource/lifetime diagnostics, owner-brand error classification and per-scene256 active-effect admission. Prior root declarations unchanged. Explicit teardown preserves original exceptions after attempting cleanup; Phase7/8 resource rights stay owner-scoped. [Contract](../runtime-render/docs/visual-effect-v0.11.8.md), [checkpoint](checkpoints/visual-effect-v0.11.8.md).

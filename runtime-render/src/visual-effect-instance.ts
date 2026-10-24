@@ -10,6 +10,7 @@ import { addRenderVisualInstance, getRenderVisualInstance, listRenderVisualInsta
   removeRenderVisualInstance, readVisualInstanceFrameState, onVisualInstanceEnd, setRenderVisualInstanceVisible,
   setRenderVisualInstanceTransform, getRenderVisualInstanceTransform, getRenderVisualInstanceVisibility,
   getRenderVisualInstanceFailure, type RenderVisualScene, type RenderVisualInstance } from './visual-scene.js';
+import { getRenderVisualInstanceResource, getRenderVisualSceneDiagnostics } from './visual-scene.js';
 import { captureVisualInstanceTransform, type RenderVisualInstanceTransformSnapshot } from './visual-instance-transform.js';
 import { createOrthographicPlaneProjection, captureSourcePlanePoint2D, captureProjectionPoint2D,
   type PlaneProjectionPoint2D, type OrthographicPlaneProjection } from './plane-projection.js';
@@ -75,6 +76,9 @@ interface Data {
   completion: VisualEffectCompletionReceipt | null;
   lastWorldTransform: RenderVisualInstanceTransformSnapshot | null;
   attachment: EffectAttachment | undefined;
+  lastResource: VisualEffectResourceObservation | null;
+  lastFrameSync: VisualEffectDiagnosticsSnapshot['lastFrameSync'];
+  sceneCleanupFailed: boolean | null;
 }
 interface EffectAttachment {
   readonly target: RenderVisualInstance;
@@ -85,6 +89,75 @@ interface EffectAttachment {
 // Issuance/correlation only. Phase8 alone stores/enumerates live scene membership.
 const instances = new WeakMap<VisualEffectInstance, Data>();
 const effects = new WeakMap<RenderVisualInstance, Data>();
+const maxActiveEffects = 256;
+const workFailures = new WeakMap<object, VisualEffectWorkFailure>();
+export interface VisualEffectWorkFailure { readonly code: 'ACTIVE_EFFECT_LIMIT'; }
+export function getVisualEffectWorkFailure(error: unknown): VisualEffectWorkFailure | undefined {
+  return typeof error === 'object' && error !== null ? workFailures.get(error) : undefined;
+}
+export interface VisualEffectWorkSnapshot {
+  readonly activeEffects: number;
+  readonly maxActiveEffects: number;
+  /** Effect-owned operations are synchronous; no queue, load or promise is retained. */
+  readonly inFlightOperations: number;
+}
+export function getVisualEffectWorkSnapshot(scene: RenderVisualScene): VisualEffectWorkSnapshot {
+  const active = listVisualEffectInstances(scene);
+  return Object.freeze({ activeEffects: active.length, maxActiveEffects,
+    inFlightOperations: active.filter(handle => issued(handle).commanding).length });
+}
+export interface VisualEffectResourceObservation {
+  readonly resourceId: symbol;
+  /** Bounded prefixes, never revision equality tokens. Use Phase8 for exact live data. */
+  readonly sourceRevisionPrefix: string;
+  readonly frameKeyPrefix: string | null;
+  readonly atlasRevision: symbol | null;
+  readonly cleanupFailed: boolean;
+}
+export interface VisualEffectDiagnosticsSnapshot {
+  readonly instance: VisualEffectInstanceSnapshot;
+  readonly resourceState: 'unbound' | 'usable' | 'unavailable' | 'retired';
+  readonly resource: VisualEffectResourceObservation | null;
+  readonly lastFrameSync: 'not-attempted' | 'bound' | 'rejected' | 'threw';
+  /** Scene-wide uncertainty is independent of effect-local cleanupFailed. null = unobserved. */
+  readonly sceneCleanupFailed: boolean | null;
+}
+function observeResource(data: Data): 'unbound' | 'usable' | 'unavailable' | 'retired' {
+  const active = data.active;
+  if (!active) return 'retired';
+  const resource = getRenderVisualInstanceResource(active.scene, active.visual);
+  data.lastResource = resource ? Object.freeze({ resourceId: resource.resourceId,
+    sourceRevisionPrefix: resource.sourceRevision.slice(0, 2048),
+    frameKeyPrefix: resource.frame?.reference.subresourceId?.slice(0, 512) ?? null,
+    atlasRevision: resource.frame?.revision ?? null, cleanupFailed: resource.cleanupFailed }) : null;
+  return resource?.state ?? 'unbound';
+}
+/** Bounded data only: never captures lease, texture, scene, provider or native handles. */
+export function getVisualEffectDiagnosticsSnapshot(handle: VisualEffectInstance): VisualEffectDiagnosticsSnapshot {
+  const data = issued(handle), instance = getVisualEffectInstanceSnapshot(handle);
+  const resourceState = observeResource(data), scene = data.owner.deref();
+  if (scene) data.sceneCleanupFailed = (data.sceneCleanupFailed ?? false) || getRenderVisualSceneDiagnostics(scene).cleanupFailed;
+  return Object.freeze({ instance, resourceState, resource: data.lastResource,
+    lastFrameSync: data.lastFrameSync, sceneCleanupFailed: data.sceneCleanupFailed });
+}
+
+const coordinateFailures = new WeakSet<object>();
+/** Owner-local admission brand; never guesses from upstream exception messages. */
+export function isVisualEffectCoordinateFailure(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && coordinateFailures.has(error);
+}
+function admitFinitePoint(value: unknown): void {
+  if (typeof value !== 'object' || value === null) return;
+  const x = Object.getOwnPropertyDescriptor(value, 'x'), y = Object.getOwnPropertyDescriptor(value, 'y');
+  // Structural/accessor failures stay with the canonical coordinate owner.
+  if (!x || !y || !('value' in x) || !('value' in y)) return;
+  if (typeof x.value !== 'number' || !Number.isFinite(x.value)
+    || typeof y.value !== 'number' || !Number.isFinite(y.value)) {
+    const error = new TypeError('Effect point requires finite coordinates');
+    coordinateFailures.add(error);
+    throw error;
+  }
+}
 
 function record(input: unknown): Record<string, unknown> {
   if (typeof input !== 'object' || input === null || Array.isArray(input)
@@ -114,8 +187,9 @@ function sceneOperation<T>(operation: () => T): T {
   }
 }
 
-/** Terminal before cleanup; never throws into Phase8's owner-local end broadcast. */
-function end(data: Data, reason: NonNullable<VisualEffectInstanceSnapshot['reason']>, removeMembership: boolean): boolean {
+/** Terminal before cleanup. Broadcasts stay nonthrowing; explicit teardown preserves the first exception. */
+function end(data: Data, reason: NonNullable<VisualEffectInstanceSnapshot['reason']>, removeMembership: boolean,
+  propagate = false): boolean {
   const active = data.active;
   if (!active) return false;
   data.active = undefined;
@@ -123,8 +197,8 @@ function end(data: Data, reason: NonNullable<VisualEffectInstanceSnapshot['reaso
   data.attachment = undefined;
   data.snapshot = Object.freeze({ ...data.snapshot, state: 'removed', reason });
   effects.delete(active.visual);
-  let failed = false;
-  const attempt = (operation: () => void): void => { try { operation(); } catch { failed = true; } };
+  let failure: { error: unknown } | undefined;
+  const attempt = (operation: () => void): void => { try { operation(); } catch (error) { failure ??= { error }; } };
   if (attachment) attempt(attachment.unsubscribe);
   attempt(active.unsubscribe);
   if (active.binding) attempt(() => { active.binding!.unbind(); });
@@ -133,7 +207,10 @@ function end(data: Data, reason: NonNullable<VisualEffectInstanceSnapshot['reaso
     data.terminalPlayback = commandSpriteSequencePlayback(active.playback, { type: 'dispose' });
   });
   if (removeMembership) attempt(() => { removeRenderVisualInstance(active.scene, active.visual); });
-  if (failed) data.snapshot = Object.freeze({ ...data.snapshot, cleanupFailed: true });
+  if (failure) {
+    data.snapshot = Object.freeze({ ...data.snapshot, cleanupFailed: true });
+    if (propagate) throw failure.error;
+  }
   return true;
 }
 function membershipEnded(data: Data): void {
@@ -169,6 +246,11 @@ function createEffect(session: RenderFrameSession, scene: RenderVisualScene,
   const key = value.visualInstanceId;
   if (typeof key !== 'string' || key.length < 1 || key.length > 512 || /[\s\u0000-\u001f\u007f]/u.test(key)) invalid('INVALID_ID');
   if (sceneOperation(() => getRenderVisualInstance(scene, key))) invalid('DUPLICATE_ID');
+  if (listVisualEffectInstances(scene).length >= maxActiveEffects) {
+    const error = new RangeError('Active effect scene budget exceeded');
+    workFailures.set(error, Object.freeze({ code: 'ACTIVE_EFFECT_LIMIT' }));
+    throw error;
+  }
   const playback = createSpriteSequencePlayback({ clips: [definition.clip], clipId: definition.clip.clip.clipId });
   let visual: RenderVisualInstance | undefined, data: Data | undefined;
   try {
@@ -176,7 +258,8 @@ function createEffect(session: RenderFrameSession, scene: RenderVisualScene,
     const handle = Object.freeze({ id: Symbol('visual-effect-instance') }) as VisualEffectInstance;
     data = { handle, owner: new WeakRef(scene), active: { session, scene, visual, definition, playback, binding: undefined, unsubscribe: () => {} },
       terminalPlayback: getSpriteSequencePlaybackSnapshot(playback), commanding: false,
-      lastWorldTransform: null, attachment: undefined,
+      lastWorldTransform: null, attachment: undefined, lastResource: null,
+      lastFrameSync: 'not-attempted', sceneCleanupFailed: null,
       mode: durationMs !== null ? 'timed-repeat' : definition.clip.repeat,
       durationMs: durationMs ?? (definition.clip.repeat === 'once' ? definition.clip.durationMs : null), completion: null,
       snapshot: Object.freeze({ id: handle.id, effectId: definition.effectId,
@@ -228,7 +311,7 @@ export function removeVisualEffectInstance(scene: RenderVisualScene, handle: Vis
   catch (error) {
     if (data.active || getVisualEffectInstanceFailure(error)?.code !== 'SESSION_UNAVAILABLE') throw error;
   }
-  const removed = end(data, 'removed', true);
+  const removed = end(data, 'removed', true, true);
   if (data.snapshot.cleanupFailed) invalid('CLEANUP_FAILED', true);
   return removed;
 }
@@ -411,7 +494,7 @@ export function advanceVisualEffectInstance(handle: VisualEffectInstance, deltaM
     if (complete) {
       data.completion = Object.freeze({ instanceId: handle.id,
         reason: data.mode === 'once' ? 'clip-completed' : 'duration-elapsed', elapsedMs: after.elapsedMs, playback: after });
-      end(data, 'removed', true); // One canonical membership/playback cleanup, terminal before native release.
+      end(data, 'removed', true, true); // One canonical membership/playback cleanup, terminal before native release.
       if (data.snapshot.cleanupFailed) invalid('CLEANUP_FAILED', true);
     }
     return Object.freeze({ snapshot: getVisualEffectLifetimeSnapshot(handle), frameChanged: advanced.frameChanged, completedNow: complete });
@@ -456,6 +539,10 @@ export function setVisualEffectWorldPlacement(handle: VisualEffectInstance,
     }
     const projection = createOrthographicPlaneProjection(fields.projection as OrthographicPlaneProjection);
     if (projection.source.projectId !== data.snapshot.projectId) throw new TypeError('Effect world placement project mismatch');
+    if (typeof fields.placement === 'object' && fields.placement !== null) {
+      const point = Object.getOwnPropertyDescriptor(fields.placement, 'point');
+      if (point && 'value' in point) admitFinitePoint(point.value);
+    }
     const candidate = captureVisualInstanceTransform({ placement: fields.placement as PlaneProjectionPoint2D,
       anchor: fields.anchor as VisualAnchor2D, projection,
       local: { translation: { x: 0, y: 0 }, rotationRadians: 0, scale: { x: 1, y: 1 } },
@@ -538,6 +625,7 @@ export function attachVisualEffectInstance(handle: VisualEffectInstance,
       fields[key] = field.value;
     }
     if (fields.inheritance !== 'translation-only') throw new TypeError('Unsupported effect attachment inheritance');
+    admitFinitePoint(fields.localOffset);
     const target = fields.target as RenderVisualInstance, offset = captureProjectionPoint2D(fields.localOffset as PlanarPoint2D);
     const candidate = attachmentCandidate(active, target, offset);
     livePlayback(data);
@@ -621,10 +709,11 @@ export function syncVisualEffectFrame(handle: VisualEffectInstance,
     const pixels = capture(fields.pixels, ['imageSourceId', 'unit', 'width', 'height', 'layout']) as unknown as VisualEffectFrameInput['pixels'];
     const frameInput = { ...fields, pixels } as unknown as VisualEffectFrameInput;
     const failure = validateVisualEffectSources(active.definition, frameInput.atlas, frameInput.expectedRevision);
-    if (failure) return Object.freeze({ status: 'rejected', code: failure.code });
+    if (failure) { data.lastFrameSync = 'rejected'; return Object.freeze({ status: 'rejected', code: failure.code }); }
     const pin = active.definition.sources.find(source => source.sourceId === pixels.imageSourceId);
     if (!pin || active.definition.resource.sources[pin.sourceIndex]?.role !== 'image'
       || pin.revision !== frameInput.expectedSourceRevision) {
+      data.lastFrameSync = 'rejected';
       return Object.freeze({ status: 'rejected', code: 'SOURCE_REVISION_MISMATCH' });
     }
     livePlayback(data);
@@ -632,6 +721,10 @@ export function syncVisualEffectFrame(handle: VisualEffectInstance,
       throw new TypeError('Scene changed during effect frame capture');
     }
     active.binding ??= createSpriteSequenceVisualBinding(active.session, active.scene, active.visual, active.playback);
-    return active.binding.sync(frameInput);
-  } finally { data.commanding = false; }
+    const result = active.binding.sync(frameInput);
+    data.lastFrameSync = result.status;
+    if (result.status === 'bound') observeResource(data);
+    return result;
+  } catch (error) { data.lastFrameSync = 'threw'; throw error; }
+  finally { data.commanding = false; }
 }

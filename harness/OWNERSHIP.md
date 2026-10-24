@@ -393,3 +393,5 @@ existing Phase7/U1/Phase8 resource/geometry transactions and Phase9 scene camera
 No alternate renderer, timer, shader or GPU cache. Editor/Client unchanged build
 consumers; Harness evidence only, no foundation/boundary expansion.
 [Checkpoint](checkpoints/visual-effect-v0.11.7.md).
+
+v0.11.8 VE09: **runtime-render** owns bounded effect diagnostics/admission and owned cleanup orchestration over existing Phase7/8/U1 rights. Host owns acquired leases and async IO; no new cache/pool/clock or gameplay authority. Editor/Client unchanged build consumers; Harness evidence only. [Checkpoint](checkpoints/visual-effect-v0.11.8.md).

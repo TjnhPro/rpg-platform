@@ -6,6 +6,12 @@ import { getRenderFrameFailure as frameFailure, type RenderFrameFailure } from '
 import { getRenderTextureFailure as textureFailure, type RenderTextureFailure } from './render-texture.js';
 import { getVisualResourceCacheFailure as cacheFailure, type VisualResourceCacheFailure } from './visual-resource-cache.js';
 import { VisualPresentationError } from './visual-presentation-error.js';
+import { getVisualEffectInstanceFailure as effectInstanceFailure,
+  getVisualEffectPlaybackFailure as effectPlaybackFailure,
+  getVisualEffectLifetimeFailure as effectLifetimeFailure,
+  getVisualEffectWorkFailure as effectWorkFailure,
+  isVisualEffectCoordinateFailure } from './visual-effect-instance.js';
+import { getVisualEffectDefinitionFailure as effectDefinitionFailure } from './visual-effect-definition.js';
 export { getRenderCameraViewportSnapshot, type RenderCameraViewportSnapshot } from './camera-viewport.js';
 export { projectRenderCameraPoint, type RenderCameraProjectionResult } from './camera-projection.js';
 export { viewportToRenderCameraSelectedPlane, screenToRenderCameraSelectedPlane,
@@ -54,6 +60,33 @@ export function getRenderVisualDiagnostic(error: unknown): RenderVisualDiagnosti
   const session = getRenderFailure(error);
   if (session) return Object.freeze({ domain: 'session', code: session.code, cleanupFailed: null });
   return Object.freeze({ domain: 'unknown', code: 'UNKNOWN_FAILURE', cleanupFailed: null });
+}
+
+export type VisualEffectDiagnostic = RenderVisualDiagnostic
+  | { readonly domain: 'effect-coordinate'; readonly code: 'INVALID_COORDINATE'; readonly cleanupFailed: null }
+  | { readonly domain: 'effect-definition'; readonly code: NonNullable<ReturnType<typeof effectDefinitionFailure>>['code']; readonly cleanupFailed: null }
+  | { readonly domain: 'effect-instance'; readonly code: NonNullable<ReturnType<typeof effectInstanceFailure>>['code']; readonly cleanupFailed: boolean }
+  | { readonly domain: 'effect-playback'; readonly code: NonNullable<ReturnType<typeof effectPlaybackFailure>>['code']; readonly cleanupFailed: null }
+  | { readonly domain: 'effect-lifetime'; readonly code: NonNullable<ReturnType<typeof effectLifetimeFailure>>['code']; readonly cleanupFailed: null }
+  | { readonly domain: 'effect-work'; readonly code: NonNullable<ReturnType<typeof effectWorkFailure>>['code']; readonly cleanupFailed: null };
+
+/** Classify caught exceptions only. Canonical owner records take precedence.
+ * Result codes from frame sync and load snapshots remain their own explicit records. */
+export function getVisualEffectDiagnostic(error: unknown): VisualEffectDiagnostic {
+  const owner = getRenderVisualDiagnostic(error);
+  if (owner.domain !== 'unknown') return owner;
+  const definition = effectDefinitionFailure(error);
+  if (definition) return Object.freeze({ domain: 'effect-definition', code: definition.code, cleanupFailed: null });
+  const instance = effectInstanceFailure(error);
+  if (instance) return Object.freeze({ domain: 'effect-instance', code: instance.code, cleanupFailed: instance.cleanupFailed });
+  const playback = effectPlaybackFailure(error);
+  if (playback) return Object.freeze({ domain: 'effect-playback', code: playback.code, cleanupFailed: null });
+  const lifetime = effectLifetimeFailure(error);
+  if (lifetime) return Object.freeze({ domain: 'effect-lifetime', code: lifetime.code, cleanupFailed: null });
+  const work = effectWorkFailure(error);
+  if (work) return Object.freeze({ domain: 'effect-work', code: work.code, cleanupFailed: null });
+  if (isVisualEffectCoordinateFailure(error)) return Object.freeze({ domain: 'effect-coordinate', code: 'INVALID_COORDINATE', cleanupFailed: null });
+  return owner;
 }
 
 export {
@@ -431,3 +464,6 @@ export { attachVisualEffectInstance, syncVisualEffectAttachment, detachVisualEff
   getVisualEffectAttachmentSnapshot, type VisualEffectAttachmentInput,
   type VisualEffectAttachmentSnapshot } from './visual-effect-instance.js';
 export { syncVisualEffectFrame, type VisualEffectFrameInput, type VisualEffectFrameResult } from './visual-effect-instance.js';
+export { getVisualEffectDiagnosticsSnapshot, getVisualEffectWorkSnapshot, getVisualEffectWorkFailure,
+  type VisualEffectDiagnosticsSnapshot, type VisualEffectResourceObservation,
+  type VisualEffectWorkSnapshot, type VisualEffectWorkFailure } from './visual-effect-instance.js';
