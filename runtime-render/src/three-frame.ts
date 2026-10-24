@@ -1,4 +1,6 @@
-import { Camera, Object3D, REVISION, Scene, WebGLRenderer } from 'three';
+import { Camera, OrthographicCamera, Object3D, REVISION, Scene, WebGLRenderer } from 'three';
+import type { CameraFrameState } from './camera-frame-link.js';
+import { captureSourcePlanePoint2D } from './plane-projection.js';
 import type { AffineTransform2D } from './planar-affine.js';
 import { FrameError, getRenderFrameFailure } from './frame-failure.js';
 import { readBrowserCanvas } from './canvas-target.js';
@@ -18,7 +20,7 @@ export interface ThreeFrameBackend {
     readonly size: { readonly width: number; readonly height: number };
     readonly changed: boolean;
   };
-  readonly renderFrame: (demo?: DemoTextureRequest, items?: readonly VisualFrameItem[]) => void;
+  readonly renderFrame: (demo?: DemoTextureRequest, items?: readonly VisualFrameItem[], view?: CameraFrameState) => void;
   readonly clearVisualDrawable: (instance: object) => void;
   readonly uploadTexture: (sessionId: symbol, bitmap: ImageBitmap, options: RenderTextureOptions) => RenderTexture;
   readonly setVisualTransform: (instance: object, matrix: AffineTransform2D | null, visible: boolean, renderOrder: number) => void;
@@ -46,6 +48,7 @@ export function createThreeFrameBackend(
   let renderer: WebGLRenderer | undefined;
   let scene: Scene | undefined;
   let camera: Camera | undefined;
+  let viewCamera: OrthographicCamera | undefined;
   let viewportSize: ThreeFrameBackend['viewportSize'];
   let contextLost = false;
   let released = false;
@@ -76,6 +79,7 @@ export function createThreeFrameBackend(
     renderer = undefined;
     scene = undefined;
     camera = undefined;
+    viewCamera = undefined;
     let visualCleanupFailed = false;
     try { visualDraw.dispose(); } catch { visualCleanupFailed = true; }
     visualNodes.clear();
@@ -296,7 +300,7 @@ export function createThreeFrameBackend(
         throw error; // Unknown exceptions remain unknown; session handles cleanup.
       }
     },
-    renderFrame: (demo?: DemoTextureRequest, items: readonly VisualFrameItem[] = []): void => {
+    renderFrame: (demo?: DemoTextureRequest, items: readonly VisualFrameItem[] = [], view?: CameraFrameState): void => {
       if (contextLost || context.isContextLost()) {
         contextLost = true;
         throw new FrameError('CONTEXT_LOST', 'renderFrame');
@@ -313,8 +317,30 @@ export function createThreeFrameBackend(
       // Reconcile one frozen logical submission; empty items preserve the legacy clear.
       const previousFrame = renderer.info.render.frame;
       try {
-        visualDraw.synchronize(items);
-        renderer.render(scene, camera);
+        let applied: Camera = camera;
+        if (view !== undefined) {
+          const { left, right, top, bottom } = view.frustum;
+          viewCamera ??= new OrthographicCamera(left, right, top, bottom, -1, 1);
+          viewCamera.left = left; viewCamera.right = right;
+          viewCamera.top = top; viewCamera.bottom = bottom;
+          viewCamera.updateProjectionMatrix();
+          if (![...viewCamera.projectionMatrix.elements, ...viewCamera.projectionMatrixInverse.elements]
+            .every(value => Number.isFinite(Math.fround(value)))) throw new FrameError('FRAME_FAILED', 'renderFrame');
+          applied = viewCamera;
+        }
+        for (const item of items) {
+          if (view !== undefined) captureSourcePlanePoint2D(view.snapshot.camera.configuration.source, item.transform.placement);
+          const matrix = view === undefined ? item.transform.localToClip : item.transform.localToScene;
+          if (![matrix.a, matrix.b, matrix.c, matrix.d, matrix.tx, matrix.ty]
+            .every(value => Number.isFinite(Math.fround(value)))) throw new FrameError('FRAME_FAILED', 'renderFrame');
+          const node = visualNodes.get(item.instance);
+          if (node === undefined) throw new FrameError('FRAME_FAILED', 'renderFrame');
+          node.matrix.set(matrix.a, matrix.c, 0, matrix.tx,
+            matrix.b, matrix.d, 0, matrix.ty, 0, 0, 1, 0, 0, 0, 0, 1);
+          node.matrixWorldNeedsUpdate = true;
+        }
+        visualDraw.synchronize(items, view !== undefined);
+        renderer.render(scene, applied);
         if (demo !== undefined) {
           const backing = textureBacking(demo.texture);
           const native = backing === undefined ? undefined : nativeTextures.get(backing);

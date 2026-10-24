@@ -1,3 +1,9 @@
+# Camera host integration - v0.9.12
+
+[Two-host manual guide](../../harness/manual/camera-hosts.md): canonical camera,
+independent Editor on-demand / Client continuous scheduling, real PNG and honest
+CPU/native evidence. Browser and visual acceptance remain pending.
+
 # Editor Visual Resource Integration — v0.7.11
 
 [Editor-owned host guide](editor-visual-resource.md): authored catalog/reference to

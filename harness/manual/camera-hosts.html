@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8"><title>Editor and Client camera integration v0.9.12</title>
+<style>body{font:16px system-ui;margin:24px;color:#142333;background:#f6f7fa}.views{display:flex;flex-wrap:wrap;gap:24px}canvas{display:block;width:320px;height:240px;padding:0;border:0;outline:1px solid #345;transform:none;touch-action:none}button,select{margin:4px;padding:6px}pre{white-space:pre-wrap;max-height:360px;overflow:auto;font-size:12px}section{max-width:500px}</style>
+<h1>Two independent camera hosts</h1>
+<p>Original 32x48 PNG, verified against its committed manifest. Editor A: drag and wheel at pointer.
+Client B: neutral presentation with continuous frames after Start. Inspect logs separately from pixels.</p>
+<button id="mount">Mount both</button><button id="inspect">Inspect immutable inputs / cameras</button>
+<div class="views"><section><h2>Editor A</h2><canvas id="a"></canvas>
+<button id="acquire-a">Acquire A</button><button id="pan-a">Pan A (5,0)</button>
+<button id="suspend-a">Suspend A</button><button id="resume-a">Resume A</button><button id="close-a">Unmount A</button>
+<label>A ratio <select id="ratio-a"><option value="1">1</option><option value="2">2</option><option value="device">Device</option></select></label>
+<button id="resize-a">Toggle width A</button><button id="zero-a">Zero A</button><button id="restore-a">Restore A</button>
+<button id="loss-a">Native context loss A</button></section>
+<section><h2>Client B</h2><canvas id="b"></canvas>
+<button id="acquire-b">Acquire B</button><button id="start-b">Start B</button><button id="stop-b">Stop B</button>
+<button id="center-b">Center B at neutral (165,120)</button><button id="zoom-b">Zoom B 2</button><button id="close-b">Unmount B</button>
+<label>B ratio <select id="ratio-b"><option value="1">1</option><option value="2">2</option><option value="device">Device</option></select></label>
+</section></div><pre id="output"></pre>
+<script type="importmap">{"imports":{"@rpg-platform/runtime-render":"/runtime-render/dist/index.js","@rpg-platform/editor":"/editor/dist/index.js","three":"/node_modules/three/build/three.module.js"}}</script>
+<script type="module">
+import {mountCameraHosts} from '/.artifacts/camera-hosts/camera-hosts.mjs';
+const output=document.querySelector('#output'), a=document.querySelector('#a'), b=document.querySelector('#b');
+let hosts, mounting=false, alive=true;
+const log=(event,value)=>{output.textContent+=`${event}: ${JSON.stringify(value,(_,v)=>typeof v==='symbol'?String(v):v)}\n`;output.scrollTop=output.scrollHeight;};
+const ratio=id=>()=>{const value=document.querySelector(id).value;return value==='device'?devicePixelRatio:Number(value);};
+const actions={
+ mount:async()=>{if(hosts||mounting)throw new TypeError('Reload for new mounts');mounting=true;try{
+   const result=await mountCameraHosts(a,b,log,ratio('#ratio-a'),ratio('#ratio-b'));
+   if(!alive)result.close();else hosts=result;
+ }finally{mounting=false;}},
+ inspect:()=>hosts.inspect(), 'acquire-a':()=>hosts.editor.acquire(), 'pan-a':()=>hosts.editor.pan({x:5,y:0}),
+ 'suspend-a':()=>hosts.editor.suspend(), 'resume-a':()=>hosts.editor.resume(), 'close-a':()=>hosts.editor.close(),
+ 'resize-a':()=>{a.style.width=a.style.width==='480px'?'320px':'480px';hosts.editor.sync();},
+ 'zero-a':()=>{a.style.width='0px';hosts.editor.sync();},
+ 'restore-a':()=>{a.style.width='320px';hosts.editor.resume();},
+ 'acquire-b':()=>hosts.client.acquire(), 'start-b':()=>hosts.client.start(), 'stop-b':()=>hosts.client.stop(),
+ 'center-b':()=>hosts.client.center({plane:hosts.plane,point:{x:165,y:120}}),
+ 'zoom-b':()=>hosts.client.zoom(2), 'close-b':()=>hosts.client.close(),
+ 'loss-a':()=>{const gl=a.getContext('webgl2'), extension=gl?.getExtension('WEBGL_lose_context');
+   if(!extension)throw new TypeError('Actual native loss unavailable');extension.loseContext();},
+};
+for(const[id,action]of Object.entries(actions))document.getElementById(id).onclick=async()=>{
+ try{await action();}catch(error){log('Action rejected',{name:error?.name,message:error?.message});}
+};
+document.querySelector('#ratio-a').onchange=()=>hosts?.editor.sync();
+document.querySelector('#ratio-b').onchange=()=>hosts?.client.sync();
+addEventListener('pagehide',()=>{alive=false;hosts?.close();},{once:true});
+</script></html>

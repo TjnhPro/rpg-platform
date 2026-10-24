@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><title>Camera MVP CM20 v0.9.13</title>
+<style>
+body{font:16px system-ui;color:#152536;background:#f5f7fa;margin:24px}canvas{display:block;width:800px;height:450px;border:0;padding:0;outline:1px solid #456;transform:none;touch-action:none;background:#182536}section{margin:24px 0;overflow:auto}button,select,input{padding:7px;margin:4px}input{width:70px}pre{white-space:pre-wrap;font-size:12px;max-height:440px;overflow:auto;background:#fff;padding:12px}.status{color:#873c00}
+</style>
+<h1>Editor A / Client B — real Scene camera MVP</h1>
+<p>Map, Player and three Monster illustrations; these names have no gameplay rules.
+Both sessions consume the same Render package. A: drag to pan, wheel to zoom at cursor.
+Each canvas starts at 800 × 450 CSS px, world right/down, scale 2 CSS px/scene unit.</p>
+<p class="status">VISUAL_NOT_VERIFIED until a human observes the canvases. Logs, frame receipts and builds do not certify pixels.</p>
+<button id="mount">1. Mount both</button><button id="capture">Capture loaded baseline</button><button id="inspect">Inspect truth / transforms / order / resources</button>
+<section><h2>Editor A · on demand</h2><canvas id="a"></canvas>
+<button id="acquire-a">2. Acquire A</button><button id="pan-a">Pan A (5,0)</button>
+<button id="zoom-a">Center zoom ×2</button><button id="reset-a">Reset center / zoom</button>
+<label>World X<input id="x" type="number" value="110"></label><label>Y<input id="y" type="number" value="50"></label>
+<button id="project">Project → CSS / client → selected ground</button><br>
+<label>A DPR<select id="ratio-a"><option>1</option><option>2</option></select></label>
+<button id="resize-a">Toggle A width 800 / 640</button><button id="suspend-a">Suspend A</button><button id="resume-a">Resume A</button>
+<button id="zero-a">Zero A</button><button id="restore-a">Restore A</button>
+<button id="bounds-reject">Bounds reject</button><button id="bounds-clamp">Bounds clamp</button><br>
+<button id="bad-width">Invalid width 0</button><button id="bad-zoom">Invalid zoom 0</button><button id="nan-zoom">Invalid zoom NaN</button><button id="bad-plane">Unknown plane</button>
+<button id="close-a">Close A</button><button id="recreate-a">Recreate A on fresh canvas</button>
+</section>
+<section><h2>Client B · continuous after Start</h2><canvas id="b"></canvas>
+<button id="acquire-b">3. Acquire B</button><button id="start-b">4. Start B</button><button id="stop-b">Stop B</button>
+<button id="center-b">Center B (105,50)</button><button id="zoom-b">Zoom B ×2</button>
+<label>B DPR<select id="ratio-b"><option>1</option><option>2</option></select></label>
+<button id="resize-b">Toggle B width 800 / 640</button><button id="expired">Bind released B lease</button><button id="close-b">Close B</button>
+</section>
+<p>Capture after both loadState values say applied. Record native pixels separately using
+the <a href="camera-mvp.md">manual runbook</a>. Optional 2.5D numeric example runs below;
+this orthographic Scene does not claim 2.5D native drawing.</p>
+<button id="coordinates">Finite coordinate / height / negative observations</button>
+<pre id="output" aria-live="polite"></pre>
+<script type="importmap">{"imports":{"@rpg-platform/runtime-render":"/runtime-render/dist/index.js","@rpg-platform/editor":"/editor/dist/index.js","three":"/node_modules/three/build/three.module.js"}}</script>
+<script type="module">
+import {mountCameraMvp} from '/.artifacts/camera-mvp/camera-mvp.mjs';
+import {observeCameraMvpCoordinates} from '/.artifacts/camera-mvp/camera-mvp-coordinates.mjs';
+const output=document.querySelector('#output'), b=document.querySelector('#b');
+let a=document.querySelector('#a'), hosts, mounting=false, alive=true;
+const abort=new AbortController();
+const log=(event,value)=>{output.textContent+=`${event}: ${JSON.stringify(value,(_,v)=>typeof v==='symbol'?String(v):v)}\n`;output.textContent=output.textContent.slice(-65000);output.scrollTop=output.scrollHeight;};
+const point=()=>({plane:hosts.plane,point:{x:Number(document.querySelector('#x').value),y:Number(document.querySelector('#y').value)}});
+const bounds=movement=>({kind:'rectangle',plane:hosts.plane,min:{x:0,y:0},max:{x:320,y:240},movement,oversized:'reject'});
+const actions={
+ mount:async()=>{if(hosts||mounting)throw new TypeError('Mount already exists; reload to replace both');mounting=true;
+   try{const result=await mountCameraMvp(a,b,log,()=>Number(document.querySelector('#ratio-a').value),()=>Number(document.querySelector('#ratio-b').value),abort.signal);
+     if(!alive)result.close();else hosts=result;}finally{mounting=false;}},
+ capture:()=>hosts.capture(),inspect:()=>hosts.inspect(),
+ 'acquire-a':()=>hosts.editor.acquire(),'acquire-b':()=>hosts.client.acquire(),'start-b':()=>hosts.client.start(),'stop-b':()=>hosts.client.stop(),
+ 'pan-a':()=>hosts.editor.pan({x:5,y:0}),'zoom-a':()=>hosts.editor.zoom(2),
+ 'reset-a':()=>{hosts.editor.zoom(1);hosts.editor.center({plane:hosts.plane,point:{x:100,y:50}});},
+ project:()=>hosts.editor.project(point()),
+ 'resize-a':()=>{a.style.width=a.style.width==='640px'?'800px':'640px';hosts.editor.sync();},
+ 'resize-b':()=>{b.style.width=b.style.width==='640px'?'800px':'640px';hosts.client.sync();},
+ 'suspend-a':()=>hosts.editor.suspend(),'resume-a':()=>hosts.editor.resume(),
+ 'zero-a':()=>{a.style.width='0px';hosts.editor.sync();},'restore-a':()=>{a.style.width='800px';hosts.editor.resume();},
+ 'bounds-reject':()=>hosts.editor.bounds({plane:hosts.plane,point:{x:1000,y:1000}},bounds('reject')),
+ 'bounds-clamp':()=>hosts.editor.bounds({plane:hosts.plane,point:{x:1000,y:1000}},bounds('clamp')),
+ 'bad-width':()=>hosts.editor.project(point(),0),'bad-zoom':()=>hosts.editor.zoom(0),'nan-zoom':()=>hosts.editor.zoom(NaN),
+ 'bad-plane':()=>hosts.editor.project({...point(),plane:{...hosts.plane,coordinateSpaceId:'unknown'}}),
+ 'center-b':()=>hosts.client.center({plane:hosts.plane,point:{x:105,y:50}}),'zoom-b':()=>hosts.client.zoom(2),
+ expired:()=>hosts.client.bindExpiredResource(),'close-a':()=>hosts.editor.close(),'close-b':()=>hosts.client.close(),
+ 'recreate-a':()=>{const fresh=a.cloneNode(false);fresh.style.width='800px';hosts.recreateEditor(fresh);a.replaceWith(fresh);a=fresh;},
+ coordinates:()=>observeCameraMvpCoordinates(log),
+};
+for(const[id,action]of Object.entries(actions))document.getElementById(id).onclick=async()=>{
+ try{await action();}catch(error){log('Action rejected (read actual contract)',{name:error?.name,message:error?.message});}
+};
+document.querySelector('#ratio-a').onchange=()=>hosts?.editor.sync();
+document.querySelector('#ratio-b').onchange=()=>hosts?.client.sync();
+addEventListener('pagehide',()=>{alive=false;abort.abort();hosts?.close();},{once:true});
+</script></html>

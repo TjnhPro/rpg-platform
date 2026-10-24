@@ -4,6 +4,42 @@
 
 Read root agent guidance first.
 
+- [v0.9.10 CM16/CM17](docs/camera-v0.9.10.md): optional live camera/Scene binding
+  uses canonical Phase6 submission and private orthographic backend. Bound draws
+  use localToScene once, preserve Phase8 snapshots/depth/resources. Camera edits
+  invalidate only; fresh configure after every accepted resize. Receipt application
+  is historical submission evidence, not pixels. Legacy no-binding path remains.
+
+- [v0.9.5 CM09/CM10](docs/camera-v0.9.5.md): read current camera CSS mapping only
+  with exact latest Phase6 session resize receipt and matching host logical extent.
+  Preserve scale, separate accepted buffer/ratio, reject suspended/terminal/stale.
+  Historical configured-not-applied result is not a native camera/session binder.
+
+- [v0.9.4 CM07/CM08](docs/camera-v0.9.4.md): configured cameras share the existing
+  handle/lifecycle, with additive immutable view snapshots and explicit zoom limits.
+  Center/focus zoom commit atomically; use canonical Phase4 inverse/affine/residual
+  policy and exact current logical CSS context. No session/GPU binding yet.
+
+- [v0.9.3 CM06](docs/camera-v0.9.3.md): additive issued-handle set-center/pan,
+  source-plane units/axes, shared Phase4 admission/affine math and immutable commit
+  seam. No live binding/invalidation yet; do not change authored or gameplay positions.
+
+- [v0.9.2 CM05](docs/camera-v0.9.2.md): pure orthographic configuration uses
+  explicit per-axis CSS-px/source-unit scale, positive zoom and preserve-scale
+  extent policy with center at logical midpoint. No implicit DPR/fit, projection
+  calculator, viewport acceptance or change to the v0.9.1 lifecycle contract.
+
+- [v0.9.1 CM02/03/04](docs/camera-v0.9.1.md) adds real pure CPU camera state,
+  ephemeral identity and terminal lifecycle. Reuse Phase4 capture; preserve frozen
+  observations, no-op revision and host-exception/reentrant-disposal semantics.
+  No session binding, occupancy enforcement, GPU application or camera matrix yet.
+
+- [v0.9.0 CM01](docs/camera-v0.9.0.md) is Camera API_DESIGN_ONLY. Existing Phase4
+  axis-aligned mapping is not an arbitrary oblique camera; Phase8 already bakes
+  per-instance localToClip and uses a fixed private Camera. Future opt-in view
+  must avoid double projection and preserve legacy behavior, source depth and
+  authored/gameplay truth. CM01 made no runtime API or diagnostics union change.
+
 - [v0.8.10 SR15/SR17](../harness/checkpoints/scene-rendering-v0.8.10.md): use
   getRenderVisualDiagnostic for safe caught-error domain/code data; unknown never
   means success. Scene diagnostics count logical usages and preserve sticky cleanup
@@ -189,3 +225,11 @@ Read root agent guidance first.
   audit and sixty-addition public declaration inventory; no production closure
   delta. Keep authored identity, live handle, lease and frame receipt distinct.
   READY_FOR_DEVELOPER_REVIEW does not establish visual/functional acceptance.
+
+- [v0.9.6 CM11/CM12](docs/camera-v0.9.6.md): canonical camera projection reuses Phase4 mapping. Explicit null is logical-only CPU context; non-null requires current real Phase6 receipt, never fallback. CSS and optional host screen mapping remain separate from accepted device buffer. No authored/gameplay/depth mutation or GPU application.
+
+- [v0.9.7 CM13](docs/camera-v0.9.7.md): viewport/screen inverse returns only the explicit selected source plane. Require current issued camera view and current logical/accepted context; reuse Phase4 inverse cutoff/residual policy. No inferred elevation, perfect-source recovery, picking or state mutation.
+
+- [v0.9.8 CM14](docs/camera-v0.9.8.md): Render-owned affine ground/elevation composition before existing camera. Explicit presentation basis/origins/units and supplied inverse height; singular rejection via Phase4. No sheared orthographic alias, Scene/depth/resource mutation or native application.
+
+- [v0.9.9 CM15](docs/camera-v0.9.9.md): optional per-request bounds transition uses current view/viewport and target zoom, full visible extent, explicit clamp/reject and oversize reject/center. Atomic center+zoom; old methods unrestricted, no automatic resize teleport or persisted map policy.

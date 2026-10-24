@@ -7,10 +7,19 @@ import {
   type RenderViewportResizeReceipt,
 } from '@rpg-platform/runtime-render';
 
+/** Private composition seam; the viewport host retains session/scheduling ownership. */
+export interface EditorViewportContent {
+  readonly acquired: (session: RenderFrameSession) => void;
+  readonly configured: (session: RenderFrameSession, receipt: RenderViewportResizeReceipt,
+    metrics: RenderViewportMetrics) => void;
+  readonly release: () => void;
+}
+
 /** One UI mount; closed mounts never adopt a late graphics result or revive. */
 export function mountEditorViewport(
   target: HTMLCanvasElement, notify: (event: string, detail?: unknown) => void,
   pixelRatio: () => number = () => window.devicePixelRatio,
+  content?: EditorViewportContent,
 ) {
   const limits = { maxWidthPixels: 4096, maxHeightPixels: 4096, maxPixelCount: 4_000_000 };
   let acquisition: RenderFrameAcquisition | undefined;
@@ -80,6 +89,7 @@ export function mountEditorViewport(
     lastMetrics = Object.freeze(next);
     lastConfiguration = receipt;
     if (resume) paused = false;
+    content?.configured(current, receipt, next);
     notify('configured-not-submitted', receipt);
     return true;
   };
@@ -108,7 +118,8 @@ export function mountEditorViewport(
     const owned = session;
     session = undefined;
     cancel();
-    owned?.dispose(); // Retain acquisition for safe terminal/cleanup observations.
+    try { content?.release(); }
+    finally { owned?.dispose(); } // Retain acquisition for safe terminal observations.
   };
   const start = (): void => {
     if (closed || pending || document.hidden) { notify('start-unavailable'); return; }
@@ -128,6 +139,7 @@ export function mountEditorViewport(
           return;
         }
         session = acquired;
+        content?.acquired(acquired);
         // Initial native buffer is not yet configured for this UI's CSS/DPR.
         sync();
       } catch (error) { report(error); }

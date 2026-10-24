@@ -79,11 +79,11 @@ export function createVisualDrawScope(nodes: Map<object, Object3D>,
   };
   return {
     remove,
-    synchronize: (items: readonly VisualFrameItem[]): void => {
+    synchronize: (items: readonly VisualFrameItem[], cameraBound = false): void => {
       const active = new Set(items.map(item => item.instance));
       for (const instance of drawables.keys()) if (!active.has(instance)) remove(instance);
       for (const item of items) {
-        const matrix = item.transform.localToClip;
+        const matrix = cameraBound ? item.transform.localToScene : item.transform.localToClip;
         if (![matrix.a, matrix.b, matrix.c, matrix.d, matrix.tx, matrix.ty]
           .every(value => Number.isFinite(Math.fround(value)))) throw new FrameError('FRAME_FAILED', 'renderFrame');
         const { native, snapshot } = resolve(item.texture); // Revalidate every submitted right, including reused meshes.

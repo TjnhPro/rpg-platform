@@ -38,7 +38,8 @@ function record(value: unknown, keys: readonly string[], field: string): void {
   }
 }
 
-function point(input: PlanarPoint2D): PlanarPoint2D {
+/** Owner-local canonical numeric capture, not a package-root export. */
+export function captureProjectionPoint2D(input: PlanarPoint2D): PlanarPoint2D {
   record(input, ['x', 'y'], 'Projection point');
   const { x, y } = input;
   if (typeof x !== 'number' || !Number.isFinite(x) || typeof y !== 'number' || !Number.isFinite(y)) {
@@ -47,7 +48,8 @@ function point(input: PlanarPoint2D): PlanarPoint2D {
   return Object.freeze({ x, y });
 }
 
-function plane(input: ProjectionPlane2D): ProjectionPlane2D {
+/** Owner-local canonical plane capture, not a package-root export. */
+export function captureProjectionPlane2D(input: ProjectionPlane2D): ProjectionPlane2D {
   record(input, ['projectId', 'coordinateSpaceId', 'unit', 'axes'], 'Projection plane');
   const { projectId, coordinateSpaceId, unit, axes } = input;
   if (typeof projectId !== 'string' || projectId.length === 0 || /\s/u.test(projectId)
@@ -72,9 +74,9 @@ export function createOrthographicPlaneProjection(input: OrthographicPlaneProjec
   record(input, ['kind', 'source', 'destination', 'sourceOrigin', 'destinationOrigin', 'destinationUnitsPerSourceUnit'], 'Plane projection');
   const { kind, source, destination, sourceOrigin, destinationOrigin, destinationUnitsPerSourceUnit } = input;
   if (kind !== 'orthographic-plane') throw new TypeError('Only orthographic-plane projection is supported');
-  const capturedSource = plane(source), capturedDestination = plane(destination);
-  const capturedSourceOrigin = point(sourceOrigin), capturedDestinationOrigin = point(destinationOrigin);
-  const ratios = point(destinationUnitsPerSourceUnit);
+  const capturedSource = captureProjectionPlane2D(source), capturedDestination = captureProjectionPlane2D(destination);
+  const capturedSourceOrigin = captureProjectionPoint2D(sourceOrigin), capturedDestinationOrigin = captureProjectionPoint2D(destinationOrigin);
+  const ratios = captureProjectionPoint2D(destinationUnitsPerSourceUnit);
   if (ratios.x <= 0 || ratios.y <= 0) throw new TypeError('Projection unit ratios must be positive');
   return Object.freeze({ kind, source: capturedSource, destination: capturedDestination,
     sourceOrigin: capturedSourceOrigin, destinationOrigin: capturedDestinationOrigin,
@@ -109,14 +111,20 @@ export function projectPlanePoint2D(
   projectionInput: OrthographicPlaneProjection, input: PlaneProjectionPoint2D,
 ): PlaneProjectionPoint2D {
   const projection = createOrthographicPlaneProjection(projectionInput);
+  const p = captureSourcePlanePoint2D(projection.source, input);
+  let result = p;
+  for (const step of planeProjectionSteps(projection)) result = applyPlanarPoint2D(step, result);
+  return Object.freeze({ plane: projection.destination, point: result });
+}
+
+/** Owner-local shared admission; source is already canonically captured. */
+export function captureSourcePlanePoint2D(expected: ProjectionPlane2D, input: PlaneProjectionPoint2D): PlanarPoint2D {
   record(input, ['plane', 'point'], 'Projection input');
   const { plane: inputPlane, point: inputPoint } = input;
-  const actual = plane(inputPlane), p = point(inputPoint), expected = projection.source;
+  const actual = captureProjectionPlane2D(inputPlane), p = captureProjectionPoint2D(inputPoint);
   if (actual.projectId !== expected.projectId || actual.coordinateSpaceId !== expected.coordinateSpaceId
     || actual.unit !== expected.unit || actual.axes.x !== expected.axes.x || actual.axes.y !== expected.axes.y) {
     throw new TypeError('Projection source plane, unit or axes mismatch');
   }
-  let result = p;
-  for (const step of planeProjectionSteps(projection)) result = applyPlanarPoint2D(step, result);
-  return Object.freeze({ plane: projection.destination, point: result });
+  return p;
 }

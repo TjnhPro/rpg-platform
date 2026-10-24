@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Camera Scene — manual observation</title>
+<style>body{font:16px system-ui;margin:24px;background:#f6f7fa;color:#142333}canvas{width:320px;height:240px;border:1px solid #345}button{margin:4px;padding:8px}pre{white-space:pre-wrap;font-size:12px;max-height:400px;overflow:auto} .views{display:flex;gap:24px}</style>
+<h1>Camera / Scene / Frame</h1>
+<p>Original repository PNG through real Phase7 loading. Controls change only A; Draw B independently.
+No automatic frames. Inspect pixels separately from submission logs.</p>
+<div class="views"><section><h2>A</h2><canvas id="a" width="320" height="240"></canvas></section><section><h2>B</h2><canvas id="b" width="320" height="240"></canvas></section></div>
+<p id="controls"></p><pre id="output"></pre>
+<script type="importmap">{"imports":{"@rpg-platform/runtime-render":"/runtime-render/dist/index.js","three":"/node_modules/three/build/three.module.js"}}</script>
+<script type="module">
+import {openCameraScene} from '/.artifacts/camera-scene/camera-scene.mjs';
+const output=document.querySelector('#output');
+const report=(label,value)=>{output.textContent+=`${label}: ${JSON.stringify(value,(_,v)=>typeof v==='symbol'?String(v):v instanceof Error?{name:v.name,message:v.message}:v)}\n`;output.scrollTop=output.scrollHeight;};
+const projectId='camera-scene-manual';
+const provider={scope:{projectId,providerId:Symbol('original-sample'),authorizationGeneration:'1'},async read(request){
+  if(request.scope.providerId!==provider.scope.providerId||request.scope.projectId!==projectId
+    ||request.scope.authorizationGeneration!=='1'||request.identity.projectId!==projectId
+    ||request.identity.resourceId!=='traveler'||request.sourceIndex!==0||request.source.role!=='image'
+    ||request.source.locator.path!=='samples/traveler.png')return {status:'failed',code:'SOURCE_DENIED'};
+  const response=await fetch('/runtime-render/manual/scene-mvp-assets/traveler.png');
+  if(!response.ok)return {status:'failed',code:'SOURCE_NOT_FOUND'};
+  const bytes=new Uint8Array(await response.arrayBuffer());
+  if(bytes.length>request.maxBytes)return {status:'failed',code:'CONTENT_TOO_LARGE'};
+  return {status:'provided',bytes,contentLength:bytes.length,mediaType:'image/png',revision:'original-traveler-v1'};
+}};
+let a,b,busy=false,alive=true;
+const actions={
+ 'Open A+B':async()=>{if(a||b)throw new TypeError('Close before reopening');try{
+   a=await openCameraScene({target:document.querySelector('#a')},provider,(label,value)=>report('A '+label,value));
+   b=await openCameraScene({target:document.querySelector('#b')},provider,(label,value)=>report('B '+label,value));
+   if(!alive){a.close();b.close();}else {a.draw();b.draw();}
+ }catch(error){a?.close();b?.close();a=b=undefined;throw error;}},
+ 'Pan A':()=>a.pan(),'Zoom A':()=>a.zoom(),'No-op A':()=>a.noOp(),'Draw A':()=>a.draw(),'Draw B':()=>b.draw(),
+ 'Inspect A':()=>a.inspect(),'Inspect B':()=>b.inspect(),
+ 'Resize A DPR2':()=>a.resizeStale(),'Refresh A context':()=>a.refresh(),
+ 'Invalid zoom':()=>a.invalidZoom(),'Invalid width':()=>a.invalidWidth(),'Wrong plane':()=>a.wrongPlane(),'Released lease':()=>a.bindReleased(),
+ 'Unbind A':()=>a.unbind(),'Dispose camera A':()=>a.disposeCamera(),'Dispose scene A':()=>a.disposeScene(),
+ 'Lose native context A':()=>{const gl=document.querySelector('#a').getContext('webgl2');const extension=gl?.getExtension('WEBGL_lose_context');if(!extension)throw new TypeError('Native context loss extension unavailable');extension.loseContext();},
+ 'Close A':()=>a?.close(),'Close all':()=>{a?.close();b?.close();a=b=undefined;},
+};
+for(const [label,action]of Object.entries(actions)){const button=document.createElement('button');button.textContent=label;button.onclick=async()=>{if(busy)return;busy=true;try{await action();}catch(error){report('Rejected/failed',error);}finally{busy=false;}};document.querySelector('#controls').append(button);}
+addEventListener('pagehide',()=>{alive=false;a?.close();b?.close();},{once:true});
+</script>
+</html>

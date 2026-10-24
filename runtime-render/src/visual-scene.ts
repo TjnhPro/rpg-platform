@@ -1,4 +1,5 @@
 import { VisualPresentationError } from './visual-presentation-error.js';
+import { registerCameraScene, endCameraScene } from './camera-frame-link.js';
 import type { RenderFrameSession } from './frame-session.js';
 import { requireTextureSession, onTextureSessionEnd, getRenderTextureSnapshot } from './render-texture.js';
 import { retainVisualResourceLease, type VisualResourceLease } from './visual-resource-cache.js';
@@ -667,12 +668,14 @@ function createScope(sessionId: symbol) {
     prepare = undefined;
     const release = detach;
     detach = undefined; // Terminal before unlinking; no retained session/subscription.
-    try { drain(); } finally {
-      layers.clear();
-      policies.clear();
-      writeTransform = undefined; writeVisibility = undefined; writeOrdering = undefined;
-      readSuspended = undefined; edit = undefined;
-      try { release?.(); } catch (error) { noteCleanupFailure(); throw error; }
+    try { endCameraScene(handle); } finally {
+      try { drain(); } finally {
+        layers.clear();
+        policies.clear();
+        writeTransform = undefined; writeVisibility = undefined; writeOrdering = undefined;
+        readSuspended = undefined; edit = undefined;
+        try { release?.(); } catch (error) { noteCleanupFailure(); throw error; }
+      }
     }
     return snapshot;
   };
@@ -988,5 +991,6 @@ export function createRenderVisualScene(session: RenderFrameSession): RenderVisu
   () => readVisualViewportSuspension(session),
   (invalidate, instance) => checkVisualEdit(session, invalidate, instance));
   occupiedSessions.add(session);
+  registerCameraScene(scope.handle, session);
   return scope.handle;
 }

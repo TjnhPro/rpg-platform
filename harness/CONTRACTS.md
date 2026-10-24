@@ -1,5 +1,60 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase9 v0.9.14 CM20 closure is documentation/audit only. See the
+[15-checkpoint review packet](checkpoints/camera-v0.9.14.md) and
+[exact declaration/commit inventory](checkpoints/camera-v0.9.14-api.md).
+Render owns camera state, projection and native application; Phase4/6/7/8 remain
+canonical. Phase9 adds no breaking diagnostic union; accepted Phase6 migration
+remains separate. Private Editor/Client hosts share the Render public root.
+READY_FOR_DEVELOPER_REVIEW / FEATURE_NOT_VERIFIED / VISUAL_NOT_VERIFIED:
+CPU/build evidence does not establish native MVP acceptance. No v0.9.15.
+
+Phase9 v0.9.10 CM16/CM17 adds bindRenderCameraToVisualScene,
+getRenderCameraFrameSnapshot and three types. Canonical Phase6/8 path, optional
+private OrthographicCamera, localToScene once, exact issued resize/frame evidence.
+Render226->231; old declarations unchanged. No host scheduling/schema changes.
+See [contract](../runtime-render/docs/camera-v0.9.10.md).
+
+Phase9 v0.9.5 CM09/CM10 adds getRenderCameraViewportSnapshot and
+RenderCameraViewportSnapshot. Exact latest issued Phase6 receipt + matching CSS
+extent, preserve-scale logical mapping, no implicit DPR/native camera application.
+Existing declarations/unions unchanged. See [contract](../runtime-render/docs/camera-v0.9.5.md)
+and [checkpoint](checkpoints/camera-v0.9.5.md).
+
+Phase9 v0.9.4 CM07/CM08 adds seven Render-root names for configured-camera creation,
+view readback, absolute center/focus zoom and three readonly types. Old declarations
+stay unchanged. Explicit inclusive zoom policy, current CSS mapping and canonical
+Phase4 inverse/residual admission; no partial commit or implicit DPR/clamp. See
+[contract](../runtime-render/docs/camera-v0.9.4.md) and [checkpoint](checkpoints/camera-v0.9.4.md).
+
+Phase9 v0.9.3 CM06 adds Render-root `setRenderCameraCenter`, `panRenderCamera`
+and `RenderCameraPan`; old declarations stay unchanged. Source-plane translation
+uses Phase4 canonical admission/affine math; no-op preserves snapshot/revision,
+mismatch/nonfinite/absorbed/overflow rejects atomically. Issued handles only.
+See [contract](../runtime-render/docs/camera-v0.9.3.md) and
+[checkpoint](checkpoints/camera-v0.9.3.md). Live binding remains deferred.
+
+Phase9 v0.9.2 CM05 adds three Render-root names for pure orthographic configuration:
+explicit source/center, CSS-px/source-unit x/y scale, positive zoom, preserve-scale
+viewport policy and immutable effective ratios. No live binding/projection matrix,
+v0.9.1 lifecycle, existing signature or closed union change. See
+[contract](../runtime-render/docs/camera-v0.9.2.md) and [checkpoint](checkpoints/camera-v0.9.2.md).
+
+Phase9 v0.9.1 CM02/03/04 adds five Render-root names for a pure camera factory,
+handle, input/update and immutable snapshot. Ephemeral symbol, fixed source plane,
+finite center, no-op revision preservation and terminal/idempotent disposal;
+`unbound`/`not-applied` never means GPU state. No session binding/occupancy API yet.
+Existing declarations/unions stay unchanged. See [contract](../runtime-render/docs/camera-v0.9.1.md)
+and [checkpoint](checkpoints/camera-v0.9.1.md).
+
+Phase9 v0.9.0 CM01 is [Camera design only](../runtime-render/docs/camera-v0.9.0.md):
+no public exports, DTOs or failure-union changes. Preserve Phase4 axis-aligned
+inverse semantics, Phase6 accepted viewport/frame lifecycle, Phase7 resource
+rights and Phase8 instance/depth ownership. Future camera binding is opt-in;
+existing per-instance localToClip and fixed-camera consumers remain compatible.
+Camera description/view/result/live binding are distinct proposed concepts,
+not runtime capabilities. See [checkpoint](checkpoints/camera-v0.9.0.md).
+
 Phase8 v0.8.10 SR15/SR17 adds four root names for redacted caught-error diagnostics
 and count-only scope observations. Unknown is never success; scope cleanup failure
 is sticky and does not grant a new visual scope on the same session. Existing
@@ -947,3 +1002,11 @@ Render and four Editor additions; no removed/changed existing root declarations.
 Matching declarations do not prove semantic/runtime compatibility. renderFrame
 now draws the attached visual source. [Public inventory](../runtime-render/docs/public-api-delta-v0.8.14.md).
 READY_FOR_DEVELOPER_REVIEW; browser/visual MVP acceptance remains open.
+
+Phase9 v0.9.6 CM11/CM12 adds projectRenderCameraPoint and RenderCameraProjectionResult. Render208/Editor138/Client0; existing declarations unchanged. Reuse Phase4 mapping; explicit logical-only null or real current session/receipt. No implicit screen origin/DPR, no GPU application. [Contract](../runtime-render/docs/camera-v0.9.6.md), [evidence](checkpoints/camera-v0.9.6.md).
+
+Phase9 v0.9.7 CM13 adds viewportToRenderCameraSelectedPlane, screenToRenderCameraSelectedPlane, RenderCameraSelectedPlaneInput/Result. Exact issued camera-view identity, selected plane and Phase6 receipt freshness; unchanged Phase4 cutoff/residual policy. Four additions, no legacy declaration changes. [Contract](../runtime-render/docs/camera-v0.9.7.md), [checkpoint](checkpoints/camera-v0.9.7.md).
+
+Phase9 v0.9.8 CM14 adds discriminated affine-ground-elevation config, forward and supplied-height viewport/screen inverse through Phase4. Existing camera declarations/unions unchanged. Presentation plane must match camera source; scale/zoom apply once to ground and height together. [Contract](../runtime-render/docs/camera-v0.9.8.md), [checkpoint](checkpoints/camera-v0.9.8.md).
+
+Phase9 v0.9.9 CM15 adds transitionRenderCameraWithinBounds and four types. Per-request disabled/rectangle bounds, center/pan plus target zoom; full visible extent via Phase4 inverse, explicit oversized status, atomic rejection/commit. Existing root contracts unchanged. [Contract](../runtime-render/docs/camera-v0.9.9.md), [checkpoint](checkpoints/camera-v0.9.9.md).

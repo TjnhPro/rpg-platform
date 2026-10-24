@@ -6,6 +6,18 @@ import { getRenderFrameFailure as frameFailure, type RenderFrameFailure } from '
 import { getRenderTextureFailure as textureFailure, type RenderTextureFailure } from './render-texture.js';
 import { getVisualResourceCacheFailure as cacheFailure, type VisualResourceCacheFailure } from './visual-resource-cache.js';
 import { VisualPresentationError } from './visual-presentation-error.js';
+export { getRenderCameraViewportSnapshot, type RenderCameraViewportSnapshot } from './camera-viewport.js';
+export { projectRenderCameraPoint, type RenderCameraProjectionResult } from './camera-projection.js';
+export { viewportToRenderCameraSelectedPlane, screenToRenderCameraSelectedPlane,
+  type RenderCameraSelectedPlaneInput, type RenderCameraSelectedPlaneResult } from './camera-inverse.js';
+export { transitionRenderCameraWithinBounds, type RenderCameraBoundsPolicy,
+  type RenderCameraBoundsMovement, type RenderCameraBoundsTransitionInput,
+  type RenderCameraBoundsTransitionResult } from './camera-bounds.js';
+export { createRenderCameraGroundConfiguration, projectRenderCameraGroundPoint,
+  viewportToRenderCameraGround, screenToRenderCameraGround,
+  type RenderCameraGroundConfiguration, type RenderCameraGroundPoint,
+  type RenderCameraGroundProjectionResult, type RenderCameraGroundInverseInput,
+  type RenderCameraGroundInverseResult } from './camera-ground.js';
 export { getRenderVisualSceneDiagnostics, type RenderVisualSceneDiagnostics } from './visual-scene.js';
 
 /** Safe error data only. null cleanup means unknown/not reported by that domain. */
@@ -358,3 +370,13 @@ export { invalidateVisualResourceCache, getVisualResourceCacheFailure, type Visu
 export type { AtlasMetadataLimits } from './unity-atlas.js';
 
 export { type RenderVisualSpriteLayout } from './visual-sprite-layout.js';
+export { createRenderCamera, type RenderCameraInput, type RenderCameraUpdate,
+  type RenderCameraSnapshot, type RenderCamera } from './camera.js';
+export { setRenderCameraCenter, panRenderCamera, type RenderCameraPan } from './camera.js';
+export { createConfiguredRenderCamera, getRenderCameraViewSnapshot, setRenderCameraZoom,
+  zoomRenderCameraAtFocus, type RenderCameraViewSnapshot } from './camera.js';
+export { type RenderCameraZoomLimits, type RenderCameraFocusZoomInput } from './camera-zoom.js';
+export { createOrthographicCameraConfiguration, type OrthographicCameraConfigurationInput,
+  type OrthographicCameraConfiguration } from './camera-configuration.js';
+export { bindRenderCameraToVisualScene, getRenderCameraFrameSnapshot,
+  type RenderCameraSceneBinding, type RenderCameraSceneBindingSnapshot, type RenderCameraFrameSnapshot } from './camera-scene.js';

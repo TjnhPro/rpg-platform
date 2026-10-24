@@ -13,6 +13,8 @@ import { planRenderViewportSize, type RenderViewportMetrics, type RenderViewport
 import { readDecodedPng } from './png-bitmap.js';
 import { registerTextureSession, endTextureSession, requireTextureSession, TextureError, getRenderTextureFailure } from './render-texture.js';
 import { registerVisualTransformSession, type VisualFrameItem } from './visual-transform-backend.js';
+import { registerCameraFrameSession, endCameraFrameSession, type CameraFrameState } from './camera-frame-link.js';
+import { recordCameraFrame } from './camera-scene.js';
 
 export { getRenderFrameFailure, type RenderFrameFailure } from './frame-failure.js';
 
@@ -103,7 +105,24 @@ export interface RenderViewportResizeReceipt {
 
 const viewportResizers = new WeakMap<RenderFrameSession,
   (metrics: RenderViewportMetrics, limits: RenderViewportSizeLimits) => RenderViewportResizeReceipt>();
+// Issuance/freshness only. Even an unchanged accepted resize replaces the token.
+const latestViewportResizes = new WeakMap<RenderFrameSession, RenderViewportResizeReceipt>();
 const viewportSuspensions = new WeakMap<RenderFrameSession, (suspended: boolean) => void>();
+
+/** Owner-local camera adapter guard; not a root API or structural receipt port. */
+export function requireCurrentViewportResize(session: RenderFrameSession,
+  receipt: RenderViewportResizeReceipt): RenderViewportSnapshot & { readonly state: 'active' } {
+  const viewport = getRenderViewportSnapshot(session);
+  if (viewport.state !== 'active' || viewport.graphics.state !== 'ready') {
+    throw new TypeError('Camera viewport requires an active graphics viewport');
+  }
+  const latest = latestViewportResizes.get(session);
+  if (latest === undefined || latest !== receipt || receipt.sessionId !== viewport.sessionId
+    || receipt.size.width !== viewport.size.width || receipt.size.height !== viewport.size.height) {
+    throw new TypeError('Camera viewport requires the latest issued resize receipt for this session');
+  }
+  return Object.freeze({ ...viewport, state: 'active' });
+}
 
 /** Redraw demand only; neither readiness, a queued callback nor display evidence. */
 export interface RenderFrameInvalidationSnapshot {
@@ -319,12 +338,16 @@ async function acquireRenderFrameSession(
   }
 
   let visualFrameSource: (() => readonly VisualFrameItem[]) | undefined;
+  let cameraFrameSource: (() => CameraFrameState) | undefined;
   const disposeResources = () => {
     viewportControl.suspended = false;
     const owned = backend;
     backend = undefined;
+    endCameraFrameSession(session);
+    latestViewportResizes.delete(session);
     let cleanupFailed = endTextureSession(session);
     visualFrameSource = undefined;
+    cameraFrameSource = undefined;
     try {
       owned?.dispose();
     } catch {
@@ -369,18 +392,24 @@ async function acquireRenderFrameSession(
       throw failGraphics(new FrameError('FRAME_NOT_SUBMITTED', 'renderFrame'));
     }
     frameInProgress = true;
+    // Stale host CSS/resize context is admission rejection, not native failure.
+    let cameraFrame: CameraFrameState | undefined;
+    try { cameraFrame = cameraFrameSource?.(); }
+    catch (error) { frameInProgress = false; throw error; }
     const requestedToken = redrawToken;
     try {
       const owned = backend;
       if (owned === undefined) throw new FrameError('FRAME_FAILED', 'renderFrame');
       const items = visualFrameSource?.() ?? [];
       if (backend !== owned) throw new FrameError('FRAME_FAILED', 'renderFrame');
-      owned.renderFrame(demo, items);
+      owned.renderFrame(demo, items, cameraFrame);
       // Do not receipt a frame whose session was released during backend work.
       if (backend !== owned) throw new FrameError('FRAME_FAILED', 'renderFrame');
       submittedToken = requestedToken;
-      return Object.freeze({ sessionId: viewport.sessionId, status: 'submitted',
+      const receipt: RenderFrameReceipt = Object.freeze({ sessionId: viewport.sessionId, status: 'submitted',
         viewport: Object.freeze({ ...viewport, state: 'active' as const }) });
+      if (cameraFrame !== undefined) recordCameraFrame(receipt, cameraFrame);
+      return receipt;
     } catch (error) {
       throw failGraphics(error);
     } finally {
@@ -407,6 +436,15 @@ async function acquireRenderFrameSession(
     renderFrame: () => submit(),
   });
   registerVisualResourceDemo(session, submit);
+  registerCameraFrameSession(session, (read) => {
+    if (read !== undefined) {
+      lifecycle.getSnapshot();
+      if (frameInProgress) throw new FrameError('FRAME_IN_PROGRESS', 'renderFrame');
+      if (cameraFrameSource !== undefined) throw new TypeError('Camera frame source already attached');
+    }
+    cameraFrameSource = read;
+    redrawToken = {};
+  });
   registerVisualTransformSession(session, {
     source: (read) => {
       if (read !== undefined) {
@@ -501,12 +539,15 @@ async function acquireRenderFrameSession(
   });
   viewportSuspensions.set(session, (suspended) => {
     lifecycle.getSnapshot();
+    if (frameInProgress) throw new FrameError('FRAME_IN_PROGRESS', 'renderFrame');
     viewportControl.suspended = suspended;
   });
   viewportResizers.set(session, (metrics, limits) => {
     lifecycle.getSnapshot(); // Terminal guard precedes validation.
+    if (frameInProgress) throw new FrameError('FRAME_IN_PROGRESS', 'renderFrame');
     const plan = planRenderViewportSize(metrics, limits);
     lifecycle.getSnapshot(); // Host-supplied getters may have disposed the session.
+    if (frameInProgress) throw new FrameError('FRAME_IN_PROGRESS', 'renderFrame');
     const owned = backend;
     if (owned === undefined) throw new Error('Missing graphics resources');
     try {
@@ -523,7 +564,7 @@ async function acquireRenderFrameSession(
       // Includes unchanged resize and resume: accepted configuration merits redraw,
       // but never performs/schedules it. Rejected admission leaves demand unchanged.
       redrawToken = {};
-      return Object.freeze({
+      const receipt: RenderViewportResizeReceipt = Object.freeze({
         sessionId, status: accepted.changed ? 'resized' : 'unchanged',
         requested: plan.requested,
         size: Object.freeze({ ...accepted.size, unit: 'drawing-buffer-px' as const }),
@@ -532,6 +573,8 @@ async function acquireRenderFrameSession(
           y: accepted.size.height / plan.requested.logicalHeightCssPx,
         }),
       });
+      latestViewportResizes.set(session, receipt);
+      return receipt;
     } catch (error) { throw failGraphics(error); }
   });
   update({ state: 'ready', failure: null });

@@ -1,3 +1,9 @@
+# Camera host integration - v0.9.12
+
+[Two-host manual guide](../../harness/manual/camera-hosts.md): canonical camera,
+independent Editor on-demand / Client continuous scheduling, real PNG and honest
+CPU/native evidence. Browser and visual acceptance remain pending.
+
 # Manual Client viewport host — v0.6.12 RV17
 
 v0.6.13 also provides a [two-host manual composition](../../editor/manual/viewport-mvp.html)
