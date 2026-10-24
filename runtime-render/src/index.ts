@@ -402,3 +402,5 @@ export {
 export { advanceSpriteAnimationPlayback, type SpriteAnimationAdvanceResult } from './sprite-animation-playback.js';
 export { resolveSpriteFrameAlignment, type SpriteFrameAlignmentData,
   type SpriteFrameAlignmentInput, type SpriteFrameAlignmentResult } from './sprite-frame-alignment.js';
+export { createSpriteAnimationVisualBinding, type SpriteAnimationVisualBinding,
+  type SpriteAnimationVisualFrameInput, type SpriteAnimationVisualFrameResult } from './sprite-animation-visual-binding.js';

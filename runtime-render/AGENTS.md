@@ -4,6 +4,13 @@
 
 Read root agent guidance first.
 
+- [v0.10.7 SA08](docs/sprite-animation-v0.10.7.md): bind one borrowed playback
+  to one existing instance through canonical Phase7 rights/geometry, SA07 origin
+  and an owner-local Phase8 resource/transform/layout transaction. Identity local
+  TRS only; preserve placement/ground offset/order/depth/visibility. Pending or
+  released lease is FRAME_NOT_READY. Host advances/draws; sync invalidates only.
+  Unbind/replace never dispose borrowed handles; instance/session end closes scope.
+
 - [v0.10.6 SA07](docs/sprite-animation-v0.10.6.md): pure frame alignment through
   Phase4 anchor/affine APIs and canonical Phase7 geometry/revision. Explicit
   verified per-frame pixel anchor/pivot/offset or FRAME_ORIGIN_UNAVAILABLE.

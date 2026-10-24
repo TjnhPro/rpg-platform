@@ -1,5 +1,12 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase10 [v0.10.7 SA08](../runtime-render/docs/sprite-animation-v0.10.7.md) adds
+createSpriteAnimationVisualBinding and three neutral types. Existing Phase7
+retained page rights/geometry and SA07 alignment feed a Phase8 atomic resource,
+transform and layout commit; identity local TRS only. Preserve placement/ground
+offset and presentation metadata. Pending/released lease returns FRAME_NOT_READY;
+host schedules/draws. No old signature, dependency or ownership changes.
+
 Phase10 [v0.10.6 SA07](../runtime-render/docs/sprite-animation-v0.10.6.md) adds
 resolveSpriteFrameAlignment and three portable types. Phase4 alignment/affine
 math, canonical Phase7 geometry/token, explicit verified frame-local pixel data
