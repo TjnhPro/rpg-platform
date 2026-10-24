@@ -5,6 +5,7 @@ import { EditorPanel, type EditorPanelState } from '../components/panel/EditorPa
 import { EditorShell } from '../layout/EditorShell.js';
 import { editorTokens } from '../theme/index.js';
 import { Viewport } from '../viewport/Viewport.js';
+import { ProjectManagerPanel } from '../features/project-manager/ProjectManagerPanel.js';
 
 /** UI presentation samples; these are never authored Scene or project records. */
 const panelExamples: readonly EditorPanelState[] = [
@@ -13,15 +14,9 @@ const panelExamples: readonly EditorPanelState[] = [
   { kind: 'error', message: 'Illustrative error only. Use Next example to inspect the read-only sample.' },
   { kind: 'ready' },
 ];
-const navigatorSamples: readonly { readonly key: string; readonly text: string }[] =
-  Array.from({ length: 30 }, (_, index) => ({
-    key: `layout-${index + 1}`,
-    text: `Layout example ${index + 1}. This paragraph demonstrates scrolling without any authored data.`,
-  }));
 
 export function App() {
   const [showGuidance, setShowGuidance] = useState(true);
-  const [longSample, setLongSample] = useState(false);
   const [inspectorExample, setInspectorExample] = useState(0);
   const [inspectorTab, setInspectorTab] = useState<'controls' | 'panel'>('controls');
   const [statusError, setStatusError] = useState(true);
@@ -31,27 +26,14 @@ export function App() {
       header={(
         <Group gap={editorTokens.spacing.standard}>
           <Title order={1} size="md">RPG Editor</Title>
-          <Badge color={editorTokens.colors.neutral}>UI Foundation MVP</Badge>
+          <Badge color={editorTokens.colors.neutral}>Project Manager MVP</Badge>
         </Group>
       )}
       toolbar={(
         <Switch label="Show guidance" checked={showGuidance}
           onChange={(event) => setShowGuidance(event.currentTarget.checked)} />
       )}
-      navigator={(
-        <EditorPanel title="Navigator" subtitle="Static UI examples, not project entries."
-          actions={<Button variant="default" onClick={() => setLongSample((value) => !value)}>
-            {longSample ? 'Show short sample' : 'Show long sample'}
-          </Button>}
-          footer={<Text>Navigator footer · sample only</Text>}>
-          <Stack gap={editorTokens.spacing.standard}>
-            <Text>No project is open.</Text>
-            {longSample && navigatorSamples.map((sample) => (
-              <Text key={sample.key}>{sample.text}</Text>
-            ))}
-          </Stack>
-        </EditorPanel>
-      )}
+      navigator={<ProjectManagerPanel />}
       inspector={(
         <EditorPanel title="Inspector" subtitle="Temporary controls and panel states; no authored data."
           actions={(
@@ -85,7 +67,7 @@ export function App() {
             {statusError ? 'Clear sample error' : 'Show sample error'}
           </Button>}
           state={statusError ? { kind: 'error', message: 'Illustrative error only; Clear sample error restores the local status.' } : { kind: 'ready' }}>
-          <Text>No project connected · Guidance {showGuidance ? 'shown' : 'hidden'}</Text>
+          <Text>Project status appears in Project Manager · Guidance {showGuidance ? 'shown' : 'hidden'}</Text>
         </EditorPanel>
       )}
     >
