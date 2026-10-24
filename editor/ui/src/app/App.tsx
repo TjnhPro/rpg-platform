@@ -1,5 +1,5 @@
-import { Text } from '@mantine/core';
+import { ComponentCatalog } from '../components/ComponentCatalog.js';
 
 export function App() {
-  return <Text>Editor UI Foundation</Text>;
+  return <ComponentCatalog />;
 }
