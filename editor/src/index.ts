@@ -245,3 +245,5 @@ export { createAssetPreviewController } from './asset-manager-preview.js';
 export type { AssetPreviewRequest, AssetPreviewAcquisition, AssetPreviewSnapshot, AssetPreviewController } from './asset-manager-preview.js';
 export { createMapProfile, readMapProfile, mapDocumentContext, replaceMapProfile } from './map-profile.js';
 export type { MapProfile, MapLayerDefinition, MapProfileSnapshot, MapProfileReadResult } from './map-profile.js';
+export { mapExtentLimits, createMapExtent, diagnoseMapCell, containsMapCell, resizeMapExtent } from './map-bounds.js';
+export type { MapExtentCells, MapCell } from './map-bounds.js';

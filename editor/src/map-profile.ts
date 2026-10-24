@@ -23,10 +23,25 @@ export interface MapProfileSnapshot {
 export type MapProfileReadResult = { readonly status: 'supported'; readonly snapshot: MapProfileSnapshot }
   | { readonly status: 'not-a-map' | 'unsupported' | 'invalid'; readonly path: string; readonly reason: string };
 
+export const mapExtentLimits = Object.freeze({ maxCount: 4096, maxCells: 1_048_576 });
+/** Internal common admission for profile reads and public bounds operations. */
+export function captureMapExtent(input: unknown): MapProfile['extentCells'] {
+  mapRecord(input, ['width', 'height'], 'MAP_EXTENT');
+  const width = input['width'], height = input['height'];
+  if (typeof width !== 'number' || typeof height !== 'number' || !Number.isSafeInteger(width) || !Number.isSafeInteger(height)
+    || width <= 0 || height <= 0 || width > mapExtentLimits.maxCount || height > mapExtentLimits.maxCount
+    || width * height > mapExtentLimits.maxCells) throw new TypeError('MAP_EXTENT_LIMIT');
+  return Object.freeze({ width, height });
+}
+
 /** Internal structural check on already captured portable data. */
 export function mapRecord(value: unknown, keys: readonly string[], path: string): asserts value is Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value)
-    || Object.keys(value).length !== keys.length || keys.some(key => !Object.hasOwn(value, key))) throw new TypeError(path);
+    || (Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null)
+    || Reflect.ownKeys(value).length !== keys.length || keys.some(key => {
+      const descriptor = Object.getOwnPropertyDescriptor(value, key);
+      return !descriptor?.enumerable || !('value' in descriptor);
+    })) throw new TypeError(path);
 }
 /** Closed Map-owned profile; canonical capture rejects accessors before reading fields. */
 export function createMapProfile(input: unknown, identityInput: SceneIdentity): MapProfile {
@@ -35,9 +50,7 @@ export function createMapProfile(input: unknown, identityInput: SceneIdentity): 
     identity: { projectId: identity.projectId, documentId: identity.sceneId }, documentKind: 'scene', contentSchemaVersion: 1, content: input }).content;
   mapRecord(captured, ['schemaVersion', 'extentCells', 'space', 'grid', 'layers'], 'editorMap');
   if (captured['schemaVersion'] !== 1) throw new TypeError('editorMap.schemaVersion');
-  const extent = captured['extentCells']; mapRecord(extent, ['width', 'height'], 'editorMap.extentCells');
-  for (const key of ['width', 'height']) if (typeof extent[key] !== 'number' || !Number.isSafeInteger(extent[key]) || extent[key] <= 0)
-    throw new TypeError(`editorMap.extentCells.${key}`);
+  captureMapExtent(captured['extentCells']);
   const space = createCoordinateSpaceDefinition(captured['space'] as unknown as CoordinateSpaceDefinition);
   const grid = createOrthogonalGridDefinition(captured['grid'] as unknown as OrthogonalGridDefinition);
   if (space.reference.projectId !== identity.projectId || grid.space.projectId !== identity.projectId
