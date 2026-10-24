@@ -247,3 +247,4 @@ export { createMapProfile, readMapProfile, mapDocumentContext, replaceMapProfile
 export type { MapProfile, MapLayerDefinition, MapProfileSnapshot, MapProfileReadResult } from './map-profile.js';
 export { mapExtentLimits, createMapExtent, diagnoseMapCell, containsMapCell, resizeMapExtent } from './map-bounds.js';
 export type { MapExtentCells, MapCell } from './map-bounds.js';
+export { mapCellToPlacement, mapPlacementToCell, replaceMapGrid } from './map-grid.js';
