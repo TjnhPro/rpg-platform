@@ -220,3 +220,5 @@ export { setProjectActiveScene, clearProjectActiveScene, getProjectActiveScene }
 export { createProjectSession, getProjectSessionSnapshot, openProjectSession,
   replaceProjectManifest, closeProjectSession } from './project-session.js';
 export type { ProjectSession, ProjectSessionSnapshot } from './project-session.js';
+export { createProject } from './project-create.js';
+export type { CreateProjectOptions } from './project-create.js';
