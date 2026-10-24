@@ -1,5 +1,10 @@
 # Foundation contract boundaries — deliberately minimal
 
+Phase10 [v0.10.3 SA04](../runtime-render/docs/sprite-animation-v0.10.3.md) adds
+eight-slot capture, pure Phase4 angular selection and Phase7 frame resolution.
+Same logical elapsed applies to target modulo/clamp; this explicitly supersedes
+SA01/SA03's future direction fraction proposal. No old implemented API changes.
+
 Phase10 [v0.10.2 SA03](../runtime-render/docs/sprite-animation-v0.10.2.md) adds
 normalized timing, timed metadata composition and stateless once/repeat sampling
 at Render root. No old signature/union change or live playhead. Half-open numeric

@@ -1,5 +1,11 @@
 # SA01 — Sprite and eight-direction animation foundation
 
+**SA04 supersession:** the supplied v0.10.3 task replaces this proposal's
+direction-change cycle-fraction policy with unchanged logical elapsed followed
+by target-duration modulo/clamp. See [current contract](sprite-animation-v0.10.3.md).
+No implemented playback API existed to break. Other historical proposals below
+remain proposals; current names use repeat and directionZeroAngleRadians.
+
 **API_DESIGN_ONLY.** Every Sprite* name below is a proposal, not an installed
 export. v0.10.0 implements no sequence validator, mapping or playback. Existing
 Phase4/6/7/8/9 contracts remain unchanged. Baseline is main

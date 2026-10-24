@@ -389,3 +389,8 @@ export {
   type SpriteAnimationTimingInput, type SpriteAnimationTiming, type SpriteAnimationRepeat,
   type SpriteTimedClipInput, type SpriteTimedClip, type SpriteAnimationFrameSample,
 } from './sprite-animation-timing.js';
+export {
+  createEightWaySpriteClip, selectEightWaySpriteDirection, resolveEightWaySpriteFrame,
+  type SpriteDirectionIndex, type SpriteDirectionSequences, type SpriteEightWayConvention,
+  type EightWaySpriteClipInput, type EightWaySpriteClip, type EightWaySpriteFrameResolution,
+} from './sprite-eight-way.js';

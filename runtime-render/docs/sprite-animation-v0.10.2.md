@@ -1,5 +1,10 @@
 # SA03 — frame timing and once/repeat contracts
 
+**SA04 supersession:** the later supplied task replaces the future direction
+switch fraction rule below with SAME logical elapsed, sampled against the target
+sequence's duration. See [current directional contract](sprite-animation-v0.10.3.md).
+SA03's implemented timing/sampling APIs and observations are unchanged.
+
 Render owns pure normalization and stateless numeric policy. Existing SA02 clip
 and sequence factories/types are unchanged. Nine additive root symbols:
 

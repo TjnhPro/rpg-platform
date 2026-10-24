@@ -4,6 +4,11 @@
 
 Read root agent guidance first.
 
+- [v0.10.3 SA04](docs/sprite-animation-v0.10.3.md): exactly eight authored slots,
+  Phase4 orientation quantizer and Phase7 selected-frame resolution. No stateful
+  playback/GPU. Latest task overrides earlier direction progress proposal: retain
+  SAME logical elapsed, sample target duration modulo/clamp, never cycle rescale.
+
 - [v0.10.2 SA03](docs/sprite-animation-v0.10.2.md): pure exclusive FPS/interval
   normalization, immutable timed clip and stateless once/repeat sampling. No
   playhead/timer/direction/GPU. Binary64 half-open product boundaries, explicit
