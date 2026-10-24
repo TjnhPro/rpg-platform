@@ -239,3 +239,5 @@ export { searchManagedAssets } from './asset-manager-search.js';
 export type { AssetSearchRequest, AssetSearchResult } from './asset-manager-search.js';
 export { inspectManagedAsset } from './asset-manager-inspector.js';
 export type { AssetInspectorResult } from './asset-manager-inspector.js';
+export { selectManagedAsset, getManagedAssetSelection } from './asset-manager-selection.js';
+export type { AssetSelectionResult } from './asset-manager-selection.js';
