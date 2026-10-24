@@ -1,5 +1,18 @@
 # Ownership decisions — do not classify by similar names
 
+Phase13 Project Manager: **editor** is the sole production owner; trusted host
+owns physical root authorization/containment and actual storage guarantees.
+See [frozen design](../editor/docs/project-manager-v0.13.0.md) and
+[ordered task manifest](../editor/docs/tasks/phase13-project-manager/MANIFEST.md).
+Developer requires v0.13.0 through v0.13.10 strictly in order, one file/task per
+checkpoint commit. Before each change inspect `git status`, exact HEAD, preceding
+checkpoint/commit and that version's task and actual affected APIs. Audit the delta,
+run architecture/scope/build gates, record observed limitations, then commit before
+starting the next capability. Do not bundle, omit or silently skip a version.
+Continue without routine intermediate review; final review is Developer-owned.
+No automatic merge/release. This phase-specific instruction supersedes historical
+stop-at-next-version notes for Phase13 only; five-project boundaries remain intact.
+
 v0.11.10 VE11: **game-client** owns neutral presentation intent/correlation,
 request lease lifetime and the optional browser host. Render remains sole effect,
 playback/resource/scene/camera owner; no Editor import or Engine/gameplay rule.

@@ -205,3 +205,24 @@ export function getEditorPreviewFailure(error: unknown): RenderFailure | undefin
 }
 export { createScenePreviewBridge, type ScenePreviewBridge, type ScenePreviewPresentation,
   type ScenePreviewOutcome } from './scene-preview.js';
+export { createProjectManifest, readProjectManifest } from './project-manifest.js';
+export type { ProjectManifest, ProjectManifestInput, ProjectMetadata, ProjectResourceRoot,
+  ProjectDocumentReference, ProjectActiveScene } from './project-manifest.js';
+export { diagnoseProjectManifest } from './project-diagnostics.js';
+export type { ProjectDiagnostic, ProjectManifestDiagnosis } from './project-diagnostics.js';
+export { ProjectValidationError } from './project-validation.js';
+export { setProjectResourceRoots } from './project-resource-roots.js';
+export { createProjectRootBinding, resolveProjectLocator } from './project-root-binding.js';
+export type { ProjectRootBinding } from './project-root-binding.js';
+export { trackProjectDocument, listProjectDocuments, getProjectDocument, updateProjectDocument,
+  removeProjectDocument, diagnoseProjectDocuments } from './project-document-tracking.js';
+export { setProjectActiveScene, clearProjectActiveScene, getProjectActiveScene } from './project-active-scene.js';
+export { createProjectSession, getProjectSessionSnapshot, openProjectSession,
+  replaceProjectManifest, closeProjectSession } from './project-session.js';
+export type { ProjectSession, ProjectSessionSnapshot } from './project-session.js';
+export { createProject } from './project-create.js';
+export type { CreateProjectOptions } from './project-create.js';
+export { openProject, projectDocumentContext } from './project-open.js';
+export type { OpenProjectOptions, ProjectOpenResult } from './project-open.js';
+export { saveProject } from './project-save.js';
+export type { ProjectSaveResult } from './project-save.js';
