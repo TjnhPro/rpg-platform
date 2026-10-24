@@ -3,6 +3,8 @@ import { MantineProvider, type MantineColorSchemeManager } from '@mantine/core';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './app/App.js';
+import { editorTheme, editorCssVariablesResolver } from './theme/index.js';
+import { ThemeSample } from './theme/ThemeSample.js';
 
 // Fixed bootstrap scheme: avoid the provider's default storage manager entirely.
 const colorSchemeManager: MantineColorSchemeManager = {
@@ -20,8 +22,14 @@ if (!target) {
 
 createRoot(target).render(
   <StrictMode>
-    <MantineProvider forceColorScheme="dark" colorSchemeManager={colorSchemeManager}>
+    <MantineProvider
+      theme={editorTheme}
+      cssVariablesResolver={editorCssVariablesResolver}
+      forceColorScheme="dark"
+      colorSchemeManager={colorSchemeManager}
+    >
       <App />
+      <ThemeSample />
     </MantineProvider>
   </StrictMode>,
 );
