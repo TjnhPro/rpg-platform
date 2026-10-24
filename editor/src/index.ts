@@ -278,3 +278,5 @@ export { placeVisualObject, type PlaceVisualObjectRequest } from './visual-place
 export { moveVisualObject } from './visual-placement-move.js';
 export { duplicateVisualObject } from './visual-placement-duplicate.js';
 export { deleteVisualObject } from './visual-placement-delete.js';
+export { insertVisualSceneDocumentObject, createVisualPlacementEditor } from './document-scene-placement.js';
+export type { VisualPlacementCreateInput, VisualPlacementEdit, VisualPlacementEditor } from './document-scene-placement.js';
