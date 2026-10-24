@@ -430,3 +430,4 @@ export { setVisualEffectWorldPlacement, getVisualEffectWorldPlacementSnapshot,
 export { attachVisualEffectInstance, syncVisualEffectAttachment, detachVisualEffectInstance,
   getVisualEffectAttachmentSnapshot, type VisualEffectAttachmentInput,
   type VisualEffectAttachmentSnapshot } from './visual-effect-instance.js';
+export { syncVisualEffectFrame, type VisualEffectFrameInput, type VisualEffectFrameResult } from './visual-effect-instance.js';

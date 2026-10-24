@@ -168,15 +168,25 @@ export function resolveVisualEffectDefinition(definition: VisualEffectDefinition
   input: VisualEffectDefinitionBindingInput): VisualEffectDefinitionBindingResult {
   if (!definitions.has(definition)) invalid('FOREIGN_DEFINITION');
   const data = record(input, ['atlas', 'expectedRevision', 'pages']);
-  if (typeof data.expectedRevision !== 'symbol') invalid('INVALID_STRUCTURE');
-  type Code = Extract<VisualEffectDefinitionBindingResult, { status: 'rejected' }>['code'];
-  const reject = (code: Code, frameIndex: number | null = null): VisualEffectDefinitionBindingResult =>
-    Object.freeze({ status: 'rejected', code, frameIndex });
   const atlas = data.atlas as AtlasMetadata | null;
+  const failure = validateVisualEffectSources(definition, atlas, data.expectedRevision as symbol);
+  if (failure) return failure;
+  // Source validation above proves canonical non-null atlas provenance.
+  return resolveDefinitionFrames(definition, atlas!, data.expectedRevision as symbol, data.pages);
+}
+
+/** Owner-local shared definition/source admission; no geometry or resource mutation. */
+export function validateVisualEffectSources(definition: VisualEffectDefinition,
+  atlas: AtlasMetadata | null, expectedRevision: symbol): Extract<VisualEffectDefinitionBindingResult, { status: 'rejected' }> | null {
+  if (!definitions.has(definition)) invalid('FOREIGN_DEFINITION');
+  if (typeof expectedRevision !== 'symbol') invalid('INVALID_STRUCTURE');
+  type Code = Extract<VisualEffectDefinitionBindingResult, { status: 'rejected' }>['code'];
+  const reject = (code: Code): Extract<VisualEffectDefinitionBindingResult, { status: 'rejected' }> =>
+    Object.freeze({ status: 'rejected', code, frameIndex: null });
   if (atlas === null) return reject('ATLAS_NOT_AVAILABLE');
   const revision = getAtlasMetadataRevision(atlas);
   if (revision === null) return reject('ATLAS_NOT_SUPPORTED');
-  if (revision.id !== data.expectedRevision) return reject('ATLAS_REVISION_MISMATCH');
+  if (revision.id !== expectedRevision) return reject('ATLAS_REVISION_MISMATCH');
   if (atlas.identity.projectId !== definition.resource.identity.projectId
     || atlas.identity.resourceId !== definition.resource.identity.resourceId) return reject('RESOURCE_MISMATCH');
   if (atlas.sources.length !== definition.sources.length) return reject('SOURCE_BINDING_MISMATCH');
@@ -194,8 +204,16 @@ export function resolveVisualEffectDefinition(definition: VisualEffectDefinition
       }
     }
   }
+  return null;
+}
+
+function resolveDefinitionFrames(definition: VisualEffectDefinition, atlas: AtlasMetadata,
+  expectedRevision: symbol, pageInputs: unknown): VisualEffectDefinitionBindingResult {
+  type Code = Extract<VisualEffectDefinitionBindingResult, { status: 'rejected' }>['code'];
+  const reject = (code: Code, frameIndex: number | null = null): VisualEffectDefinitionBindingResult =>
+    Object.freeze({ status: 'rejected', code, frameIndex });
   const pages = new Map<string, AtlasPagePixels>();
-  for (const item of list(data.pages, 64)) {
+  for (const item of list(pageInputs, 64)) {
     const page = record(item, ['imageSourceId', 'unit', 'width', 'height', 'layout']);
     if (!token(page.imageSourceId) || pages.has(page.imageSourceId)
       || !atlas.pages.some(candidate => candidate.imageSourceId === page.imageSourceId)) return reject('PAGE_BINDING_MISMATCH');
@@ -215,11 +233,11 @@ export function resolveVisualEffectDefinition(definition: VisualEffectDefinition
     if (geometry === undefined) {
       // The first public Phase7 resolution establishes the authoritative page.
       // Geometry resolution below repeats canonical frame validation intentionally.
-      const frame = resolveAtlasFrame(reference, atlas, data.expectedRevision);
+      const frame = resolveAtlasFrame(reference, atlas, expectedRevision);
       if (frame.status !== 'resolved') return reject(frame.code, index);
       const pixels = pages.get(frame.page.imageSourceId);
       if (pixels === undefined) return reject('PAGE_BINDING_MISMATCH', index);
-      const result = resolveAtlasFrameGeometry(reference, atlas, data.expectedRevision, pixels);
+      const result = resolveAtlasFrameGeometry(reference, atlas, expectedRevision, pixels);
       if (result.status !== 'resolved') return reject(result.code, index);
       geometry = result.geometry;
       resolved.set(reference.subresourceId!, geometry);
@@ -227,5 +245,5 @@ export function resolveVisualEffectDefinition(definition: VisualEffectDefinition
     frames.push(geometry);
   }
   return Object.freeze({ status: 'resolved', resourceLoading: 'NOT_PERFORMED', effectId: definition.effectId,
-    atlasRevision: revision.id, frames: Object.freeze(frames) });
+    atlasRevision: expectedRevision, frames: Object.freeze(frames) });
 }

@@ -1,6 +1,9 @@
 import type { RenderFrameSession } from './frame-session.js';
 import { requireTextureSession, getRenderTextureFailure } from './render-texture.js';
-import { requireVisualEffectDefinition, getVisualEffectDefinitionFailure, type VisualEffectDefinition } from './visual-effect-definition.js';
+import { requireVisualEffectDefinition, getVisualEffectDefinitionFailure, validateVisualEffectSources,
+  type VisualEffectDefinition, type VisualEffectDefinitionBindingResult } from './visual-effect-definition.js';
+import { createSpriteSequenceVisualBinding, type SpriteSequenceVisualBinding,
+  type SpriteAnimationVisualFrameInput, type SpriteSequenceVisualFrameResult } from './sprite-animation-visual-binding.js';
 import { createSpriteSequencePlayback, commandSpriteSequencePlayback, getSpriteSequencePlaybackSnapshot, advanceSpriteSequencePlayback,
   type SpriteSequencePlayback, type SpriteSequencePlaybackSnapshot } from './sprite-animation-playback.js';
 import { addRenderVisualInstance, getRenderVisualInstance, listRenderVisualInstances,
@@ -52,10 +55,12 @@ export function getVisualEffectInstanceFailure(error: unknown): VisualEffectInst
   return typeof error === 'object' && error !== null ? failures.get(error) : undefined;
 }
 interface Active {
+  readonly session: RenderFrameSession;
   readonly scene: RenderVisualScene;
   readonly visual: RenderVisualInstance;
   readonly definition: VisualEffectDefinition;
   readonly playback: SpriteSequencePlayback;
+  binding: SpriteSequenceVisualBinding | undefined;
   unsubscribe: () => void;
 }
 interface Data {
@@ -122,6 +127,7 @@ function end(data: Data, reason: NonNullable<VisualEffectInstanceSnapshot['reaso
   const attempt = (operation: () => void): void => { try { operation(); } catch { failed = true; } };
   if (attachment) attempt(attachment.unsubscribe);
   attempt(active.unsubscribe);
+  if (active.binding) attempt(() => { active.binding!.unbind(); });
   attempt(() => {
     data.terminalPlayback = getSpriteSequencePlaybackSnapshot(active.playback);
     data.terminalPlayback = commandSpriteSequencePlayback(active.playback, { type: 'dispose' });
@@ -168,7 +174,7 @@ function createEffect(session: RenderFrameSession, scene: RenderVisualScene,
   try {
     visual = sceneOperation(() => addRenderVisualInstance(scene, { visualInstanceId: key }));
     const handle = Object.freeze({ id: Symbol('visual-effect-instance') }) as VisualEffectInstance;
-    data = { handle, owner: new WeakRef(scene), active: { scene, visual, definition, playback, unsubscribe: () => {} },
+    data = { handle, owner: new WeakRef(scene), active: { session, scene, visual, definition, playback, binding: undefined, unsubscribe: () => {} },
       terminalPlayback: getSpriteSequencePlaybackSnapshot(playback), commanding: false,
       lastWorldTransform: null, attachment: undefined,
       mode: durationMs !== null ? 'timed-repeat' : definition.clip.repeat,
@@ -581,5 +587,51 @@ export function detachVisualEffectInstance(handle: VisualEffectInstance): Visual
       data.attachment = undefined;
     }
     return getVisualEffectAttachmentSnapshot(handle);
+  } finally { data.commanding = false; }
+}
+
+/** Borrowed exact selected-page lease/atlas and explicit verified per-frame alignment. */
+export type VisualEffectFrameInput = SpriteAnimationVisualFrameInput;
+export type VisualEffectFrameResult = SpriteSequenceVisualFrameResult
+  | { readonly status: 'rejected'; readonly code:
+    Extract<VisualEffectDefinitionBindingResult, { status: 'rejected' }>['code'] };
+
+/** Host syncs attachment first, then selected frame, then submits the canonical scene.
+ * No acquisition, transport advance, submission or scheduler is implicit. */
+export function syncVisualEffectFrame(handle: VisualEffectInstance,
+  input: VisualEffectFrameInput): VisualEffectFrameResult {
+  const data = playbackData(handle);
+  if (data.commanding) playbackInvalid('TRANSITION_IN_PROGRESS');
+  data.commanding = true;
+  try {
+    const active = livePlayback(data), before = readVisualInstanceFrameState(active.scene, active.visual);
+    const capture = (value: unknown, keys: readonly string[]): Record<string, unknown> => {
+      if (typeof value !== 'object' || value === null || Array.isArray(value)
+        || (Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null)
+        || Reflect.ownKeys(value).length !== keys.length) throw new TypeError('Closed effect frame data required');
+      const result: Record<string, unknown> = {};
+      for (const key of keys) {
+        const field = Object.getOwnPropertyDescriptor(value, key);
+        if (!field?.enumerable || !('value' in field)) throw new TypeError('Own effect frame data required');
+        result[key] = field.value;
+      }
+      return result;
+    };
+    const fields = capture(input, ['resource', 'expectedSourceRevision', 'atlas', 'expectedRevision', 'pixels', 'planeUnitsPerPixel', 'authored']);
+    const pixels = capture(fields.pixels, ['imageSourceId', 'unit', 'width', 'height', 'layout']) as unknown as VisualEffectFrameInput['pixels'];
+    const frameInput = { ...fields, pixels } as unknown as VisualEffectFrameInput;
+    const failure = validateVisualEffectSources(active.definition, frameInput.atlas, frameInput.expectedRevision);
+    if (failure) return Object.freeze({ status: 'rejected', code: failure.code });
+    const pin = active.definition.sources.find(source => source.sourceId === pixels.imageSourceId);
+    if (!pin || active.definition.resource.sources[pin.sourceIndex]?.role !== 'image'
+      || pin.revision !== frameInput.expectedSourceRevision) {
+      return Object.freeze({ status: 'rejected', code: 'SOURCE_REVISION_MISMATCH' });
+    }
+    livePlayback(data);
+    if (readVisualInstanceFrameState(active.scene, active.visual).revision !== before.revision) {
+      throw new TypeError('Scene changed during effect frame capture');
+    }
+    active.binding ??= createSpriteSequenceVisualBinding(active.session, active.scene, active.visual, active.playback);
+    return active.binding.sync(frameInput);
   } finally { data.commanding = false; }
 }

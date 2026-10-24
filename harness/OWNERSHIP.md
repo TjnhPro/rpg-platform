@@ -387,3 +387,9 @@ over Phase4/8 transform, effective visibility and lifecycle. Host explicitly
 syncs before submission; no gameplay target lookup, hierarchy, second clock or
 renderer. Editor/Client unchanged build consumers; Harness evidence only.
 No upstream-owner expansion. [Checkpoint](checkpoints/visual-effect-v0.11.6.md).
+
+v0.11.7 VE08: **runtime-render** owns selected VFX frame orchestration through
+existing Phase7/U1/Phase8 resource/geometry transactions and Phase9 scene camera.
+No alternate renderer, timer, shader or GPU cache. Editor/Client unchanged build
+consumers; Harness evidence only, no foundation/boundary expansion.
+[Checkpoint](checkpoints/visual-effect-v0.11.7.md).

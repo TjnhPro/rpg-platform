@@ -1123,3 +1123,9 @@ attachment, explicit sync, freeze detach and readback; Render321→327, old root
 declarations unchanged. Phase4/8 applied attachment/visibility and lifecycle are
 canonical; target loss removes the effect, with no transport coupling or ticker.
 [Contract](../runtime-render/docs/visual-effect-v0.11.6.md), [checkpoint](checkpoints/visual-effect-v0.11.6.md).
+
+Phase11 v0.11.7 VE08 adds syncVisualEffectFrame and two types, Render327→330;
+old public declarations unchanged. Reuses definition source validation and U1
+selected-frame/Phase8 atomic binding; explicit host attachment/frame sync and
+canonical camera submission. No transport advance or resource acquisition.
+[Contract](../runtime-render/docs/visual-effect-v0.11.7.md), [checkpoint](checkpoints/visual-effect-v0.11.7.md).
