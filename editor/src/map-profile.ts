@@ -6,6 +6,8 @@ import { createSceneMembership, type SceneMembership, type SceneMembershipInput 
 import { createCoordinateSpaceDefinition, type CoordinateSpaceDefinition } from './coordinate-space.js';
 import { createOrthogonalGridDefinition, type OrthogonalGridDefinition } from './orthogonal-grid.js';
 import type { AssetCatalog } from './asset-catalog.js';
+import { resolveAssetReference } from './asset-catalog.js';
+import { describeResolvedVisualAsset } from './asset-visual.js';
 
 export interface MapLayerDefinition {
   readonly layerKey: string; readonly role: 'background' | 'tiles' | 'objects'; readonly visible: boolean;
@@ -25,12 +27,28 @@ export type MapProfileReadResult = { readonly status: 'supported'; readonly snap
 
 /** Map-specific classification is meaningful only after profile admission. */
 export function validateMapLayerMembership(profile: MapProfile, membership: SceneMembership): void {
+  let backgrounds = 0;
   for (const entry of membership.objects) {
     const role = entry.definition.classification === 'editor-map:tile' ? 'tiles'
       : entry.definition.classification === 'editor-map:background' ? 'background' : null;
     if (role && profile.layers.find(layer => layer.layerKey === entry.layerKey)?.role !== role)
       throw new TypeError('MAP_LAYER_ROLE_MISMATCH');
+    if (role === 'background') {
+      if (++backgrounds > 1) throw new TypeError('MULTIPLE_MAP_BACKGROUNDS');
+      if (!entry.placement || entry.placement.coordinateSpaceId !== profile.space.reference.coordinateSpaceId
+        || entry.placement.point.x !== profile.grid.origin.x || entry.placement.point.y !== profile.grid.origin.y
+        || entry.attachment) throw new TypeError('NONCANONICAL_BACKGROUND_PLACEMENT');
+    }
   }
+}
+/** Whole-image admission: target/source metadata, never a filesystem existence claim. */
+export function requireMapImage(catalog: AssetCatalog, reference: import('./asset-reference.js').AssetReference, projectId: string): void {
+  if (catalog.projectId !== projectId || reference.projectId !== projectId || reference.subresourceId !== null)
+    throw new TypeError('MAP_IMAGE_PROJECT_OR_SUBRESOURCE');
+  const resolution = resolveAssetReference(catalog, reference);
+  const description = describeResolvedVisualAsset(resolution, 'image/png');
+  if (description.status !== 'described' || description.descriptor.sources.filter(source => source.role === 'image').length !== 1)
+    throw new TypeError('MAP_IMAGE_UNSUPPORTED');
 }
 
 export const mapExtentLimits = Object.freeze({ maxCount: 4096, maxCells: 1_048_576 });
@@ -103,6 +121,10 @@ export function readMapProfile(document: DocumentEnvelope, catalog?: AssetCatalo
       reason: checked.diagnostics[0]?.code ?? 'SCENE_NOT_STRICT' });
     const membership = createSceneMembership(captured.document.content as unknown as SceneMembershipInput);
     validateMapLayerMembership(captured.profile, membership);
+    for (const entry of membership.objects) if (entry.definition.classification === 'editor-map:background') {
+      if (!catalog || !entry.assetReference) throw new TypeError('MAP_IMAGE_REQUIRED');
+      requireMapImage(catalog, entry.assetReference, captured.identity.projectId);
+    }
     return Object.freeze({ status: 'supported', snapshot: Object.freeze({ ...captured, membership }) });
   } catch (error) {
     if (!(error instanceof TypeError)) throw error;
