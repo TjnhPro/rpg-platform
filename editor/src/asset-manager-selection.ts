@@ -8,6 +8,13 @@ export type AssetSelectionResult = { readonly projectId: string; readonly genera
       readonly reference: null }
 );
 const selections = new WeakMap<AssetManagerProject, AssetReference>();
+const observers = new WeakMap<AssetManagerProject, Set<() => void>>();
+/** Internal preview collaboration; not a package-root API. */
+export function observeManagedAssetSelection(context: AssetManagerProject, changed: () => void): () => void {
+  const listeners = observers.get(context) ?? new Set<() => void>();
+  observers.set(context, listeners); listeners.add(changed);
+  return () => { listeners.delete(changed); };
+}
 /** No cached resolution or definition; every read revalidates the current context/catalog. */
 export function getManagedAssetSelection(context: AssetManagerProject): AssetSelectionResult {
   const { snapshot } = requireAssetManagerProject(context);
@@ -24,6 +31,7 @@ export function getManagedAssetSelection(context: AssetManagerProject): AssetSel
 export function selectManagedAsset(context: AssetManagerProject, input: AssetReferenceInput | null): AssetSelectionResult {
   requireAssetManagerProject(context);
   selections.delete(context);
+  for (const changed of observers.get(context) ?? []) changed();
   if (input !== null) selections.set(context, createAssetReference(input));
   return getManagedAssetSelection(context);
 }
