@@ -5,6 +5,9 @@ thin Inspector orchestration; Scene placement/layer/asset and existing Document,
 Project/Asset/Map/Render owners stay canonical. Follow13 ordered checkpoint commits
 v0.16.0→v0.16.12, exact HEAD/source audit and genuine builds, no routine review or
 generated tests. [Design](../editor/docs/visual-inspector-v0.16.0.md). No auto-merge.
+[Closure](../editor/docs/visual-inspector-v0.16.12-closure.md) records additive APIs,
+ordered commits and real initial Save/Open; UI/GPU review and existing-file CAS
+remain limitations. Final Developer acceptance only.
 
 Phase14 Asset Manager: **editor** owns browser/project adapters over the existing
 Phase2 catalog, Phase5 persistence and Phase13 project/root/tracking authority.
