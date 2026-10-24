@@ -59,11 +59,12 @@ export function updateProjectDocument(manifest: ProjectManifest, identity: Docum
   if (!current.documents.some(item => item.identity.documentId === id)) return projectFail('DOCUMENT_NOT_TRACKED', 'identity');
   return createProjectManifest({ ...current, documents: current.documents.map(item => item.identity.documentId === id ? replacement : item) });
 }
-/** Unknown removal rejects. Active-reference removal policy is introduced in PM05. */
+/** Unknown/active removal rejects; caller must explicitly clear selection first. */
 export function removeProjectDocument(manifest: ProjectManifest, identity: DocumentIdentity): ProjectManifest {
   const current = readProjectManifest(manifest);
   const id = scoped(current, identity);
   if (!current.documents.some(item => item.identity.documentId === id)) return projectFail('DOCUMENT_NOT_TRACKED', 'identity');
+  if (current.activeScene?.documentId === id) return projectFail('ACTIVE_DOCUMENT_REMOVAL', 'identity');
   return createProjectManifest({ ...current, documents: current.documents.filter(item => item.identity.documentId !== id) });
 }
 /** Declaration validity only, never physical file existence or target content. */

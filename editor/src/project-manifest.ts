@@ -3,6 +3,7 @@ import type { ResourceLocator } from './asset-sources.js';
 import { projectData, projectFail, projectKey, projectRecord } from './project-validation.js';
 import { captureProjectRoots } from './project-resource-roots.js';
 import { captureProjectDocuments } from './project-document-tracking.js';
+import { captureProjectActiveScene } from './project-active-scene.js';
 
 export interface ProjectMetadata {
   readonly name: string;
@@ -56,13 +57,13 @@ export function createProjectManifest(input: ProjectManifestInput): ProjectManif
   const activeScene = value.activeScene ?? null;
   const resourceRoots = captureProjectRoots(roots);
   const documentReferences = captureProjectDocuments(documents, projectId);
-  if (activeScene !== null) return projectFail('UNSUPPORTED_ACTIVE_SCENE', 'project.activeScene');
+  const selection = captureProjectActiveScene(activeScene, documentReferences);
   // Explicit null is not an omitted array.
   if (value.resourceRoots === null || value.documents === null) return projectFail('INVALID_COLLECTION', 'project');
   return Object.freeze({ schemaVersion: 1, projectId,
     metadata: Object.freeze({ name: metadata.name,
       ...(Object.hasOwn(metadata, 'description') ? { description: metadata.description as string } : {}) }),
-    resourceRoots, documents: documentReferences, activeScene: null });
+    resourceRoots, documents: documentReferences, activeScene: selection });
 }
 
 /** Strict stored-content reader: unlike authoring input, all fields are required. */

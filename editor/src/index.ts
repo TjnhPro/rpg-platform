@@ -216,3 +216,4 @@ export { createProjectRootBinding, resolveProjectLocator } from './project-root-
 export type { ProjectRootBinding } from './project-root-binding.js';
 export { trackProjectDocument, listProjectDocuments, getProjectDocument, updateProjectDocument,
   removeProjectDocument, diagnoseProjectDocuments } from './project-document-tracking.js';
+export { setProjectActiveScene, clearProjectActiveScene, getProjectActiveScene } from './project-active-scene.js';
