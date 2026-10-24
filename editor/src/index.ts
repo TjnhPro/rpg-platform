@@ -248,3 +248,4 @@ export type { MapProfile, MapLayerDefinition, MapProfileSnapshot, MapProfileRead
 export { mapExtentLimits, createMapExtent, diagnoseMapCell, containsMapCell, resizeMapExtent } from './map-bounds.js';
 export type { MapExtentCells, MapCell } from './map-bounds.js';
 export { mapCellToPlacement, mapPlacementToCell, replaceMapGrid } from './map-grid.js';
+export { addMapLayer, updateMapLayer, reorderMapLayers, removeMapLayer, describeMapLayers } from './map-layers.js';

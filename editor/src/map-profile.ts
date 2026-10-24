@@ -23,6 +23,16 @@ export interface MapProfileSnapshot {
 export type MapProfileReadResult = { readonly status: 'supported'; readonly snapshot: MapProfileSnapshot }
   | { readonly status: 'not-a-map' | 'unsupported' | 'invalid'; readonly path: string; readonly reason: string };
 
+/** Map-specific classification is meaningful only after profile admission. */
+export function validateMapLayerMembership(profile: MapProfile, membership: SceneMembership): void {
+  for (const entry of membership.objects) {
+    const role = entry.definition.classification === 'editor-map:tile' ? 'tiles'
+      : entry.definition.classification === 'editor-map:background' ? 'background' : null;
+    if (role && profile.layers.find(layer => layer.layerKey === entry.layerKey)?.role !== role)
+      throw new TypeError('MAP_LAYER_ROLE_MISMATCH');
+  }
+}
+
 export const mapExtentLimits = Object.freeze({ maxCount: 4096, maxCells: 1_048_576 });
 /** Internal common admission for profile reads and public bounds operations. */
 export function captureMapExtent(input: unknown): MapProfile['extentCells'] {
@@ -91,8 +101,9 @@ export function readMapProfile(document: DocumentEnvelope, catalog?: AssetCatalo
     const checked = diagnoseDocument(serializeDocument(captured.document), mapDocumentContext(captured.document, catalog));
     if (!checked.readEligibility.strict) return Object.freeze({ status: 'invalid', path: checked.diagnostics[0]?.path ?? 'document',
       reason: checked.diagnostics[0]?.code ?? 'SCENE_NOT_STRICT' });
-    return Object.freeze({ status: 'supported', snapshot: Object.freeze({ ...captured,
-      membership: createSceneMembership(captured.document.content as unknown as SceneMembershipInput) }) });
+    const membership = createSceneMembership(captured.document.content as unknown as SceneMembershipInput);
+    validateMapLayerMembership(captured.profile, membership);
+    return Object.freeze({ status: 'supported', snapshot: Object.freeze({ ...captured, membership }) });
   } catch (error) {
     if (!(error instanceof TypeError)) throw error;
     return Object.freeze({ status: error.message === 'NOT_A_MAP' ? 'not-a-map' : error.message === 'UNSUPPORTED_MAP_VERSION' ? 'unsupported' : 'invalid',
