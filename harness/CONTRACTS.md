@@ -1073,3 +1073,11 @@ root names, zero removed or changed old declarations, including old unions.
 [Exact inventory](../runtime-render/docs/sprite-animation-api-inventory-v0.10.12.md)
 and [closure report](checkpoints/sprite-animation-v0.10.12.md) distinguish
 compile compatibility from finite API/pixel evidence and Developer acceptance.
+
+Phase11 v0.11.0 VE01 is architecture-only; zero exported-symbol/declaration delta.
+[VFX ledger](visual-effect-v0.11.0.md) separates definition, effect instance,
+Phase10 playback and Phase8 drawable, with explicit lifetime/attachment/release
+policies. [Current root inventory](visual-effect-api-inventory-v0.11.0.md) confirms
+Render271/Editor138/Client0. Neutral SpriteTimedClip sampling exists; neutral live
+playback/binding does not. U1 requires Developer approval before the smallest
+additive Phase10 extension; this proposal grants no production/API expansion.

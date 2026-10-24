@@ -341,3 +341,10 @@ Harness records evidence and Editor/Client are reviewed consumers. Documentation
 only, no dependency or ownership move, Engine/Server/foundation change or new
 subsystem. [Closure report](checkpoints/sprite-animation-v0.10.12.md).
 Developer review pending; no automatic Phase11, merge or release.
+
+v0.11.0 VE01: **runtime-render** remains the canonical VFX presentation owner;
+Harness records an architecture-only [decision ledger](visual-effect-v0.11.0.md).
+Editor/Client are read-only contract consumers. No source, dependency or public
+surface changes. Existing single-sequence timed metadata is real; single-sequence
+live playback/binding needs the explicit Phase10 U1 authorization gate. No VFX
+timer, repeated eight-way workaround, new manager or sixth production project.
